@@ -1,0 +1,185 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+# The file in SkyPrestige/locale to use.
+locale: en_US
+# How frequently island data is periodically saved. Island data are also saved on player disconnect and server shutdown.
+save-frequency-seconds: 900
+# When a player uses /is reset, should their prestige level be reset to 0 too?
+reset-prestige-level-on-island-reset: false
+# Requires SkyPlayTime
+award-points-while-afk: false
+# The formula used to scale requirements.
+scale-formula: r*(1+((p-1)/(k)))
+# The required prestige level necessary to exchange prestige points.
+exchange-prestige-level: 0
+# The fallback location to teleport players to if unable to teleport them to an island.
+fallback-location:
+    world: world
+    x: 0
+    y: 64
+    z: 0
+# The list of namespaced keys for items not allowed inside vaults.
+# The list of namespaced keys for items not allowed inside vaults.
+vault-disallowed-items:
+    - minecraft:spawner
+    - minecraft:cod
+    - minecraft:tropical_fish
+    - minecraft:salmon
+    - minecraft:cooked_cod
+    - minecraft:cooked_salmon
+    - minecraft:pufferfish
+    - minecraft:player_head
+    - minecraft:iron_ore
+    - minecraft:deepslate_iron_ore
+    - minecraft:raw_iron
+    - minecraft:raw_iron_block
+    - minecraft:iron_ingot
+    - minecraft:iron_nugget
+    - minecraft:iron_block
+    - minecraft:gold_ore
+    - minecraft:deepslate_gold_ore
+    - minecraft:nether_gold_ore
+    - minecraft:raw_gold
+    - minecraft:raw_gold_block
+    - minecraft:gold_ingot
+    - minecraft:gold_nugget
+    - minecraft:gold_block
+    - minecraft:emerald_ore
+    - minecraft:deepslate_emerald_ore
+    - minecraft:emerald
+    - minecraft:emerald_block
+    - minecraft:diamond_ore
+    - minecraft:deepslate_diamond_ore
+    - minecraft:diamond
+    - minecraft:diamond_block
+    - minecraft:ancient_debris
+    - minecraft:netherite_scrap
+    - minecraft:netherite_ingot
+    - minecraft:netherite_block
+# The mapping of prestige points earned for the following actions. Some actions are specific to blocks.
+prestige-points-mapping:
+    play-time: 0.0001
+    block-break:
+        block:
+            default: 0.01
+        spawner:
+            default:
+                default: 0.3
+    block-place:
+        block:
+            default: 0.01
+        spawner:
+            default:
+                default: 0.3
+    bone-meal:
+        default: 0.05
+    bottle:
+        item:
+            default: 0.2
+        potion:
+            default:
+                default: 0.05
+    breed:
+        default: 0.25
+    brew:
+        item:
+            default: 0.5
+        potion:
+            default:
+                default: 0.5
+    brush:
+        default: 0.2
+    close:
+        default: 0.01
+    compost:
+        default: 0.05
+    consume:
+        item:
+            default: 0.05
+        potion:
+            default:
+                default: 0.25
+    craft:
+        default: 0.05
+    empty:
+        default: 0.1
+    enchant:
+        default:
+            default:
+                default: 0.25
+    fill:
+        default: 0.1
+    fish:
+        item:
+            default: 0.25
+        potion:
+            default:
+                default: 0.1
+        enchantment: {}
+    harvest:
+        default: 0.1
+    item-pickup:
+        item:
+            default: 0
+        potion:
+            default:
+                default: 0
+        enchantment:
+            default:
+                default:
+                    default: 0
+    item-drop:
+        item:
+            default: 0
+        potion:
+            default:
+                default: 0
+        enchantment:
+            default:
+                default:
+                    default: 0
+    kill:
+        default: 0.5
+    milk:
+        default: 0.25
+    name:
+        item:
+            default: 0.25
+        potion:
+            default:
+                default: 0.25
+        enchantment:
+            default:
+                default:
+                    default: 0.25
+    open:
+        default: 0.01
+    shear:
+        block:
+            default: 0.5
+        entity:
+            default: 0.25
+    sleep:
+        default: 0.25
+    smelt:
+        default: 0.05
+    strip:
+        block:
+            default: 0.25
+        entity:
+            default: 0.25
+    tame:
+        default: 2
+    thrown:
+        item:
+            default: 0.05
+        potion:
+            default:
+                default: 0.25
+    water-log:
+        default: 0.1
+    wax:
+        block:
+            default: 0.5
+        entity:
+            default: 0.5

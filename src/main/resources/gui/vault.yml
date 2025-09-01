@@ -1,0 +1,112 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+gui-name: "Island Vault"
+gui-type: CHEST_54
+pages:
+    -   filler:
+            item-type: gray_stained_glass_pane
+            name: " "
+            amount: 1
+        prev-page:
+            item:
+                item-type: arrow
+                name: "<white>Previous Page"
+                amount: 1
+            slot: 47
+        exit:
+            item:
+                item-type: barrier
+                name: "<red>Click to close the vault.</red>"
+                amount: 1
+            slot: 49
+        next-page:
+            item:
+                item-type: arrow
+                name: "<white>Next Page"
+                amount: 1
+            slot: 51
+        slots:
+            -   slot: 10
+                prestige-level: 0
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1
+            -   slot: 11
+                prestige-level: 0
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1
+            -   slot: 12
+                prestige-level: 0
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1
+            -   slot: 13
+                prestige-level: 1
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1
+            -   slot: 14
+                prestige-level: 1
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1
+            -   slot: 15
+                prestige-level: 1
+                unlocked-item:
+                    item-type: structure_void
+                    name: "<gray>Empty vault slot.</gray>"
+                    lore:
+                        - "<gray>Click an item in your inventory to add it to the vault.</gray>"
+                    amount: 1
+                locked-item:
+                    item-type: red_stained_glass_pane
+                    name: "<red>This slot is locked."
+                    lore:
+                        - "<gray>Unlocked at prestige level <white><required_prestige_level>"
+                    amount: 1

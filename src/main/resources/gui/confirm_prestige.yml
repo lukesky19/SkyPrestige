@@ -1,0 +1,241 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+gui-name: "Confirm Prestige"
+gui-type: CHEST_54
+# The slot to display the blueprint bundle at.
+blueprint-button-slot: 0
+filler:
+    item-type: gray_stained_glass_pane
+    name: " "
+    amount: 1
+confirm-button:
+    item:
+        item-type: emerald_block
+        name: "<green>Click to confirm prestige.</green>"
+        lore:
+            - "<gray>By prestiging your island, your island will be reset"
+            - "<gray>and a new island will be created based on the blueprint selected."
+            - ""
+            - "<gray>The effects of prestiging will apply to offline players when they log on next."
+        amount: 1
+    slot: 3
+cancel-button:
+    item:
+        item-type: redstone_block
+        name: "<red>Click to cancel the prestige.</red>"
+        lore:
+            - "<gray>By cancelling the prestige, nothing will be reset"
+            - "<gray>and you will not prestige."
+        amount: 1
+    slot: 5
+rewards-button:
+    item:
+        item-type: barrel
+        name: "<white>Click to view prestige rewards."
+        lore:
+            - "<white>These are the rewards given after you prestige your island.</white>"
+            - "<white>Rewards are given to each island member.</white>"
+        amount: 1
+    slot: 53
+keep-members:
+    item:
+        item-type: armor_stand
+        name: "<white>Island Members"
+        lore:
+            - "<gray>Island Members will be carried over on prestige."
+        amount: 1
+    slot: 10
+keep-flags:
+    item:
+        item-type: red_banner
+        name: "<white>Island Flags"
+        lore:
+            - "<gray>Island Flags will be carried over on prestige."
+        amount: 1
+    slot: 11
+keep-command-ranks:
+    item:
+        item-type: tripwire_hook
+        name: "<white>Island Ranks"
+        lore:
+            - "<gray>Island Ranks will be carried over on prestige."
+        amount: 1
+    slot: 12
+# Buttons that changed depending on conditions.
+conditional-buttons:
+    keep-inventory:
+        item:
+            item-type: chest
+            name: "<white>Player Inventory"
+            lore:
+                - "<gray>Your inventory will be carried over on prestige."
+            amount: 1
+        slot: 13
+    clear-inventory:
+        item:
+            item-type: chest
+            name: "<white>Player Inventory"
+            lore:
+                - "<gray>Your inventory will be cleared on prestige."
+            amount: 1
+        slot: 13
+    keep-ender-chest:
+        item:
+            item-type: ender_chest
+            name: "<white>Player Ender Chest"
+            lore:
+                - "<gray>Your ender chest will be carried over on prestige."
+            amount: 1
+        slot: 14
+    clear-ender-chest:
+        item:
+            item-type: ender_chest
+            name: "<white>Player Ender Chest"
+            lore:
+                - "<gray>Your ender chest will be reset on prestige."
+            amount: 1
+        slot: 14
+    keep-exp:
+        item:
+            item-type: experience_bottle
+            name: "<white>Player Experience"
+            lore:
+                - "<gray>Your experience levels will be carried over on prestige."
+            amount: 1
+        slot: 15
+    reset-exp:
+        item:
+            item-type: experience_bottle
+            name: "<white>Player Experience"
+            lore:
+                - "<gray>Your experience levels will be reset on prestige."
+            amount: 1
+        slot: 15
+    keep-money:
+        item:
+            item-type: paper
+            name: "<white>Player Balance"
+            lore:
+                - "<gray>Your balance will be carried over on prestige."
+            amount: 1
+        slot: 16
+    reset-money:
+        item:
+            item-type: paper
+            name: "<white>Player Balance"
+            lore:
+                - "<gray>Your balance will be reset on prestige."
+            amount: 1
+        slot: 16
+    starting-money:
+        item:
+            item-type: emerald
+            name: "<white>Starting Money"
+            lore:
+                - "<gray>You will start with $<amount> on prestige."
+            amount: 1
+        slot: 19
+    no-starting-money:
+        item:
+            item-type: emerald
+            name: "<white>Starting Money"
+            lore:
+                - "<gray>You will start with no extra money on prestige."
+            amount: 1
+        slot: 19
+    keep-session-play-time:
+        item:
+            item-type: clock
+            name: "<white>Session Play Time"
+            lore:
+                - "<gray>Your session play time will be carried over on prestige."
+            amount: 1
+        slot: 20
+    reset-session-play-time:
+        item:
+            item-type: clock
+            name: "<white>Session Play Time"
+            lore:
+                - "<gray>Your session play time will be reset on prestige."
+            amount: 1
+        slot: 20
+    keep-daily-play-time:
+        item:
+            item-type: clock
+            name: "<white>Daily Play Time"
+            lore:
+                - "<gray>Your daily play time will be carried over on prestige."
+            amount: 1
+        slot: 21
+    reset-daily-play-time:
+        item:
+            item-type: clock
+            name: "<white>Daily Play Time"
+            lore:
+                - "<gray>Your daily play time will be reset on prestige."
+            amount: 1
+        slot: 21
+    keep-weekly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Weekly Play Time"
+            lore:
+                - "<gray>Your weekly play time will be carried over on prestige."
+            amount: 1
+        slot: 22
+    reset-weekly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Weekly Play Time"
+            lore:
+                - "<gray>Your weekly play time will be reset on prestige."
+            amount: 1
+        slot: 22
+    keep-monthly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Monthly Play Time"
+            lore:
+                - "<gray>Your monthly play time will be carried over on prestige."
+            amount: 1
+        slot: 23
+    reset-monthly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Monthly Play Time"
+            lore:
+                - "<gray>Your monthly play time will be reset on prestige."
+            amount: 1
+        slot: 23
+    keep-yearly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Yearly Play Time"
+            lore:
+                - "<gray>Your yearly play time will be carried over on prestige."
+            amount: 1
+        slot: 24
+    reset-yearly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Yearly Play Time"
+            lore:
+                - "<gray>Your yearly play time will be reset on prestige."
+            amount: 1
+        slot: 24
+    keep-total-play-time:
+        item:
+            item-type: clock
+            name: "<white>Total Play Time"
+            lore:
+                - "<gray>Your total play time will be carried over on prestige."
+            amount: 1
+        slot: 25
+    reset-total-play-time:
+        item:
+            item-type: clock
+            name: "<white>Total Play Time"
+            lore:
+                - "<gray>Your total play time will be reset on prestige."
+            amount: 1
+        slot: 25

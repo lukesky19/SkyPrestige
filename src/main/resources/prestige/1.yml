@@ -1,0 +1,494 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+prestige-level: 1
+prestige-settings:
+    reset-inventory: true
+    reset-ender-chest: false
+    reset-exp: true
+    reset-money: true
+    give-starting-money-to-all-island-members: false
+    starting-money: 2000.0
+    play-time-settings:
+        reset-session: false
+        reset-daily: false
+        reset-weekly: false
+        reset-monthly: false
+        reset-total: false
+    reset-prestige-points: true
+requirements:
+    -   type: INVENTORY
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 12
+        inventory-item:
+            item-type: diamond_block
+            amount: 12
+        display-item:
+            item-type: diamond_block
+            name: "<white><required_amount> Diamond Blocks"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+                - "<gray>This item must be in the island member who initiated the island prestige's inventory to count.</gray>"
+            amount: 12
+    -   type: INVENTORY
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        inventory-item:
+            item-type: spawner
+            entity-type: chicken
+            amount: 10
+        display-item:
+            item-type: spawner
+            name: "<white><required_amount> Chicken Spawners"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+                - "<gray>This item must be in any island member's inventory to count.</gray>"
+            amount: 10
+            entity-type: chicken
+    -   type: BALANCE
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 500
+        display-item:
+            item-type: emerald
+            name: "<white>$<required_amount>"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+        amount: 500
+    -   type: EXP_LEVEL
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        display-item:
+            item-type: experience_bottle
+            name: "<white><required_amount> Experience Levels"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 5
+    -   type: ISLAND_LEVEL
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        display-item:
+            item-type: grass_block
+            name: "<white><required_amount> Island Levels"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: MONTHLY_PLAYTIME
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-time: 5m
+        display-item:
+            item-type: clock
+            name: "<white><required_amount> Monthly Play Time"
+            lore:
+                - "<gray>Progress: <progress_amount>"
+                - "<gray>Requirement: <required_amount>"
+            amount: 1
+    -   type: TOTAL_PLAYTIME
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-time: 30m
+        display-item:
+            item-type: clock
+            name: "<white><required_amount> Total Play Time"
+            lore:
+                - "<gray>Progress: <progress_amount>"
+                - "<gray>Requirement: <required_amount>"
+            amount: 1
+        time: 30m
+    -   type: BLOCK_BREAK
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: spawner
+        entity-type: chicken
+        display-item:
+            item-type: spawner
+            name: "<white>Break <required_amount> Chicken Spawners"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+            entity-type: chicken
+    -   type: BLOCK_PLACE
+        block-type: dirt
+        scale-required-amount: true
+        required-amount: 10
+        scale-factor: 3.5
+        display-item:
+            item-type: dirt
+            name: "<white>Place <required_amount> Dirt"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: INTERACT
+        block-type: dirt
+        scale-required-amount: true
+        required-amount: 10
+        scale-factor: 3.5
+        display-item:
+            item-type: DIRT
+            name: "<white>Interact with <required_amount> Dirt"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: HARVEST
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        block-type: sweet_berry_bush
+        display-item:
+            item-type: sweet_berries
+            name: "<white>Harvest <required_amount> Sweet Berries"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: CRAFT
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        item-type: oak_planks
+        display-item:
+            item-type: oak_planks
+            name: "<white>Craft <required_amount> Oak Planks"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: SMELT
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        item-type: iron_ingot
+        display-item:
+            item-type: iron_ingot
+            name: "<white>Smelt Raw Iron to produce <required_amount> Iron Ingots"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: FISH
+        scale-required-amount: true
+        required-amount: 10
+        scale-factor: 3.5
+        item-type: cod
+        display-item:
+            item-type: cod
+            name: "<white>Fish <required_amount> Cod"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BREW
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 3
+        item-type: potion
+        potion-type: healing
+        display-item:
+            item-type: potion
+            potion-config:
+                potion-type: healing
+            name: "<white>Brew <required_amount> Healing Potions"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: FILL
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        item-type: lava_bucket
+        display-item:
+            item-type: lava_bucket
+            name: "<white>Fill <required_amount> Buckets with Lava"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: EMPTY
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        item-type: water_bucket
+        display-item:
+            item-type: water_bucket
+            name: "<white>Empty <required_amount> Water Buckets"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: CONSUME
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        item-type: baked_potato
+        display-item:
+            item-type: baked_potato
+            name: "<white>Eat <required_amount> Baked Potatoes"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: THROW
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 2
+        item-type: ender_pearl
+        display-item:
+            item-type: ender_pearl
+            name: "<white>Throw <required_amount> Ender Pearls"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: THROW
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 1
+        item-type: splash_potion
+        potion-type: healing
+        display-item:
+            item-type: splash_potion
+            potion-config:
+                potion-type: healing
+            name: "<white>Throw <required_amount> Healing Splash Potions"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: WAX
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: copper_block
+        display-item:
+            item-type: copper_block
+            name: "<white>Wax <required_amount> Copper Blocks"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: STRIP
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: waxed_copper_block
+        display-item:
+            item-type: waxed_copper_block
+            name: "<white>Remove wax from <required_amount> Waxed Copper Blocks"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: STRIP
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: oak_log
+        display-item:
+            item-type: oak_log
+            name: "<white>Strip <required_amount> Oak Logs"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BONE_MEAL
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: carrots
+        display-item:
+            item-type: bone_meal
+            name: "<white>Bone Meal <required_amount> Carrots"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: COMPOST
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        item-type: carrot
+        display-item:
+            item-type: carrot
+            name: "<white>Compost <required_amount> Carrots"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: SLEEP
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 1
+        block-type: red_bed
+        display-item:
+            item-type: red_bed
+            name: "<white>Sleep in <required_amount> Red Bed"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: WATER_LOG
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: oak_slab
+        display-item:
+            item-type: oak_slab
+            name: "<white>Water Log <required_amount> Oak Slabs"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BRUSH
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 5
+        block-type: suspicious_sand
+        display-item:
+            item-type: suspicious_sand
+            name: "<white>Brush <required_amount> Suspicious Sand"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: SHEAR
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 1
+        block-type: beehive
+        display-item:
+            item-type: beehive
+            name: "<white>Shear <required_amount> Bee Hives"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: SHEAR
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 1
+        block-type: bee_nest
+        display-item:
+            item-type: bee_nest
+            name: "<white>Shear <required_amount> Bee Nests"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BOTTLE
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 3
+        item-type: potion
+        potion-type: water
+        display-item:
+            item-type: potion
+            potion-config:
+                potion-type: water
+            name: "<white>Bottle <required_amount> Water Bottles"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BOTTLE
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 2
+        item-type: honey_bottle
+        display-item:
+            item-type: honey_bottle
+            name: "<white>Bottle <required_amount> Honey Bottles"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: ENCHANT
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 1
+        item-type: diamond_helmet
+        enchantments:
+            protection: 4
+            unbreaking: 3
+        display-item:
+            item-type: diamond_helmet
+            name: "<white>Enchant <required_amount> Diamond Helmet"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+                - "<gray>Required Enchantments are displayed on the ItemStack.</gray>"
+            amount: 1
+            enchantments:
+                -   enchantment: protection
+                    level: 4
+                -   enchantment: unbreaking
+                    level: 3
+    -   type: KILL
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        entity-type: chicken
+        display-item:
+            item-type: feather
+            name: "<white>Kill <required_amount> Chickens"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: BREED
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        entity-type: cow
+        display-item:
+            item-type: leather
+            name: "<white>Breed <required_amount> Cows"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: TAME
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 10
+        entity-type: wolf
+        display-item:
+            item-type: bone
+            name: "<white>Tame <required_amount> Wolves"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: MILK
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 2
+        entity-type: cow
+        display-item:
+            item-type: milk_bucket
+            name: "<white>Milk <required_amount> Cows"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: NAME
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 2
+        entity-type: cow
+        display-item:
+            item-type: name_tag
+            name: "<white>Name <required_amount> Cows"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+    -   type: SHEAR
+        scale-required-amount: true
+        scale-factor: 3.5
+        required-amount: 2
+        entity-type: sheep
+        display-item:
+            item-type: shears
+            name: "<white>Shear <required_amount> Sheep"
+            lore:
+                - "<gray>Progress: <progress_amount>/<required_amount>.</gray>"
+            amount: 1
+        mob: sheep
+        amount: 2
+rewards:
+    -   give-to-all-island-members: false
+        display-item:
+            item-type: netherite_scrap
+            amount: 1
+            lore:
+                - "<gray>Rewards are only given to the player who prestiged the island.</gray>"
+        reward-item:
+            item-type: netherite_scrap
+            amount: 1
+    -   give-to-all-island-members: false
+        display-item:
+            item-type: diamond
+            amount: 1
+            lore:
+                - "<gray>Rewards are only given to the player who prestiged the island.</gray>"
+        commands:
+            - "give %player_name% diamond 1"

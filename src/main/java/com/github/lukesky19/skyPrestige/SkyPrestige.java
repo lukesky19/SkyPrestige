@@ -1,0 +1,252 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package com.github.lukesky19.skyPrestige;
+
+import com.github.lukesky19.skyPrestige.commands.SkyPrestigeCommand;
+import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
+import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
+import com.github.lukesky19.skyPrestige.listener.*;
+import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
+import com.github.lukesky19.skyPrestige.manager.config.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.manager.config.SettingsManager;
+import com.github.lukesky19.skyPrestige.manager.gui.GUIManager;
+import com.github.lukesky19.skyPrestige.manager.hook.HookManager;
+import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
+import com.github.lukesky19.skyPrestige.manager.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.manager.task.TaskManager;
+import com.github.lukesky19.skyPrestige.placeholderapi.SkyPrestigeExpansion;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * The main class for the SkyPrestige plugin.
+ */
+public final class SkyPrestige extends JavaPlugin {
+    // Plugin Classes
+    private SettingsManager settingsManager;
+    private LocaleManager localeManager;
+    private PrestigeConfigManager prestigeConfigManager;
+    private GUIConfigManager guiConfigManager;
+    private GUIManager guiManager;
+    private DatabaseManager databaseManager;
+    private IslandDataManager islandDataManager;
+    private TaskManager taskManager;
+    private SkyPrestigeExpansion skyPrestigeExpansion;
+
+    /**
+     * Default Constructor
+     */
+    public SkyPrestige() {}
+
+    /**
+     * This method is run when the plugin is enabled to set up required data.
+     */
+    @Override
+    public void onEnable() {
+        // Check SkyLib version
+        if(!checkSkyLibVersion()) {
+            return;
+        }
+
+        // Set up plugin classes
+        // Plugin Hooks
+        HookManager hookManager = new HookManager(this);
+        // Database
+        databaseManager = new DatabaseManager(this);
+        // Configuration Classes
+        settingsManager = new SettingsManager(this);
+        localeManager = new LocaleManager(this, settingsManager);
+        guiConfigManager = new GUIConfigManager(this);
+        prestigeConfigManager = new PrestigeConfigManager(this);
+        // Data Managers
+        guiManager = new GUIManager(this);
+        islandDataManager = new IslandDataManager(databaseManager);
+        taskManager = new TaskManager(this, settingsManager, islandDataManager);
+        // Prestige Manager
+        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, databaseManager, hookManager);
+
+        // Register Commands
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, guiManager, databaseManager);
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
+                commands ->
+                        commands.registrar().register(skyPrestigeCommand.createCommand(),
+                                "Command to manage and use the SkyPrestige plugin.",
+                                List.of("prestige")));
+
+        // Listeners
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        pluginManager.registerEvents(new BlockBreakListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new BlockHarvestListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new BlockPlaceListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new CauldronListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new CraftItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new InventoryListener(this, settingsManager, islandDataManager, guiManager, hookManager), this);
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, localeManager, databaseManager, islandDataManager, prestigeManager), this);
+        pluginManager.registerEvents(new PlayerBeeHiveListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBoneMealListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBottleListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBreedListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBrewListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBrushBlockListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBucketListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerCompostListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerConsumeListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerDropItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerEnchantListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerFishListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager), this);
+        pluginManager.registerEvents(new PlayerKillEntityListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerMilkCowListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerNameEntityListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerPickupItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager), this);
+        pluginManager.registerEvents(new PlayerRenameItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerShearListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerSleepListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerStripLogListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerTameEntityListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerThrowItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerWaxListener(this, settingsManager, islandDataManager, hookManager), this);
+        if(hookManager.getHook(RoseStackerHook.class).isHooked()) pluginManager.registerEvents(new RoseStackerListener(this, settingsManager, islandDataManager, hookManager), this);
+        if(hookManager.getHook(SkyPlayTimeHook.class).isHooked()) pluginManager.registerEvents(new SkyPlayTimeListener(this, settingsManager, islandDataManager), this);
+        pluginManager.registerEvents(new SmeltItemListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new WaterLogListener(this, settingsManager, islandDataManager, hookManager), this);
+
+        // Register the PlaceholderAPI expansion
+        registerExpansion();
+
+        // Reload the plugin
+        reload();
+
+        // Load player data for any online players.
+        this.getServer().getOnlinePlayers().forEach(player -> {
+            UUID uuid = player.getUniqueId();
+
+            // Insert the player's uuid into the database if it doesn't exist
+            databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
+
+            // Load the player's island data
+            islandDataManager.loadIslandData(uuid);
+
+            // Handle any prestiges that occurred while the player was offline
+            CompletableFuture<List<Integer>> future = databaseManager.getOfflinePrestigeTable().getPrestigeLevels(uuid);
+            future.thenAccept(list -> prestigeManager.handleOfflinePrestige(player, uuid, list));
+        });
+    }
+
+    /**
+     * This method is run when the plugin is disabled and is used to clean up any data.
+     */
+    @Override
+    public void onDisable() {
+        // Unregister the PlaceholderAPI expansion
+        unregisterExpansion();
+
+        // Close any open GUIs
+        if(guiManager != null) guiManager.closeOpenGUIs(true);
+
+        // Stop the save task
+        if(taskManager != null) taskManager.stopSaveTask();
+
+        // Save any loaded island data and clean up the database.
+        if(islandDataManager != null) {
+            islandDataManager.saveIslandData().thenAccept(v -> {
+                if(databaseManager != null) {
+                    databaseManager.cleanUp();
+                }
+            });
+        } else {
+            if(databaseManager != null) {
+                databaseManager.cleanUp();
+            }
+        }
+    }
+
+    /**
+     * This method is run to reload any plugin data.
+     */
+    public void reload() {
+        // Close any open GUIs
+        guiManager.closeOpenGUIs(false);
+
+        // Reload plugin configuration
+        settingsManager.reload();
+        localeManager.reload();
+        guiConfigManager.reload();
+        prestigeConfigManager.reload();
+
+        // (Re-)start the save task
+        taskManager.stopSaveTask();
+        taskManager.startSaveTask();
+    }
+
+    /**
+     * This method registers the PlaceholderAPI expansion if PlaceholderAPI is enabled.
+     */
+    private void registerExpansion() {
+        if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            if(skyPrestigeExpansion == null) {
+                skyPrestigeExpansion = new SkyPrestigeExpansion(islandDataManager);
+                skyPrestigeExpansion.register();
+            }
+        }
+    }
+
+    /**
+     * This method unregisters the PlaceholderAPI expansion if PlaceholderAPI is enabled.
+     */
+    private void unregisterExpansion() {
+        if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            if(skyPrestigeExpansion != null) {
+                skyPrestigeExpansion.unregister();
+            }
+        }
+    }
+
+    /**
+     * Checks if the Server has the proper SkyLib version.
+     * @return true if it does, false if not.
+     */
+    private boolean checkSkyLibVersion() {
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        Plugin skyLib = pluginManager.getPlugin("SkyLib");
+        if(skyLib != null && skyLib.isEnabled()) {
+            String version = skyLib.getPluginMeta().getVersion();
+            String[] splitVersion = version.split("\\.");
+            int second = Integer.parseInt(splitVersion[1]);
+            int third = Integer.parseInt(splitVersion[2]);
+
+            if(second >= 4 || (second == 3 && third >= 1)) {
+                return true;
+            }
+        }
+
+        this.getComponentLogger().error(AdventureUtil.serialize("SkyLib Version 1.3.1.0 or newer is required to run this plugin."));
+        this.getServer().getPluginManager().disablePlugin(this);
+        return false;
+    }
+}
