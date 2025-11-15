@@ -44,6 +44,7 @@ import java.util.List;
  * @param prestigeEnderChestReset The message sent when a player has their ender chest reset as part of prestiging their island.
  * @param prestigeExperienceReset The message sent when a player has their experience reset as part of prestiging their island.
  * @param prestigeBalanceReset The message sent when a player has their balance reset as part of prestiging their island.
+ * @param prestigeAuctionHouseItemsReset The message sent when a player has their auction house items reset as a part of prestiging their island.
  * @param prestigeStartingMoneyGiven The message sent when a player has been given starting money as part of prestiging their island.
  * @param islandMemberPrestigeNotice The message sent to island members when their island was prestiged.
  * @param otherPrestigeNotice The message sent to non-island members when an island they are cooped or trusted on was prestiged.
@@ -62,6 +63,9 @@ import java.util.List;
  * @param exchangeNotEnoughPrestigePoints The message sent when a player tries to exchange their prestige points, but doesn't have enough prestige points for an exchange.
  * @param vaultPlayerNotOnIsland The message sent when a player tries to open their island vault while not on an island.
  * @param vaultItemNotAllowed The message sent when a player tries to put an item in their island vault that isn't allowed.
+ * @param requirementsConfigError The message sent to a player when there is a config error when viewing prestige level requirements.
+ * @param requirementsLevelNotFound The message sent to a player when there is no prestige level configured for the level number provided.
+ * @param requirementsPointsForLevel The message sent to a player to display prestige points required for a level.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -105,5 +109,8 @@ public record Locale(
         String exchangeNotEnoughPrestigePoints,
         String vaultPlayerNotOnIsland,
         String vaultItemNotAllowed,
+        String requirementsLevelNotFound,
+        String requirementsConfigError,
+        String requirementsPointsForLevel,
         String delimiter,
         String finalDelimiter) {}

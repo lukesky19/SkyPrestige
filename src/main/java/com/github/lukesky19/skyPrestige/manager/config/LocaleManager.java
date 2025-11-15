@@ -152,6 +152,9 @@ public class LocaleManager {
                         locale.exchangeNotEnoughPrestigePoints(),
                         locale.vaultPlayerNotOnIsland(),
                         locale.vaultItemNotAllowed(),
+                        "<red>The level provided is not a prestige level.</red>",
+                        "<red>Unable to view prestige level requirements due to a configuration error.</red>",
+                        "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
                         locale.delimiter(),
                         locale.finalDelimiter());
 
@@ -216,6 +219,9 @@ public class LocaleManager {
                 || locale.progressMaxPrestigeLevel()  == null
                 || locale.rewardsPlayerNotOnIsland()  == null
                 || locale.rewardsMaxPrestigeLevel()  == null
+                || locale.requirementsLevelNotFound() == null
+                || locale.requirementsConfigError() == null
+                || locale.requirementsPointsForLevel() == null
                 || locale.delimiter()  == null
                 || locale.finalDelimiter() == null) {
             locale = null;
@@ -254,6 +260,7 @@ public class LocaleManager {
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>reload</yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>requirements</yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>rewards</yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>level set <island_id> <level></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points add <island_id> <amount></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points remove <island_id> <amount></yellow>",
@@ -294,6 +301,9 @@ public class LocaleManager {
                 "<red>You do not have enough prestige points to exchange.</red>",
                 "<red>You must be on your island to view the island vault.</red>",
                 "<red>The item you clicked is not allowed to be placed inside the vault.</red>",
+                "<red>The level provided is not a prestige level.</red>",
+                "<red>Unable to view prestige level requirements due to a configuration error.</red>",
+                "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
                 ", ",
                 ", and ");
     }

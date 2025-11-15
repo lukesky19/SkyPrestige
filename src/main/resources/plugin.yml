@@ -11,27 +11,30 @@ permissions:
     skyprestige.commands.skyprestige:
         description: Base Command Permission
         default: op
-    skyprestige.command.skyprestige.help:
+    skyprestige.commands.skyprestige.help:
         description: Permission to view the plugin's help message.
         default: op
-    skyprestige.command.skyprestige.level:
+    skyprestige.commands.skyprestige.level:
         description: Permission to view and manage prestige levels.
         default: op
-    skyprestige.command.skyprestige.points:
+    skyprestige.commands.skyprestige.points:
         description: Permission to view and manage prestige points.
         default: op
-    skyprestige.command.skyprestige.progress:
+    skyprestige.commands.skyprestige.progress:
         description: Permission to view prestige progress.
         default: op
-    skyprestige.command.skyprestige.reload:
+    skyprestige.commands.skyprestige.reload:
         description: Permission to reload the plugin.
         default: op
-    skyprestige.command.skyprestige.rewards:
+    skyprestige.commands.skyprestige.rewards:
         description: Permission to view rewards for the next prestige level.
         default: op
-    skyprestige.command.skyprestige.exchange:
+    skyprestige.commands.skyprestige.exchange:
         description: Permission to open the GUI to exchange prestige points.
         default: op
-    skyprestige.command.skyprestige.vault:
+    skyprestige.commands.skyprestige.vault:
         description: Permission to open the island vault.
+        default: op
+    skyprestige.commands.skyprestige.requirements:
+        description: Permission to view prestige level requirements.
         default: op

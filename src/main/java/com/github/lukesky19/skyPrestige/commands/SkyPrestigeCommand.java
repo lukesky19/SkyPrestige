@@ -117,6 +117,7 @@ public class SkyPrestigeCommand {
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(skyPrestige, localeManager, islandDataManager);
         ReloadCommand reloadCommand = new ReloadCommand(skyPrestige, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
+        RequirementsCommand requirementsCommand = new RequirementsCommand(skyPrestige, settingsManager, localeManager, prestigeConfigManager, islandDataManager);
         RewardsCommand rewardsCommand = new RewardsCommand(skyPrestige, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(skyPrestige, localeManager, islandDataManager);
         VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, settingsManager);
@@ -125,6 +126,7 @@ public class SkyPrestigeCommand {
         builder.then(helpCommand.createCommand());
         builder.then(reloadCommand.createCommand());
         builder.then(progressCommand.createCommand());
+        builder.then(requirementsCommand.createCommand());
         builder.then(rewardsCommand.createCommand());
         builder.then(prestigePointsCommand.createCommand());
         builder.then(exchangeCommand.createCommand());

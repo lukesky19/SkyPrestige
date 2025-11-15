@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+config-version: 1.1.0.0
 prefix: "<green><bold>SkyPrestige</bold></green><gray> ▪ </gray>"
 help:
     - "<green>SkyPrestige is developed by <white><bold>lukeskywlker19</bold></white>.</green>"
@@ -12,6 +12,7 @@ help:
     - "<white>/</white><green>skyprestige</green> <yellow>requirements</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>rewards</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>vault</yellow>"
+    - "<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>level set <island_id> <level></yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>points add <island_id> <amount></yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>points remove <island_id> <amount></yellow>"
@@ -52,5 +53,8 @@ exchange-prestige-level-not-met: "<red>Your island doesn't meet the required pre
 exchange-not-enough-prestige-points: "<red>You do not have enough prestige points to exchange.</red>"
 vault-player-not-on-island: "<red>You must be on your island to view the island vault.</red>"
 vault-item-not-allowed: "<red>The item you clicked is not allowed to be placed inside the vault.</red>"
+requirements-level-not-found: "<red>The level provided is not a prestige level.</red>"
+requirements-config-error: "<red>Unable to view prestige level requirements due to a configuration error.</red>"
+requirements-points-for-level: "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>"
 delimiter: ", "
 final-delimiter: ", and "

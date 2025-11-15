@@ -34,8 +34,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -60,6 +62,16 @@ public class PrestigeConfigManager {
      */
     public @Nullable PrestigeConfig getPrestigeConfig(int level) {
         return prestigeConfig.get(level);
+    }
+
+    /**
+     * Get a {@link List} of {@link Integer}s for the currently configured prestige levels.
+     * @return A {@link List} of {@link Integer}s for the currently configured prestige levels.
+     */
+    public @NotNull List<@NotNull Integer> getPrestigeLevels() {
+        return prestigeConfig.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     /**
