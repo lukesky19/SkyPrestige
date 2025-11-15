@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.0.0.0"
+version = "1.1.0.0"
 
 repositories {
     mavenLocal()
@@ -26,6 +26,9 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") {
         name = "PlaceholderAPI Repo"
     }
+    maven("https://repo.olziedev.com/") {
+        name = "PlayerAuctions Repo"
+    }
 }
 
 dependencies {
@@ -39,6 +42,8 @@ dependencies {
     compileOnly("world.bentobox:bskyblock:1.18.1-SNAPSHOT")
     compileOnly("dev.rosewood:rosestacker:1.5.32")
     compileOnly("com.github.lukesky19:SkyPlayTime:1.0.0.0")
+    compileOnly("com.github.lukesky19:SkySellWands:1.4.0.0")
+    compileOnly("com.olziedev:playerauctions-api:1.32.1")
 }
 
 java {
@@ -56,9 +61,9 @@ tasks {
     }
 
     // This allows usage of @apiNode in javadocs
-    javadoc {
-        (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
-    }
+//    javadoc {
+//        (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
+//    }
 
     jar {
         manifest {
@@ -69,6 +74,6 @@ tasks {
     }
 
     build {
-        dependsOn(javadoc)
+//        dependsOn(javadoc)
     }
 }

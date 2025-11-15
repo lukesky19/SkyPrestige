@@ -19,9 +19,12 @@ package com.github.lukesky19.skyPrestige.manager.config;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.config.gui.*;
+import com.github.lukesky19.skyPrestige.config.gui.button.ButtonConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Manages the plugin's GUI configurations.
@@ -142,6 +146,8 @@ public class GUIConfigManager {
 
         try {
             confirmPrestigeGUIConfig = confirmPrestigeLoader.load().get(ConfirmPrestigeGUIConfig.class);
+
+            updateConfirmGUIConfig();
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.serialize("Failed to load confirm prestige GUI config. Error:" + configurateException.getMessage()));
         }
@@ -162,6 +168,109 @@ public class GUIConfigManager {
             vaultGUIConfig = vaultLoader.load().get(VaultGUIConfig.class);
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.serialize("Failed to load the vault GUI config. Error:" + configurateException.getMessage()));
+        }
+
+    private void updateConfirmGUIConfig() {
+        if(confirmPrestigeGUIConfig == null) return;
+
+        switch(confirmPrestigeGUIConfig.configVersion()) {
+            case "1.1.0.0" -> {
+                // latest version, do nothing
+            }
+
+            case "1.0.0.0" -> {
+                ConfirmPrestigeGUIConfig.ConditionalButtons conditionalButtons = confirmPrestigeGUIConfig.conditionalButtons();
+                ConfirmPrestigeGUIConfig.ConditionalButtons newConditionalButtons = new ConfirmPrestigeGUIConfig.ConditionalButtons(
+                        conditionalButtons.keepInventory(),
+                        conditionalButtons.clearInventory(),
+                        conditionalButtons.keepEnderChest(),
+                        conditionalButtons.clearEnderChest(),
+                        conditionalButtons.keepExp(),
+                        conditionalButtons.resetExp(),
+                        conditionalButtons.keepMoney(),
+                        conditionalButtons.resetMoney(),
+                        new ButtonConfig(
+                                new ItemStackConfig(
+                                        "orange_shulker_box",
+                                        1,
+                                        null,
+                                        "<white>Auction House Items",
+                                        List.of("<gray>Your auction house items will be carried over on prestige."),
+                                        null,
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                        List.of(),
+                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
+                                40),
+                        new ButtonConfig(
+                                new ItemStackConfig(
+                                        "orange_shulker_box",
+                                        1,
+                                        null,
+                                        "<white>Auction House Items",
+                                        List.of("<gray>Your auction house items will be reset on prestige."),
+                                        null,
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                        List.of(),
+                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
+                                40),
+                        conditionalButtons.startingMoney(),
+                        conditionalButtons.noStartingMoney(),
+                        conditionalButtons.keepSessionPlayTime(),
+                        conditionalButtons.resetSessionPlayTime(),
+                        conditionalButtons.keepDailyPlayTime(),
+                        conditionalButtons.resetDailyPlayTime(),
+                        conditionalButtons.keepWeeklyPlayTime(),
+                        conditionalButtons.resetWeeklyPlayTime(),
+                        conditionalButtons.keepMonthlyPlayTime(),
+                        conditionalButtons.resetMonthlyPlayTime(),
+                        conditionalButtons.keepYearlyPlayTime(),
+                        conditionalButtons.resetYearlyPlayTime(),
+                        conditionalButtons.keepTotalPlayTime(),
+                        conditionalButtons.resetTotalPlayTime());
+
+                this.confirmPrestigeGUIConfig = new ConfirmPrestigeGUIConfig(
+                        "1.1.0.0",
+                        confirmPrestigeGUIConfig.guiName(),
+                        confirmPrestigeGUIConfig.guiType(),
+                        confirmPrestigeGUIConfig.blueprintBundleSlot(),
+                        confirmPrestigeGUIConfig.filler(),
+                        confirmPrestigeGUIConfig.confirmButton(),
+                        confirmPrestigeGUIConfig.cancelButton(),
+                        confirmPrestigeGUIConfig.rewardsButton(),
+                        confirmPrestigeGUIConfig.keepMembers(),
+                        confirmPrestigeGUIConfig.keepFlags(),
+                        confirmPrestigeGUIConfig.keepCommandRanks(),
+                        newConditionalButtons,
+                        confirmPrestigeGUIConfig.dummyButtons());
+
+                try {
+                    @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmPrestigePath);
+
+                    ConfigurationNode node = yamlConfigurationLoader.createNode();
+
+                    node.set(ConfirmPrestigeGUIConfig.class, confirmPrestigeGUIConfig);
+
+                    yamlConfigurationLoader.save(node);
+                } catch (ConfigurateException e) {
+                    skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
+                }
+            }
+
+            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for confirm prestige gui config. Unable to update config."));
         }
     }
 

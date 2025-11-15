@@ -261,7 +261,10 @@ public class ConfirmPrestigeGUI extends ChestGUI {
 
         createActionButton(confirmConfig, inventoryClickEvent -> {
             User user = User.getInstance(player);
+
             prestigeManager.prestigeIsland(player, user, island, gameModeAddon, blueprint.getUniqueId(), prestigeConfig, prestigeLevel);
+
+            close();
         });
     }
 
@@ -348,7 +351,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!prestigeSettings.resetInventory()) {
+        if(!prestigeSettings.inventorySettings().resetInventory()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepInventory(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
@@ -370,6 +373,12 @@ public class ConfirmPrestigeGUI extends ChestGUI {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepMoney(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetMoney(), emptyList);
+        }
+
+        if(!prestigeSettings.resetAuctionItems()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
         }
 
         if(prestigeSettings.startingMoney() > 0) {

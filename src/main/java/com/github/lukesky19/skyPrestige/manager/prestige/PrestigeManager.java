@@ -25,9 +25,7 @@ import com.github.lukesky19.skyPrestige.data.IslandData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.database.table.PlayerTeleportTable;
 import com.github.lukesky19.skyPrestige.gui.BlueprintGUI;
-import com.github.lukesky19.skyPrestige.hook.impl.BSkyBlockHook;
-import com.github.lukesky19.skyPrestige.hook.impl.EconomyHook;
-import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
+import com.github.lukesky19.skyPrestige.hook.impl.*;
 import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
 import com.github.lukesky19.skyPrestige.manager.config.PrestigeConfigManager;
@@ -48,6 +46,7 @@ import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
@@ -374,6 +373,17 @@ public class PrestigeManager {
 
         EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
+        SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
+        PlayerAuctionsHook playerAuctionsHook = hookManager.getHook(PlayerAuctionsHook.class);
+
+        // Reset auction house items if configured to do so for offline island members
+        if(prestigeSettings.resetAuctionItems() && playerAuctionsHook.isHooked()) {
+            oldIsland.getMemberSet().stream().filter(uuid -> {
+                @Nullable Player memberPlayer = skyPrestige.getServer().getPlayer(uuid);
+
+                return memberPlayer == null || !memberPlayer.isOnline() || !memberPlayer.isConnected();
+            }).forEach(playerAuctionsHook::clearPlayerAuctions);
+        }
 
         // Loop through all online island members
         oldIsland.getMemberSet().stream()
@@ -381,9 +391,18 @@ public class PrestigeManager {
                 .filter(Objects::nonNull)
                 .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
                 .forEach(memberPlayer -> {
+                    UUID memberPlayerUniqueId = memberPlayer.getUniqueId();
                     // Reset the island member's inventory if configured to do so
-                    if(prestigeSettings.resetInventory()) {
-                        memberPlayer.getInventory().clear();
+                    if(prestigeSettings.inventorySettings().resetInventory()) {
+                        ItemStack emptyStack = ItemType.AIR.createItemStack();
+
+                        for(int i = 0; i < memberPlayer.getInventory().getSize(); i++) {
+                            ItemStack itemStack = memberPlayer.getInventory().getItem(i);
+                            if(itemStack == null || itemStack.isEmpty()) continue;
+                            if(skySellWandsHook.isInfiniteSellWand(itemStack)) continue;
+
+                            memberPlayer.getInventory().setItem(i, emptyStack);
+                        }
 
                         memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeInventoryReset()));
                     }
@@ -414,7 +433,7 @@ public class PrestigeManager {
 
                         // Give starting money if configured and the starting money should be given to all island members
                         if(prestigeSettings.startingMoney() > 0 && prestigeSettings.giveStartingMoneyToAllIslandMembers()) {
-                            economyHook.addToBalance(player, prestigeSettings.startingMoney());
+                            economyHook.addToBalance(memberPlayer, prestigeSettings.startingMoney());
 
                             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("money", String.valueOf(prestigeSettings.startingMoney())));
 
@@ -437,13 +456,19 @@ public class PrestigeManager {
                         }
                     }
 
+                    if(prestigeSettings.resetAuctionItems() && playerAuctionsHook.isHooked()) {
+                        playerAuctionsHook.clearPlayerAuctions(memberPlayerUniqueId);
+
+                        memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
+                    }
+
                     // Check if SkyPlayTime is hooked into.
                     if(skyPlayTimeHook.isHooked()) {
                         PrestigeConfig.PlayTimeSettings playTimeSettings = prestigeSettings.playTimeSettings();
 
                         // Reset any play time configured to do so.
                         skyPlayTimeHook.resetPlayTime(
-                                memberPlayer.getUniqueId(),
+                                memberPlayerUniqueId,
                                 playTimeSettings.resetSession(),
                                 playTimeSettings.resetDaily(),
                                 playTimeSettings.resetWeekly(),
@@ -464,7 +489,7 @@ public class PrestigeManager {
                     }
                 });
 
-        // Give starting money if configured if the starting money should only be given to the player prestiging the island.
+        // Give starting money if configured and the starting money should only be given to the player prestiging the island.
         if(prestigeSettings.startingMoney() > 0 && !prestigeSettings.giveStartingMoneyToAllIslandMembers()) {
             if(economyHook.isHooked()) {
                 economyHook.addToBalance(player, prestigeSettings.startingMoney());
@@ -524,7 +549,7 @@ public class PrestigeManager {
             if(rewardConfig.giveToAllIslandMembers()) {
                 onlineIslandMembers.forEach(islandMember ->
                         rewardConfig.commands().stream()
-                                .map(command -> PlaceholderAPIUtil.parsePlaceholders(player, command))
+                                .map(command -> PlaceholderAPIUtil.parsePlaceholders(islandMember, command))
                                 .forEach(parsedCommand -> server.dispatchCommand(commandSender, parsedCommand)));
             } else {
                 rewardConfig.commands().stream()
@@ -544,6 +569,7 @@ public class PrestigeManager {
         Locale locale = localeManager.getLocale();
         EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
+        SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
 
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null) {
@@ -561,6 +587,7 @@ public class PrestigeManager {
         boolean enderChestReset = false;
         boolean expReset = false;
         boolean moneyReset = false;
+        boolean auctionHouseMessageSent = false;
 
         // Process prestige settings for all prestige levels that occured while the player was offline
         for(Map.Entry<Integer, PrestigeConfig> prestigeConfigEntry  : prestigeConfigMap.entrySet()) {
@@ -568,9 +595,23 @@ public class PrestigeManager {
             PrestigeConfig prestigeConfig = prestigeConfigEntry.getValue();
             PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
 
+            if(prestigeSettings.resetAuctionItems() && !auctionHouseMessageSent) {
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
+                auctionHouseMessageSent = true;
+            }
+
             // Reset the player's inventory if configured to do so, and it hasn't been done so already
-            if(prestigeSettings.resetInventory() && !invReset) {
-                player.getInventory().clear();
+            if(prestigeSettings.inventorySettings().resetInventory() && !invReset) {
+                ItemStack emptyStack = ItemType.AIR.createItemStack();
+
+                for(int i = 0; i < player.getInventory().getSize(); i++) {
+                    ItemStack itemStack = player.getInventory().getItem(i);
+                    if(itemStack == null || itemStack.isEmpty()) continue;
+                    if(skySellWandsHook.isInfiniteSellWand(itemStack)) continue;
+
+                    player.getInventory().setItem(i, emptyStack);
+                }
+
                 invReset = true;
 
                 player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeInventoryReset()));

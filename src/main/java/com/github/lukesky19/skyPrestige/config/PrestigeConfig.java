@@ -43,10 +43,12 @@ public record PrestigeConfig(
         @NotNull List<Reward> rewards) {
     /**
      * This record contains settings for when an island is prestiged.
-     * @param resetInventory Whether to reset an island member's inventory on island prestige.
+     * @param resetInventory Legacy reset inventory setting. Migration purposes only.
+     * @param inventorySettings Settings related to resetting an island member's inventory.
      * @param resetEnderChest Whether to reset an island member's ender chest on island prestige.
      * @param resetExp Whether to reset an island member's exp on island prestige.
      * @param resetMoney Whether to reset an island member's balance on island prestige.
+     * @param resetAuctionItems Whether to clear the player's auction house items.
      * @param giveStartingMoneyToAllIslandMembers Whether to give the starting money to all island members or not.
      * @param startingMoney The starting amount of money to give the player.
      * @param playTimeSettings The {@link PlayTimeSettings}.
@@ -54,14 +56,27 @@ public record PrestigeConfig(
      */
     @ConfigSerializable
     public record PrestigeSettings(
-            boolean resetInventory,
+            @Nullable Boolean resetInventory,
+            @NotNull InventorySettings inventorySettings,
             boolean resetEnderChest,
             boolean resetExp,
             boolean resetMoney,
+            boolean resetAuctionItems,
             boolean giveStartingMoneyToAllIslandMembers,
             double startingMoney,
             @NotNull PrestigeConfig.PlayTimeSettings playTimeSettings,
             boolean resetPrestigePoints) {}
+
+    /**
+     * Settings related to resetting a player's inventory.
+     * @param resetInventory Whether to reset an island member's inventory on island prestige.
+     * @param removeInfiniteSellWands Whether to remove infinite sell wands from SkySellWands or not.
+     */
+    @ConfigSerializable
+    public record InventorySettings(
+            boolean resetInventory,
+            boolean removeInfiniteSellWands) {}
+
     /**
      * This record contains settings for play time for when an island is prestiged.
      * @param resetSession Whether session play time should be reset or not.

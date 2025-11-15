@@ -3,6 +3,9 @@ config-version: 1.0.0.0
 prestige-level: 1
 prestige-settings:
     reset-inventory: true
+    inventory-settings:
+        reset-inventory: true
+        remove-infinite-sell-wands: false
     reset-ender-chest: false
     reset-exp: true
     reset-money: true

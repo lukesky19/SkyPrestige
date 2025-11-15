@@ -86,6 +86,7 @@ public record Locale(
         String prestigeEnderChestReset,
         String prestigeExperienceReset,
         String prestigeBalanceReset,
+        String prestigeAuctionHouseItemsReset,
         String prestigeStartingMoneyGiven,
         String islandMemberPrestigeNotice,
         String otherPrestigeNotice,

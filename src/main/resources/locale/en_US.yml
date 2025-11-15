@@ -33,6 +33,7 @@ prestige-inventory-reset: "<yellow>Your inventory has been reset as part of your
 prestige-ender-chest-reset: "<yellow>Your ender chest has been reset as part of your island being prestiged.</yellow>"
 prestige-experience-reset: "<yellow>Your experience has been reset as part of your island being prestiged.</yellow>"
 prestige-balance-reset: "<yellow>Your balance has been reset as part of your island being prestiged.</yellow>"
+prestige-auction-house-items-reset: "<yellow>Your auction house items have been cleared as part of your island being prestiged."
 prestige-starting-money-given: "<yellow>You received <money> to start your new island with.</yellow>"
 island-member-prestige-notice: "<green>Your island has been prestiged.</green>"
 other-prestige-notice: "<green>An island your are cooped or trusted on was prestiged.</green>"

@@ -19,10 +19,7 @@ package com.github.lukesky19.skyPrestige.manager.hook;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.hook.Hook;
-import com.github.lukesky19.skyPrestige.hook.impl.BSkyBlockHook;
-import com.github.lukesky19.skyPrestige.hook.impl.EconomyHook;
-import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
-import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
+import com.github.lukesky19.skyPrestige.hook.impl.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -50,6 +47,12 @@ public class HookManager {
 
         SkyPlayTimeHook skyPlayTimeHook = new SkyPlayTimeHook(skyPrestige);
         registerHook(SkyPlayTimeHook.class, skyPlayTimeHook);
+
+        SkySellWandsHook skySellWandsHook = new SkySellWandsHook(skyPrestige);
+        registerHook(SkySellWandsHook.class, skySellWandsHook);
+
+        PlayerAuctionsHook playerAuctionsHook = new PlayerAuctionsHook(skyPrestige);
+        registerHook(PlayerAuctionsHook.class, playerAuctionsHook);
     }
 
     /**

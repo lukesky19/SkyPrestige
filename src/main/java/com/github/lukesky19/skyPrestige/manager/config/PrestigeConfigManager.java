@@ -22,6 +22,7 @@ import com.github.lukesky19.skyPrestige.config.PrestigeConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -72,11 +74,19 @@ public class PrestigeConfigManager {
         try(Stream<Path> paths = Files.walk(Paths.get(skyPrestige.getDataFolder() + File.separator + "prestige"))) {
             paths.filter(Files::isRegularFile)
                     .forEach(path -> {
-                        @NotNull YamlConfigurationLoader Manager = ConfigurationUtility.getYamlConfigurationLoader(path);
+                        @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
                         try {
-                            PrestigeConfig config = Manager.load().get(PrestigeConfig.class);
-                            if (config != null) {
-                                prestigeConfig.put(config.prestigeLevel(), config);
+                            PrestigeConfig config = yamlConfigurationLoader.load().get(PrestigeConfig.class);
+                            if(config != null) {
+                                PrestigeConfig updatedConfig = updateConfig(config);
+
+                                if(!config.equals(updatedConfig)) {
+                                    System.out.println("Config was migrated for level: " + updatedConfig.prestigeLevel());
+
+                                    saveConfig(path, updatedConfig);
+                                }
+
+                                prestigeConfig.put(updatedConfig.prestigeLevel(), updatedConfig);
                             } else {
                                 logger.error(AdventureUtil.serialize("Failed to load prestige config file: " + path.getFileName()));
                             }
@@ -86,6 +96,61 @@ public class PrestigeConfigManager {
                     });
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void saveConfig(@NotNull Path path, @NotNull PrestigeConfig prestigeConfig) {
+        try {
+            @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
+
+            ConfigurationNode node = yamlConfigurationLoader.createNode();
+
+            node.set(PrestigeConfig.class, prestigeConfig);
+
+            yamlConfigurationLoader.save(node);
+        } catch (ConfigurateException e) {
+            skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save prestige config file: " + path.getFileName() + ". Error: " + e.getMessage()));
+        }
+    }
+
+    private @NotNull PrestigeConfig updateConfig(@NotNull PrestigeConfig prestigeConfig) {
+        switch(prestigeConfig.configVersion()) {
+            case "1.1.0.0" -> {
+                // Current version, do nothing
+                return prestigeConfig;
+            }
+
+            case "1.0.0.0" -> {
+                PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
+                PrestigeConfig.PrestigeSettings newSettings = new PrestigeConfig.PrestigeSettings(
+                        null,
+                        new PrestigeConfig.InventorySettings(Objects.requireNonNullElse(prestigeSettings.resetInventory(), true), false),
+                        prestigeSettings.resetEnderChest(),
+                        prestigeSettings.resetExp(),
+                        prestigeSettings.resetMoney(),
+                        true,
+                        prestigeSettings.giveStartingMoneyToAllIslandMembers(),
+                        prestigeSettings.startingMoney(),
+                        prestigeSettings.playTimeSettings(),
+                        prestigeSettings.resetPrestigePoints());
+
+                return new PrestigeConfig(
+                        "1.1.0.0",
+                        prestigeConfig.prestigeLevel(),
+                        prestigeConfig.scaleFactor(),
+                        newSettings,
+                        prestigeConfig.requiredPrestigePoints(),
+                        prestigeConfig.rewards());
+            }
+
+            case null -> {
+                return prestigeConfig;
+            }
+
+            default -> {
+                skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for prestige config. Unable to update config."));
+                return prestigeConfig;
+            }
         }
     }
 

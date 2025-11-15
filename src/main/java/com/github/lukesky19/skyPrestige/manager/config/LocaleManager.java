@@ -23,6 +23,7 @@ import com.github.lukesky19.skyPrestige.config.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
@@ -87,6 +88,8 @@ public class LocaleManager {
         YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
         try {
             locale = yamlConfigurationLoader.load().get(Locale.class);
+
+            updateLocale(path);
         } catch (ConfigurateException exception) {
             throw new RuntimeException(exception);
         }
@@ -101,6 +104,77 @@ public class LocaleManager {
         Path path = Path.of(skyPrestige.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
         if (!path.toFile().exists()) {
             skyPrestige.saveResource("locale" + File.separator + "en_US.yml", false);
+    private void updateLocale(@NotNull Path path) {
+        if(locale == null) return;
+
+        switch(locale.configVersion()) {
+            case "1.1.0.0" -> {
+                // latest version, do nothing
+            }
+
+            case "1.0.0.0" -> {
+                locale = new Locale(
+                        "1.1.0.0",
+                        locale.prefix(),
+                        locale.help(),
+                        locale.reload(),
+                        locale.guiOpenError(),
+                        locale.islandNotFound(),
+                        locale.islandDataNotFound(),
+                        locale.islandPrestigeLevelUpdated(),
+                        locale.prestigePlayerOnly(),
+                        locale.islandPrestigeLevelMax(),
+                        locale.prestigePlayerInWrongWorld(),
+                        locale.prestigePlayerNotOnIsland(),
+                        locale.prestigeIslandNotOwned(),
+                        locale.prestigePlayerNotMemberOrOwner(),
+                        locale.prestigeNotEnoughPrestigePoints(),
+                        locale.prestigeInventoryReset(),
+                        locale.prestigeEnderChestReset(),
+                        locale.prestigeExperienceReset(),
+                        locale.prestigeBalanceReset(),
+                        "<yellow>Your auction house items have been cleared as part of your island being prestiged.",
+                        locale.prestigeStartingMoneyGiven(),
+                        locale.islandMemberPrestigeNotice(),
+                        locale.otherPrestigeNotice(),
+                        locale.islandMemberIslandTeleportNotice(),
+                        locale.islandMemberFallbackTeleportNotice(),
+                        locale.otherIslandTeleportNotice(),
+                        locale.otherFallbackTeleportNotice(),
+                        locale.prestigeConfigError(),
+                        locale.prestigeConfigRequirementError(),
+                        locale.progressPlayerNotOnIsland(),
+                        locale.progressMaxPrestigeLevel(),
+                        locale.rewardsPlayerNotOnIsland(),
+                        locale.rewardsMaxPrestigeLevel(),
+                        locale.exchangePlayerNotOnIsland(),
+                        locale.exchangePrestigeLevelNotMet(),
+                        locale.exchangeNotEnoughPrestigePoints(),
+                        locale.vaultPlayerNotOnIsland(),
+                        locale.vaultItemNotAllowed(),
+                        locale.delimiter(),
+                        locale.finalDelimiter());
+
+                saveLocale(path);
+            }
+
+            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for locale config. Unable to update config."));
+        }
+    }
+
+    private void saveLocale(@NotNull Path path) {
+        if(locale == null) return;
+
+        try {
+            @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
+
+            ConfigurationNode node = yamlConfigurationLoader.createNode();
+
+            node.set(Locale.class, locale);
+
+            yamlConfigurationLoader.save(node);
+        } catch (ConfigurateException e) {
+            skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save locale config file. Error: " + e.getMessage()));
         }
     }
 
@@ -128,6 +202,7 @@ public class LocaleManager {
                 || locale.prestigeEnderChestReset()  == null
                 || locale.prestigeExperienceReset()  == null
                 || locale.prestigeBalanceReset()  == null
+                || locale.prestigeAuctionHouseItemsReset() == null
                 || locale.prestigeStartingMoneyGiven()  == null
                 || locale.islandMemberPrestigeNotice()  == null
                 || locale.otherPrestigeNotice()  == null
@@ -152,12 +227,22 @@ public class LocaleManager {
     }
 
     /**
+     * Copies the default locale files that come bundled with the plugin, if they do not exist at least.
+     */
+    private void copyDefaultLocales() {
+        Path path = Path.of(skyPrestige.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
+        if (!path.toFile().exists()) {
+            skyPrestige.saveResource("locale" + File.separator + "en_US.yml", false);
+        }
+    }
+
+    /**
      * Creates the default locale.
      * It is created in a separate method so that the method can be minimized.
      */
     private void createDefaultLocale() {
         DEFAULT_LOCALE = new Locale(
-                "1.0.0.0",
+                "1.1.0.0",
                 "<green><bold>SkyPrestige</bold></green><gray> ▪ </gray>",
                 List.of(
                         "<green>SkyPrestige is developed by <white><bold>lukeskywlker19</bold></white>.</green>",
@@ -190,6 +275,7 @@ public class LocaleManager {
                 "<yellow>Your ender chest has been reset as part of your island being prestiged.</yellow>",
                 "<yellow>Your experience has been reset as part of your island being prestiged.</yellow>",
                 "<yellow>Your balance has been reset as part of your island being prestiged.</yellow>",
+                "<yellow>Your auction house items have been cleared as part of your island being prestiged.",
                 "<yellow>You received <money> to start your new island with.</yellow>",
                 "<green>Your island has been prestiged.</green>",
                 "<green>An island your are cooped or trusted on was prestiged.</green>",

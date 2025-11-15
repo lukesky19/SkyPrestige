@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+config-version: 1.1.0.0
 gui-name: "Confirm Prestige"
 gui-type: CHEST_54
 # The slot to display the blueprint bundle at.
@@ -239,3 +239,19 @@ conditional-buttons:
                 - "<gray>Your total play time will be reset on prestige."
             amount: 1
         slot: 25
+    keep-auction-items:
+        item:
+            item-type: orange_shulker_box
+            name: "<white>Auction House Items"
+            lore:
+                - "<gray>Your auction house items will be carried over on prestige."
+            amount: 1
+        slot: 40
+    reset-auction-items:
+        item:
+            item-type: orange_shulker_box
+            name: "<white>Auction House Items"
+            lore:
+                - "<gray>Your auction house items will be reset on prestige."
+            amount: 1
+        slot: 40
