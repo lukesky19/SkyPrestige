@@ -279,7 +279,7 @@ public class ProgressGUI extends ChestGUI {
 
         if(prestigeConfig.requiredPrestigePoints() == null) return;
 
-        long requiredPoints;
+        double requiredPoints;
         if (prestigeConfig.scaleFactor() != null && prestigeConfig.scaleFactor() != 0) {
             HashMap<String, String> variables = new HashMap<>();
             variables.put("r", String.valueOf(prestigeConfig.requiredPrestigePoints()));
