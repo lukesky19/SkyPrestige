@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+config-version: 1.0.0.1
 # The file in SkyPrestige/locale to use.
 locale: en_US
 # How frequently island data is periodically saved. Island data are also saved on player disconnect and server shutdown.
@@ -115,7 +115,9 @@ prestige-points-mapping:
         potion:
             default:
                 default: 0.1
-        enchantment: {}
+        enchantment:
+            default:
+                default: 0.1
     harvest:
         default: 0.1
     item-pickup:
