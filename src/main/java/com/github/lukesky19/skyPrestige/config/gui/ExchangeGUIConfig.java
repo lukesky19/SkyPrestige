@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * This record contains the configuration for the progress gui.
+ * This record contains the configuration for the exchange gui.
  * @param configVersion The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
