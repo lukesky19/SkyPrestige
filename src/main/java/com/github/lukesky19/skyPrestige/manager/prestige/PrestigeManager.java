@@ -276,7 +276,7 @@ public class PrestigeManager {
 
             // Set the island owner and members for the new island
             newIsland.setOwner(oldIsland.getOwner());
-            newIsland.setMembers(oldIsland.getMembers());
+            newIsland.setMembers(new HashMap<>(oldIsland.getMembers()));
 
             IslandsManager islandsManager = BentoBox.getInstance().getIslandsManager();
             IslandCache islandCache = islandsManager.getIslandCache();
@@ -287,9 +287,9 @@ public class PrestigeManager {
                         islandCache.addPlayer(uuid, newIsland);
 
                         if(oldIsland.isPrimary(uuid)) islandCache.setPrimaryIsland(uuid, newIsland);
-
-                        IslandsManager.updateIsland(newIsland);
                     });
+
+            IslandsManager.updateIsland(newIsland);
 
             // Process PrestigeSettings
             processPrestigeSettings(player, oldIsland, prestigeConfig.prestigeSettings());
@@ -340,6 +340,17 @@ public class PrestigeManager {
                     logger.error(AdventureUtil.serialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
                     return null;
                 });
+
+            // Set the owner of the old island to null
+            oldIsland.setOwner(null);
+            // Remove the members from the old island
+            oldIsland.getMemberSet()
+                    .forEach(uuid -> {
+                        // Remove the member from the old island
+                        islandCache.removePlayer(oldIsland, uuid);
+                    });
+            // Update the island
+            IslandsManager.updateIsland(oldIsland);
 
             // Process prestige rewards
             processPrestigeRewards(player, newIsland, prestigeConfig, prestigeLevel);
@@ -504,6 +515,7 @@ public class PrestigeManager {
     /**
      * Processes the rewards for the prestige level.
      * @param player The {@link Player} to give rewards to.
+     * @param island The new {@link Island} of the player.
      * @param prestigeConfig The {@link PrestigeConfig} to process rewards for.
      * @param prestigeLevel The prestige level.
      */
