@@ -69,6 +69,8 @@ public record ConfirmPrestigeGUIConfig(
      * @param resetMoney The {@link ButtonConfig} for the button shown when island member's balance is reset on prestige.
      * @param keepAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are carried over on prestige.
      * @param resetAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are reset on prestige.
+     * @param keepGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades carry over on prestige.
+     * @param resetGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades are reset on prestige.
      * @param startingMoney The {@link ButtonConfig} for the button shown when one or more island members receive starting money on prestige.
      * @param noStartingMoney The {@link ButtonConfig} for the button shown when no starting money is given on prestige.
      * @param keepSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is carried over on prestige.
@@ -96,6 +98,8 @@ public record ConfirmPrestigeGUIConfig(
             @NotNull ButtonConfig resetMoney,
             @NotNull ButtonConfig keepAuctionItems,
             @NotNull ButtonConfig resetAuctionItems,
+            @NotNull ButtonConfig keepGeneratorUpgrades,
+            @NotNull ButtonConfig resetGeneratorUpgrades,
             @NotNull ButtonConfig startingMoney,
             @NotNull ButtonConfig noStartingMoney,
             @NotNull ButtonConfig keepSessionPlayTime,

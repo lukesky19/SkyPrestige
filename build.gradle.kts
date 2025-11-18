@@ -40,6 +40,9 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
     compileOnly("world.bentobox:bskyblock:1.18.1-SNAPSHOT")
+    compileOnly("world.bentobox:magiccobblestonegenerator:2.6.0-SNAPSHOT") {
+        exclude("org.bukkit", "bukkit")
+    }
     compileOnly("dev.rosewood:rosestacker:1.5.32")
     compileOnly("com.github.lukesky19:SkyPlayTime:1.0.0.0")
     compileOnly("com.github.lukesky19:SkySellWands:1.4.0.0")

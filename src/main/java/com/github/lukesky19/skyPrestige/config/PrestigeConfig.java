@@ -49,6 +49,7 @@ public record PrestigeConfig(
      * @param resetExp Whether to reset an island member's exp on island prestige.
      * @param resetMoney Whether to reset an island member's balance on island prestige.
      * @param resetAuctionItems Whether to clear the player's auction house items.
+     * @param keepGeneratorUpgrades Whether to keep generator upgrades or not.
      * @param giveStartingMoneyToAllIslandMembers Whether to give the starting money to all island members or not.
      * @param startingMoney The starting amount of money to give the player.
      * @param playTimeSettings The {@link PlayTimeSettings}.
@@ -62,6 +63,7 @@ public record PrestigeConfig(
             boolean resetExp,
             boolean resetMoney,
             boolean resetAuctionItems,
+            boolean keepGeneratorUpgrades,
             boolean giveStartingMoneyToAllIslandMembers,
             double startingMoney,
             @NotNull PrestigeConfig.PlayTimeSettings playTimeSettings,
@@ -76,7 +78,6 @@ public record PrestigeConfig(
     public record InventorySettings(
             boolean resetInventory,
             boolean removeInfiniteSellWands) {}
-
     /**
      * This record contains settings for play time for when an island is prestiged.
      * @param resetSession Whether session play time should be reset or not.

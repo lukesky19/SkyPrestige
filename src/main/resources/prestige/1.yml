@@ -9,6 +9,7 @@ prestige-settings:
     reset-ender-chest: false
     reset-exp: true
     reset-money: true
+    keep-generator-upgrades: false
     give-starting-money-to-all-island-members: false
     starting-money: 2000.0
     play-time-settings:

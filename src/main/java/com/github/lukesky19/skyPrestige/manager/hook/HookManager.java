@@ -42,6 +42,9 @@ public class HookManager {
         EconomyHook economyHook = new EconomyHook(skyPrestige);
         registerHook(EconomyHook.class, economyHook);
 
+        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook();
+        registerHook(MagicCobblestoneGeneratorHook.class, magicCobblestoneGeneratorHook);
+
         RoseStackerHook roseStackerHook = new RoseStackerHook(skyPrestige);
         registerHook(RoseStackerHook.class, roseStackerHook);
 

@@ -246,7 +246,7 @@ conditional-buttons:
             lore:
                 - "<gray>Your auction house items will be carried over on prestige."
             amount: 1
-        slot: 40
+        slot: 39
     reset-auction-items:
         item:
             item-type: orange_shulker_box
@@ -254,4 +254,20 @@ conditional-buttons:
             lore:
                 - "<gray>Your auction house items will be reset on prestige."
             amount: 1
-        slot: 40
+        slot: 39
+    keep-generator-upgrades:
+        item:
+            item-type: coal_ore
+            name: "<white>Generator Upgrades"
+            lore:
+                - "<gray>Your generator upgrades will be carried over on prestige."
+            amount: 1
+        slot: 41
+    reset-generator-upgrades:
+        item:
+            item-type: coal_ore
+            name: "<white>Generator Upgrades"
+            lore:
+                - "<gray>Your generator upgrades will be reset on prestige."
+            amount: 1
+        slot: 41

@@ -146,6 +146,7 @@ public class PrestigeConfigManager {
                         prestigeSettings.resetExp(),
                         prestigeSettings.resetMoney(),
                         true,
+                        false,
                         prestigeSettings.giveStartingMoneyToAllIslandMembers(),
                         prestigeSettings.startingMoney(),
                         prestigeSettings.playTimeSettings(),

@@ -379,6 +379,7 @@ public class PrestigeManager {
     private void processPrestigeSettings(
             @NotNull Player player,
             @NotNull Island oldIsland,
+            @NotNull Island newIsland,
             @NotNull PrestigeConfig.PrestigeSettings prestigeSettings) {
         Locale locale = localeManager.getLocale();
 
@@ -386,6 +387,12 @@ public class PrestigeManager {
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
         SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
         PlayerAuctionsHook playerAuctionsHook = hookManager.getHook(PlayerAuctionsHook.class);
+        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = hookManager.getHook(MagicCobblestoneGeneratorHook.class);
+
+        // Copy island generator upgrades if configured to do so
+        if(prestigeSettings.keepGeneratorUpgrades() && magicCobblestoneGeneratorHook.isHooked()) {
+            magicCobblestoneGeneratorHook.copyGeneratorData(oldIsland, newIsland);
+        }
 
         // Reset auction house items if configured to do so for offline island members
         if(prestigeSettings.resetAuctionItems() && playerAuctionsHook.isHooked()) {

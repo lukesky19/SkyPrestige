@@ -357,6 +357,12 @@ public class ConfirmPrestigeGUI extends ChestGUI {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
         }
 
+        if(prestigeSettings.keepGeneratorUpgrades()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepGeneratorUpgrades(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
+        }
+
         if(!prestigeSettings.resetEnderChest()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
         } else {
