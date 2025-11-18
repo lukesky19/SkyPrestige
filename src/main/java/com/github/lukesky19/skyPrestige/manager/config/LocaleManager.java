@@ -74,11 +74,11 @@ public class LocaleManager {
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.error(AdventureUtil.serialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
+            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
             return;
         }
         if(settings.locale() == null) {
-            logger.error(AdventureUtil.serialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
+            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
             return;
         }
 
@@ -161,7 +161,7 @@ public class LocaleManager {
                 saveLocale(path);
             }
 
-            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for locale config. Unable to update config."));
+            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
         }
     }
 
@@ -177,7 +177,7 @@ public class LocaleManager {
 
             yamlConfigurationLoader.save(node);
         } catch (ConfigurateException e) {
-            skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save locale config file. Error: " + e.getMessage()));
+            skyPrestige.getComponentLogger().error(AdventureUtil.deserialize("Failed to save locale config file. Error: " + e.getMessage()));
         }
     }
 
@@ -227,8 +227,8 @@ public class LocaleManager {
             locale = null;
 
             ComponentLogger logger = skyPrestige.getComponentLogger();
-            logger.error(AdventureUtil.serialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
-            logger.info(AdventureUtil.serialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
+            logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
+            logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
         }
     }
 

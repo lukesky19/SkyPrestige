@@ -110,13 +110,13 @@ public class ProgressGUI extends ChestGUI {
      */
     public boolean create() {
         if(progressGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the progress GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the progress GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = progressGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the progress GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the progress GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -132,13 +132,13 @@ public class ProgressGUI extends ChestGUI {
     @Override
     public boolean update() {
         if(progressGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -149,8 +149,8 @@ public class ProgressGUI extends ChestGUI {
 
         // Check for invalid settings
         if(settings == null || settings.scaleFormula() == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeConfigError()));
-            logger.error(AdventureUtil.serialize("Unable to display prestige requirement due to invalid plugin settings or scale formula."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigError()));
+            logger.error(AdventureUtil.deserialize("Unable to display prestige requirement due to invalid plugin settings or scale formula."));
             return false;
         }
 
@@ -254,7 +254,7 @@ public class ProgressGUI extends ChestGUI {
         ButtonConfig exitConfig = progressGUIConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the exit button to the progress GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the progress GUI due to an invalid slot."));
             return;
         }
 
@@ -330,7 +330,7 @@ public class ProgressGUI extends ChestGUI {
 
         progressGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button in the progress gui due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button in the progress gui due to an invalid slot."));
                 return;
             }
 
@@ -345,7 +345,7 @@ public class ProgressGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the progress GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the progress GUI due to an invalid slot."));
             return;
         }
 
@@ -371,7 +371,7 @@ public class ProgressGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the progress GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the progress GUI due to an invalid slot."));
             return;
         }
 

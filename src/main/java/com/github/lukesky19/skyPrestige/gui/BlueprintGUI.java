@@ -119,13 +119,13 @@ public class BlueprintGUI extends ChestGUI {
      */
     public boolean create() {
         if(blueprintGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the blueprint GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = blueprintGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the blueprint GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -139,7 +139,7 @@ public class BlueprintGUI extends ChestGUI {
             case CHEST_54 -> blueprintsPerPage = 28;
 
             default -> {
-                logger.error(AdventureUtil.serialize("Unsupported GUI Type in blueprints GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in blueprints GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
@@ -158,13 +158,13 @@ public class BlueprintGUI extends ChestGUI {
         clearButtons();
 
         if(blueprintGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -298,8 +298,8 @@ public class BlueprintGUI extends ChestGUI {
 
             ItemStack itemStack = ItemStack.of(blueprint.getIcon());
             ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.displayName(AdventureUtil.serialize(blueprint.getDisplayName()));
-            List<Component> lore = blueprint.getDescription().stream().map(AdventureUtil::serialize).toList();
+            itemMeta.displayName(AdventureUtil.deserialize(blueprint.getDisplayName()));
+            List<Component> lore = blueprint.getDescription().stream().map(AdventureUtil::deserialize).toList();
             itemMeta.lore(lore);
             itemStack.setItemMeta(itemMeta);
 
@@ -315,22 +315,22 @@ public class BlueprintGUI extends ChestGUI {
 
                 boolean creationResult = gui.create();
                 if(!creationResult) {
-                    logger.error(AdventureUtil.serialize("Unable to create the InventoryView for the blueprints GUI for player " + player.getName() + " due to a configuration error."));
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = gui.update();
                 if(!updateResult) {
-                    logger.error(AdventureUtil.serialize("Unable to decorate the blueprints GUI for player " + player.getName() + " due to a configuration error."));
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    logger.error(AdventureUtil.deserialize("Unable to decorate the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = gui.open();
                 if(!openResult) {
-                    logger.error(AdventureUtil.serialize("Unable to open the blueprints GUI for player " + player.getName() + " due to a configuration error."));
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    logger.error(AdventureUtil.deserialize("Unable to open the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
@@ -352,7 +352,7 @@ public class BlueprintGUI extends ChestGUI {
         ButtonConfig nextPageConfig = blueprintGUIConfig.nextPage();
 
         if(nextPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
@@ -373,7 +373,7 @@ public class BlueprintGUI extends ChestGUI {
         ButtonConfig prevPageConfig = blueprintGUIConfig.prevPage();
 
         if(prevPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the previous page button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
@@ -396,7 +396,7 @@ public class BlueprintGUI extends ChestGUI {
         ButtonConfig exitConfig = blueprintGUIConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the exit button to the blueprint GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the blueprint GUI due to an invalid slot."));
             return;
         }
 
@@ -416,7 +416,7 @@ public class BlueprintGUI extends ChestGUI {
 
         blueprintGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the blueprint GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the blueprint GUI due to an invalid slot."));
                 return;
             }
 
@@ -431,7 +431,7 @@ public class BlueprintGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
@@ -457,7 +457,7 @@ public class BlueprintGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the blueprints GUI due to an invalid slot."));
             return;
         }
 

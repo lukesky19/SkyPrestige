@@ -120,8 +120,8 @@ public class IslandListener implements Listener {
         // Retrieve the IslandData for the old island.
         IslandData islandData = islandDataManager.getIslandData(oldIslandId);
         if(islandData == null) {
-            logger.error(AdventureUtil.serialize("No island data found for the island id " + oldIslandId + "."));
-            logger.error(AdventureUtil.serialize(locale.islandDataNotFound()));
+            logger.error(AdventureUtil.deserialize("No island data found for the island id " + oldIslandId + "."));
+            logger.error(AdventureUtil.deserialize(locale.islandDataNotFound()));
             return;
         }
 
@@ -141,15 +141,15 @@ public class IslandListener implements Listener {
                         databaseManager.getPrestigeLevelsTable().setLevel(newIslandId, islandData.getPrestigeLevel())
                             .thenAccept(v3 -> {})
                             .exceptionally(ex -> {
-                                logger.error(AdventureUtil.serialize("Failed to set prestige level for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
+                                logger.error(AdventureUtil.deserialize("Failed to set prestige level for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
                                 return null;
                             }))
                     .exceptionally(ex -> {
-                        logger.error(AdventureUtil.serialize("Failed to reset prestige points for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
+                        logger.error(AdventureUtil.deserialize("Failed to reset prestige points for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
                         return null;
                     }))
             .exceptionally(ex -> {
-                logger.error(AdventureUtil.serialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
+                logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
                 return null;
             });
     }
@@ -187,84 +187,84 @@ public class IslandListener implements Listener {
 
             if(newIslandSpawnPoint != null) {
                 islandMemberPlayersOnOldIsland.forEach(memberPlayer -> {
-                    memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
+                    memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
 
                     memberPlayer.teleportAsync(newIslandSpawnPoint);
                 });
 
                 trustedPlayersOnOldIsland.forEach(trustedPlayer -> {
-                    trustedPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherIslandTeleportNotice()));
+                    trustedPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherIslandTeleportNotice()));
 
                     trustedPlayer.teleportAsync(newIslandSpawnPoint);
                 });
 
                 coopPlayersOnOldIsland.forEach(coopPlayer -> {
-                    coopPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherIslandTeleportNotice()));
+                    coopPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherIslandTeleportNotice()));
 
                     coopPlayer.teleportAsync(newIslandSpawnPoint);
                 });
 
                 otherPlayersOnOldIsland.forEach(visitorPlayer -> {
-                    visitorPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherIslandTeleportNotice()));
+                    visitorPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherIslandTeleportNotice()));
 
                     visitorPlayer.teleportAsync(newIslandSpawnPoint);
                 });
             } else {
                 Settings.Location fallbackLocationConfig = settings.fallbackLocation();
                 if(fallbackLocationConfig.world() == null) {
-                    logger.error(AdventureUtil.serialize("Fallback location world is invalid. Unable to teleport players."));
+                    logger.error(AdventureUtil.deserialize("Fallback location world is invalid. Unable to teleport players."));
                     return;
                 }
                 World world = skyPrestige.getServer().getWorld(fallbackLocationConfig.world());
                 if(world == null) {
-                    logger.error(AdventureUtil.serialize("Fallback location world is invalid for world name " + fallbackLocationConfig.world() + ". Unable to teleport players."));
+                    logger.error(AdventureUtil.deserialize("Fallback location world is invalid for world name " + fallbackLocationConfig.world() + ". Unable to teleport players."));
                     return;
                 }
                 if(fallbackLocationConfig.x() == null) {
-                    logger.error(AdventureUtil.serialize("Fallback location X coordinate is invalid. Unable to teleport players."));
+                    logger.error(AdventureUtil.deserialize("Fallback location X coordinate is invalid. Unable to teleport players."));
                     return;
                 }
                 if(fallbackLocationConfig.y() == null) {
-                    logger.error(AdventureUtil.serialize("Fallback location Y coordinate is invalid. Unable to teleport players."));
+                    logger.error(AdventureUtil.deserialize("Fallback location Y coordinate is invalid. Unable to teleport players."));
                     return;
                 }
                 if(fallbackLocationConfig.z() == null) {
-                    logger.error(AdventureUtil.serialize("Fallback location Z coordinate is invalid. Unable to teleport players."));
+                    logger.error(AdventureUtil.deserialize("Fallback location Z coordinate is invalid. Unable to teleport players."));
                     return;
                 }
 
                 @NotNull Location fallbackLocation = new Location(world, fallbackLocationConfig.x(), fallbackLocationConfig.y(), fallbackLocationConfig.z());
 
                 islandMemberPlayersOnOldIsland.forEach(memberPlayer -> {
-                    memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberFallbackTeleportNotice()));
+                    memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberFallbackTeleportNotice()));
 
                     memberPlayer.teleportAsync(fallbackLocation);
                 });
 
                 trustedPlayersOnOldIsland.forEach(trustedPlayer -> {
-                    trustedPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
+                    trustedPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
 
                     trustedPlayer.teleportAsync(fallbackLocation);
                 });
 
                 coopPlayersOnOldIsland.forEach(coopPlayer -> {
-                    coopPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
+                    coopPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
 
                     coopPlayer.teleportAsync(fallbackLocation);
                 });
 
                 otherPlayersOnOldIsland.forEach(visitorPlayer -> {
-                    visitorPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
+                    visitorPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
 
                     visitorPlayer.teleportAsync(fallbackLocation);
                 });
             }
 
-            islandMemberPlayersNotOnOldOrNewIsland.forEach(memberPlayer -> memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberPrestigeNotice())));
+            islandMemberPlayersNotOnOldOrNewIsland.forEach(memberPlayer -> memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberPrestigeNotice())));
 
-            trustedPlayersNotOnOldIsland.forEach(trustedPlayer -> trustedPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherPrestigeNotice())));
+            trustedPlayersNotOnOldIsland.forEach(trustedPlayer -> trustedPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherPrestigeNotice())));
 
-            coopPlayersNotOnOldIsland.forEach(coopPlayer -> coopPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherPrestigeNotice())));
+            coopPlayersNotOnOldIsland.forEach(coopPlayer -> coopPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherPrestigeNotice())));
             
             prestigeManager.removePrestigedIslandId(oldIslandId);
         }

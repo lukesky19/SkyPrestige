@@ -93,13 +93,13 @@ public class RewardsGUI extends ChestGUI {
      */
     public boolean create() {
         if(rewardsGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the rewards GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = rewardsGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the rewards GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -113,7 +113,7 @@ public class RewardsGUI extends ChestGUI {
             case CHEST_54 -> rewardsPerPage = 28;
 
             default -> {
-                logger.error(AdventureUtil.serialize("Unsupported GUI Type in rewards GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in rewards GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
@@ -130,13 +130,13 @@ public class RewardsGUI extends ChestGUI {
     @Override
     public boolean update() {
         if(rewardsGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -279,7 +279,7 @@ public class RewardsGUI extends ChestGUI {
         ButtonConfig nextPageConfig = rewardsGUIConfig.nextPage();
 
         if(nextPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the rewards GUI due to an invalid slot."));
             return;
         }
 
@@ -300,7 +300,7 @@ public class RewardsGUI extends ChestGUI {
         ButtonConfig prevPageConfig = rewardsGUIConfig.prevPage();
 
         if(prevPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the previous page button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the rewards GUI due to an invalid slot."));
             return;
         }
 
@@ -323,7 +323,7 @@ public class RewardsGUI extends ChestGUI {
         ButtonConfig exitConfig = rewardsGUIConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the exit button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the rewards GUI due to an invalid slot."));
             return;
         }
 
@@ -358,7 +358,7 @@ public class RewardsGUI extends ChestGUI {
                 createDisplayButton(optionalItemStack.get(), getRewardSlot());
                 numOfRewardsAdded++;
             } else {
-                logger.warn(AdventureUtil.serialize("Unable to add a reward display item to the Rewards GUI due to a null ItemStack."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a reward display item to the Rewards GUI due to a null ItemStack."));
                 numOfRewardsErrored++;
             }
 
@@ -374,7 +374,7 @@ public class RewardsGUI extends ChestGUI {
 
         rewardsGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the rewards GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the rewards GUI due to an invalid slot."));
                 return;
             }
 
@@ -389,7 +389,7 @@ public class RewardsGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
             return;
         }
 
@@ -415,7 +415,7 @@ public class RewardsGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
             return;
         }
 

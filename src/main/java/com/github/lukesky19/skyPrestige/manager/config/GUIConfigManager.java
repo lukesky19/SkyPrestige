@@ -135,13 +135,13 @@ public class GUIConfigManager {
         try {
             progressGUIConfig = progressLoader.load().get(ProgressGUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load progress GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load progress GUI config. Error:" + configurateException.getMessage()));
         }
 
         try {
             blueprintGUIConfig = blueprintsLoader.load().get(BlueprintGUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load blueprints GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load blueprints GUI config. Error:" + configurateException.getMessage()));
         }
 
         try {
@@ -149,25 +149,25 @@ public class GUIConfigManager {
 
             updateConfirmGUIConfig();
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load confirm prestige GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load confirm prestige GUI config. Error:" + configurateException.getMessage()));
         }
 
         try {
             rewardsGUIConfig = rewardsLoader.load().get(RewardsGUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load rewards GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load rewards GUI config. Error:" + configurateException.getMessage()));
         }
 
         try {
             exchangeGUIConfig = exchangeLoader.load().get(ExchangeGUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load the exchange GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load the exchange GUI config. Error:" + configurateException.getMessage()));
         }
 
         try {
             vaultGUIConfig = vaultLoader.load().get(VaultGUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load the vault GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load the vault GUI config. Error:" + configurateException.getMessage()));
         }
 
     private void updateConfirmGUIConfig() {
@@ -266,11 +266,11 @@ public class GUIConfigManager {
 
                     yamlConfigurationLoader.save(node);
                 } catch (ConfigurateException e) {
-                    skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
+                    skyPrestige.getComponentLogger().error(AdventureUtil.deserialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
                 }
             }
 
-            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for confirm prestige gui config. Unable to update config."));
+            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for confirm prestige gui config. Unable to update config."));
         }
     }
 

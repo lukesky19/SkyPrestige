@@ -69,7 +69,7 @@ public class OfflinePrestigeTable {
 
         queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Offline Prestige Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Offline Prestige Table creation failed: " + ex.getMessage()));
                     return new ArrayList<>();
                 });
     }
@@ -89,7 +89,7 @@ public class OfflinePrestigeTable {
 
         queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, levelParameter))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to insert offline prestige: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to insert offline prestige: " + ex.getMessage()));
                     return 0;
                 });
     }
@@ -105,7 +105,7 @@ public class OfflinePrestigeTable {
 
         queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to remove offline prestige: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to remove offline prestige: " + ex.getMessage()));
                     return 0;
                 });
     }
@@ -136,7 +136,7 @@ public class OfflinePrestigeTable {
             return offlinePrestigeLevels;
         })
         .exceptionally(ex -> {
-            logger.error(AdventureUtil.serialize("Failed to get offline prestige levels: " + ex.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to get offline prestige levels: " + ex.getMessage()));
             return new ArrayList<>();
         });
     }

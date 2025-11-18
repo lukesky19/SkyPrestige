@@ -90,7 +90,7 @@ public class PrestigeLevelCommand {
                                 String islandMembersNames = island.getMemberSet().stream().map(memberId ->
                                                 skyPrestige.getServer().getOfflinePlayer(memberId).getName())
                                         .collect(Collectors.joining(","));
-                                Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.serialize("Members: " + islandMembersNames));
+                                Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
 
                                 suggestionsMap.put(islandId, toolTip);
                             }
@@ -109,12 +109,12 @@ public class PrestigeLevelCommand {
 
                             IslandData islandData = islandDataManager.getIslandData(islandId);
                             if(islandData == null) {
-                                logger.error(AdventureUtil.serialize("No island data found for the island " + islandId + "."));
+                                logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
 
                                 if(sender instanceof Player player) {
-                                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
+                                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                                 } else {
-                                    logger.error(AdventureUtil.serialize(locale.islandDataNotFound()));
+                                    logger.error(AdventureUtil.deserialize(locale.islandDataNotFound()));
                                 }
 
                                 return 0;
@@ -127,9 +127,9 @@ public class PrestigeLevelCommand {
                                     Placeholder.parsed("prestige_level", String.valueOf(islandData.getPrestigeLevel())));
 
                             if(sender instanceof Player player) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandPrestigeLevelUpdated(), placeholders));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandPrestigeLevelUpdated(), placeholders));
                             } else {
-                                logger.error(AdventureUtil.serialize(locale.islandPrestigeLevelUpdated(), placeholders));
+                                logger.error(AdventureUtil.deserialize(locale.islandPrestigeLevelUpdated(), placeholders));
                             }
 
                             return 1;

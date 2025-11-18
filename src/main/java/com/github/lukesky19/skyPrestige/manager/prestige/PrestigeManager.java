@@ -151,14 +151,14 @@ public class PrestigeManager {
         // Check if the player is in a world managed by a GameModeAddon
         Optional<GameModeAddon> optionalGameModeAddon = getGameModeAddon(player);
         if(optionalGameModeAddon.isEmpty()) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigePlayerInWrongWorld()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerInWrongWorld()));
             return;
         }
 
         // Get the Island the player is on.
         @NotNull Optional<Island> optionalIsland = getIslandAtLocation(location);
         if(optionalIsland.isEmpty()) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigePlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerNotOnIsland()));
             return;
         }
         Island island = optionalIsland.get();
@@ -166,15 +166,15 @@ public class PrestigeManager {
 
         // Check if the player attempting to prestige owns the island or is a member
         if(!isPlayerOwnerOrMember(island, uuid)) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigePlayerNotMemberOrOwner()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerNotMemberOrOwner()));
             return;
         }
 
         // Get the island data for the island.
         IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
         if(islandData == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
-            logger.error(AdventureUtil.serialize("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+            logger.error(AdventureUtil.deserialize("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
             return;
         }
 
@@ -184,13 +184,13 @@ public class PrestigeManager {
 
         // If the prestige config is null, the player is at the max prestige level
         if(prestigeConfig == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandPrestigeLevelMax()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandPrestigeLevelMax()));
             return;
         }
 
         // Check if the player's island has enough prestige points to prestige
         if(lacksRequiredPrestigePoints(player, island, prestigeConfig, nextPrestigeLevel)) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
             return;
         }
 
@@ -200,24 +200,24 @@ public class PrestigeManager {
         // Create the GUI
         boolean creationResult = gui.create();
         if(!creationResult) {
-            logger.error(AdventureUtil.serialize("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Update the GUI
         boolean updateResult = gui.update();
         if(!updateResult) {
-            logger.error(AdventureUtil.serialize("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtil.deserialize("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Open the GUI
         boolean openResult = gui.open();
         if(!openResult) {
-            logger.error(AdventureUtil.serialize("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtil.deserialize("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 
@@ -249,14 +249,14 @@ public class PrestigeManager {
 
         // Re-check if the player meets the prestige requirements
         if(lacksRequiredPrestigePoints(player, oldIsland, prestigeConfig, prestigeLevel)) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
             return;
         }
 
         IslandData islandData = islandDataManager.getIslandData(oldIslandId);
         if(islandData == null) {
-            logger.error(AdventureUtil.serialize("No island data found for island id " + oldIslandId + "."));
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
+            logger.error(AdventureUtil.deserialize("No island data found for island id " + oldIslandId + "."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
             return;
         }
 
@@ -292,7 +292,7 @@ public class PrestigeManager {
             IslandsManager.updateIsland(newIsland);
 
             // Process PrestigeSettings
-            processPrestigeSettings(player, oldIsland, prestigeConfig.prestigeSettings());
+            processPrestigeSettings(player, oldIsland, newIsland, prestigeConfig.prestigeSettings());
 
             // Set prestige level and reset prestige points
             islandData.setPrestigeLevel(prestigeLevel);
@@ -324,7 +324,7 @@ public class PrestigeManager {
                     databaseManager.getPrestigePointsTable().resetPrestigePoints(newIslandId)
                         .thenAccept(v2 -> {})
                         .exceptionally(ex -> {
-                            logger.error(AdventureUtil.serialize("Failed to reset prestige points for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
+                            logger.error(AdventureUtil.deserialize("Failed to reset prestige points for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
                             return null;
                         });
 
@@ -332,12 +332,12 @@ public class PrestigeManager {
                     databaseManager.getPrestigeLevelsTable().setLevel(newIslandId, islandData.getPrestigeLevel())
                             .thenAccept(v2 -> {})
                             .exceptionally(ex -> {
-                                logger.error(AdventureUtil.serialize("Failed to set prestige level for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
+                                logger.error(AdventureUtil.deserialize("Failed to set prestige level for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
                                 return null;
                             });
                 })
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
                     return null;
                 });
 
@@ -359,7 +359,7 @@ public class PrestigeManager {
             BSkyBlockHook bSkyBlockHook = hookManager.getHook(BSkyBlockHook.class);
             if(bSkyBlockHook.isHooked()) {
                 if(bSkyBlockHook.isTeleportPlayerToIslandUponIslandCreation()) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
                 }
             }
 
@@ -415,14 +415,14 @@ public class PrestigeManager {
                             memberPlayer.getInventory().setItem(i, emptyStack);
                         }
 
-                        memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeInventoryReset()));
+                        memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeInventoryReset()));
                     }
 
                     // Reset the island member's ender chest if configured to do so
                     if(prestigeSettings.resetEnderChest()) {
                         memberPlayer.getEnderChest().clear();
 
-                        memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeEnderChestReset()));
+                        memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeEnderChestReset()));
                     }
 
                     // Reset the island member's experience if configured to do so
@@ -430,7 +430,7 @@ public class PrestigeManager {
                         memberPlayer.setLevel(0);
                         memberPlayer.setExp(0);
 
-                        memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeExperienceReset()));
+                        memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeExperienceReset()));
                     }
 
                     // Check if an economy is hooked into
@@ -439,7 +439,7 @@ public class PrestigeManager {
                         if(prestigeSettings.resetMoney()) {
                             economyHook.removeFromBalance(memberPlayer, economyHook.getBalance(memberPlayer));
 
-                            memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeBalanceReset()));
+                            memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeBalanceReset()));
                         }
 
                         // Give starting money if configured and the starting money should be given to all island members
@@ -448,29 +448,29 @@ public class PrestigeManager {
 
                             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("money", String.valueOf(prestigeSettings.startingMoney())));
 
-                            memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeStartingMoneyGiven(), placeholders));
+                            memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeStartingMoneyGiven(), placeholders));
                         }
                     } else {
                         // Display appropriate errors, if any, if no economy was hooked into.
                         if(prestigeSettings.resetMoney() && prestigeSettings.startingMoney() > 0) {
                             // Display an error if an economy isn't hooked into and starting money is configured.
-                            player.sendMessage(AdventureUtil.serialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                            logger.warn(AdventureUtil.serialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into.</red>"));
+                            player.sendMessage(AdventureUtil.deserialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                            logger.warn(AdventureUtil.deserialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into.</red>"));
                         } else if(prestigeSettings.resetMoney()) {
                             // Display an error if the economy isn't hooked into and starting money is configured.
-                            player.sendMessage(AdventureUtil.serialize("<red>Failed to reset a player's balance due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                            logger.warn(AdventureUtil.serialize("<red>Failed to reset a player's balance due to an Economy not being hooked into.</red>"));
+                            player.sendMessage(AdventureUtil.deserialize("<red>Failed to reset a player's balance due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                            logger.warn(AdventureUtil.deserialize("<red>Failed to reset a player's balance due to an Economy not being hooked into.</red>"));
                         } else if(prestigeSettings.startingMoney() > 0) {
                             // Display an error if an economy isn't hooked into and starting money is configured.
-                            player.sendMessage(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                            logger.warn(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
+                            player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                            logger.warn(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
                         }
                     }
 
                     if(prestigeSettings.resetAuctionItems() && playerAuctionsHook.isHooked()) {
                         playerAuctionsHook.clearPlayerAuctions(memberPlayerUniqueId);
 
-                        memberPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
+                        memberPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
                     }
 
                     // Check if SkyPlayTime is hooked into.
@@ -494,8 +494,8 @@ public class PrestigeManager {
                                 || playTimeSettings.resetMonthly()
                                 || playTimeSettings.resetYearly()
                                 || playTimeSettings.resetTotal()) {
-                            player.sendMessage(AdventureUtil.serialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into. Contact your server's system administrator.</red>"));
-                            logger.warn(AdventureUtil.serialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into.</red>"));
+                            player.sendMessage(AdventureUtil.deserialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into. Contact your server's system administrator.</red>"));
+                            logger.warn(AdventureUtil.deserialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into.</red>"));
                         }
                     }
                 });
@@ -506,8 +506,8 @@ public class PrestigeManager {
                 economyHook.addToBalance(player, prestigeSettings.startingMoney());
             } else {
                 // Display an error if an economy isn't hooked into and starting money is configured.
-                player.sendMessage(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                logger.warn(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
+                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                logger.warn(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
             }
         }
     }
@@ -552,8 +552,8 @@ public class PrestigeManager {
                         PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
                     }
                 } else {
-                    player.sendMessage(AdventureUtil.serialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.serialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                    player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                    logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
                 }
             }
 
@@ -585,13 +585,13 @@ public class PrestigeManager {
 
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.error(AdventureUtil.serialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
+            logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
             return;
         }
 
         @Nullable Map<Integer, PrestigeConfig> prestigeConfigMap = getPrestigeConfigMap(prestigeLevels);
         if(prestigeConfigMap == null) {
-            logger.error(AdventureUtil.serialize("Unable to process offline prestige for player " + player.getName() + " due to a missing prestige config for a level their island was prestiged for."));
+            logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to a missing prestige config for a level their island was prestiged for."));
             return;
         }
 
@@ -608,7 +608,7 @@ public class PrestigeManager {
             PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
 
             if(prestigeSettings.resetAuctionItems() && !auctionHouseMessageSent) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeAuctionHouseItemsReset()));
                 auctionHouseMessageSent = true;
             }
 
@@ -626,7 +626,7 @@ public class PrestigeManager {
 
                 invReset = true;
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeInventoryReset()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeInventoryReset()));
             }
 
             // Reset the player's ender chest if configured to do so, and it hasn't been done so already
@@ -634,7 +634,7 @@ public class PrestigeManager {
                 player.getEnderChest().clear();
                 enderChestReset = true;
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeEnderChestReset()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeEnderChestReset()));
             }
 
             // Reset the player's experience if configured to do so, and it hasn't been done so already
@@ -642,7 +642,7 @@ public class PrestigeManager {
                 player.setTotalExperience(0);
                 expReset = true;
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeExperienceReset()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeExperienceReset()));
             }
 
             // Check if an economy is hooked into
@@ -653,7 +653,7 @@ public class PrestigeManager {
 
                     economyHook.removeFromBalance(player, balance);
 
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeBalanceReset()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeBalanceReset()));
                 }
 
                 // Give starting money if configured and the starting money should be given to all island members
@@ -662,22 +662,22 @@ public class PrestigeManager {
 
                     List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("money", String.valueOf(prestigeSettings.startingMoney())));
 
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeStartingMoneyGiven(), placeholders));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeStartingMoneyGiven(), placeholders));
                 }
             } else {
                 // Display appropriate errors, if any, if no economy was hooked into.
                 if(prestigeSettings.resetMoney() && prestigeSettings.startingMoney() > 0) {
                     // Display an error if an economy isn't hooked into and starting money is configured.
-                    player.sendMessage(AdventureUtil.serialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.serialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into.</red>"));
+                    player.sendMessage(AdventureUtil.deserialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                    logger.warn(AdventureUtil.deserialize("<red>Failed to reset a player's balance or give starting money due to an Economy not being hooked into.</red>"));
                 } else if(prestigeSettings.resetMoney()) {
                     // Display an error if the economy isn't hooked into and starting money is configured.
-                    player.sendMessage(AdventureUtil.serialize("<red>Failed to reset a player's balance due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.serialize("<red>Failed to reset a player's balance due to an Economy not being hooked into.</red>"));
+                    player.sendMessage(AdventureUtil.deserialize("<red>Failed to reset a player's balance due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                    logger.warn(AdventureUtil.deserialize("<red>Failed to reset a player's balance due to an Economy not being hooked into.</red>"));
                 } else if(prestigeSettings.startingMoney() > 0) {
                     // Display an error if an economy isn't hooked into and starting money is configured.
-                    player.sendMessage(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.serialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
+                    player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into. Contact your server's system administrator.</red>"));
+                    logger.warn(AdventureUtil.deserialize("<red>Failed to give a player starting money due to an Economy not being hooked into.</red>"));
                 }
             }
 
@@ -702,8 +702,8 @@ public class PrestigeManager {
                         || playTimeSettings.resetMonthly()
                         || playTimeSettings.resetYearly()
                         || playTimeSettings.resetTotal()) {
-                    player.sendMessage(AdventureUtil.serialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.serialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into.</red>"));
+                    player.sendMessage(AdventureUtil.deserialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into. Contact your server's system administrator.</red>"));
+                    logger.warn(AdventureUtil.deserialize("<red>Failed to apply reset a player's play time due to SkyPlayTime not being hooked into.</red>"));
                 }
             }
 
@@ -724,8 +724,8 @@ public class PrestigeManager {
 
                                         PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
                                     } else {
-                                        player.sendMessage(AdventureUtil.serialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-                                        logger.warn(AdventureUtil.serialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                                        player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                                        logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
                                     }
                                 }
 
@@ -749,7 +749,7 @@ public class PrestigeManager {
         Locale locale = localeManager.getLocale();
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
+            logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
             return;
         }
 
@@ -760,7 +760,7 @@ public class PrestigeManager {
             IslandsManager islandsManager = BentoBox.getInstance().getIslandsManager();
             Optional<Island> optionalIsland = islandsManager.getIslandById(islandId);
             if(optionalIsland.isEmpty()) {
-                logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
+                logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
                 return;
             }
 
@@ -768,42 +768,42 @@ public class PrestigeManager {
             @Nullable Location spawnPoint = island.getSpawnPoint(World.Environment.NORMAL);
             if(spawnPoint != null) {
                 if(island.getMemberSet().contains(uuid)) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
                 } else {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherIslandTeleportNotice()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherIslandTeleportNotice()));
                 }
 
                 player.teleportAsync(spawnPoint);
             } else {
                 Settings.Location fallbackLocationConfig = settings.fallbackLocation();
                 if(fallbackLocationConfig.world() == null) {
-                    logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to an invalid fallback location world name."));
+                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid fallback location world name."));
                     return;
                 }
                 World world = skyPrestige.getServer().getWorld(fallbackLocationConfig.world());
                 if(world == null) {
-                    logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to no world found for world name " + fallbackLocationConfig.world() + " for the fallback location config."));
+                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to no world found for world name " + fallbackLocationConfig.world() + " for the fallback location config."));
                     return;
                 }
                 if(fallbackLocationConfig.x() == null) {
-                    logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to an invalid X coordinate for the fallback location config."));
+                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid X coordinate for the fallback location config."));
                     return;
                 }
                 if(fallbackLocationConfig.y() == null) {
-                    logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to an invalid Y coordinate for the fallback location config."));
+                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid Y coordinate for the fallback location config."));
                     return;
                 }
                 if(fallbackLocationConfig.z() == null) {
-                    logger.error(AdventureUtil.serialize("Unable to teleport player " + player.getName() + " due to an invalid Z coordinate for the fallback location config."));
+                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid Z coordinate for the fallback location config."));
                     return;
                 }
 
                 Location fallbackLocation = new Location(world, fallbackLocationConfig.x(), fallbackLocationConfig.y(), fallbackLocationConfig.z());
 
                 if(island.getMemberSet().contains(uuid)) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberFallbackTeleportNotice()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberFallbackTeleportNotice()));
                 } else {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
                 }
 
                 player.teleportAsync(fallbackLocation);
@@ -832,21 +832,21 @@ public class PrestigeManager {
         @Nullable Double scaleFactor = prestigeConfig.scaleFactor();
 
         if(requiredPrestigePoints == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeConfigRequirementError()));
-            logger.error(AdventureUtil.serialize("The required prestige points for prestige level " + prestigeLevel + " is invalid."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigRequirementError()));
+            logger.error(AdventureUtil.deserialize("The required prestige points for prestige level " + prestigeLevel + " is invalid."));
             return true;
         }
 
         if(scaleFactor == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.prestigeConfigRequirementError()));
-            logger.error(AdventureUtil.serialize("The scale factor for prestige level " + prestigeLevel + " is invalid."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigRequirementError()));
+            logger.error(AdventureUtil.deserialize("The scale factor for prestige level " + prestigeLevel + " is invalid."));
             return true;
         }
 
         IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
         if(islandData == null) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
-            logger.error(AdventureUtil.serialize("No island data was found for island " + island.getUniqueId() + " for player " + player.getName() + "."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+            logger.error(AdventureUtil.deserialize("No island data was found for island " + island.getUniqueId() + " for player " + player.getName() + "."));
             return true;
         }
 
@@ -897,7 +897,7 @@ public class PrestigeManager {
         for(Integer prestigeLevel : prestigeLevels) {
             PrestigeConfig prestigeConfig = prestigeConfigManager.getPrestigeConfig(prestigeLevel);
             if(prestigeConfig == null) {
-                logger.warn(AdventureUtil.serialize("No prestige config found for prestige level: " + prestigeLevel));
+                logger.warn(AdventureUtil.deserialize("No prestige config found for prestige level: " + prestigeLevel));
                 return null;
             }
 

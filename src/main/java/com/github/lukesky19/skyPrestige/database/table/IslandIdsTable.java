@@ -83,7 +83,7 @@ public class IslandIdsTable {
         return queueManager.queueWriteTransaction(updateSql, List.of(newIslandIdParameter, oldIslandIdParameter))
                 .thenAccept(integer -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + " Error: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + " Error: " + ex.getMessage()));
                     return null;
                 });
     }

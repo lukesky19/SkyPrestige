@@ -104,13 +104,13 @@ public class ExchangeGUI extends ChestGUI {
      */
     public boolean create() {
         if(exchangeGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the exchange GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the exchange GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = exchangeGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the exchange GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the exchange GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -123,7 +123,7 @@ public class ExchangeGUI extends ChestGUI {
     public boolean open() {
         if(inventoryView == null) {
             // If the InventoryView was not created, log a warning and return false.
-            logger.warn(AdventureUtil.serialize("Unable to open the InventoryView as it was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to open the InventoryView as it was not created."));
             return false;
         }
 
@@ -155,19 +155,19 @@ public class ExchangeGUI extends ChestGUI {
     @Override
     public boolean update() {
         if(exchangeGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         pageConfig = exchangeGUIConfig.pages().get(pageNum);
         if(pageConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the page configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the page configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -302,19 +302,19 @@ public class ExchangeGUI extends ChestGUI {
         ButtonConfig nextPageButtonConfig = pageConfig.nextPage();
 
         if(nextPageButtonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the rewards GUI due to an invalid slot."));
             return;
         }
 
         int nextPageNum = pageNum + 1;
         if(nextPageNum >= exchangeGUIConfig.pages().size()) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the exchange GUI due to no next page configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the exchange GUI due to no next page configured."));
             return;
         }
 
         @Nullable ExchangeGUIConfig.PageConfig nextPageConfig = exchangeGUIConfig.pages().get(nextPageNum);
         if(nextPageConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the exchange GUI due to no next page configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the exchange GUI due to no next page configured."));
             return;
         }
 
@@ -335,14 +335,14 @@ public class ExchangeGUI extends ChestGUI {
         ButtonConfig prevPageButtonConfig = pageConfig.prevPage();
 
         if(prevPageButtonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the previous page button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the rewards GUI due to an invalid slot."));
             return;
         }
 
         int previousPageNum = pageNum - 1;
         @Nullable ExchangeGUIConfig.PageConfig previousPageConfig = exchangeGUIConfig.pages().get(previousPageNum);
         if(previousPageConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the previous page button to the exchange GUI due to no previous page configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the exchange GUI due to no previous page configured."));
             return;
         }
 
@@ -362,7 +362,7 @@ public class ExchangeGUI extends ChestGUI {
         ButtonConfig exitConfig = pageConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the exit button to the exchange GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the exchange GUI due to an invalid slot."));
             return;
         }
 
@@ -379,12 +379,12 @@ public class ExchangeGUI extends ChestGUI {
 
         for(ExchangeGUIConfig.ExchangeButtonConfig exchangeButtonConfig : pageConfig.exchangeButtons()) {
             if(exchangeButtonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add an exchange button to the exchange GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add an exchange button to the exchange GUI due to an invalid slot."));
                 continue;
             }
 
             if(exchangeButtonConfig.exchangePoints() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add an exchange button to the exchange GUI due to exchange points not being configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to add an exchange button to the exchange GUI due to exchange points not being configured."));
                 continue;
             }
 
@@ -392,7 +392,7 @@ public class ExchangeGUI extends ChestGUI {
                 double exchangePoints = exchangeButtonConfig.exchangePoints();
 
                 if(islandData.getPrestigePoints() < exchangePoints) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.exchangeNotEnoughPrestigePoints()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangeNotEnoughPrestigePoints()));
                     return;
                 }
 
@@ -425,7 +425,7 @@ public class ExchangeGUI extends ChestGUI {
 
         pageConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the exchange GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the exchange GUI due to an invalid slot."));
                 return;
             }
 
@@ -440,7 +440,7 @@ public class ExchangeGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
             return;
         }
 
@@ -466,7 +466,7 @@ public class ExchangeGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ExchangeGUIConfig.ExchangeButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the exchange GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the exchange GUI due to an invalid slot."));
             return;
         }
 
@@ -492,7 +492,7 @@ public class ExchangeGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
             return;
         }
 

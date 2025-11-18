@@ -94,20 +94,20 @@ public class ProgressCommand {
                     UUID uuid = player.getUniqueId();
                     Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
                         return 0;
                     }
 
                     IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
                     if(islandData == null) {
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.serialize("No island data found for the island " + island.getUniqueId() + "."));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
                         return 0;
                     }
 
                     PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getPrestigeConfig(islandData.getPrestigeLevel() + 1);
                     if(nextPrestigeLevelConfig == null) {
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.progressMaxPrestigeLevel()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressMaxPrestigeLevel()));
                         return 0;
                     }
 
@@ -116,22 +116,22 @@ public class ProgressCommand {
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {
-                        logger.error(AdventureUtil.serialize("Unable to create the InventoryView for the progress GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the progress GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean updateResult = gui.update();
                     if(!updateResult) {
-                        logger.error(AdventureUtil.serialize("Unable to decorate the progress GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtil.deserialize("Unable to decorate the progress GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean openResult = gui.open();
                     if(!openResult) {
-                        logger.error(AdventureUtil.serialize("Unable to open the progress GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtil.deserialize("Unable to open the progress GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 

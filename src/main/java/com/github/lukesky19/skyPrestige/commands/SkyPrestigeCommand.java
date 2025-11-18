@@ -107,7 +107,7 @@ public class SkyPrestigeCommand {
 
                     return 1;
                 } else {
-                    logger.error(AdventureUtil.serialize(locale.prestigePlayerOnly()));
+                    logger.error(AdventureUtil.deserialize(locale.prestigePlayerOnly()));
                     return 0;
                 }
             });

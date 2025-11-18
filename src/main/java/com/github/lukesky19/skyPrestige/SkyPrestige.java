@@ -238,14 +238,13 @@ public final class SkyPrestige extends JavaPlugin {
             String version = skyLib.getPluginMeta().getVersion();
             String[] splitVersion = version.split("\\.");
             int second = Integer.parseInt(splitVersion[1]);
-            int third = Integer.parseInt(splitVersion[2]);
 
-            if(second >= 4 || (second == 3 && third >= 1)) {
+            if(second >= 4) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(AdventureUtil.serialize("SkyLib Version 1.3.1.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

@@ -69,7 +69,7 @@ public class PrestigePointsTable {
 
         queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, islandIdIndexCreationSql))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Prestige Points Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Prestige Points Table creation failed: " + ex.getMessage()));
                     return new ArrayList<>();
                 });
     }
@@ -98,7 +98,7 @@ public class PrestigePointsTable {
         return queueManager.queueWriteTransaction(updateSql, List.of(islandIdParameter, prestigePointsParameter, lastUpdatedParameter, prestigePointsParameter, lastUpdatedParameter, lastUpdatedParameter))
                 .thenAccept(list -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to save prestige points: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to save prestige points: " + ex.getMessage()));
                     throw new RuntimeException(ex);
                 });
     }
@@ -141,7 +141,7 @@ public class PrestigePointsTable {
         return queueManager.queueWriteTransaction(resetSql, List.of(zeroParameter, lastUpdatedParameter, islandIdParameter, lastUpdatedParameter))
                 .thenAccept(integer -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Prestige Points reset failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Prestige Points reset failed: " + ex.getMessage()));
                     throw new RuntimeException(ex);
                 });
     }

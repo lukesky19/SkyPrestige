@@ -107,7 +107,7 @@ public class CraftItemListener implements Listener {
         String islandId = island.getUniqueId();
         IslandData islandData = islandDataManager.getIslandData(islandId);
         if(islandData == null) {
-            logger.error(AdventureUtil.serialize("No island data found for island id " + island.getUniqueId() + "."));
+            logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
             return;
         }
 

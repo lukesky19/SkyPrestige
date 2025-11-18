@@ -95,31 +95,31 @@ public class RequirementsCommand {
 
                             @Nullable Settings settings = settingsManager.getSettings();
                             if(settings == null || settings.scaleFormula() == null) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.requirementsConfigError()));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementsConfigError()));
                                 return 0;
                             }
 
                             int level = ctx.getArgument("level", int.class);
                             @Nullable PrestigeConfig prestigeConfig = prestigeConfigManager.getPrestigeConfig(level);
                             if(prestigeConfig == null) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.requirementsLevelNotFound()));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementsLevelNotFound()));
                                 return 0;
                             }
                             if(prestigeConfig.requiredPrestigePoints() == null) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.requirementsConfigError()));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementsConfigError()));
                                 return 0;
                             }
 
                             @Nullable Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
                             if(island == null) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
                                 return 0;
                             }
 
                             @Nullable IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
                             if(islandData == null) {
-                                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandDataNotFound()));
-                                logger.warn(AdventureUtil.serialize("No island data found for the island " + island.getUniqueId() + "."));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                                logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
                                 return 0;
                             }
 
@@ -135,7 +135,7 @@ public class RequirementsCommand {
                                 requiredPoints = prestigeConfig.requiredPrestigePoints();
                             }
 
-                            player.sendMessage(AdventureUtil.serialize(
+                            player.sendMessage(AdventureUtil.deserialize(
                                     player,
                                     locale.prefix() + locale.requirementsPointsForLevel(),
                                     List.of(

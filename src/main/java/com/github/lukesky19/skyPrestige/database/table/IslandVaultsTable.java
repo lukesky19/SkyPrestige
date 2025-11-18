@@ -70,7 +70,7 @@ public class IslandVaultsTable {
 
         queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, islandIdIndexCreationSql))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Vaults Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Vaults Table creation failed: " + ex.getMessage()));
                     return new ArrayList<>();
                 });
     }
@@ -86,13 +86,13 @@ public class IslandVaultsTable {
                 "ON CONFLICT (island_id) DO UPDATE SET vault_data = ?, last_updated = ? WHERE last_updated < ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
-        ByteArrayParameter byteArrayParameter = new ByteArrayParameter(serializeItemMap(vaultMap));
+        ByteArrayParameter byteArrayParameter = new ByteArrayParameter(deserializeItemMap(vaultMap));
         LongParameter lastUpdatedParameter = new LongParameter(System.currentTimeMillis());
 
         return queueManager.queueWriteTransaction(insertOrUpdateSql, List.of(islandIdParameter, byteArrayParameter, lastUpdatedParameter, byteArrayParameter, lastUpdatedParameter, lastUpdatedParameter))
                 .thenAccept(integer -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to set island vault data: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to set island vault data: " + ex.getMessage()));
                     throw new RuntimeException(ex);
                 });
     }
@@ -114,7 +114,7 @@ public class IslandVaultsTable {
                 if(resultSet.next()) {
                     byte[] mapBytes = resultSet.getBytes("vault_data");
 
-                    Map<PageSlotKey, ItemStack> vaultMap = deserializeItemMap(islandId, mapBytes);
+                    Map<PageSlotKey, ItemStack> vaultMap = dedeserializeItemMap(islandId, mapBytes);
 
                     islandData.setVaultItems(vaultMap);
                 }
@@ -127,12 +127,12 @@ public class IslandVaultsTable {
     }
 
     /**
-     * Serialize the vault data map into a byte array.
+     * deserialize the vault data map into a byte array.
      * @param itemMap A byte array.
      * @return A byte array.
      * @throws RuntimeException on any IO exception.
      */
-    private byte[] serializeItemMap(@NotNull Map<PageSlotKey, ItemStack> itemMap) {
+    private byte[] deserializeItemMap(@NotNull Map<PageSlotKey, ItemStack> itemMap) {
         Map<PageSlotKey, byte[]> rawMap = new HashMap<>();
 
         itemMap.forEach((pageSlotKey, itemStack) -> {
@@ -151,14 +151,14 @@ public class IslandVaultsTable {
     }
 
     /**
-     * Deserialize the byte array back into the vault data map.
-     * @param islandId The island id whose data is being deserialized. Used for error messages.
+     * Dedeserialize the byte array back into the vault data map.
+     * @param islandId The island id whose data is being dedeserialized. Used for error messages.
      * @param mapBytes A byte array.
      * @return A {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      * @throws RuntimeException on any IOException or ClassNotFoundException.
      */
     @SuppressWarnings("unchecked")
-    private @NotNull Map<PageSlotKey, ItemStack> deserializeItemMap(@NotNull String islandId, byte[] mapBytes) {
+    private @NotNull Map<PageSlotKey, ItemStack> dedeserializeItemMap(@NotNull String islandId, byte[] mapBytes) {
         try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(mapBytes))) {
             Map<PageSlotKey, ItemStack> itemMap = new HashMap<>();
 
@@ -176,7 +176,7 @@ public class IslandVaultsTable {
                 }
 
                 if(!isValidType) {
-                    logger.warn(AdventureUtil.serialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+                    logger.warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
                     return itemMap;
                 }
 
@@ -189,7 +189,7 @@ public class IslandVaultsTable {
                 return itemMap;
             }
 
-            logger.warn(AdventureUtil.serialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+            logger.warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
             return itemMap;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);

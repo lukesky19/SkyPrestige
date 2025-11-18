@@ -100,10 +100,10 @@ public class PrestigeConfigManager {
 
                                 prestigeConfig.put(updatedConfig.prestigeLevel(), updatedConfig);
                             } else {
-                                logger.error(AdventureUtil.serialize("Failed to load prestige config file: " + path.getFileName()));
+                                logger.error(AdventureUtil.deserialize("Failed to load prestige config file: " + path.getFileName()));
                             }
                         } catch (ConfigurateException e) {
-                            logger.error(AdventureUtil.serialize("Failed to load prestige config file: " + path.getFileName() + ". Error: " + e.getMessage()));
+                            logger.error(AdventureUtil.deserialize("Failed to load prestige config file: " + path.getFileName() + ". Error: " + e.getMessage()));
                         }
                     });
         } catch (IOException e) {
@@ -126,7 +126,7 @@ public class PrestigeConfigManager {
 
             yamlConfigurationLoader.save(node);
         } catch (ConfigurateException e) {
-            skyPrestige.getComponentLogger().error(AdventureUtil.serialize("Failed to save prestige config file: " + path.getFileName() + ". Error: " + e.getMessage()));
+            skyPrestige.getComponentLogger().error(AdventureUtil.deserialize("Failed to save prestige config file: " + path.getFileName() + ". Error: " + e.getMessage()));
         }
     }
 
@@ -165,7 +165,7 @@ public class PrestigeConfigManager {
             }
 
             default -> {
-                skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unknown config version for prestige config. Unable to update config."));
+                skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for prestige config. Unable to update config."));
                 return prestigeConfig;
             }
         }

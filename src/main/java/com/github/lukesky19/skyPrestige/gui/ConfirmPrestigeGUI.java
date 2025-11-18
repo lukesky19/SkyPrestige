@@ -121,13 +121,13 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      */
     public boolean create() {
         if(confirmPrestigeGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = confirmPrestigeGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the confirm prestige GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -135,7 +135,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
             case CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54 -> {}
 
             default -> {
-                logger.error(AdventureUtil.serialize("Unsupported GUI Type in confirm prestige GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in confirm prestige GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
@@ -152,13 +152,13 @@ public class ConfirmPrestigeGUI extends ChestGUI {
     @Override
     public boolean update() {
         if(confirmPrestigeGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -255,7 +255,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         ButtonConfig confirmConfig = confirmPrestigeGUIConfig.confirmButton();
 
         if(confirmConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the confirm button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the confirm button to the confirm prestige GUI due to an invalid slot."));
             return;
         }
 
@@ -276,7 +276,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         ButtonConfig cancelConfig = confirmPrestigeGUIConfig.cancelButton();
 
         if(cancelConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the cancel button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the cancel button to the confirm prestige GUI due to an invalid slot."));
             return;
         }
 
@@ -292,8 +292,8 @@ public class ConfirmPrestigeGUI extends ChestGUI {
 
         ItemStack itemStack = ItemStack.of(blueprint.getIcon());
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.displayName(AdventureUtil.serialize(blueprint.getDisplayName()));
-        List<Component> lore = blueprint.getDescription().stream().map(AdventureUtil::serialize).toList();
+        itemMeta.displayName(AdventureUtil.deserialize(blueprint.getDisplayName()));
+        List<Component> lore = blueprint.getDescription().stream().map(AdventureUtil::deserialize).toList();
         itemMeta.lore(lore);
         itemStack.setItemMeta(itemMeta);
 
@@ -309,7 +309,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         ButtonConfig rewardsConfig = confirmPrestigeGUIConfig.rewardsButton();
 
         if(rewardsConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the rewards button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the rewards button to the confirm prestige GUI due to an invalid slot."));
             return;
         }
 
@@ -323,22 +323,22 @@ public class ConfirmPrestigeGUI extends ChestGUI {
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
-                logger.error(AdventureUtil.serialize("Unable to create the InventoryView for the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 return;
             }
 
             boolean updateResult = rewardsGUI.update();
             if(!updateResult) {
-                logger.error(AdventureUtil.serialize("Unable to decorate the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtil.deserialize("Unable to decorate the rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 return;
             }
 
             boolean openResult = rewardsGUI.open();
             if(!openResult) {
-                logger.error(AdventureUtil.serialize("Unable to open the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtil.deserialize("Unable to open the rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
             }
         });
     }
@@ -436,7 +436,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
 
         confirmPrestigeGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the confirm prestige GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the confirm prestige GUI due to an invalid slot."));
                 return;
             }
 
@@ -451,7 +451,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the confirm prestige GUI due to an invalid slot."));
             return;
         }
 
@@ -477,7 +477,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the confirm prestige GUI due to an invalid slot."));
             return;
         }
 

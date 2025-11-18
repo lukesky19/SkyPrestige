@@ -60,9 +60,9 @@ public class ReloadCommand {
                     skyPrestige.reload();
 
                     if(ctx.getSource().getSender() instanceof Player player) {
-                        player.sendMessage(AdventureUtil.serialize(player,locale.prefix() + locale.reload()));
+                        player.sendMessage(AdventureUtil.deserialize(player,locale.prefix() + locale.reload()));
                     } else {
-                        logger.info(AdventureUtil.serialize(locale.reload()));
+                        logger.info(AdventureUtil.deserialize(locale.reload()));
                     }
 
                     return 1;

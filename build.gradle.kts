@@ -33,10 +33,10 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
-    compileOnly("com.github.lukesky19:SkyLib:1.3.1.0")
+    compileOnly("com.github.lukesky19:SkyLib:1.4.0.0")
 
     // Hooks
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("me.clip:placeholderapi:2.11.7")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
     compileOnly("world.bentobox:bskyblock:1.18.1-SNAPSHOT")

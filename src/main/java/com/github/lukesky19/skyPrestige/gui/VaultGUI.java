@@ -114,13 +114,13 @@ public class VaultGUI extends ChestGUI {
      */
     public boolean create() {
         if(vaultGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the vault GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the vault GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = vaultGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the vault GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the vault GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -138,13 +138,13 @@ public class VaultGUI extends ChestGUI {
         clearButtons();
 
         if(vaultGUIConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the vault GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the vault GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the vault GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the vault GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -173,7 +173,7 @@ public class VaultGUI extends ChestGUI {
     public boolean open() {
         if(inventoryView == null) {
             // If the InventoryView was not created, log a warning and return false.
-            logger.warn(AdventureUtil.serialize("Unable to open the InventoryView as it was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to open the InventoryView as it was not created."));
             return false;
         }
 
@@ -311,7 +311,7 @@ public class VaultGUI extends ChestGUI {
 
         // If the item is restricted, don't add the item to the vault and send the player an error message
         if(settingsManager.isItemDisallowed(itemType)) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.vaultItemNotAllowed()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultItemNotAllowed()));
             return;
         }
 
@@ -411,7 +411,7 @@ public class VaultGUI extends ChestGUI {
         ButtonConfig nextPageConfig = pageConfig.nextPage();
 
         if(nextPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the next page button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
@@ -431,7 +431,7 @@ public class VaultGUI extends ChestGUI {
         ButtonConfig prevPageConfig = pageConfig.prevPage();
 
         if(prevPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the previous page button to the blueprints GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
@@ -450,7 +450,7 @@ public class VaultGUI extends ChestGUI {
         ButtonConfig exitConfig = pageConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add the exit button to the blueprint GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the blueprint GUI due to an invalid slot."));
             return;
         }
 
@@ -592,7 +592,7 @@ public class VaultGUI extends ChestGUI {
 
         pageConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the blueprint GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the blueprint GUI due to an invalid slot."));
                 return;
             }
 
@@ -607,7 +607,7 @@ public class VaultGUI extends ChestGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add an action button to the vault GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the vault GUI due to an invalid slot."));
             return;
         }
 
@@ -643,7 +643,7 @@ public class VaultGUI extends ChestGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a display button to the vault GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the vault GUI due to an invalid slot."));
             return;
         }
 

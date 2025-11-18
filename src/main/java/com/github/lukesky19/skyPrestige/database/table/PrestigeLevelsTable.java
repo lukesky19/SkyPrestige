@@ -66,7 +66,7 @@ public class PrestigeLevelsTable {
 
         queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Prestige levels table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Prestige levels table creation failed: " + ex.getMessage()));
                     return new ArrayList<>();
                 });
     }
@@ -88,7 +88,7 @@ public class PrestigeLevelsTable {
         return queueManager.queueWriteTransaction(insertOrUpdateSql, List.of(islandIdParameter, levelParameter, lastUpdatedParameter, levelParameter, lastUpdatedParameter, lastUpdatedParameter))
                 .thenAccept(integer -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.serialize("Failed to set island prestige level: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to set island prestige level: " + ex.getMessage()));
                     throw new RuntimeException(ex);
                 });
     }

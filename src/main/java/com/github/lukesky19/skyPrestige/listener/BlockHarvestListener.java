@@ -99,7 +99,7 @@ public class BlockHarvestListener implements Listener {
 
         IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
         if(islandData == null) {
-            logger.error(AdventureUtil.serialize("No island data found for island id " + island.getUniqueId() + "."));
+            logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
             return;
         }
 

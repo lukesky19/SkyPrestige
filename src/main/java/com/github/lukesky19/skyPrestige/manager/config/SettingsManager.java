@@ -85,7 +85,7 @@ public class SettingsManager {
         try {
             settings = yamlConfigurationLoader.load().get(Settings.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load plugin settings. Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load plugin settings. Error: " + configurateException.getMessage()));
             return;
         }
 

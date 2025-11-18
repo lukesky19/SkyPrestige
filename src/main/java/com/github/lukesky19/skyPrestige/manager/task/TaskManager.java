@@ -59,7 +59,7 @@ public class TaskManager {
 
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null || settings.saveFrequencySeconds() == null) {
-            skyPrestige.getComponentLogger().warn(AdventureUtil.serialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
+            skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
             return;
         }
 
