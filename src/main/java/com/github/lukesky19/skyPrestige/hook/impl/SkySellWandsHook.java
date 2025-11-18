@@ -10,6 +10,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * This class manages interfacing with the SkySellWands plugin.
+ */
 public class SkySellWandsHook implements Hook {
     private final @NotNull SkyPrestige skyPrestige;
     private @Nullable SkySellWandsAPI skySellWandsAPI;

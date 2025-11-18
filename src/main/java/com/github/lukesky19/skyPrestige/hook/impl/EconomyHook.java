@@ -77,7 +77,6 @@ public class EconomyHook implements Hook {
     /**
      * Remove the amount provided from the player's balance.
      * This method will prevent balances from going into the negative.
-     *
      * @param player The {@link Player}.
      * @param amount The amount to remove.
      * @apiNote If the economy was not hooked into, this method will do nothing. Can be checked with {@link #isHooked()}.

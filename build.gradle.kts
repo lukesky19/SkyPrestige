@@ -60,10 +60,16 @@ tasks {
         }
     }
 
-    // This allows usage of @apiNode in javadocs
-//    javadoc {
-//        (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
-//    }
+    javadoc {
+        source = sourceSets["main"].allJava
+        classpath = files() + configurations["compileClasspath"]
+
+        (options as StandardJavadocDocletOptions).apply {
+            tags("apiNote:a:API Note:")
+            addStringOption("sourcepath", "")
+        }
+    }
+
 
     jar {
         manifest {
@@ -74,6 +80,6 @@ tasks {
     }
 
     build {
-//        dependsOn(javadoc)
+        dependsOn(javadoc)
     }
 }

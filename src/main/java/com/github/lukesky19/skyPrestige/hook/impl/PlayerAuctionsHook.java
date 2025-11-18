@@ -29,6 +29,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * This class manages interfacing with the Player Auctions plugin.
+ */
 public class PlayerAuctionsHook implements Hook {
     private final @NotNull SkyPrestige skyPrestige;
     private @Nullable PlayerAuctionsAPI playerAuctionsAPI;

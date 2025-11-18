@@ -111,6 +111,11 @@ public class PrestigeConfigManager {
         }
     }
 
+    /**
+     * Save the prestige config.
+     * @param path The path to save to.
+     * @param prestigeConfig The {@link PrestigeConfig} to save.
+     */
     public void saveConfig(@NotNull Path path, @NotNull PrestigeConfig prestigeConfig) {
         try {
             @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
