@@ -45,6 +45,8 @@ public class GUIConfigManager {
     private @Nullable RewardsGUIConfig rewardsGUIConfig;
     private @Nullable ExchangeGUIConfig exchangeGUIConfig;
     private @Nullable VaultGUIConfig vaultGUIConfig;
+    private @Nullable ValuesGUIConfig valuesGUIConfig;
+    private @Nullable InfoGUIConfig infoGUIConfig;
 
     private final @NotNull Path progressPath;
     private final @NotNull Path blueprintsPath;
@@ -52,6 +54,8 @@ public class GUIConfigManager {
     private final @NotNull Path rewardsPath;
     private final @NotNull Path exchangePath;
     private final @NotNull Path vaultPath;
+    private final @NotNull Path valuesPath;
+    private final @NotNull Path infoPath;
 
     /**
      * Constructor
@@ -66,6 +70,8 @@ public class GUIConfigManager {
         rewardsPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "rewards.yml");
         exchangePath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "exchange.yml");
         vaultPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "vault.yml");
+        valuesPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "values.yml");
+        infoPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "info.yml");
     }
 
     /**
@@ -117,6 +123,22 @@ public class GUIConfigManager {
     }
 
     /**
+     * Get the {@link ValuesGUIConfig}. May be null.
+     * @return The {@link ValuesGUIConfig} or null.
+     */
+    public @Nullable ValuesGUIConfig getValuesGUIConfig() {
+        return valuesGUIConfig;
+    }
+
+    /**
+     * Get the {@link InfoGUIConfig}. May be null.
+     * @return The {@link InfoGUIConfig} or null.
+     */
+    public @Nullable InfoGUIConfig getInfoGUIConfig() {
+        return infoGUIConfig;
+    }
+
+    /**
      * (Re-)load the GUI configurations.
      */
     public void reload() {
@@ -131,6 +153,8 @@ public class GUIConfigManager {
         YamlConfigurationLoader rewardsLoader = ConfigurationUtility.getYamlConfigurationLoader(rewardsPath);
         YamlConfigurationLoader exchangeLoader = ConfigurationUtility.getYamlConfigurationLoader(exchangePath);
         YamlConfigurationLoader vaultLoader = ConfigurationUtility.getYamlConfigurationLoader(vaultPath);
+        YamlConfigurationLoader valuesLoader = ConfigurationUtility.getYamlConfigurationLoader(valuesPath);
+        YamlConfigurationLoader infoLoader = ConfigurationUtility.getYamlConfigurationLoader(infoPath);
 
         try {
             progressGUIConfig = progressLoader.load().get(ProgressGUIConfig.class);
@@ -170,6 +194,19 @@ public class GUIConfigManager {
             logger.error(AdventureUtil.deserialize("Failed to load the vault GUI config. Error:" + configurateException.getMessage()));
         }
 
+        try {
+            valuesGUIConfig = valuesLoader.load().get(ValuesGUIConfig.class);
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Failed to load the values GUI config. Error:" + configurateException.getMessage()));
+        }
+
+        try {
+            infoGUIConfig = infoLoader.load().get(InfoGUIConfig.class);
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Failed to load the info GUI config. Error:" + configurateException.getMessage()));
+        }
+    }
+
     private void updateConfirmGUIConfig() {
         if(confirmPrestigeGUIConfig == null) return;
 
@@ -183,6 +220,44 @@ public class GUIConfigManager {
                 ConfirmPrestigeGUIConfig.ConditionalButtons newConditionalButtons = new ConfirmPrestigeGUIConfig.ConditionalButtons(
                         conditionalButtons.keepInventory(),
                         conditionalButtons.clearInventory(),
+                        new ButtonConfig(
+                                new ItemStackConfig(
+                                        "coal_ore",
+                                        1,
+                                        null,
+                                        "<white>Generator Upgrades",
+                                        List.of("<gray>Your generator upgrades will be carried over on prestige."),
+                                        null,
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                        List.of(),
+                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
+                                39),
+                        new ButtonConfig(
+                                new ItemStackConfig(
+                                        "coal_ore",
+                                        1,
+                                        null,
+                                        "<white>Generator Upgrades",
+                                        List.of("<gray>Your generator upgrades will be reset on prestige."),
+                                        null,
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                        null,
+                                        List.of(),
+                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                        List.of(),
+                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
+                                39),
                         conditionalButtons.keepEnderChest(),
                         conditionalButtons.clearEnderChest(),
                         conditionalButtons.keepExp(),
@@ -207,7 +282,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                40),
+                                41),
                         new ButtonConfig(
                                 new ItemStackConfig(
                                         "orange_shulker_box",
@@ -226,7 +301,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                40),
+                                41),
                         conditionalButtons.startingMoney(),
                         conditionalButtons.noStartingMoney(),
                         conditionalButtons.keepSessionPlayTime(),
@@ -295,6 +370,12 @@ public class GUIConfigManager {
         }
         if(!vaultPath.toFile().exists()) {
             skyPrestige.saveResource("gui" + File.separator + "vault.yml", false);
+        }
+        if(!valuesPath.toFile().exists()) {
+            skyPrestige.saveResource("gui" + File.separator + "values.yml", false);
+        }
+        if(!infoPath.toFile().exists()) {
+            skyPrestige.saveResource("gui" + File.separator + "info.yml", false);
         }
     }
 }

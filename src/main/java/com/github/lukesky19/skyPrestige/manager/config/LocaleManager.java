@@ -97,13 +97,6 @@ public class LocaleManager {
         validateLocale();
     }
 
-    /**
-     * Copies the default locale files that come bundled with the plugin, if they do not exist at least.
-     */
-    private void copyDefaultLocales() {
-        Path path = Path.of(skyPrestige.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
-        if (!path.toFile().exists()) {
-            skyPrestige.saveResource("locale" + File.separator + "en_US.yml", false);
     private void updateLocale(@NotNull Path path) {
         if(locale == null) return;
 
@@ -113,10 +106,14 @@ public class LocaleManager {
             }
 
             case "1.0.0.0" -> {
+                List<String> help = locale.help();
+                help.add("<white>/</white><green>skyprestige</green> <yellow>values</yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>info</yellow>");
+
                 locale = new Locale(
                         "1.1.0.0",
                         locale.prefix(),
-                        locale.help(),
+                        help,
                         locale.reload(),
                         locale.guiOpenError(),
                         locale.islandNotFound(),
@@ -260,6 +257,8 @@ public class LocaleManager {
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>reload</yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>progress</yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>rewards</yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>values</yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>info</yellow>",
                         "<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>level set <island_id> <level></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points add <island_id> <amount></yellow>",

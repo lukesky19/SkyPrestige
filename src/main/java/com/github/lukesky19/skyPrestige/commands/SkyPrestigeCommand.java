@@ -113,23 +113,29 @@ public class SkyPrestigeCommand {
             });
 
         ExchangeCommand exchangeCommand = new ExchangeCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, guiManager, islandDataManager);
+        FixCommand fixCommand = new FixCommand(skyPrestige);
         HelpCommand helpCommand = new HelpCommand(skyPrestige, localeManager);
+        InfoCommand infoCommand = new InfoCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(skyPrestige, localeManager, islandDataManager);
         ReloadCommand reloadCommand = new ReloadCommand(skyPrestige, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         RequirementsCommand requirementsCommand = new RequirementsCommand(skyPrestige, settingsManager, localeManager, prestigeConfigManager, islandDataManager);
         RewardsCommand rewardsCommand = new RewardsCommand(skyPrestige, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(skyPrestige, localeManager, islandDataManager);
+        ValuesCommand valuesCommand = new ValuesCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
         VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, settingsManager);
 
         builder.then(prestigeLevelCommand.createCommand());
+        builder.then(fixCommand.createCommand());
         builder.then(helpCommand.createCommand());
+        builder.then(infoCommand.createCommand());
         builder.then(reloadCommand.createCommand());
         builder.then(progressCommand.createCommand());
         builder.then(requirementsCommand.createCommand());
         builder.then(rewardsCommand.createCommand());
         builder.then(prestigePointsCommand.createCommand());
         builder.then(exchangeCommand.createCommand());
+        builder.then(valuesCommand.createCommand());
         builder.then(vaultCommand.createCommand());
 
         return builder.build();

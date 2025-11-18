@@ -1,0 +1,207 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+gui-name: "Prestige Point Values"
+gui-type: CHEST_54
+pages:
+    -   filler:
+            item-type: gray_stained_glass_pane
+            name: " "
+            amount: 1
+        next-page:
+            item:
+                item-type: arrow
+                name: "<white>Next Page"
+                amount: 1
+            slot: 47
+        prev-page:
+            item:
+                item-type: arrow
+                name: "<white>Previous Page"
+                amount: 1
+            slot: 51
+        exit:
+            item:
+                item-type: barrier
+                name: "<red>Click to close the GUI.</red>"
+                amount: 1
+            slot: 49
+        dummy-buttons:
+            -   item:
+                    item-type: clock
+                    name: "<white>Play Time"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.0014 prestige points per second of play time.</gray>"
+                slot: 10
+            -   item:
+                    item-type: cobblestone
+                    name: "<white>Block Break"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.1 prestige points for breaking blocks.</gray>"
+                        - "<gray>You earn 0.3 prestige points for breaking spawners.</gray>"
+                slot: 11
+            -   item:
+                    item-type: dirt
+                    name: "<white>Block Place"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for placing blocks.</gray>"
+                        - "<gray>You earn 0.4 prestige points for placing spawners.</gray>"
+                slot: 12
+            -   item:
+                    item-type: bone_meal
+                    name: "<white>Bone Meal"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.05 prestige points for bone mealing.</gray>"
+                slot: 13
+            -   item:
+                    item-type: honey_bottle
+                    name: "<white>Bottling"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.2 prestige points for bottling items.</gray>"
+                        - "<gray>You earn 0.05 prestige points for bottling water bottles.</gray>"
+                slot: 14
+            -   item:
+                    item-type: wheat
+                    name: "<white>Breeding"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for breeding.</gray>"
+                slot: 15
+            -   item:
+                    item-type: potion
+                    potion-type: healing
+                    name: "<white>Potion Brewing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.5 prestige points for brewing potions.</gray>"
+                slot: 16
+            -   item:
+                    item-type: brush
+                    name: "<white>Brushing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.2 prestige points for brushing suspicious sand or gravel.</gray>"
+                slot: 19
+            -   item:
+                    item-type: chest
+                    name: "<white>Closing Containers"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.01 prestige points for closing containers.</gray>"
+                slot: 20
+            -   item:
+                    item-type: apple
+                    name: "<white>Consuming"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.05 prestige points for consuming items.</gray>"
+                        - "<gray>You earn 0.25 prestige points for consuming potions.</gray>"
+                slot: 21
+            -   item:
+                    item-type: crafting_table
+                    name: "<white>Crafting"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.05 prestige points for crafting items.</gray>"
+                slot: 22
+            -   item:
+                    item-type: enchanting_table
+                    name: "<white>Enchanting"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.1 prestige points for enchanting item.</gray>"
+                slot: 23
+            -   item:
+                    item-type: fishing_rod
+                    name: "<white>Fishing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for fishing up items.</gray>"
+                        - "<gray>You earn 0.1 prestige points for fishing up potions.</gray>"
+                        - "<gray>You earn 0.1 prestige points for fishing up enchanted items.</gray>"
+                slot: 24
+            -   item:
+                    item-type: sweet_berries
+                    name: "<white>Harvesting"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.3 prestige points for harvesting items.</gray>"
+                slot: 25
+            -   item:
+                    item-type: diamond_sword
+                    name: "<white>Killing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.5 prestige points for killing entities.</gray>"
+                slot: 28
+            -   item:
+                    item-type: name_tag
+                    name: "<white>Naming"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for naming items.</gray>"
+                slot: 29
+            -   item:
+                    item-type: chest
+                    name: "<white>Opening Containers"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.01 prestige points for opening containers.</gray>"
+                slot: 30
+            -   item:
+                    item-type: shears
+                    name: "<white>Shearing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.5 prestige points for shearing blocks.</gray>"
+                        - "<gray>You earn 0.25 prestige points for shearing entities.</gray>"
+                slot: 31
+            -   item:
+                    item-type: red_bed
+                    name: "<white>Sleeping"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for sleeping through the night.</gray>"
+                slot: 32
+            -   item:
+                    item-type: furnace
+                    name: "<white>Smelting"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.05 prestige points for smelting items.</gray>"
+                slot: 33
+            -   item:
+                    item-type: diamond_axe
+                    name: "<white>Stripping"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.25 prestige points for stripping blocks.</gray>"
+                        - "<gray>You earn 0.25 prestige points for stripping entities.</gray>"
+                slot: 34
+            -   item:
+                    item-type: bone
+                    name: "<white>Taming"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 2 prestige points for taming entities.</gray>"
+                slot: 37
+            -   item:
+                    item-type: egg
+                    name: "<white>Throwing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.05 prestige points for throwing items.</gray>"
+                        - "<gray>You earn 0.05 prestige points for throwing potions.</gray>"
+                slot: 38
+            -   item:
+                    item-type: copper_block
+                    name: "<white>Waxing"
+                    amount: 1
+                    lore:
+                        - "<gray>You earn 0.5 prestige points for waxing blocks.</gray>"
+                        - "<gray>You earn 0.05 prestige points for waxing entities.</gray>"
+                slot: 39

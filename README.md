@@ -15,7 +15,8 @@
 * [SkyLib](https://github.com/lukesky19/SkyLib)
 
 ## Soft Dependencies
-* BSkyBlock addon.
+* BSkyBlock addon
+* MagicCobblestoneGenerator addon
 * PlaceholderAPI
 * PlayerAuctions
 * RoseStacker
@@ -33,6 +34,8 @@
 * /skyprestige rewards - View the rewards for the next prestige level.
 * /skyprestige exchange - Exchange prestige points.
 * /skyprestige vault - Open the island vault.
+* /skyprestige info - Open the info GUI.
+* /skyprestige values - Open the values GUI.
 * /skyprestige level set <island_id> <level>
 * /skyprestige points add <island_id> <prestige_points>
 * /skyprestige points remove <island_id> <prestige_points>
@@ -46,7 +49,9 @@
 * `skyprestige.command.skyprestige.progress` - The permission to open the GUI that displays the progress for the next prestige level.
 * `skyprestige.command.skyprestige.rewards` - The permission to open the GUI that displays the rewards for the next prestige level.
 * `skyprestige.command.skyprestige.exchange` - The permission to open the GUI that allows players to exchange prestige points.
-* `skyprestige.command.skyprestige.vault` - The permission to open the GUI opens the island's vault.
+* `skyprestige.command.skyprestige.vault` - The permission to open the GUI for the island's vault.
+* `skyprestige.command.skyprestige.info` - The permission to open the info GUI.
+* `skyprestige.command.skyprestige.values` - The permission to open the values GUI.
 * `skyprestige.command.skyprestige.level` - The permission to set an island's prestige level.
 * `skyprestige.command.skyprestige.points` - The permission to use the `/skyprestige points` command.
 * `skyprestige.command.skyprestige.points.add` - The permission to use the `/skyprestige points add` command.

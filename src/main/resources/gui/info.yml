@@ -1,0 +1,211 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+gui-name: "Prestige Information"
+gui-type: CHEST_54
+pages:
+    -   filler:
+            item-type: gray_stained_glass_pane
+            name: " "
+            amount: 1
+        next-page:
+            item:
+                item-type: arrow
+                name: "<white>Next Page"
+                amount: 1
+            slot: 47
+        prev-page:
+            item:
+                item-type: arrow
+                name: "<white>Previous Page"
+                amount: 1
+            slot: 51
+        exit:
+            item:
+                item-type: barrier
+                name: "<red>Click to close the GUI.</red>"
+                amount: 1
+            slot: 49
+        dummy-buttons:
+            -   item:
+                    item-type: book
+                    name: "<aqua>What Is Prestige?</aqua>"
+                    lore:
+                        - "<gray>Prestige is your island’s long-term progression."
+                        - "<gray>Play Skyblock as normal, earn Prestige Points,"
+                        - "<gray>and advance your island to new heights."
+                        - ""
+                        - "<gray>Each Prestige Level represents a complete"
+                        - "<gray>journey of rebuilding, improving, and mastering"
+                        - "<gray>your island again - stronger every time."
+                    amount: 1
+                slot: 19
+            -   item:
+                    item-type: experience_bottle
+                    name: "<aqua>Why Prestige?</aqua>"
+                    lore:
+                        - "<gray>Prestiging isn’t just a reset — it’s progression."
+                        - "<gray>Each cycle makes you stronger, smarter, and faster."
+                        - ""
+                        - "<green>✔ <gray>Keep the game fresh with new challenges"
+                        - "<green>✔ <gray>Prove your mastery with higher Prestige levels"
+                        - "<green>✔ <gray>Show off status & dedication to the community"
+                        - "<green>✔ <gray>Unlock long-term perks and powerful tools"
+                        - ""
+                        - "<green>✔ <gray>Bigger island size every Prestige"
+                        - "<green>✔ <gray>Exclusive blueprints & utilities"
+                        - "<green>✔ <gray>Coins & Keys for a stronger restart"
+                        - "<green>✔ <gray>Ancient Debris generator & Happy Ghast"
+                        - ""
+                        - "<gray>Prestige gives purpose to every island you build."
+                    amount: 1
+                slot: 20
+            -   item:
+                    item-type: TNT
+                    name: "<aqua>What Resets?</aqua>"
+                    lore:
+                        - "<red>Your island will begin a new cycle."
+                        - ""
+                        - "<red>✗ <gray>Island"
+                        - "<red>✗ <gray>Balance"
+                        - "<red>✗ <gray>Inventory"
+                        - "<red>✗ <gray>Ender Chest"
+                        - "<red>✗ <gray>Auction House"
+                        - ""
+                        - "<gray>Your Prestige Vault keeps important items safe."
+                    amount: 1
+                slot: 21
+            -   item:
+                    item-type: ender_chest
+                    name: "<aqua>What Do I Keep?</aqua>"
+                    lore:
+                        - "<green>✔ <gray>Your Prestige Vault contents"
+                        - "<green>✔ <gray>Infinite Sell Wand (if owned)"
+                        - ""
+                        - "<gray>The essentials you save will carry into every new run."
+                    amount: 1
+                slot: 22
+            -   item:
+                    item-type: clock
+                    name: "<aqua>Prestige Points</aqua>"
+                    lore:
+                        - "<gray>Everything you do earns Prestige Points."
+                        - "<gray>Farm, build, grind, and explore to progress."
+                        - ""
+                        - "<gray>Use <aqua>/prestige progress <gray>to see how close"
+                        - "<gray>you are to the next Prestige."
+                    amount: 1
+                slot: 23
+            -   item:
+                    item-type: diamond
+                    name: "<aqua>Rewards</aqua>"
+                    lore:
+                        - "<gray>Each Prestige grants powerful rewards:"
+                        - ""
+                        - "<green>✔ <gray>Coins for the prestige economy"
+                        - "<green>✔ <gray>Keys to help you restart faster"
+                        - "<green>✔ <gray>Blueprints (farms, grinders, pools)"
+                        - "<green>✔ <gray>Utility boosts and island perks"
+                        - "<green>✔ <gray>Island size increases with Prestige"
+                        - ""
+                        - "<gray>Check <aqua>/prestige rewards <gray>for details."
+                    amount: 1
+                slot: 24
+            -   item:
+                    item-type: paper
+                    name: "<aqua>Blueprints</aqua>"
+                    lore:
+                        - "<gray>Prestiging unlocks exclusive blueprints."
+                        - ""
+                        - "<aqua>• <gray>Auto-farms"
+                        - "<aqua>• <gray>Spawners & Grinder Rooms"
+                        - "<aqua>• <gray>Fishing Pools & Pastures"
+                        - "<aqua>• <gray>Late-game utilities"
+                        - ""
+                        - "<gray>Higher levels unlock more powerful builds."
+                    amount: 1
+                slot: 25
+            -   item:
+                    item-type: ancient_debris
+                    name: "<aqua>Late-Game Unlocks</aqua>"
+                    lore:
+                        - "<gray>Dedicated players earn unique perks:"
+                        - ""
+                        - "<green>✔ <gray>Ancient Debris Generator"
+                        - "<green>✔ <gray>Happy Ghast access"
+                        - "<green>✔ <gray>Special island upgrades"
+                        - ""
+                        - "<gray>Prestige is an evolution, not just a reset."
+                    amount: 1
+                slot: 28
+            -   item:
+                    item-type: shulker_box
+                    name: "<aqua>Prestige Vault</aqua>"
+                    lore:
+                        - "<gray>Your safe space for items across resets."
+                        - ""
+                        - "<gray>The vault grows larger as you Prestige,"
+                        - "<gray>letting you carry more tools into each new cycle."
+                        - ""
+                        - "<gray>Open with <aqua>/prestige vault<gray>."
+                    amount: 1
+                slot: 29
+            -   item:
+                    item-type: comparator
+                    name: "<aqua>Point Values</aqua>"
+                    lore:
+                        - "<gray>Want to know how many points actions give?"
+                        - ""
+                        - "<gray>Use <aqua>/prestige values <gray>to see exactly"
+                        - "<gray>how different activities contribute points."
+                    amount: 1
+                slot: 30
+            -   item:
+                    item-type: lever
+                    name: "<aqua>How To Prestige</aqua>"
+                    lore:
+                        - "<gray>Ready to start your next Prestige?"
+                        - ""
+                        - "<green>✔ <gray>Simply type <aqua>/prestige<gray> to begin"
+                        - "<green>✔ <gray>Review your rewards and what resets beforehand"
+                        - ""
+                        - "<gray>Check requirements with <aqua>/prestige requirements <level><gray>."
+                    amount: 1
+                slot: 31
+            -   item:
+                    item-type: tripwire_hook
+                    name: "<aqua>Prestige Crates</aqua>"
+                    lore:
+                        - "<gray>Every Prestige grants you keys for special crates."
+                        - "<gray>These crates are located at <aqua>/warp prestige<gray>."
+                        - ""
+                        - "<green>✔ <gray>Crates contain coins, money, and kits"
+                        - "<green>✔ <gray>Help you get a headstart on your next run"
+                        - ""
+                        - "<gray>Use your keys wisely and jump into your new Prestige cycle!"
+                    amount: 1
+                slot: 32
+            -   item:
+                    item-type: sunflower
+                    name: "<aqua>Prestige Point Exchange</aqua>"
+                    lore:
+                        - "<gray>Not ready to Prestige yet?"
+                        - ""
+                        - "<green>✔ <gray>Use <aqua>/prestige exchange<gray> to convert points into coins"
+                        - "<green>✔ <gray>Spend coins on tags, custom enchants, chat colors, and more"
+                        - "<green>✔ <gray>Browse rewards in <aqua>/shop open coins<gray>"
+                        - ""
+                        - "<gray>Make the most of your Prestige Points, even if you wait!"
+                    amount: 1
+                slot: 33
+            -   item:
+                    item-type: command_block
+                    name: "<aqua>All Commands</aqua>"
+                    lore:
+                        - "<aqua>/prestige help <gray>- Full command list"
+                        - "<aqua>/prestige progress <gray>- Track points"
+                        - "<aqua>/prestige rewards <gray>- View next rewards"
+                        - "<aqua>/prestige vault <gray>- Open vault"
+                        - "<aqua>/prestige values <gray>- Point values"
+                        - "<aqua>/prestige requirements <level> <gray>- Needed points"
+                    amount: 1
+                slot: 34
