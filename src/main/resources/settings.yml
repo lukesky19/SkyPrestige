@@ -19,7 +19,6 @@ fallback-location:
     y: 64
     z: 0
 # The list of namespaced keys for items not allowed inside vaults.
-# The list of namespaced keys for items not allowed inside vaults.
 vault-disallowed-items:
     - minecraft:spawner
     - minecraft:cod
@@ -58,19 +57,19 @@ vault-disallowed-items:
     - minecraft:netherite_block
 # The mapping of prestige points earned for the following actions. Some actions are specific to blocks.
 prestige-points-mapping:
-    play-time: 0.0001
+    play-time: 0.0014
     block-break:
         block:
-            default: 0.01
+            default: 0.1
         spawner:
             default:
                 default: 0.3
     block-place:
         block:
-            default: 0.01
+            default: 0.25
         spawner:
             default:
-                default: 0.3
+                default: 0.4
     bone-meal:
         default: 0.05
     bottle:
@@ -102,13 +101,13 @@ prestige-points-mapping:
     craft:
         default: 0.05
     empty:
-        default: 0.1
+        default: 0
     enchant:
         default:
             default:
-                default: 0.25
+                default: 0.1
     fill:
-        default: 0.1
+        default: 0
     fish:
         item:
             default: 0.25
@@ -119,7 +118,7 @@ prestige-points-mapping:
             default:
                 default: 0.1
     harvest:
-        default: 0.1
+        default: 0.3
     item-pickup:
         item:
             default: 0
@@ -143,7 +142,7 @@ prestige-points-mapping:
     kill:
         default: 0.5
     milk:
-        default: 0.25
+        default: 0
     name:
         item:
             default: 0.25
@@ -177,9 +176,9 @@ prestige-points-mapping:
             default: 0.05
         potion:
             default:
-                default: 0.25
+                default: 0.05
     water-log:
-        default: 0.1
+        default: 0
     wax:
         block:
             default: 0.5
