@@ -180,12 +180,23 @@ public class BlueprintGUI extends ChestGUI {
         @NonNull Map<String, BlueprintBundle> blueprints = blueprintsManager.getBlueprintBundles(gameModeAddon);
         List<Map.Entry<String, BlueprintBundle>> blueprintList = blueprints.entrySet()
                 .stream()
+                .filter(entry -> {
+                    BlueprintBundle blueprint = entry.getValue();
+
+                    if(blueprint.isRequirePermission()) {
+                        String permission = gameModeAddon.getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
+
+                        return player.hasPermission(permission);
+                    }
+
+                    return true;
+                })
                 .sorted(Map.Entry.comparingByValue(Comparator.comparing(BlueprintBundle::getSlot)))
                 .toList();
 
         createBlueprintButtons(blueprintList);
 
-        if(numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) > currentBlueprintKey) {
+        if(numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) >= currentBlueprintKey) {
             createNextPageButton();
         }
 
@@ -282,15 +293,6 @@ public class BlueprintGUI extends ChestGUI {
 
             Map.Entry<String, BlueprintBundle> entry = blueprintList.get(currentBlueprintKey);
             BlueprintBundle blueprint = entry.getValue();
-
-            // Check if the player has permission to the blueprint
-            if(blueprint.isRequirePermission()) {
-                String permission = gameModeAddon.getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
-                if(!player.hasPermission(permission)) {
-                    currentBlueprintKey++;
-                    continue;
-                }
-            }
 
             GUIButton.Builder builder = new GUIButton.Builder();
 
