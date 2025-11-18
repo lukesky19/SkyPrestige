@@ -17,8 +17,10 @@
 ## Soft Dependencies
 * BSkyBlock addon.
 * PlaceholderAPI
+* PlayerAuctions
 * RoseStacker
 * SkyPlayTime
+* SkySellWands
 * Vault
 
 ## Commands
