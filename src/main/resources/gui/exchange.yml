@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+config-version: 1.0.0.1
 gui-name: "Exchange Prestige Points"
 gui-type: CHEST_54
 pages:
@@ -23,9 +23,6 @@ pages:
             item:
                 item-type: barrier
                 name: "<red>Click to close the GUI.</red>"
-                lore:
-                    - "<gray>You will return to the confirm"
-                    - "<gray>prestige GUI if you came from there."
                 amount: 1
             slot: 49
         prestige-points:
