@@ -26,6 +26,7 @@
   * Alias: /prestige
 * /skyprestige help - View the plugin's help message.
 * /skyprestige reload - Reloads the plugin.
+* /skyprestige requirements <level> - View the required prestige points for a particular prestige level.
 * /skyprestige progress - View the requirements for the next prestige level.
 * /skyprestige rewards - View the rewards for the next prestige level.
 * /skyprestige exchange - Exchange prestige points.
@@ -39,6 +40,7 @@
 ## Permissions
 * `skyprestige.command.skyprestige` - Base Command Permission
 * `skyprestige.command.skyprestige.help` - The permission to view the plugin's help message.
+* `skyprestige.command.skyprestige.requirements` - The permission to view the required prestige points for a particular prestige level.
 * `skyprestige.command.skyprestige.progress` - The permission to open the GUI that displays the progress for the next prestige level.
 * `skyprestige.command.skyprestige.rewards` - The permission to open the GUI that displays the rewards for the next prestige level.
 * `skyprestige.command.skyprestige.exchange` - The permission to open the GUI that allows players to exchange prestige points.
