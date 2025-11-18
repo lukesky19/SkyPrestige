@@ -109,6 +109,7 @@ public class LocaleManager {
                 List<String> help = locale.help();
                 help.add("<white>/</white><green>skyprestige</green> <yellow>values</yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>info</yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>");
 
                 locale = new Locale(
                         "1.1.0.0",
