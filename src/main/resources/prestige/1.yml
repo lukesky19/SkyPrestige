@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+config-version: 1.1.0.0
 prestige-level: 1
 prestige-settings:
     reset-inventory: true
@@ -9,6 +9,7 @@ prestige-settings:
     reset-ender-chest: false
     reset-exp: true
     reset-money: true
+    reset-auction-items: true
     keep-generator-upgrades: false
     give-starting-money-to-all-island-members: false
     starting-money: 2000.0
