@@ -107,7 +107,6 @@ public class SkyPrestigeCommand {
             });
 
         ExchangeCommand exchangeCommand = new ExchangeCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, guiManager, islandDataManager);
-        FixCommand fixCommand = new FixCommand(skyPrestige);
         HelpCommand helpCommand = new HelpCommand(skyPrestige, localeManager);
         InfoCommand infoCommand = new InfoCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(skyPrestige, localeManager, islandDataManager);
@@ -120,7 +119,6 @@ public class SkyPrestigeCommand {
         VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, settingsManager);
 
         builder.then(prestigeLevelCommand.createCommand());
-        builder.then(fixCommand.createCommand());
         builder.then(helpCommand.createCommand());
         builder.then(infoCommand.createCommand());
         builder.then(reloadCommand.createCommand());
