@@ -18,20 +18,21 @@
 package com.github.lukesky19.skyPrestige;
 
 import com.github.lukesky19.skyPrestige.commands.SkyPrestigeCommand;
+import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.hook.HookManager;
 import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.listener.*;
-import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
-import com.github.lukesky19.skyPrestige.manager.config.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.SettingsManager;
-import com.github.lukesky19.skyPrestige.manager.gui.GUIManager;
-import com.github.lukesky19.skyPrestige.manager.hook.HookManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
-import com.github.lukesky19.skyPrestige.manager.prestige.PrestigeManager;
-import com.github.lukesky19.skyPrestige.manager.task.TaskManager;
 import com.github.lukesky19.skyPrestige.placeholderapi.SkyPrestigeExpansion;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.task.TaskManager;
+import com.github.lukesky19.skyPrestige.teleport.TeleportationManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
@@ -40,7 +41,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * The main class for the SkyPrestige plugin.
@@ -73,21 +73,17 @@ public final class SkyPrestige extends JavaPlugin {
         }
 
         // Set up plugin classes
-        // Plugin Hooks
         HookManager hookManager = new HookManager(this);
-        // Database
         databaseManager = new DatabaseManager(this);
-        // Configuration Classes
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);
         prestigeConfigManager = new PrestigeConfigManager(this);
-        // Data Managers
         guiManager = new GUIManager(this);
         islandDataManager = new IslandDataManager(databaseManager);
         taskManager = new TaskManager(this, settingsManager, islandDataManager);
-        // Prestige Manager
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, databaseManager, hookManager);
+        TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, localeManager, databaseManager);
 
         // Register Commands
         SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, guiManager, databaseManager);
@@ -118,7 +114,7 @@ public final class SkyPrestige extends JavaPlugin {
         pluginManager.registerEvents(new PlayerDropItemListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerEnchantListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerFishListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager), this);
+        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager, teleportationManager), this);
         pluginManager.registerEvents(new PlayerKillEntityListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerMilkCowListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerNameEntityListener(this, settingsManager, islandDataManager, hookManager), this);
@@ -153,8 +149,10 @@ public final class SkyPrestige extends JavaPlugin {
             islandDataManager.loadIslandData(uuid);
 
             // Handle any prestiges that occurred while the player was offline
-            CompletableFuture<List<Integer>> future = databaseManager.getOfflinePrestigeTable().getPrestigeLevels(uuid);
-            future.thenAccept(list -> prestigeManager.handleOfflinePrestige(player, uuid, list));
+            prestigeManager.handleOfflinePrestiges(player);
+
+            // Handle any queued teleports for the player.
+            teleportationManager.handleQueuedTeleports(player);
         });
     }
 

@@ -18,8 +18,9 @@
 package com.github.lukesky19.skyPrestige.listener;
 
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
-import com.github.lukesky19.skyPrestige.manager.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.teleport.TeleportationManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,9 +28,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Listens for when a player joins and creates or loads any data necessary for their islands.
@@ -38,20 +37,24 @@ public class PlayerJoinListener implements Listener {
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull PrestigeManager prestigeManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull TeleportationManager teleportationManager;
 
     /**
      * Constructor
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param prestigeManager A {@link PrestigeManager} instance.
-     * @param islandDataManager An {@link IslandDataManager}.
+     * @param islandDataManager An {@link IslandDataManager} instance.
+     * @param teleportationManager A {@link TeleportationManager} instance.
      */
     public PlayerJoinListener(
             @NotNull DatabaseManager databaseManager,
             @NotNull PrestigeManager prestigeManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull TeleportationManager teleportationManager) {
         this.databaseManager = databaseManager;
         this.prestigeManager = prestigeManager;
         this.islandDataManager = islandDataManager;
+        this.teleportationManager = teleportationManager;
     }
 
     /**
@@ -69,9 +72,9 @@ public class PlayerJoinListener implements Listener {
         islandDataManager.loadIslandData(uuid);
 
         // Handle any prestiges that occurred while the player was offline
-        CompletableFuture<List<Integer>> future = databaseManager.getOfflinePrestigeTable().getPrestigeLevels(uuid);
-        future.thenAccept(list -> prestigeManager.handleOfflinePrestige(player, uuid, list));
+        prestigeManager.handleOfflinePrestiges(player);
 
-        prestigeManager.handleQueuedTeleports(player, uuid);
+        // Handle any queued teleports for the player.
+        teleportationManager.handleQueuedTeleports(player);
     }
 }

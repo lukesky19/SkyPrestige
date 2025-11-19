@@ -18,12 +18,12 @@
 package com.github.lukesky19.skyPrestige.listener;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.Settings;
-import com.github.lukesky19.skyPrestige.data.IslandData;
+import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
+import com.github.lukesky19.skyPrestige.hook.HookManager;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
-import com.github.lukesky19.skyPrestige.manager.config.SettingsManager;
-import com.github.lukesky19.skyPrestige.manager.hook.HookManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.GameMode;
@@ -32,7 +32,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,17 +71,17 @@ public class PlayerMilkCowListener implements Listener {
 
     /**
      * Listens for when a player milks a cow on an island and increments prestige points.
-     * @param playerInteractAtEntityEvent A {@link PlayerInteractAtEntityEvent}.
+     * @param playerInteractEntityEvent A {@link PlayerInteractEntityEvent}.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onCowMilked(PlayerInteractAtEntityEvent playerInteractAtEntityEvent) {
+    public void onCowMilked(PlayerInteractEntityEvent playerInteractEntityEvent) {
         Settings settings = settingsManager.getSettings();
         if(settings == null) return;
 
-        Player player = playerInteractAtEntityEvent.getPlayer();
+        Player player = playerInteractEntityEvent.getPlayer();
         if(player.getGameMode().equals(GameMode.CREATIVE)) return;
         UUID uuid = player.getUniqueId();
-        EntityType entityType = playerInteractAtEntityEvent.getRightClicked().getType();
+        EntityType entityType = playerInteractEntityEvent.getRightClicked().getType();
         if(!entityType.equals(EntityType.COW) && !entityType.equals(EntityType.MOOSHROOM)) return;
         ItemType itemTypeUsed = player.getInventory().getItemInMainHand().getType().asItemType();
         if(itemTypeUsed == null) return;

@@ -18,11 +18,11 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.Locale;
-import com.github.lukesky19.skyPrestige.gui.InfoGUI;
-import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
-import com.github.lukesky19.skyPrestige.manager.gui.GUIManager;
+import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.gui.gui.InfoGUI;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;

@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
-import com.github.lukesky19.skyPrestige.data.IslandData;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import com.github.lukesky19.skyPrestige.util.parameter.ByteArrayParameter;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;

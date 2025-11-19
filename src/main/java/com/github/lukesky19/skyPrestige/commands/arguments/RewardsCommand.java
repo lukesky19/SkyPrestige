@@ -18,15 +18,15 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.Locale;
-import com.github.lukesky19.skyPrestige.config.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.data.IslandData;
-import com.github.lukesky19.skyPrestige.gui.RewardsGUI;
-import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
-import com.github.lukesky19.skyPrestige.manager.config.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.manager.gui.GUIManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
+import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.gui.gui.RewardsGUI;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;

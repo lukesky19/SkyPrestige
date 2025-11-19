@@ -19,26 +19,23 @@ package com.github.lukesky19.skyPrestige.commands;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.commands.arguments.*;
-import com.github.lukesky19.skyPrestige.config.Locale;
+import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.manager.config.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.LocaleManager;
-import com.github.lukesky19.skyPrestige.manager.config.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.manager.config.SettingsManager;
-import com.github.lukesky19.skyPrestige.manager.gui.GUIManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
-import com.github.lukesky19.skyPrestige.manager.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 /**
  * This class creates the main /skyprestige command to register.
@@ -100,10 +97,7 @@ public class SkyPrestigeCommand {
                 Locale locale = localeManager.getLocale();
 
                 if(ctx.getSource().getSender() instanceof Player player) {
-                    UUID uuid = player.getUniqueId();
-                    Location location = player.getLocation();
-
-                    prestigeManager.prestigeIsland(player, uuid, location);
+                    prestigeManager.prestigeIsland(player);
 
                     return 1;
                 } else {

@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.placeholderapi;
 
-import com.github.lukesky19.skyPrestige.data.IslandData;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.util.NumberUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;

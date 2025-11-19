@@ -18,13 +18,13 @@
 package com.github.lukesky19.skyPrestige.listener;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.Settings;
-import com.github.lukesky19.skyPrestige.data.IslandData;
+import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
+import com.github.lukesky19.skyPrestige.hook.HookManager;
 import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
-import com.github.lukesky19.skyPrestige.manager.config.SettingsManager;
-import com.github.lukesky19.skyPrestige.manager.hook.HookManager;
-import com.github.lukesky19.skyPrestige.manager.island.IslandDataManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.GameMode;

@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
-import com.github.lukesky19.skyPrestige.data.IslandData;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
