@@ -21,7 +21,6 @@ import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
@@ -34,7 +33,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,15 +113,14 @@ public class PrestigeConfigManager {
                         try {
                             PrestigeConfig config = yamlConfigurationLoader.load().get(PrestigeConfig.class);
                             if(config != null) {
-                                PrestigeConfig updatedConfig = updateConfig(config);
+                                @Nullable PrestigeConfig updatedConfig = updateConfig(path.getFileName().toString(), config);
+                                if(updatedConfig != null) {
+                                    if(!config.equals(updatedConfig)) {
+                                        saveConfig(path, updatedConfig);
+                                    }
 
-                                if(!config.equals(updatedConfig)) {
-                                    System.out.println("Config was migrated for level: " + updatedConfig.prestigeLevel());
-
-                                    saveConfig(path, updatedConfig);
+                                    prestigeConfig.put(updatedConfig.prestigeLevel(), updatedConfig);
                                 }
-
-                                prestigeConfig.put(updatedConfig.prestigeLevel(), updatedConfig);
                             } else {
                                 logger.error(AdventureUtil.deserialize("Failed to load prestige config file: " + path.getFileName()));
                             }
@@ -157,112 +154,29 @@ public class PrestigeConfigManager {
 
     /**
      * Update a {@link PrestigeConfig} to the latest version.
+     * @param fileName The name of the file the prestige config was loaded from.
      * @param prestigeConfig The {@link PrestigeConfig} to update.
      * @return The updated {@link PrestigeConfig}.
      */
-    @SuppressWarnings("deprecation") // Suppressed because this deprecated usage is for migration purposes.
-    private @NotNull PrestigeConfig updateConfig(@NotNull PrestigeConfig prestigeConfig) {
+    private @Nullable PrestigeConfig updateConfig(@NotNull String fileName, @NotNull PrestigeConfig prestigeConfig) {
         switch(prestigeConfig.configVersion()) {
-            case "1.1.0.0" -> {
+            case "2.0.0.0" -> {
                 // Current version, do nothing
                 return prestigeConfig;
             }
 
             case "1.0.0.0" -> {
-                PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
-                PrestigeConfig.PrestigeSettings newSettings = new PrestigeConfig.PrestigeSettings(
-                        new PrestigeConfig.PlayerSettings(
-                                new PrestigeConfig.InventorySettings(
-                                        prestigeSettings.resetInventory(),
-                                        true
-                                ),
-                                new PrestigeConfig.EnderChestSettings(
-                                        prestigeSettings.resetEnderChest(),
-                                        true
-                                ),
-                                prestigeSettings.resetExp(),
-                                prestigeSettings.resetMoney(),
-                                true,
-                                prestigeSettings.playTimeSettings()
-                        ),
-                        new PrestigeConfig.IslandSettings(
-                                false,
-                                false,
-                                prestigeSettings.resetPrestigePoints(),
-                                true),
-                        prestigeSettings.giveStartingMoneyToAllIslandMembers(),
-                        prestigeSettings.startingMoney(),
-                        prestigeSettings.resetInventory(),
-                        prestigeSettings.resetEnderChest(),
-                        prestigeSettings.resetExp(),
-                        prestigeSettings.resetMoney(),
-                        prestigeSettings.playTimeSettings(),
-                        prestigeSettings.resetPrestigePoints()
-                );
+                logger.error(AdventureUtil.deserialize("Prestige config file " + fileName + " is from version 1.0.0.0 and cannot be migrated."));
+                logger.error(AdventureUtil.deserialize("Please regenerate or update your files."));
 
-                List<PrestigeConfig.ItemReward> itemRewardList = new ArrayList<>();
-                List<PrestigeConfig.CommandReward> commandRewardList = new ArrayList<>();
-
-                prestigeConfig.rewards().forEach(reward -> {
-                    if(reward.rewardItem().itemType() != null && reward.displayItem().itemType() != null) {
-                        itemRewardList.add(new PrestigeConfig.ItemReward(
-                                reward.displayItem(),
-                                reward.giveToAllIslandMembers(),
-                                reward.rewardItem())
-                        );
-                    }
-
-                    if(!reward.commands().isEmpty()) {
-                        commandRewardList.add(new PrestigeConfig.CommandReward(
-                                reward.displayItem(),
-                                reward.giveToAllIslandMembers(),
-                                reward.commands())
-                        );
-                    }
-                });
-
-                PrestigeConfig.RewardConfig rewardConfig = new PrestigeConfig.RewardConfig(
-                        itemRewardList,
-                        commandRewardList,
-                        new ArrayList<>(),
-                        new PrestigeConfig.IslandRangeReward(new ItemStackConfig(
-                                null,
-                                null,
-                                null,
-                                null,
-                                List.of(),
-                                null,
-                                null,
-                                List.of(),
-                                new ItemStackConfig.PotionConfig(null, List.of()),
-                                new ItemStackConfig.ColorConfig(false, null, null, null),
-                                null,
-                                List.of(),
-                                new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
-                                new ItemStackConfig.ArmorTrimConfig(null, null),
-                                List.of(),
-                                new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                0
-                        )
-                );
-
-                return new PrestigeConfig(
-                        "1.1.0.0",
-                        prestigeConfig.prestigeLevel(),
-                        prestigeConfig.scaleFactor(),
-                        prestigeConfig.requiredPrestigePoints(),
-                        newSettings,
-                        rewardConfig,
-                        prestigeConfig.rewards());
+                return null;
             }
 
-            case null -> {
-                return prestigeConfig;
-            }
+            case null, default -> {
+                logger.error(AdventureUtil.deserialize("Prestige config file " + fileName + " version is unrecognized and cannot be migrated."));
+                logger.error(AdventureUtil.deserialize("Please regenerate or update your files to version 2.0.0.0."));
 
-            default -> {
-                skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for prestige config. Unable to update config."));
-                return prestigeConfig;
+                return null;
             }
         }
     }
