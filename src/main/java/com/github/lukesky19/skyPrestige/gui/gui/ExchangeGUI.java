@@ -409,7 +409,7 @@ public class ExchangeGUI extends ChestGUI {
                 ConsoleCommandSender commandSender = server.getConsoleSender();
 
                 exchangeButtonConfig.exchangeCommands().forEach(command ->
-                        server.dispatchCommand(commandSender, PlaceholderAPIUtil.parsePlaceholders(command)));
+                        server.dispatchCommand(commandSender, PlaceholderAPIUtil.parsePlaceholders(player, command)));
 
                 guiManager.refreshExchangeGUIs(islandId);
             });
