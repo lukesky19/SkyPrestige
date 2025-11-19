@@ -39,11 +39,13 @@ import java.util.List;
  */
 public class GUIConfigManager {
     private final @NotNull SkyPrestige skyPrestige;
+    private final @NotNull ComponentLogger logger;
+
     private @Nullable ProgressGUIConfig progressGUIConfig;
-    private @Nullable com.github.lukesky19.skyPrestige.config.data.gui.BlueprintGUIConfig blueprintGUIConfig;
-    private @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
+    private @Nullable BlueprintGUIConfig blueprintGUIConfig;
+    private @Nullable ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
     private @Nullable RewardsGUIConfig rewardsGUIConfig;
-    private @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ExchangeGUIConfig exchangeGUIConfig;
+    private @Nullable ExchangeGUIConfig exchangeGUIConfig;
     private @Nullable VaultGUIConfig vaultGUIConfig;
     private @Nullable ValuesGUIConfig valuesGUIConfig;
     private @Nullable InfoGUIConfig infoGUIConfig;
@@ -63,6 +65,7 @@ public class GUIConfigManager {
      */
     public GUIConfigManager(@NotNull SkyPrestige skyPrestige) {
         this.skyPrestige = skyPrestige;
+        this.logger = skyPrestige.getComponentLogger();
 
         progressPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "progress.yml");
         blueprintsPath = Path.of(skyPrestige.getDataFolder() + File.separator + "gui" + File.separator + "blueprints.yml");
@@ -78,7 +81,7 @@ public class GUIConfigManager {
      * Get the {@link ProgressGUIConfig}. May be null.
      * @return The {@link ProgressGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ProgressGUIConfig getProgressGUIConfig() {
+    public @Nullable ProgressGUIConfig getProgressGUIConfig() {
         return progressGUIConfig;
     }
 
@@ -86,7 +89,7 @@ public class GUIConfigManager {
      * Get the {@link BlueprintGUIConfig}. May be null.
      * @return The {@link BlueprintGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.BlueprintGUIConfig getBlueprintGUIConfig() {
+    public @Nullable BlueprintGUIConfig getBlueprintGUIConfig() {
         return blueprintGUIConfig;
     }
 
@@ -94,7 +97,7 @@ public class GUIConfigManager {
      * Get the {@link ConfirmPrestigeGUIConfig}. May be null.
      * @return The {@link ConfirmPrestigeGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ConfirmPrestigeGUIConfig getConfirmPrestigeGUIConfig() {
+    public @Nullable ConfirmPrestigeGUIConfig getConfirmPrestigeGUIConfig() {
         return confirmPrestigeGUIConfig;
     }
 
@@ -102,15 +105,15 @@ public class GUIConfigManager {
      * Get the {@link RewardsGUIConfig}. May be null.
      * @return The {@link RewardsGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.RewardsGUIConfig getRewardsGUIConfig() {
+    public @Nullable RewardsGUIConfig getRewardsGUIConfig() {
         return rewardsGUIConfig;
     }
 
     /**
-     * Get the {@link com.github.lukesky19.skyPrestige.config.data.gui.ExchangeGUIConfig}. May be null.
+     * Get the {@link ExchangeGUIConfig}. May be null.
      * @return The {@link ExchangeGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ExchangeGUIConfig getExchangeGUIConfig() {
+    public @Nullable ExchangeGUIConfig getExchangeGUIConfig() {
         return exchangeGUIConfig;
     }
 
@@ -118,7 +121,7 @@ public class GUIConfigManager {
      * Get the {@link VaultGUIConfig}. May be null.
      * @return The {@link VaultGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.VaultGUIConfig getVaultGUIConfig() {
+    public @Nullable VaultGUIConfig getVaultGUIConfig() {
         return vaultGUIConfig;
     }
 
@@ -126,7 +129,7 @@ public class GUIConfigManager {
      * Get the {@link ValuesGUIConfig}. May be null.
      * @return The {@link ValuesGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.ValuesGUIConfig getValuesGUIConfig() {
+    public @Nullable ValuesGUIConfig getValuesGUIConfig() {
         return valuesGUIConfig;
     }
 
@@ -134,7 +137,7 @@ public class GUIConfigManager {
      * Get the {@link InfoGUIConfig}. May be null.
      * @return The {@link InfoGUIConfig} or null.
      */
-    public @Nullable com.github.lukesky19.skyPrestige.config.data.gui.InfoGUIConfig getInfoGUIConfig() {
+    public @Nullable InfoGUIConfig getInfoGUIConfig() {
         return infoGUIConfig;
     }
 
@@ -207,6 +210,9 @@ public class GUIConfigManager {
         }
     }
 
+    /**
+     * Update the confirm gui configuration to the latest version if possible, or display an error.
+     */
     private void updateConfirmGUIConfig() {
         if(confirmPrestigeGUIConfig == null) return;
 
@@ -216,8 +222,8 @@ public class GUIConfigManager {
             }
 
             case "1.0.0.0" -> {
-                com.github.lukesky19.skyPrestige.config.data.gui.ConfirmPrestigeGUIConfig.ConditionalButtons conditionalButtons = confirmPrestigeGUIConfig.conditionalButtons();
-                com.github.lukesky19.skyPrestige.config.data.gui.ConfirmPrestigeGUIConfig.ConditionalButtons newConditionalButtons = new com.github.lukesky19.skyPrestige.config.data.gui.ConfirmPrestigeGUIConfig.ConditionalButtons(
+                ConfirmPrestigeGUIConfig.ConditionalButtons conditionalButtons = confirmPrestigeGUIConfig.conditionalButtons();
+                ConfirmPrestigeGUIConfig.ConditionalButtons newConditionalButtons = new ConfirmPrestigeGUIConfig.ConditionalButtons(
                         conditionalButtons.keepInventory(),
                         conditionalButtons.clearInventory(),
                         new ButtonConfig(
@@ -341,11 +347,11 @@ public class GUIConfigManager {
 
                     yamlConfigurationLoader.save(node);
                 } catch (ConfigurateException e) {
-                    skyPrestige.getComponentLogger().error(AdventureUtil.deserialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
                 }
             }
 
-            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for confirm prestige gui config. Unable to update config."));
+            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for confirm prestige gui config. Unable to update config."));
         }
     }
 
