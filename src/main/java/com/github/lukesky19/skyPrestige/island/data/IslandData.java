@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 public class IslandData implements Cloneable {
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
-    // Map<PAGE_NUM, Map<SLOT_NUM, ItemStack>>
     private final @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
+    private boolean exempt = false;
 
     /**
      * Constructor
@@ -43,12 +43,15 @@ public class IslandData implements Cloneable {
      * Constructor
      * @param prestigeLevel The island's prestige level.
      * @param prestigePoints The island's prestige points
+     * @param exempt Whether the island is exempt from leaderboard reporting or not.
      */
     public IslandData(
             int prestigeLevel,
-            double prestigePoints) {
+            double prestigePoints,
+            boolean exempt) {
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
+        this.exempt = exempt;
     }
 
     /**
@@ -173,5 +176,21 @@ public class IslandData implements Cloneable {
         this.vaultItems.clear();
 
         this.vaultItems.putAll(vaultItems);
+    }
+
+    /**
+     * Is the island exempt from leaderboard reporting?
+     * @return true if exempt, or false if not.
+     */
+    public boolean isExempt() {
+        return exempt;
+    }
+
+    /**
+     * Set the island's leaderboard exemption status
+     * @param exempt true if exempt, or false if not.
+     */
+    public void setExempt(boolean exempt) {
+        this.exempt = exempt;
     }
 }

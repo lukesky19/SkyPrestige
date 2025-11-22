@@ -38,21 +38,27 @@ import java.util.concurrent.CompletableFuture;
  */
 public class PlayerLogoutLocationsTables {
     private final @NotNull QueueManager queueManager;
+    private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_player_logout_locations";
 
     /**
      * Constructor
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public PlayerLogoutLocationsTables(@NotNull QueueManager queueManager) {
+    public PlayerLogoutLocationsTables(
+            @NotNull QueueManager queueManager,
+            @NotNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates a table to store the location and island the player logged out on.
      * Queues the table creation and index creation sql.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void createTable() {
+    public @NotNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 "player_id VARCHAR(36) NOT NULL UNIQUE, " +
                 "world TEXT NOT NULL, " +
@@ -61,9 +67,8 @@ public class PlayerLogoutLocationsTables {
                 "last_updated LONG NOT NULL DEFAULT 0, " +
                 "FOREIGN KEY (player_id) REFERENCES skyprestige_player_ids(player_id) ON UPDATE CASCADE ON DELETE CASCADE)";
         String playerIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_logout_locations_player_id ON " + tableName + "(player_id)";
-        String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_logout_locations_island_id ON " + tableName + "(island_id)";
 
-        queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**

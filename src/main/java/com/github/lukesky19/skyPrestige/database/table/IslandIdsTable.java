@@ -24,6 +24,8 @@ import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,27 +35,34 @@ import java.util.concurrent.CompletableFuture;
 public class IslandIdsTable {
     private final @NotNull ComponentLogger logger;
     private final @NotNull QueueManager queueManager;
+    private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_island_ids";
 
     /**
      * Constructor
      * @param logger The plugin's {@link ComponentLogger}.
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public IslandIdsTable(@NotNull ComponentLogger logger, @NotNull QueueManager queueManager) {
+    public IslandIdsTable(
+            @NotNull ComponentLogger logger,
+            @NotNull QueueManager queueManager,
+            @NotNull VersionsTable versionsTable) {
         this.logger = logger;
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates a table to store all island ids as a string.
      * Queues the table creation and index creation sql.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void createTable() {
+    public @NotNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (island_id TEXT PRIMARY KEY NOT NULL UNIQUE);";
         String indexCreationSql = "CREATE INDEX IF NOT EXISTS idx_island_ids_island_id ON " + tableName + "(island_id);";
 
-        queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**
@@ -99,5 +108,27 @@ public class IslandIdsTable {
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
         queueManager.queueWriteTransaction(deletionSql, List.of(islandIdParameter));
+    }
+
+    /**
+     * Get a list of all island ids stored in the table.
+     * @return A {@link CompletableFuture} containing a {@link List} of {@link String}s for the island ids in the table.
+     */
+    public @NotNull CompletableFuture<@NotNull List<@NotNull String>> getIslandIds() {
+        String sql = "SELECT island_id FROM " + tableName;
+
+        return queueManager.queueReadTransaction(sql, resultSet -> {
+            @NotNull List<@NotNull String> islandIdList = new ArrayList<>();
+
+            try {
+                while(resultSet.next()) {
+                    islandIdList.add(resultSet.getString("island_id"));
+                }
+            } catch(SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            return islandIdList;
+        });
     }
 }

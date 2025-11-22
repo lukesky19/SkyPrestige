@@ -34,21 +34,27 @@ import java.util.concurrent.CompletableFuture;
  */
 public class PlayerTeleportTable {
     private final @NotNull QueueManager queueManager;
+    private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_player_teleports";
 
     /**
      * Constructor
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public PlayerTeleportTable(@NotNull QueueManager queueManager) {
+    public PlayerTeleportTable(
+            @NotNull QueueManager queueManager,
+            @NotNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates a table to store player ids (UUIDs) that should be teleported on login.
      * Queues the table creation and index creation sql.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void createTable() {
+    public @NotNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 "player_id VARCHAR(36) NOT NULL UNIQUE, " +
                 "island_id TEXT NOT NULL, " +
@@ -57,7 +63,7 @@ public class PlayerTeleportTable {
         String playerIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_teleports_player_id ON " + tableName + "(player_id)";
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_teleports_island_id ON " + tableName + "(island_id)";
 
-        queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**

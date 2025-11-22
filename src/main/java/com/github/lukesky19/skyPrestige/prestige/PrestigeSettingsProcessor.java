@@ -39,6 +39,7 @@ import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import world.bentobox.bentobox.database.objects.Island;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -394,8 +395,7 @@ public class PrestigeSettingsProcessor {
         OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
         PlayerLogoutLocationsTables playerLogoutLocationsTables = databaseManager.getPlayerLogoutLocationsTables();
         PlayerTeleportTable playerTeleportTable = databaseManager.getPlayerTeleportTable();
-        PrestigePointsTable prestigePointsTable = databaseManager.getPrestigePointsTable();
-        PrestigeLevelsTable prestigeLevelsTable = databaseManager.getPrestigeLevelsTable();
+        IslandDataTable islandDataTable = databaseManager.getIslandDataTable();
 
         islandIdsTable.updateIslandId(oldIslandId, newIslandId).thenAccept(v1 -> {
             // For offline island members, store the data necessary to process the prestige settings for them when they come online.
@@ -406,11 +406,8 @@ public class PrestigeSettingsProcessor {
                     .thenAccept(list -> list.forEach(uuid ->
                             playerTeleportTable.insertPlayerIdAndIslandId(uuid, newIslandId)));
 
-            // Save prestige points
-            prestigePointsTable.savePrestigePoints(newIslandId, islandData.getPrestigePoints());
-
-            // Save prestige level
-            prestigeLevelsTable.setLevel(newIslandId, islandData.getPrestigeLevel());
+            // Save Island Data
+            islandDataTable.saveIslandData(newIslandId, islandData);
         });
     }
 }

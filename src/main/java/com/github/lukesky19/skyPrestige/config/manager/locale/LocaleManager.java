@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class LocaleManager {
     private final @NotNull SkyPrestige skyPrestige;
+    private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
     private @Nullable Locale locale;
     private @NotNull Locale DEFAULT_LOCALE;
@@ -50,6 +51,7 @@ public class LocaleManager {
      */
     public LocaleManager(@NotNull SkyPrestige skyPrestige, @NotNull SettingsManager settingsManager) {
         this.skyPrestige = skyPrestige;
+        this.logger = skyPrestige.getComponentLogger();
         this.settingsManager = settingsManager;
 
         createDefaultLocale();
@@ -68,7 +70,6 @@ public class LocaleManager {
      * Reloads the plugin's locale.
      */
     public void reload() {
-        ComponentLogger logger = skyPrestige.getComponentLogger();
         locale = null;
 
         copyDefaultLocales();
@@ -98,6 +99,10 @@ public class LocaleManager {
         validateLocale();
     }
 
+    /**
+     * Update the locale configuration to the latest version if possible, or display an error.
+     * @param path The {@link Path} to save the locale to.
+     */
     private void updateLocale(@NotNull Path path) {
         if(locale == null) return;
 
@@ -111,6 +116,9 @@ public class LocaleManager {
                 help.add("<white>/</white><green>skyprestige</green> <yellow>values</yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>info</yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>exempt <island_id></yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>unexempt <island_id></yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>");
 
                 locale = new Locale(
                         "1.1.0.0",
@@ -154,13 +162,18 @@ public class LocaleManager {
                         "<red>The level provided is not a prestige level.</red>",
                         "<red>Unable to view prestige level requirements due to a configuration error.</red>",
                         "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
+                        "<green>Island <yellow><island_id></yellow> is now exempt from top placeholders.</green>",
+                        "<green>Island <yellow><island_id></yellow> is now unexempt from top placeholders.</green>",
+                        "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>",
+                        "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>",
+                        "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>",
                         locale.delimiter(),
                         locale.finalDelimiter());
 
                 saveLocale(path);
             }
 
-            case null, default -> skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
+            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
         }
     }
 
@@ -176,7 +189,7 @@ public class LocaleManager {
 
             yamlConfigurationLoader.save(node);
         } catch (ConfigurateException e) {
-            skyPrestige.getComponentLogger().error(AdventureUtil.deserialize("Failed to save locale config file. Error: " + e.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to save locale config file. Error: " + e.getMessage()));
         }
     }
 
@@ -221,11 +234,15 @@ public class LocaleManager {
                 || locale.requirementsLevelNotFound() == null
                 || locale.requirementsConfigError() == null
                 || locale.requirementsPointsForLevel() == null
+                || locale.islandExempt() == null
+                || locale.islandUnexempt() == null
+                || locale.leaderboardTitle() == null
+                || locale.leaderboardPosition() == null
+                || locale.leaderboardPositionEmpty() == null
                 || locale.delimiter()  == null
                 || locale.finalDelimiter() == null) {
             locale = null;
 
-            ComponentLogger logger = skyPrestige.getComponentLogger();
             logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
             logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
         }
@@ -266,7 +283,10 @@ public class LocaleManager {
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points add <island_id> <amount></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points remove <island_id> <amount></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>points set <island_id> <amount></yellow>",
-                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points get <island_id> <amount></yellow>"),
+                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points get <island_id> <amount></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>exempt <island_id></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>unexempt <island_id></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>"),
                 "<green>The plugin has reloaded successfully.</green>",
                 "<red>Unable to open this GUI because of a configuration error.</red>",
                 "<red>No island found for the island id <island_id>.</red>",
@@ -305,6 +325,11 @@ public class LocaleManager {
                 "<red>The level provided is not a prestige level.</red>",
                 "<red>Unable to view prestige level requirements due to a configuration error.</red>",
                 "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
+                "<green>Island <yellow><island_id></yellow> is now exempt from top placeholders.</green>",
+                "<green>Island <yellow><island_id></yellow> is now unexempt from top placeholders.</green>",
+                "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>",
+                "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>",
+                "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>",
                 ", ",
                 ", and ");
     }

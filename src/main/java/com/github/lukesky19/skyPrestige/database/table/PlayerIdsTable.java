@@ -25,31 +25,38 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class creates a table to store all {@link Player}'s {@link UUID}s.
  */
 public class PlayerIdsTable {
     private final @NotNull QueueManager queueManager;
+    private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_player_ids";
 
     /**
      * Constructor
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public PlayerIdsTable(@NotNull QueueManager queueManager) {
+    public PlayerIdsTable(
+            @NotNull QueueManager queueManager,
+            @NotNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates a table to store all {@link Player}'s {@link UUID}s as a string.
      * Queues the table creation and index creation sql.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void createTable() {
+    public @NotNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (player_id VARCHAR(36) NOT NULL UNIQUE);";
         String indexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_ids_player_id ON " + tableName + "(player_id);";
 
-        queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**

@@ -136,22 +136,14 @@ public class IslandListener implements Listener {
 
         databaseManager.getIslandIdsTable().updateIslandId(oldIslandId, newIslandId)
             .thenAccept(v1 ->
-                databaseManager.getPrestigePointsTable().resetPrestigePoints(newIslandId)
-                    .thenAccept(v2 ->
-                        databaseManager.getPrestigeLevelsTable().setLevel(newIslandId, islandData.getPrestigeLevel())
-                            .thenAccept(v3 -> {})
-                            .exceptionally(ex -> {
-                                logger.error(AdventureUtil.deserialize("Failed to set prestige level for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
-                                return null;
-                            }))
-                    .exceptionally(ex -> {
-                        logger.error(AdventureUtil.deserialize("Failed to reset prestige points for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
-                        return null;
-                    }))
+                databaseManager.getIslandDataTable().saveIslandData(newIslandId, islandData).exceptionally(ex -> {
+                    logger.error(AdventureUtil.deserialize("Failed to save island data for new island id: " + newIslandId + ". Error: " + ex.getMessage()));
+                    return null;
+                })
             .exceptionally(ex -> {
                 logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + ". Error: " + ex.getMessage()));
                 return null;
-            });
+            }));
     }
 
     /**

@@ -11,8 +11,20 @@ permissions:
     skyprestige.commands.skyprestige:
         description: Base Command Permission
         default: op
+    skyprestige.commands.skyprestige.exchange:
+        description: Permission to open the GUI to exchange prestige points.
+        default: op
+    skyprestige.commands.skyprestige.exempt:
+        description: Permission to mark an island as exempt from the prestige leaderboard.
+        default: op
     skyprestige.commands.skyprestige.help:
         description: Permission to view the plugin's help message.
+        default: op
+    skyprestige.commands.skyprestige.info:
+        description: Permission to open the info GUI.
+        default: op
+    skyprestige.commands.skyprestige.leaderboard:
+        description: Permission to view the prestige leaderboard.
         default: op
     skyprestige.commands.skyprestige.level:
         description: Permission to view and manage prestige levels.
@@ -20,21 +32,36 @@ permissions:
     skyprestige.commands.skyprestige.points:
         description: Permission to view and manage prestige points.
         default: op
+    skyprestige.commands.skyprestige.points.add:
+        description: Permission to add prestige points.
+        default: op
+    skyprestige.commands.skyprestige.points.remove:
+        description: Permission to remove prestige points.
+        default: op
+    skyprestige.commands.skyprestige.points.set:
+        description: Permission to set prestige points.
+        default: op
+    skyprestige.commands.skyprestige.points.get:
+        description: Permission to get prestige points.
+        default: op
     skyprestige.commands.skyprestige.progress:
         description: Permission to view prestige progress.
         default: op
     skyprestige.commands.skyprestige.reload:
         description: Permission to reload the plugin.
         default: op
+    skyprestige.commands.skyprestige.requirements:
+        description: Permission to view prestige level requirements.
+        default: op
     skyprestige.commands.skyprestige.rewards:
         description: Permission to view rewards for the next prestige level.
         default: op
-    skyprestige.commands.skyprestige.exchange:
-        description: Permission to open the GUI to exchange prestige points.
+    skyprestige.commands.skyprestige.unexempt:
+        description: Permission to mark an island as not exempt from the prestige leaderboard.
+        default: op
+    skyprestige.commands.skyprestige.values:
+        description: Permission to open the values GUI.
         default: op
     skyprestige.commands.skyprestige.vault:
         description: Permission to open the island vault.
-        default: op
-    skyprestige.commands.skyprestige.requirements:
-        description: Permission to view prestige level requirements.
         default: op

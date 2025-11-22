@@ -28,6 +28,7 @@ import com.github.lukesky19.skyPrestige.hook.HookManager;
 import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.listener.*;
 import com.github.lukesky19.skyPrestige.placeholderapi.SkyPrestigeExpansion;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
@@ -41,6 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The main class for the SkyPrestige plugin.
@@ -54,6 +56,7 @@ public final class SkyPrestige extends JavaPlugin {
     private GUIManager guiManager;
     private DatabaseManager databaseManager;
     private IslandDataManager islandDataManager;
+    private LeaderboardManager leaderboardManager;
     private TaskManager taskManager;
     private SkyPrestigeExpansion skyPrestigeExpansion;
 
@@ -75,18 +78,20 @@ public final class SkyPrestige extends JavaPlugin {
         // Set up plugin classes
         HookManager hookManager = new HookManager(this);
         databaseManager = new DatabaseManager(this);
+        CompletableFuture<Void> databaseFuture = databaseManager.setup();
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);
         prestigeConfigManager = new PrestigeConfigManager(this);
         guiManager = new GUIManager(this);
         islandDataManager = new IslandDataManager(databaseManager);
-        taskManager = new TaskManager(this, settingsManager, islandDataManager);
+        leaderboardManager = new LeaderboardManager(this, islandDataManager, databaseManager);
+        taskManager = new TaskManager(this, settingsManager, islandDataManager, leaderboardManager);
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, databaseManager, hookManager);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, localeManager, databaseManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, guiManager, databaseManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, leaderboardManager, guiManager, databaseManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -138,21 +143,23 @@ public final class SkyPrestige extends JavaPlugin {
         // Reload the plugin
         reload();
 
-        // Load player data for any online players.
-        this.getServer().getOnlinePlayers().forEach(player -> {
-            UUID uuid = player.getUniqueId();
+        databaseFuture.thenAccept(v -> {
+            // Load player data for any online players.
+            this.getServer().getOnlinePlayers().forEach(player -> {
+                UUID uuid = player.getUniqueId();
 
-            // Insert the player's uuid into the database if it doesn't exist
-            databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
+                // Insert the player's uuid into the database if it doesn't exist
+                databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
 
-            // Load the player's island data
-            islandDataManager.loadIslandData(uuid);
+                // Load the player's island data
+                islandDataManager.loadIslandData(uuid);
 
-            // Handle any prestiges that occurred while the player was offline
-            prestigeManager.handleOfflinePrestiges(player);
+                // Handle any prestiges that occurred while the player was offline
+                prestigeManager.handleOfflinePrestiges(player);
 
-            // Handle any queued teleports for the player.
-            teleportationManager.handleQueuedTeleports(player);
+                // Handle any queued teleports for the player.
+                teleportationManager.handleQueuedTeleports(player);
+            });
         });
     }
 
@@ -196,10 +203,10 @@ public final class SkyPrestige extends JavaPlugin {
         localeManager.reload();
         guiConfigManager.reload();
         prestigeConfigManager.reload();
+        leaderboardManager.updateDatabaseTopTen();
 
-        // (Re-)start the save task
-        taskManager.stopSaveTask();
-        taskManager.startSaveTask();
+        // (Re-)start the plugin's task
+        taskManager.startTasks();
     }
 
     /**
@@ -208,7 +215,7 @@ public final class SkyPrestige extends JavaPlugin {
     private void registerExpansion() {
         if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion == null) {
-                skyPrestigeExpansion = new SkyPrestigeExpansion(islandDataManager);
+                skyPrestigeExpansion = new SkyPrestigeExpansion(islandDataManager, leaderboardManager);
                 skyPrestigeExpansion.register();
             }
         }

@@ -27,6 +27,7 @@ import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -48,6 +49,7 @@ public class SkyPrestigeCommand {
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
     private final @NotNull PrestigeManager prestigeManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
 
@@ -60,6 +62,7 @@ public class SkyPrestigeCommand {
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param prestigeManager A {@link PrestigeManager} instance.
      * @param islandDataManager A {@link IslandDataManager} instance.
+     * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      */
@@ -71,6 +74,7 @@ public class SkyPrestigeCommand {
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull PrestigeManager prestigeManager,
             @NotNull IslandDataManager islandDataManager,
+            @NotNull LeaderboardManager leaderboardManager,
             @NotNull GUIManager guiManager,
             @NotNull DatabaseManager databaseManager) {
         this.skyPrestige = skyPrestige;
@@ -80,6 +84,7 @@ public class SkyPrestigeCommand {
         this.prestigeConfigManager = prestigeConfigManager;
         this.prestigeManager = prestigeManager;
         this.islandDataManager = islandDataManager;
+        this.leaderboardManager = leaderboardManager;
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
     }
@@ -107,26 +112,32 @@ public class SkyPrestigeCommand {
             });
 
         ExchangeCommand exchangeCommand = new ExchangeCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, guiManager, islandDataManager);
+        ExemptCommand exemptCommand = new ExemptCommand(skyPrestige, localeManager, islandDataManager);
         HelpCommand helpCommand = new HelpCommand(skyPrestige, localeManager);
         InfoCommand infoCommand = new InfoCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
+        LeaderboardCommand leaderboardCommand = new LeaderboardCommand(localeManager, leaderboardManager);
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(skyPrestige, localeManager, islandDataManager);
         ReloadCommand reloadCommand = new ReloadCommand(skyPrestige, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         RequirementsCommand requirementsCommand = new RequirementsCommand(skyPrestige, settingsManager, localeManager, prestigeConfigManager, islandDataManager);
         RewardsCommand rewardsCommand = new RewardsCommand(skyPrestige, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
+        UnExemptCommand unExemptCommand = new UnExemptCommand(skyPrestige, localeManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(skyPrestige, localeManager, islandDataManager);
         ValuesCommand valuesCommand = new ValuesCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
         VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, settingsManager);
 
+        builder.then(exchangeCommand.createCommand());
         builder.then(prestigeLevelCommand.createCommand());
+        builder.then(exemptCommand.createCommand());
         builder.then(helpCommand.createCommand());
         builder.then(infoCommand.createCommand());
+        builder.then(leaderboardCommand.createCommand());
         builder.then(reloadCommand.createCommand());
         builder.then(progressCommand.createCommand());
         builder.then(requirementsCommand.createCommand());
         builder.then(rewardsCommand.createCommand());
+        builder.then(unExemptCommand.createCommand());
         builder.then(prestigePointsCommand.createCommand());
-        builder.then(exchangeCommand.createCommand());
         builder.then(valuesCommand.createCommand());
         builder.then(vaultCommand.createCommand());
 

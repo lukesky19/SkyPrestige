@@ -19,6 +19,8 @@ package com.github.lukesky19.skyPrestige.placeholderapi;
 
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.leaderboard.data.Position;
+import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.util.NumberUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -29,6 +31,7 @@ import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.IslandsManager;
 
+import java.text.DecimalFormat;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -38,14 +41,20 @@ import java.util.concurrent.ExecutionException;
  */
 public class SkyPrestigeExpansion extends PlaceholderExpansion {
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull IslandsManager islandsManager;
+    private final @NotNull DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     /**
      * Constructor
      * @param islandDataManager A {@link IslandDataManager} instance.
+     * @param leaderboardManager A {@link LeaderboardManager} instance.
      */
-    public SkyPrestigeExpansion(@NotNull IslandDataManager islandDataManager) {
+    public SkyPrestigeExpansion(
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull LeaderboardManager leaderboardManager) {
         this.islandDataManager = islandDataManager;
+        this.leaderboardManager = leaderboardManager;
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
     }
 
@@ -94,7 +103,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      */
     @Override
     public @Nullable String onPlaceholderRequest(@NotNull Player player, @NotNull String params) {
-        switch(params.toLowerCase()) {
+        String placeholder = params.toLowerCase();
+
+        switch(placeholder) {
             case "prestige_level" -> {
                 UUID uuid = player.getUniqueId();
 
@@ -135,6 +146,46 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
 
                 // Return the prestige points for the current island
                 return String.valueOf(islandData.getPrestigePoints());
+            }
+
+            default -> {
+                if(placeholder.startsWith("top_name")) {
+                    String[] split = placeholder.split("_");
+                    if(split.length != 3) return "";
+
+                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    if(positionNumber == null) return "";
+                    if(positionNumber > 10) return "";
+
+                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    if(position == null) return "";
+
+                    return position.ownerName();
+                } else if(placeholder.startsWith("top_level")) {
+                    String[] split = placeholder.split("_");
+                    if(split.length != 3) return "";
+
+                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    if(positionNumber == null) return "";
+                    if(positionNumber > 10) return "";
+
+                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    if(position == null) return "";
+
+                    return String.valueOf(position.prestigeLevel());
+                } else if(placeholder.startsWith("top_points")) {
+                    String[] split = placeholder.split("_");
+                    if(split.length != 3) return "";
+
+                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    if(positionNumber == null) return "";
+                    if(positionNumber > 10) return "";
+
+                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    if(position == null) return "";
+
+                    return String.valueOf(decimalFormat.format(position.prestigePoints()));
+                }
             }
         }
 
@@ -187,5 +238,18 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
 
         // return the prestige points
         return NumberUtils.formatDecimal(primaryIslandData.getPrestigePoints());
+    }
+
+    /**
+     * Get an {@link Integer} from a {@link String}.
+     * @param text The {@link String} to parse.
+     * @return The {@link Integer} or null.
+     */
+    private @Nullable Integer getInteger(@NotNull String text) {
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

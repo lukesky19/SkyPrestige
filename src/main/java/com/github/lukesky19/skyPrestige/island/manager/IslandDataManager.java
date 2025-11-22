@@ -24,10 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -35,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class IslandDataManager {
     private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull HashMap<String, IslandData> islandDataMap = new HashMap<>();
+    private final @NotNull Map<String, IslandData> islandDataMap = new HashMap<>();
 
     /**
      * Constructor
@@ -43,6 +40,14 @@ public class IslandDataManager {
      */
     public IslandDataManager(@NotNull DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
+    }
+
+    /**
+     * Get a {@link Map} mapping island ids to {@link IslandData}.
+     * @return The {@link Map} mapping island ids to {@link IslandData}.
+     */
+    public @NotNull Map<String, IslandData> getIslandData() {
+        return islandDataMap;
     }
 
     /**
@@ -94,9 +99,7 @@ public class IslandDataManager {
                 setIslandData(islandId, newIslandData);
 
                 // Load any data from the database.
-                databaseManager.getPrestigeLevelsTable().loadIslandLevel(islandId, newIslandData);
-                databaseManager.getPrestigePointsTable().loadPrestigePoints(islandId, newIslandData);
-                databaseManager.getIslandVaultsTable().loadVaultData(islandId, newIslandData);
+                databaseManager.getIslandDataTable().loadIslandData(islandId, newIslandData);
             }
         });
     }
@@ -109,13 +112,8 @@ public class IslandDataManager {
     public @NotNull CompletableFuture<Void> saveIslandData(@NotNull String islandId) {
         IslandData islandData = islandDataMap.get(islandId);
         if(islandData == null) return CompletableFuture.completedFuture(null);
-        List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
-        futureList.add(databaseManager.getPrestigeLevelsTable().setLevel(islandId, islandData.getPrestigeLevel()));
-        futureList.add(databaseManager.getPrestigePointsTable().savePrestigePoints(islandId, islandData.getPrestigePoints()));
-        futureList.add(databaseManager.getIslandVaultsTable().setVaultData(islandId, islandData.getVaultItems()));
-
-        return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+        return databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
     }
 
     /**

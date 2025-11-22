@@ -212,7 +212,7 @@ public class VaultGUI extends ChestGUI {
 
             guiManager.removeOpenGUI(islandId, uuid);
 
-            databaseManager.getIslandVaultsTable().setVaultData(islandId, islandData.getVaultItems());
+            databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
         }, 1L);
     }
 
@@ -232,7 +232,7 @@ public class VaultGUI extends ChestGUI {
 
                 guiManager.removeOpenGUI(islandId, uuid);
 
-                databaseManager.getIslandVaultsTable().setVaultData(islandId, islandData.getVaultItems());
+                databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
             }, 1L);
         } else {
             player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
@@ -241,7 +241,7 @@ public class VaultGUI extends ChestGUI {
 
             guiManager.removeOpenGUI(islandId, uuid);
 
-            databaseManager.getIslandVaultsTable().setVaultData(islandId, islandData.getVaultItems());
+            databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
         }
     }
 
@@ -258,7 +258,7 @@ public class VaultGUI extends ChestGUI {
 
         guiManager.removeOpenGUI(islandId, uuid);
 
-        databaseManager.getIslandVaultsTable().setVaultData(islandId, islandData.getVaultItems());
+        databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
     }
 
     /**

@@ -27,37 +27,44 @@
 ## Commands
 * /skyprestige - The base command and the command to prestige an island.
   * Alias: /prestige
-* /skyprestige help - View the plugin's help message.
-* /skyprestige reload - Reloads the plugin.
-* /skyprestige requirements <level> - View the required prestige points for a particular prestige level.
-* /skyprestige progress - View the requirements for the next prestige level.
-* /skyprestige rewards - View the rewards for the next prestige level.
 * /skyprestige exchange - Exchange prestige points.
-* /skyprestige vault - Open the island vault.
+* /skyprestige exempt <island_id> - Mark an island as exempt from prestige leaderboards.
+* /skyprestige help - View the plugin's help message.
 * /skyprestige info - Open the info GUI.
-* /skyprestige values - Open the values GUI.
+* /skyprestige leaderboard - View the prestige leaderboard.
 * /skyprestige level set <island_id> <level>
 * /skyprestige points add <island_id> <prestige_points>
 * /skyprestige points remove <island_id> <prestige_points>
 * /skyprestige points set <island_id> <prestige_points>
 * /skyprestige points get <island_id>
+* /skyprestige progress - View the requirements for the next prestige level.
+* /skyprestige reload - Reloads the plugin.
+* /skyprestige requirements <level> - View the required prestige points for a particular prestige level.
+* /skyprestige rewards - View the rewards for the next prestige level.
+* /skyprestige unexempt - Mark an island as not exempt from prestige leaderboards.
+* /skyprestige values - Open the values GUI.
+* /skyprestige vault - Open the island vault.
 
 ## Permissions
-* `skyprestige.command.skyprestige` - Base Command Permission
-* `skyprestige.command.skyprestige.help` - The permission to view the plugin's help message.
-* `skyprestige.command.skyprestige.requirements` - The permission to view the required prestige points for a particular prestige level.
-* `skyprestige.command.skyprestige.progress` - The permission to open the GUI that displays the progress for the next prestige level.
-* `skyprestige.command.skyprestige.rewards` - The permission to open the GUI that displays the rewards for the next prestige level.
-* `skyprestige.command.skyprestige.exchange` - The permission to open the GUI that allows players to exchange prestige points.
-* `skyprestige.command.skyprestige.vault` - The permission to open the GUI for the island's vault.
-* `skyprestige.command.skyprestige.info` - The permission to open the info GUI.
-* `skyprestige.command.skyprestige.values` - The permission to open the values GUI.
-* `skyprestige.command.skyprestige.level` - The permission to set an island's prestige level.
-* `skyprestige.command.skyprestige.points` - The permission to use the `/skyprestige points` command.
-* `skyprestige.command.skyprestige.points.add` - The permission to use the `/skyprestige points add` command.
-* `skyprestige.command.skyprestige.points.remove` - The permission to use the `/skyprestige points remove` command.
-* `skyprestige.command.skyprestige.points.set` - The permission to use the `/skyprestige points set` command.
-* `skyprestige.command.skyprestige.points.get` - The permission to use the `/skyprestige points get` command.
+* `skyprestige.commands.skyprestige` - Base Command Permission
+* `skyprestige.commands.skyprestige.exchange` - The permission to open the GUI that allows players to exchange prestige points.
+* `skyprestige.commands.skyprestige.exempt` - The permission to mark an island as exempt from the prestige leaderboard.
+* `skyprestige.commands.skyprestige.help` - The permission to view the plugin's help message.
+* `skyprestige.commands.skyprestige.info` - The permission to open the info GUI.
+* `skyprestige.commands.skyprestige.leaderboard` - The permission to view the prestige leaderboard.
+* `skyprestige.commands.skyprestige.level` - The permission to set an island's prestige level.
+* `skyprestige.commands.skyprestige.points` - The permission to use the `/skyprestige points` command.
+* `skyprestige.commands.skyprestige.points.add` - The permission to use the `/skyprestige points add` command.
+* `skyprestige.commands.skyprestige.points.remove` - The permission to use the `/skyprestige points remove` command.
+* `skyprestige.commands.skyprestige.points.set` - The permission to use the `/skyprestige points set` command.
+* `skyprestige.commands.skyprestige.points.get` - The permission to use the `/skyprestige points get` command.
+* `skyprestige.commands.skyprestige.progress` - The permission to open the GUI that displays the progress for the next prestige level.
+* `skyprestige.commands.skyprestige.reload` - The permission to reload the plugin.
+* `skyprestige.commands.skyprestige.requirements` - The permission to view the required prestige points for a particular prestige level.
+* `skyprestige.commands.skyprestige.rewards` - The permission to open the GUI that displays the rewards for the next prestige level.
+* `skyprestige.commands.skyprestige.unexempt` - The permission to mark an island as not exempt from the prestige leaderboard.
+* `skyprestige.commands.skyprestige.values` - The permission to open the values GUI.
+* `skyprestige.commands.skyprestige.vault` - The permission to open the GUI for the island's vault.
 
 ## FAQ
 Q: What versions does this plugin support?

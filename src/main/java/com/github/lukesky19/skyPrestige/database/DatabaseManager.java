@@ -21,24 +21,41 @@ import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.database.table.*;
+import com.github.lukesky19.skyPrestige.database.table.legacy.IslandVaultsTable;
+import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigeLevelsTable;
+import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigePointsTable;
+import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class manages the database for the plugin.
  */
 public class DatabaseManager {
-    private final ConnectionManager connectionManager;
-    private final QueueManager queueManager;
+    private final @NotNull SkyPrestige skyPrestige;
+    private final @NotNull ComponentLogger logger;
+    private final @NotNull ConnectionManager connectionManager;
+    private final @NotNull QueueManager queueManager;
 
-    private final IslandIdsTable islandIdsTable;
-    private final PlayerIdsTable playerIdsTable;
-    private final PrestigeLevelsTable prestigeLevelsTable;
-    private final PrestigePointsTable prestigePointsTable;
-    private final OfflinePrestigeTable offlinePrestigeTable;
-    private final PlayerLogoutLocationsTables playerLogoutLocationsTables;
-    private final PlayerTeleportTable playerTeleportTable;
-    private final IslandVaultsTable islandVaultsTable;
+    private IslandIdsTable islandIdsTable;
+    private PlayerIdsTable playerIdsTable;
+    private IslandDataTable islandDataTable;
+    private OfflinePrestigeTable offlinePrestigeTable;
+    private PlayerLogoutLocationsTables playerLogoutLocationsTables;
+    private PlayerTeleportTable playerTeleportTable;
+    // Legacy only
+    private PrestigeLevelsTable prestigeLevelsTable;
+    private PrestigePointsTable prestigePointsTable;
+    private IslandVaultsTable islandVaultsTable;
 
     /**
      * Get the {@link IslandIdsTable}.
@@ -57,19 +74,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Get the {@link PrestigeLevelsTable}.
-     * @return The {@link PrestigeLevelsTable}
+     * Get the {@link IslandDataTable}.
+     * @return The {@link IslandDataTable}
      */
-    public PrestigeLevelsTable getPrestigeLevelsTable() {
-        return prestigeLevelsTable;
-    }
-
-    /**
-     * Get the {@link PrestigePointsTable}.
-     * @return The {@link PrestigePointsTable}
-     */
-    public PrestigePointsTable getPrestigePointsTable() {
-        return prestigePointsTable;
+    public IslandDataTable getIslandDataTable() {
+        return islandDataTable;
     }
 
     /**
@@ -97,47 +106,53 @@ public class DatabaseManager {
     }
 
     /**
-     * Get the {@link IslandVaultsTable}.
-     * @return The {@link IslandVaultsTable}
-     */
-    public IslandVaultsTable getIslandVaultsTable() {
-        return islandVaultsTable;
-    }
-
-    /**
      * Constructor
      * Initializes the {@link ConnectionManager}, {@link QueueManager}, and all tables.
      * @param skyPrestige The main plugin's instance.
      */
     public DatabaseManager(@NotNull SkyPrestige skyPrestige) {
-        ComponentLogger logger = skyPrestige.getComponentLogger();
+        this.skyPrestige = skyPrestige;
+        this.logger = skyPrestige.getComponentLogger();
         connectionManager = new ConnectionManager(skyPrestige);
         queueManager = new QueueManager(connectionManager);
+    }
 
-        islandIdsTable = new IslandIdsTable(logger, queueManager);
-        islandIdsTable.createTable();
+    /**
+     * Setup all database tables and run any migration as needed.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
+     */
+    public @NotNull CompletableFuture<Void> setup() {
+        @NotNull List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
-        playerIdsTable = new PlayerIdsTable(queueManager);
-        playerIdsTable.createTable();
+        VersionsTable versionsTable = new VersionsTable(queueManager);
+        futureList.add(versionsTable.createTable());
 
-        // Initialize Tables
+        islandIdsTable = new IslandIdsTable(logger, queueManager, versionsTable);
+        futureList.add(islandIdsTable.createTable());
+
+        playerIdsTable = new PlayerIdsTable(queueManager, versionsTable);
+        futureList.add(playerIdsTable.createTable());
+
+        islandDataTable = new IslandDataTable(skyPrestige, queueManager, versionsTable);
+        futureList.add(islandDataTable.createTable());
+
+        offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager, versionsTable);
+        futureList.add(offlinePrestigeTable.createTable().thenCompose(v -> offlinePrestigeTable.migrate()));
+
+        playerLogoutLocationsTables = new PlayerLogoutLocationsTables(queueManager, versionsTable);
+        futureList.add(playerLogoutLocationsTables.createTable());
+
+        playerTeleportTable = new PlayerTeleportTable(queueManager, versionsTable);
+        futureList.add(playerTeleportTable.createTable());
+
+        // Legacy
         prestigeLevelsTable = new PrestigeLevelsTable(logger, queueManager);
-        prestigeLevelsTable.createTable();
-
         prestigePointsTable = new PrestigePointsTable(logger, queueManager);
-        prestigePointsTable.createTable();
-
-        offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager);
-        offlinePrestigeTable.createTable();
-
-        playerLogoutLocationsTables = new PlayerLogoutLocationsTables(queueManager);
-        playerLogoutLocationsTables.createTable();
-
-        playerTeleportTable = new PlayerTeleportTable(queueManager);
-        playerTeleportTable.createTable();
-
         islandVaultsTable = new IslandVaultsTable(logger, queueManager);
-        islandVaultsTable.createTable();
+
+        // Migrate any legacy data after all tables are created and updated (if needed)
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+        return allFutures.thenCompose(v -> migrate());
     }
 
     /**
@@ -145,5 +160,51 @@ public class DatabaseManager {
      */
     public void cleanUp() {
         queueManager.shutdownQueue().thenAccept(v -> connectionManager.closeConnections());
+    }
+
+    /**
+     * Migrate data from legacy tables to the new table.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
+     */
+    public @NotNull CompletableFuture<Void> migrate() {
+        return islandIdsTable.getIslandIds().thenCompose(islandIdList ->
+                prestigeLevelsTable.getPrestigeLevels().thenCompose(levelsMap -> {
+                    if(levelsMap == null) return CompletableFuture.completedFuture(null);
+
+                    return prestigePointsTable.getPrestigePoints().thenCompose(pointsMap -> {
+                        if(pointsMap == null) return CompletableFuture.completedFuture(null);
+
+                        return islandVaultsTable.getVaultData().thenCompose(vaultDataMap -> {
+                            if(vaultDataMap == null) return CompletableFuture.completedFuture(null);
+                            Map<String, IslandData> islandDataMap = new HashMap<>();
+
+                            islandIdList.forEach(islandId -> {
+                                @NotNull IslandData islandData = new IslandData();
+                                @Nullable Integer level = levelsMap.get(islandId);
+                                @Nullable Double points = pointsMap.get(islandId);
+                                @Nullable Map<PageSlotKey, ItemStack> vaultMap = vaultDataMap.get(islandId);
+
+                                if(level != null) {
+                                    islandData.setPrestigeLevel(level);
+                                }
+
+                                if(points != null) {
+                                    islandData.setPrestigePoints(points);
+                                }
+
+                                if(vaultMap != null) {
+                                    islandData.setVaultItems(vaultMap);
+                                }
+
+                                islandDataMap.put(islandId, islandData);
+                            });
+
+                            return islandDataTable.saveIslandData(islandDataMap)
+                                    .thenCompose(v1 -> prestigeLevelsTable.deleteTable()
+                                            .thenCompose(v2 -> prestigePointsTable.deleteTable()
+                                                    .thenCompose(v3 -> islandVaultsTable.deleteTable())));
+                        });
+                    });
+        }));
     }
 }

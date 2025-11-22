@@ -66,6 +66,11 @@ import java.util.List;
  * @param requirementsConfigError The message sent to a player when there is a config error when viewing prestige level requirements.
  * @param requirementsLevelNotFound The message sent to a player when there is no prestige level configured for the level number provided.
  * @param requirementsPointsForLevel The message sent to a player to display prestige points required for a level.
+ * @param islandExempt The message sent when an island is marked as exempt from the top leaderboard placeholders.
+ * @param islandUnexempt The message sent when an island is marked as not exempt from the top leaderboard placeholders.
+ * @param leaderboardTitle The leaderboard title.
+ * @param leaderboardPosition The leaderboard positon text.
+ * @param leaderboardPositionEmpty The leaderboard positon empty text.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -112,5 +117,11 @@ public record Locale(
         String requirementsLevelNotFound,
         String requirementsConfigError,
         String requirementsPointsForLevel,
+        String islandExempt,
+        String islandUnexempt,
+        String leaderboardTitle,
+        String leaderboardPosition,
+        String leaderboardPositionEmpty,
         String delimiter,
-        String finalDelimiter) {}
+        String finalDelimiter) {
+}

@@ -21,6 +21,10 @@ import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
+import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
+import com.github.lukesky19.skyPrestige.task.tasks.SaveTask;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -33,30 +37,54 @@ public class TaskManager {
     private final @NotNull SkyPrestige skyPrestige;
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull LeaderboardManager leaderboardManager;
+
     private @Nullable BukkitTask saveTask;
+    private @Nullable BukkitTask cacheTopTenTask;
+    private @Nullable BukkitTask calculateTopTenTask;
 
     /**
      * Constructor
      * @param skyPrestige A {@link SkyPrestige} instance.
      * @param settingsManager A {@link SettingsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
+     * @param leaderboardManager  A {@link LeaderboardManager} instance.
      */
     public TaskManager(
             @NotNull SkyPrestige skyPrestige,
             @NotNull SettingsManager settingsManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull LeaderboardManager leaderboardManager) {
         this.skyPrestige = skyPrestige;
         this.settingsManager = settingsManager;
         this.islandDataManager = islandDataManager;
+        this.leaderboardManager = leaderboardManager;
     }
 
     /**
-     * Starts the {@link BukkitTask} that periodically saves island data.
-     * If the task is already running, it will stop the task before starting it again.
+     * Start all tasks. Any existing tasks will be stopped before starting new ones.
      */
-    public void startSaveTask() {
-        stopSaveTask();
+    public void startTasks() {
+        stopTasks();
 
+        startSaveTask();
+        startCacheTopTenTask();
+        startCalculateTopTenTask();
+    }
+
+    /**
+     * Stop all tasks.
+     */
+    public void stopTasks() {
+        stopSaveTask();
+        stopCacheTopTenTask();
+        stopCalculateTopTenTask();
+    }
+
+    /**
+     * Starts the {@link SaveTask}.
+     */
+    private void startSaveTask() {
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null || settings.saveFrequencySeconds() == null) {
             skyPrestige.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
@@ -65,17 +93,63 @@ public class TaskManager {
 
         long delayAndPeriod = 20L * 60L * settings.saveFrequencySeconds();
 
-        saveTask = skyPrestige.getServer().getScheduler().runTaskTimer(skyPrestige, () ->
-                islandDataManager.saveIslandData(), delayAndPeriod, delayAndPeriod);
+        saveTask = new SaveTask(islandDataManager).runTaskTimer(skyPrestige, delayAndPeriod, delayAndPeriod);
     }
 
     /**
-     * Stop the {@link BukkitTask} that periodically saves island data.
+     * Starts the {@link CacheTopTenTask}.
+     */
+    private void startCacheTopTenTask() {
+        long ticks = 20L * 60L * 5L;
+
+        cacheTopTenTask = new CacheTopTenTask(leaderboardManager).runTaskTimer(skyPrestige, ticks, ticks);
+    }
+
+    /**
+     * Starts the {@link CalculateTopTenTask}.
+     */
+    private void startCalculateTopTenTask() {
+        long ticks = 20L;
+
+        calculateTopTenTask = new CalculateTopTenTask(leaderboardManager).runTaskTimer(skyPrestige, ticks, ticks);
+    }
+
+    /**
+     * Stop the {@link SaveTask}.
      */
     public void stopSaveTask() {
-        if(saveTask == null || saveTask.isCancelled()) return;
+        if(saveTask != null) {
+            if(!saveTask.isCancelled()) {
+                saveTask.cancel();
+            }
 
-        saveTask.cancel();
-        saveTask = null;
+            saveTask = null;
+        }
+    }
+
+    /**
+     * Stop the {@link CacheTopTenTask}.
+     */
+    public void stopCacheTopTenTask() {
+        if(cacheTopTenTask != null) {
+            if(!cacheTopTenTask.isCancelled()) {
+                cacheTopTenTask.cancel();
+            }
+
+            cacheTopTenTask = null;
+        }
+    }
+
+    /**
+     * Stop the {@link CalculateTopTenTask}.
+     */
+    public void stopCalculateTopTenTask() {
+        if(calculateTopTenTask != null) {
+            if(!calculateTopTenTask.isCancelled()) {
+                calculateTopTenTask.cancel();
+            }
+
+            calculateTopTenTask = null;
+        }
     }
 }
