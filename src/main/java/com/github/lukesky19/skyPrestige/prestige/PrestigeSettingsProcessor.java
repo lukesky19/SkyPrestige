@@ -150,6 +150,9 @@ public class PrestigeSettingsProcessor {
         if(islandSettings.removeRequiredPrestigePoints()) {
             islandData.setPrestigePoints(Math.max(0, islandData.getPrestigePoints() - requiredPrestigePoints));
         }
+
+        // Copy Island Flags
+        newIsland.setFlags(new HashMap<>(oldIsland.getFlags()));
     }
 
     /**
