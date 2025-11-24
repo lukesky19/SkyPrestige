@@ -35,7 +35,8 @@ import java.util.Map;
  * @param configVersion The file's config version.
  * @param locale The locale to use.
  * @param saveFrequencySeconds How frequently island data is periodically saved.
- * @param resetPrestigeLevelOnIslandReset Whether to reset prestige levels when an island is reset by a player using /is reset.
+ * @param resetPrestigeLevelOnIslandReset Legacy option for migration purposes only.
+ * @param islandResetSettings The {@link IslandResetSettings}.
  * @param awardPointsWhileAfk Whether to increment prestige points if the player is AFK. Requires SkyPlayTime.
  * @param scaleFormula The formula to scale requirements with.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
@@ -48,13 +49,28 @@ public record Settings(
         @Nullable String configVersion,
         @Nullable String locale,
         @Nullable Integer saveFrequencySeconds,
-        boolean resetPrestigeLevelOnIslandReset,
+        @Deprecated(since = "1.1.0.0") @Nullable Boolean resetPrestigeLevelOnIslandReset,
+        @NotNull IslandResetSettings islandResetSettings,
         boolean awardPointsWhileAfk,
         @Nullable String scaleFormula,
         int exchangePrestigeLevel,
         @NotNull Location fallbackLocation,
         @NotNull List<String> vaultDisallowedItems,
         @NotNull PrestigePointsMapping prestigePointsMapping) {
+    /**
+     * Island reset settings that apply to all non-prestiged islands (normal resets only).
+     * @param keepIslandRange Should the island's protection range carry over?
+     * @param keepGeneratorUpgrades Should generator upgrades carry over?
+     * @param resetPrestigePoints Should prestige points be reset?
+     * @param resetPrestigeLevel Should prestige level be reset?
+     */
+    @ConfigSerializable
+    public record IslandResetSettings(
+            boolean keepIslandRange,
+            boolean keepGeneratorUpgrades,
+            boolean resetPrestigePoints,
+            boolean resetPrestigeLevel) {}
+
     /**
      * The config to create a {@link org.bukkit.Location}.
      * @param world The world name.

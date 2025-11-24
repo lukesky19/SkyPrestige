@@ -23,6 +23,7 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.api.registry.RegistryUtil;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemType;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -40,6 +42,7 @@ import java.util.Optional;
  */
 public class SettingsManager {
     private final @NotNull SkyPrestige skyPrestige;
+    private final @NotNull ComponentLogger logger;
     private @Nullable Settings settings;
     private final @NotNull List<ItemType> disallowedItems = new ArrayList<>();
 
@@ -49,6 +52,7 @@ public class SettingsManager {
      */
     public SettingsManager(@NotNull SkyPrestige skyPrestige) {
         this.skyPrestige = skyPrestige;
+        this.logger = skyPrestige.getComponentLogger();
     }
 
     /**
@@ -84,6 +88,8 @@ public class SettingsManager {
         YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
         try {
             settings = yamlConfigurationLoader.load().get(Settings.class);
+
+            updateSettings(path);
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.deserialize("Failed to load plugin settings. Error: " + configurateException.getMessage()));
             return;
@@ -94,6 +100,63 @@ public class SettingsManager {
                 Optional<ItemType> optionalItemType = RegistryUtil.getItemType(logger, key);
                 optionalItemType.ifPresent(disallowedItems::add);
             });
+        }
+    }
+
+    /**
+     * Update the settings configuration to the latest version if possible, or display an error.
+     * @param path The {@link Path} to save the locale to.
+     */
+    private void updateSettings(@NotNull Path path) {
+        if(settings == null) return;
+
+        switch(settings.configVersion()) {
+            case "1.1.0.0" -> {
+                // latest version, do nothing
+            }
+
+            case "1.0.0.0" -> {
+                settings = new Settings(
+                        "1.1.0.0",
+                        settings.locale(),
+                        settings.saveFrequencySeconds(),
+                        null,
+                        new Settings.IslandResetSettings(
+                                false,
+                                false,
+                                true,
+                                Objects.requireNonNullElse(settings.resetPrestigeLevelOnIslandReset(), false)),
+                        settings.awardPointsWhileAfk(),
+                        settings.scaleFormula(),
+                        settings.exchangePrestigeLevel(),
+                        settings.fallbackLocation(),
+                        settings.vaultDisallowedItems(),
+                        settings.prestigePointsMapping());
+
+                saveSettings(path);
+            }
+
+            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for settings config. Unable to update config."));
+        }
+    }
+
+    /**
+     * Save the plugin's settings to the path provided.
+     * @param path The {@link Path} to save to.
+     */
+    private void saveSettings(@NotNull Path path) {
+        if(settings == null) return;
+
+        try {
+            @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
+
+            ConfigurationNode node = yamlConfigurationLoader.createNode();
+
+            node.set(Settings.class, settings);
+
+            yamlConfigurationLoader.save(node);
+        } catch (ConfigurateException e) {
+            logger.error(AdventureUtil.deserialize("Failed to save settings config file. Error: " + e.getMessage()));
         }
     }
 }

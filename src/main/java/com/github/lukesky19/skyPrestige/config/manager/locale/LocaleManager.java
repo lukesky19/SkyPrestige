@@ -177,6 +177,10 @@ public class LocaleManager {
         }
     }
 
+    /**
+     * Save the plugin's locale to the path provided.
+     * @param path The {@link Path} to save to.
+     */
     private void saveLocale(@NotNull Path path) {
         if(locale == null) return;
 

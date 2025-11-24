@@ -1,11 +1,15 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.1
+config-version: 1.1.0.0
 # The file in SkyPrestige/locale to use.
 locale: en_US
 # How frequently island data is periodically saved. Island data are also saved on player disconnect and server shutdown.
 save-frequency-seconds: 900
-# When a player uses /is reset, should their prestige level be reset to 0 too?
-reset-prestige-level-on-island-reset: false
+# These settings apply when an island is reset outside of prestige.
+island-reset-settings:
+    keep-island-range: false
+    keep-generator-upgrades: false
+    reset-prestige-points: true
+    reset-prestige-level: false
 # Requires SkyPlayTime
 award-points-while-afk: false
 # The formula used to scale requirements.

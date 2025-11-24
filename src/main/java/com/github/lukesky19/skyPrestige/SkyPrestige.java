@@ -29,7 +29,12 @@ import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.listener.*;
+import com.github.lukesky19.skyPrestige.listener.brewing.FreshBrewListener;
+import com.github.lukesky19.skyPrestige.listener.connection.PlayerJoinListener;
+import com.github.lukesky19.skyPrestige.listener.connection.PlayerQuitListener;
+import com.github.lukesky19.skyPrestige.listener.gui.GUIListener;
+import com.github.lukesky19.skyPrestige.listener.points.*;
+import com.github.lukesky19.skyPrestige.listener.prestige.IslandListener;
 import com.github.lukesky19.skyPrestige.placeholderapi.SkyPrestigeExpansion;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
@@ -100,40 +105,70 @@ public final class SkyPrestige extends JavaPlugin {
 
         // Listeners
         PluginManager pluginManager = this.getServer().getPluginManager();
+
+        // Brewing-related Listeners
+        pluginManager.registerEvents(new FreshBrewListener(), this);
+
+        // Connection-related Listeners
+        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager, teleportationManager), this);
+        pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager), this);
+
+        // Prestige-related Listeners
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, localeManager, databaseManager, islandDataManager, prestigeManager, hookManager), this);
+
+        // GUI-related Listeners
+        pluginManager.registerEvents(new GUIListener(guiManager), this);
+
+        // Prestige Points Listeners
+        if(hookManager.getHook(RoseStackerHook.class).isHooked()) {
+            pluginManager.registerEvents(new BlockStackListener(this, settingsManager, islandDataManager, hookManager), this);
+            pluginManager.registerEvents(new BlockUnstackListener(this, settingsManager, islandDataManager, hookManager), this);
+            pluginManager.registerEvents(new SpawnerStackListener(this, settingsManager, islandDataManager, hookManager), this);
+            pluginManager.registerEvents(new SpawnerUnstackListener(this, settingsManager, islandDataManager, hookManager), this);
+            pluginManager.registerEvents(new EntityStackMultipleDeathListener(this, settingsManager, islandDataManager, hookManager), this);
+        }
+
         pluginManager.registerEvents(new BlockBreakListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new BlockHarvestListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new BlockPlaceListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new CauldronListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new CraftItemListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new InventoryListener(this, settingsManager, islandDataManager, guiManager, hookManager), this);
-        pluginManager.registerEvents(new IslandListener(this, settingsManager, localeManager, databaseManager, islandDataManager, prestigeManager), this);
+        pluginManager.registerEvents(new InventoryCloseListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new InventoryOpenListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerAnvilEnchantListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerBeeHiveListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerBoneMealListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerBottleListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBottleDragonsBreathListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBottleWaterListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerBreedListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerBrewListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerBrushBlockListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerBucketListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBucketEmptyListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerBucketFillListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerCakeConsumeListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerCompostListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerConsumeListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerDropItemListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerEnchantListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerEnchantmentTableEnchantListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerFishListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager, teleportationManager), this);
+        pluginManager.registerEvents(new PlayerItemConsumeListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerKillEntityListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerMilkCowListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerNameEntityListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerPickupItemListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager), this);
         pluginManager.registerEvents(new PlayerRenameItemListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerShearListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerShearBlockListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerShearEntityListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerSleepListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerStripLogListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerTameEntityListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new PlayerThrowItemListener(this, settingsManager, islandDataManager, hookManager), this);
-        pluginManager.registerEvents(new PlayerWaxListener(this, settingsManager, islandDataManager, hookManager), this);
-        if(hookManager.getHook(RoseStackerHook.class).isHooked()) pluginManager.registerEvents(new RoseStackerListener(this, settingsManager, islandDataManager, hookManager), this);
-        if(hookManager.getHook(SkyPlayTimeHook.class).isHooked()) pluginManager.registerEvents(new SkyPlayTimeListener(this, settingsManager, islandDataManager), this);
+        pluginManager.registerEvents(new PlayerUnwaxBlockListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerUnwaxEntityListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerWaxBlockListener(this, settingsManager, islandDataManager, hookManager), this);
+        pluginManager.registerEvents(new PlayerWaxEntityListener(this, settingsManager, islandDataManager, hookManager), this);
+        if(hookManager.getHook(SkyPlayTimeHook.class).isHooked()) {
+            pluginManager.registerEvents(new SkyPlayTimeListener(this, settingsManager, islandDataManager, hookManager), this);
+        }
         pluginManager.registerEvents(new SmeltItemListener(this, settingsManager, islandDataManager, hookManager), this);
         pluginManager.registerEvents(new WaterLogListener(this, settingsManager, islandDataManager, hookManager), this);
 
