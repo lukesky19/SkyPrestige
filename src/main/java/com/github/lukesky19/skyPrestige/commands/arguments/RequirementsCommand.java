@@ -18,14 +18,14 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.settings.Settings;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.math.EquationUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;

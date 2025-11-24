@@ -18,10 +18,10 @@
 package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.gui.RewardsGUIConfig;
-import com.github.lukesky19.skyPrestige.config.data.gui.button.ButtonConfig;
-import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.gui.config.ButtonConfig;
+import com.github.lukesky19.skyPrestige.gui.config.RewardsGUIConfig;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
 import com.github.lukesky19.skylib.api.gui.GUIButton;

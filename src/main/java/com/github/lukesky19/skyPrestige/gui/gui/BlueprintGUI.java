@@ -18,15 +18,15 @@
 package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.gui.BlueprintGUIConfig;
-import com.github.lukesky19.skyPrestige.config.data.gui.button.ButtonConfig;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.gui.config.BlueprintGUIConfig;
+import com.github.lukesky19.skyPrestige.gui.config.ButtonConfig;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;

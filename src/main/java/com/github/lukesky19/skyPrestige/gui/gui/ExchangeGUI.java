@@ -18,13 +18,13 @@
 package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.gui.ExchangeGUIConfig;
-import com.github.lukesky19.skyPrestige.config.data.gui.button.ButtonConfig;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.gui.config.ButtonConfig;
+import com.github.lukesky19.skyPrestige.gui.config.ExchangeGUIConfig;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
 import com.github.lukesky19.skylib.api.gui.GUIButton;

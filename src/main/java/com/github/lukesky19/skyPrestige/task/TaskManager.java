@@ -18,10 +18,10 @@
 package com.github.lukesky19.skyPrestige.task;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.settings.Settings;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.SaveTask;

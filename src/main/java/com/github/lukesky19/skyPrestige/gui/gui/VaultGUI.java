@@ -18,15 +18,15 @@
 package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.gui.VaultGUIConfig;
-import com.github.lukesky19.skyPrestige.config.data.gui.button.ButtonConfig;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.gui.config.ButtonConfig;
+import com.github.lukesky19.skyPrestige.gui.config.VaultGUIConfig;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -60,8 +60,8 @@ public class VaultGUI extends ChestGUI {
     private final @NotNull SkyPrestige skyPrestige;
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
+    private final @NotNull VaultManager vaultManager;
     // Island
     private final @NotNull String islandId;
     private final @NotNull IslandData islandData;
@@ -77,8 +77,8 @@ public class VaultGUI extends ChestGUI {
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param vaultManager A {@link VaultManager} instance.
      * @param islandId The island's unique id.
      * @param islandData The island's {@link IslandData}.
      * @param player The {@link Player} viewing the GUI.
@@ -88,8 +88,8 @@ public class VaultGUI extends ChestGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull GUIManager guiManager,
             @NotNull DatabaseManager databaseManager,
-            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
+            @NotNull VaultManager vaultManager,
             @NotNull String islandId,
             @NotNull IslandData islandData,
             @NotNull Player player) {
@@ -98,8 +98,8 @@ public class VaultGUI extends ChestGUI {
         this.skyPrestige = skyPrestige;
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
-        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
+        this.vaultManager = vaultManager;
 
         this.islandId = islandId;
         this.islandData = islandData;
@@ -310,7 +310,7 @@ public class VaultGUI extends ChestGUI {
         if(itemType == null) return;
 
         // If the item is restricted, don't add the item to the vault and send the player an error message
-        if(settingsManager.isItemDisallowed(itemType)) {
+        if(vaultManager.isVaultItemTypeDisallowed(itemType)) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultItemNotAllowed()));
             return;
         }

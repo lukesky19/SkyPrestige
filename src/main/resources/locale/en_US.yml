@@ -66,5 +66,8 @@ island-unexempt: "<green>Island <yellow><island_id></yellow> is now unexempt fro
 leaderboard-title: "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>"
 leaderboard-position: "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>"
 leaderboard-position-empty: "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>"
+protectionOrbNotAllowed: "<red>This item can not be protected by a protection orb.</red>"
+protectionOrbAlreadyProtected: "<red>This item is already protected by a protection orb.</red>"
+protectionOrbProtected: "<green>This item is now protected and will not be removed on prestige.</green>"
 delimiter: ", "
 final-delimiter: ", and "

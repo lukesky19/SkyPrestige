@@ -18,15 +18,15 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -50,7 +50,7 @@ public class VaultCommand {
     private final @NotNull GUIManager guiManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull SettingsManager settingsManager;
+    private final @NotNull VaultManager vaultManager;
 
     /**
      * Constructor
@@ -60,7 +60,7 @@ public class VaultCommand {
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param vaultManager A {@link VaultManager} instance.
      */
     public VaultCommand(
             @NotNull SkyPrestige skyPrestige,
@@ -69,7 +69,7 @@ public class VaultCommand {
             @NotNull GUIManager guiManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull DatabaseManager databaseManager,
-            @NotNull SettingsManager settingsManager) {
+            @NotNull VaultManager vaultManager) {
         this.skyPrestige = skyPrestige;
         this.logger = skyPrestige.getComponentLogger();
         this.localeManager = localeManager;
@@ -77,7 +77,7 @@ public class VaultCommand {
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
         this.databaseManager = databaseManager;
-        this.settingsManager = settingsManager;
+        this.vaultManager = vaultManager;
     }
 
     /**
@@ -108,7 +108,7 @@ public class VaultCommand {
                     }
 
                     // Create the VaultGUI
-                    VaultGUI gui = new VaultGUI(skyPrestige, guiConfigManager, guiManager, databaseManager, settingsManager, localeManager, islandId, islandData, player);
+                    VaultGUI gui = new VaultGUI(skyPrestige, guiConfigManager, guiManager, databaseManager, localeManager, vaultManager, islandId, islandData, player);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

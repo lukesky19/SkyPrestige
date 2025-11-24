@@ -18,17 +18,17 @@
 package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.gui.ProgressGUIConfig;
-import com.github.lukesky19.skyPrestige.config.data.gui.button.ButtonConfig;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
+import com.github.lukesky19.skyPrestige.gui.config.ButtonConfig;
+import com.github.lukesky19.skyPrestige.gui.config.ProgressGUIConfig;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.data.IslandData;
-import com.github.lukesky19.skyPrestige.util.NumberUtils;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.settings.Settings;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
+import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;

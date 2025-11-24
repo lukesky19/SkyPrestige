@@ -10,6 +10,63 @@ island-reset-settings:
     keep-generator-upgrades: false
     reset-prestige-points: true
     reset-prestige-level: false
+# These settings are related to the protection orb.
+protection-orb-settings:
+    item-stack-config:
+        item-type: minecraft:heart_of_the_sea
+        name: "<gold><bold>Protection Orb</bold></gold>"
+        lore:
+            - "<gray>Click an item with this and it will not be removed on prestige!</gray>"
+        amount: 1
+        options:
+            enchantment-glint: true
+    disallowed-items:
+        - minecraft:spawner
+        - minecraft:iron_ore
+        - minecraft:deepslate_iron_ore
+        - minecraft:raw_iron
+        - minecraft:raw_iron_block
+        - minecraft:iron_ingot
+        - minecraft:iron_nugget
+        - minecraft:iron_block
+        - minecraft:gold_ore
+        - minecraft:deepslate_gold_ore
+        - minecraft:nether_gold_ore
+        - minecraft:raw_gold
+        - minecraft:raw_gold_block
+        - minecraft:gold_ingot
+        - minecraft:gold_nugget
+        - minecraft:gold_block
+        - minecraft:emerald_ore
+        - minecraft:deepslate_emerald_ore
+        - minecraft:emerald
+        - minecraft:emerald_block
+        - minecraft:diamond_ore
+        - minecraft:deepslate_diamond_ore
+        - minecraft:diamond
+        - minecraft:diamond_block
+        - minecraft:ancient_debris
+        - minecraft:netherite_scrap
+        - minecraft:netherite_ingot
+        - minecraft:netherite_block
+        - minecraft:shulker_box
+        - minecraft:white_shulker_box
+        - minecraft:light_gray_shulker_box
+        - minecraft:gray_shulker_box
+        - minecraft:black_shulker_box
+        - minecraft:brown_shulker_box
+        - minecraft:red_shulker_box
+        - minecraft:orange_shulker_box
+        - minecraft:yellow_shulker_box
+        - minecraft:lime_shulker_box
+        - minecraft:green_shulker_box
+        - minecraft:cyan_shulker_box
+        - minecraft:light_blue_shulker_box
+        - minecraft:blue_shulker_box
+        - minecraft:purple_shulker_box
+        - minecraft:magenta_shulker_box
+        - minecraft:pink_shulker_box
+    protected-lore: "<gray>This item is now protected and will not be removed on prestige.</gray>"
 # Requires SkyPlayTime
 award-points-while-afk: false
 # The formula used to scale requirements.
@@ -25,13 +82,6 @@ fallback-location:
 # The list of namespaced keys for items not allowed inside vaults.
 vault-disallowed-items:
     - minecraft:spawner
-    - minecraft:cod
-    - minecraft:tropical_fish
-    - minecraft:salmon
-    - minecraft:cooked_cod
-    - minecraft:cooked_salmon
-    - minecraft:pufferfish
-    - minecraft:player_head
     - minecraft:iron_ore
     - minecraft:deepslate_iron_ore
     - minecraft:raw_iron
@@ -59,6 +109,23 @@ vault-disallowed-items:
     - minecraft:netherite_scrap
     - minecraft:netherite_ingot
     - minecraft:netherite_block
+    - minecraft:shulker_box
+    - minecraft:white_shulker_box
+    - minecraft:light_gray_shulker_box
+    - minecraft:gray_shulker_box
+    - minecraft:black_shulker_box
+    - minecraft:brown_shulker_box
+    - minecraft:red_shulker_box
+    - minecraft:orange_shulker_box
+    - minecraft:yellow_shulker_box
+    - minecraft:lime_shulker_box
+    - minecraft:green_shulker_box
+    - minecraft:cyan_shulker_box
+    - minecraft:light_blue_shulker_box
+    - minecraft:blue_shulker_box
+    - minecraft:purple_shulker_box
+    - minecraft:magenta_shulker_box
+    - minecraft:pink_shulker_box
 # The mapping of prestige points earned for the following actions. Some actions are specific to blocks.
 prestige-points-mapping:
     play-time: 0.0014

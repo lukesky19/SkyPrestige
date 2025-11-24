@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.listener.connection;
 
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
 import com.github.lukesky19.skyPrestige.teleport.TeleportationManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

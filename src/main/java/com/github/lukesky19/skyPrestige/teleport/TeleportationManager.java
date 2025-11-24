@@ -18,11 +18,11 @@
 package com.github.lukesky19.skyPrestige.teleport;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.settings.Settings;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;

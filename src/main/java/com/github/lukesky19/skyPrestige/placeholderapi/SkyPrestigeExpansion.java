@@ -21,7 +21,7 @@ import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.data.Position;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.util.NumberUtils;
+import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;

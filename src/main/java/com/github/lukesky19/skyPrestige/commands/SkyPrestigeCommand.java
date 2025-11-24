@@ -19,16 +19,18 @@ package com.github.lukesky19.skyPrestige.commands;
 
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.commands.arguments.*;
-import com.github.lukesky19.skyPrestige.config.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.locale.Locale;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
+import com.github.lukesky19.skyPrestige.protection.manager.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
+import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -52,6 +54,8 @@ public class SkyPrestigeCommand {
     private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
+    private final @NotNull VaultManager vaultManager;
+    private final @NotNull ProtectionOrbManager protectionOrbManager;
 
     /**
      * Constructor
@@ -65,6 +69,8 @@ public class SkyPrestigeCommand {
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
+     * @param vaultManager A {@link VaultManager} instance.
+     * @param protectionOrbManager A {@link ProtectionOrbManager}.
      */
     public SkyPrestigeCommand(
             @NotNull SkyPrestige skyPrestige,
@@ -76,7 +82,9 @@ public class SkyPrestigeCommand {
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
             @NotNull GUIManager guiManager,
-            @NotNull DatabaseManager databaseManager) {
+            @NotNull DatabaseManager databaseManager,
+            @NotNull VaultManager vaultManager,
+            @NotNull ProtectionOrbManager protectionOrbManager) {
         this.skyPrestige = skyPrestige;
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
@@ -87,6 +95,8 @@ public class SkyPrestigeCommand {
         this.leaderboardManager = leaderboardManager;
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
+        this.vaultManager = vaultManager;
+        this.protectionOrbManager = protectionOrbManager;
     }
 
     /**
@@ -119,12 +129,13 @@ public class SkyPrestigeCommand {
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(skyPrestige, localeManager, islandDataManager);
         ReloadCommand reloadCommand = new ReloadCommand(skyPrestige, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(skyPrestige, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
+        ProtectionOrbCommand protectionOrbCommand = new ProtectionOrbCommand(localeManager, protectionOrbManager);
         RequirementsCommand requirementsCommand = new RequirementsCommand(skyPrestige, settingsManager, localeManager, prestigeConfigManager, islandDataManager);
         RewardsCommand rewardsCommand = new RewardsCommand(skyPrestige, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         UnExemptCommand unExemptCommand = new UnExemptCommand(skyPrestige, localeManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(skyPrestige, localeManager, islandDataManager);
         ValuesCommand valuesCommand = new ValuesCommand(skyPrestige, localeManager, guiConfigManager, guiManager);
-        VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, settingsManager);
+        VaultCommand vaultCommand = new VaultCommand(skyPrestige, localeManager, guiConfigManager, guiManager, islandDataManager, databaseManager, vaultManager);
 
         builder.then(exchangeCommand.createCommand());
         builder.then(prestigeLevelCommand.createCommand());
@@ -134,6 +145,7 @@ public class SkyPrestigeCommand {
         builder.then(leaderboardCommand.createCommand());
         builder.then(reloadCommand.createCommand());
         builder.then(progressCommand.createCommand());
+        builder.then(protectionOrbCommand.createCommand());
         builder.then(requirementsCommand.createCommand());
         builder.then(rewardsCommand.createCommand());
         builder.then(unExemptCommand.createCommand());

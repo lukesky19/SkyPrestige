@@ -18,27 +18,30 @@
 package com.github.lukesky19.skyPrestige;
 
 import com.github.lukesky19.skyPrestige.commands.SkyPrestigeCommand;
-import com.github.lukesky19.skyPrestige.config.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.config.manager.prestige.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.config.manager.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.gui.listener.GUIListener;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.hook.HookManager;
 import com.github.lukesky19.skyPrestige.hook.impl.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.impl.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.listener.brewing.FreshBrewListener;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerJoinListener;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerQuitListener;
-import com.github.lukesky19.skyPrestige.listener.gui.GUIListener;
-import com.github.lukesky19.skyPrestige.listener.points.*;
-import com.github.lukesky19.skyPrestige.listener.prestige.IslandListener;
+import com.github.lukesky19.skyPrestige.listener.island.IslandListener;
+import com.github.lukesky19.skyPrestige.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.placeholderapi.SkyPrestigeExpansion;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.points.listener.*;
+import com.github.lukesky19.skyPrestige.points.listener.brewing.FreshBrewListener;
+import com.github.lukesky19.skyPrestige.prestige.config.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
+import com.github.lukesky19.skyPrestige.protection.listener.ProtectionOrbListener;
+import com.github.lukesky19.skyPrestige.protection.manager.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleport.TeleportationManager;
+import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
@@ -63,6 +66,7 @@ public final class SkyPrestige extends JavaPlugin {
     private IslandDataManager islandDataManager;
     private LeaderboardManager leaderboardManager;
     private TaskManager taskManager;
+    private ProtectionOrbManager protectionOrbManager;
     private SkyPrestigeExpansion skyPrestigeExpansion;
 
     /**
@@ -94,9 +98,11 @@ public final class SkyPrestige extends JavaPlugin {
         taskManager = new TaskManager(this, settingsManager, islandDataManager, leaderboardManager);
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, databaseManager, hookManager);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, localeManager, databaseManager);
+        VaultManager vaultManager = new VaultManager(settingsManager);
+        protectionOrbManager = new ProtectionOrbManager(this, settingsManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, leaderboardManager, guiManager, databaseManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultManager, protectionOrbManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -115,6 +121,9 @@ public final class SkyPrestige extends JavaPlugin {
 
         // Prestige-related Listeners
         pluginManager.registerEvents(new IslandListener(this, settingsManager, localeManager, databaseManager, islandDataManager, prestigeManager, hookManager), this);
+
+        // Protection Orb Listener
+        pluginManager.registerEvents(new ProtectionOrbListener(localeManager, protectionOrbManager), this);
 
         // GUI-related Listeners
         pluginManager.registerEvents(new GUIListener(guiManager), this);
@@ -239,6 +248,7 @@ public final class SkyPrestige extends JavaPlugin {
         guiConfigManager.reload();
         prestigeConfigManager.reload();
         leaderboardManager.updateDatabaseTopTen();
+        protectionOrbManager.reload();
 
         // (Re-)start the plugin's task
         taskManager.startTasks();
