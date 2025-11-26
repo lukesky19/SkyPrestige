@@ -8,7 +8,11 @@
 * Rewards can be given after the island has been prestiged to one or all island members.
 * Handles processing offline island members when they log on after their island was prestiged.
 * Teleports both online and offline players when the log on when the island they are on was prestiged.
-* A vault to transfer items across prestiges. Slots are unlocked at specific prestige levels. 
+* A vault to transfer items across prestiges. Slots are unlocked at specific prestige levels.
+* Leaderboard placeholders with a way to exempt islands.
+* A protection orb to protect specific items from being removed on prestige.
+* A multiplier that can be applied to prestige points earned.
+* A multiplier event that can be scheduled weekly.
 
 ## Dependencies
 * BentoBox
@@ -33,9 +37,10 @@
 * /skyprestige info - Open the info GUI.
 * /skyprestige leaderboard - View the prestige leaderboard.
 * /skyprestige level set <island_id> <level>
-* /skyprestige points add <island_id> <prestige_points>
-* /skyprestige points remove <island_id> <prestige_points>
-* /skyprestige points set <island_id> <prestige_points>
+* /skyprestige multiplier event
+* /skyprestige multiplier <add | remove | set> <multiplier>
+* /skyprestige multiplier get [additional | event | total]
+* /skyprestige points <add | remove | set> <island_id> <prestige_points>
 * /skyprestige points get <island_id>
 * /skyprestige progress - View the requirements for the next prestige level.
 * /skyprestige reload - Reloads the plugin.
@@ -53,6 +58,15 @@
 * `skyprestige.commands.skyprestige.info` - The permission to open the info GUI.
 * `skyprestige.commands.skyprestige.leaderboard` - The permission to view the prestige leaderboard.
 * `skyprestige.commands.skyprestige.level` - The permission to set an island's prestige level.
+* `skyprestige.commands.skyprestige.multiplier` - The permission to manage and view information related to the prestige points multiplier.
+* `skyprestige.commands.skyprestige.multiplier.event` - The permission to view either the remaining event time, the time until the next event, or if the event is disabled.
+* `skyprestige.commands.skyprestige.multiplier.add` - The permission to add to the current additional multiplier.
+* `skyprestige.commands.skyprestige.multiplier.remove` - The permission to remove from the current additional multiplier.
+* `skyprestige.commands.skyprestige.multiplier.set` - The permission to set the current additional multiplier.
+* `skyprestige.commands.skyprestige.multiplier.get` - The permission to get the current multipliers.
+* `skyprestige.commands.skyprestige.multiplier.get.additional` - The permission to get the current additional multiplier.
+* `skyprestige.commands.skyprestige.multiplier.get.event` - The permission to get the current event multiplier.
+* `skyprestige.commands.skyprestige.multiplier.get.total` - The permission to get the current total multiplier.
 * `skyprestige.commands.skyprestige.points` - The permission to use the `/skyprestige points` command.
 * `skyprestige.commands.skyprestige.points.add` - The permission to use the `/skyprestige points add` command.
 * `skyprestige.commands.skyprestige.points.remove` - The permission to use the `/skyprestige points remove` command.

@@ -67,6 +67,20 @@ protection-orb-settings:
         - minecraft:magenta_shulker_box
         - minecraft:pink_shulker_box
     protected-lore: "<gray>This item is now protected and will not be removed on prestige.</gray>"
+# These settings are for the automated prestige points multiplier event.
+multiplier-event-settings:
+    # Is the automated prestige points multiplier event active.
+    enabled: true
+    # The timezone to use.
+    timezone: "America/New_York"
+    # The starting day
+    day: SUNDAY
+    # The starting hour, 0-23 format.
+    hour: 10
+    # The duration of the event in seconds
+    duration-seconds: 86400
+    # The multiplier to apply.
+    multiplier: 2.0
 # Requires SkyPlayTime
 award-points-while-afk: false
 # The formula used to scale requirements.

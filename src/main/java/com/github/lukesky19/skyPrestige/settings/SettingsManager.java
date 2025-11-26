@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Objects;
 
@@ -168,6 +169,13 @@ public class SettingsManager {
                                         "minecraft:magenta_shulker_box",
                                         "minecraft:pink_shulker_box"),
                                 "<gray>This item is now protected and will not be removed on prestige.</gray>"),
+                        new Settings.MultiplierEventSettings(
+                                true,
+                                DayOfWeek.SUNDAY.toString(),
+                                "America/New_York",
+                                10,
+                                86400,
+                                2),
                         settings.awardPointsWhileAfk(),
                         settings.scaleFormula(),
                         settings.exchangePrestigeLevel(),

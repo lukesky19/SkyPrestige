@@ -74,6 +74,16 @@ import java.util.List;
  * @param protectionOrbAlreadyProtected The message sent when an item is already protected.
  * @param protectionOrbNotAllowed The message sent when an item is not allowed to be protected.
  * @param protectionOrbProtected The message sent when an item is protected.
+ * @param additionalMultiplierGet The message sent to the player displaying the current additional multiplier.
+ * @param eventMultiplierGet The message sent to the player displaying the current event multiplier.
+ * @param totalMultiplierGet The message sent to the player displaying the current total multiplier.
+ * @param multiplierChanged The message sent to all players that changes the multiplier.
+ * @param multiplierEventStarted The message sent to all players when thea multiplier event has started.
+ * @param multiplierEventEnded The message sent to all players when the multiplier event ends.
+ * @param multiplierEventRemainingTime The message sent to the player to display the remaining event time.
+ * @param multiplierEventNextTime The message sent to the player to display the remaining time until the next event.
+ * @param multiplierEventDisabled The message sent to the player when the multiplier event is disabled.
+ * @param multiplierTimePlaceholder The {@link TimeFormat} to use for {@literal <time>} placeholders.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -128,6 +138,39 @@ public record Locale(
         String protectionOrbNotAllowed,
         String protectionOrbAlreadyProtected,
         String protectionOrbProtected,
+        String additionalMultiplierGet,
+        String eventMultiplierGet,
+        String totalMultiplierGet,
+        String multiplierChanged,
+        String multiplierEventStarted,
+        String multiplierEventEnded,
+        String multiplierEventRemainingTime,
+        String multiplierEventNextTime,
+        String multiplierEventDisabled,
+        TimeFormat multiplierTimePlaceholder,
         String delimiter,
         String finalDelimiter) {
+    /**
+     * The record containing the data necessary to format a {@literal <time>} placeholder.
+     * @param prefix The text to display before the first time unit.
+     * @param years The text to display when the player's time enters years.
+     * @param months The text to display when the player's time enters months.
+     * @param weeks The text to display when the player's time enters weeks.
+     * @param days The text to display when the player's time enters days.
+     * @param hours The text to display when the player's time enters hours.
+     * @param minutes The text to display when the player's time enters minutes.
+     * @param seconds The text to display when the player's time enters seconds.
+     * @param suffix The text to display after the last time unit.
+     */
+    @ConfigSerializable
+    public record TimeFormat(
+            String prefix,
+            String years,
+            String months,
+            String weeks,
+            String days,
+            String hours,
+            String minutes,
+            String seconds,
+            String suffix) {}
 }

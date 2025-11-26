@@ -24,6 +24,7 @@ import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.points.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.settings.Settings;
 import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import org.bukkit.block.Block;
@@ -45,13 +46,15 @@ public class PlayerBoneMealListener extends PrestigePointsListener<BlockFertiliz
      * @param settingsManager A {@link SettingsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
+     * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerBoneMealListener(
             @NotNull SkyPrestige skyPrestige,
             @NotNull SettingsManager settingsManager,
             @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
-        super(skyPrestige, settingsManager, islandDataManager, hookManager);
+            @NotNull HookManager hookManager,
+            @NotNull MultiplierManager multiplierManager) {
+        super(skyPrestige, settingsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -89,6 +92,6 @@ public class PlayerBoneMealListener extends PrestigePointsListener<BlockFertiliz
         @Nullable Double prestigePoints = settings.prestigePointsMapping().getBoneMealPrestigePoints(blockType);
         if(prestigePoints == null) return;
 
-        islandData.addPrestigePoints(prestigePoints * eventContext.getAmount());
+        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
     }
 }

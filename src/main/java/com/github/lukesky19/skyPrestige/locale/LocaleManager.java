@@ -118,6 +118,9 @@ public class LocaleManager {
                 help.add("<white>/</white><green>skyprestige</green> <yellow>exempt <island_id></yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>unexempt <island_id></yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier event</yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier <add | remove | set> <amount></yellow>");
+                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier get [additional | event | total]</yellow>");
 
                 locale = new Locale(
                         "1.1.0.0",
@@ -169,6 +172,25 @@ public class LocaleManager {
                         "<red>This item can not be protected by a protection orb.</red>",
                         "<red>This item is already protected by a protection orb.</red>",
                         "<green>This item is now protected and will not be removed on prestige.</green>",
+                        "<green>The current additional multiplier is <aqua><additional_multiplier></aqua>.</green>",
+                        "<green>The current event multiplier is <aqua><event_multiplier></aqua>.</green>",
+                        "<green>The current total multiplier is <aqua><total_multiplier></aqua>.</green>",
+                        "<green>The prestige points multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                        "<green>A <aqua><event_multiplier>x</aqua> prestige points event has now started. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                        "<green>The <aqua><event_multiplier>x</aqua> prestige points event has ended. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                        "<green>There is <time> left until the <aqua><event_multiplier>x</aqua> prestige points event ends. The total multiplier is <aqua><current_multiplier></aqua>.</green>",
+                        "<green>The next <aqua><event_multiplier>x</aqua> prestige points event starts in <time>.</green>",
+                        "<green>There is no prestige points multiplier event active. There is no next event scheduled.</green>",
+                        new Locale.TimeFormat(
+                                "",
+                                "<aqua><years></aqua> year(s)",
+                                "<aqua><months></aqua> month(s)",
+                                "<aqua><weeks></aqua> week(s)",
+                                "<aqua><days></aqua> day(s)",
+                                "<aqua><hours></aqua> hour(s)",
+                                "<aqua><minutes></aqua> minute(s)",
+                                "<aqua><seconds></aqua> second(s)",
+                                ""),
                         locale.delimiter(),
                         locale.finalDelimiter());
 
@@ -237,6 +259,8 @@ public class LocaleManager {
                 || locale.progressMaxPrestigeLevel()  == null
                 || locale.rewardsPlayerNotOnIsland()  == null
                 || locale.rewardsMaxPrestigeLevel()  == null
+                || locale.vaultItemNotAllowed() == null
+                || locale.vaultPlayerNotOnIsland() == null
                 || locale.requirementsLevelNotFound() == null
                 || locale.requirementsConfigError() == null
                 || locale.requirementsPointsForLevel() == null
@@ -245,6 +269,19 @@ public class LocaleManager {
                 || locale.leaderboardTitle() == null
                 || locale.leaderboardPosition() == null
                 || locale.leaderboardPositionEmpty() == null
+                || locale.protectionOrbNotAllowed() == null
+                || locale.protectionOrbAlreadyProtected() == null
+                || locale.protectionOrbProtected() == null
+                || locale.additionalMultiplierGet() == null
+                || locale.eventMultiplierGet() == null
+                || locale.totalMultiplierGet() == null
+                || locale.multiplierChanged() == null
+                || locale.multiplierEventStarted() == null
+                || locale.multiplierEventEnded() == null
+                || locale.multiplierEventRemainingTime() == null
+                || locale.multiplierEventNextTime() == null
+                || locale.multiplierEventDisabled() == null
+                || isTimeFormatInvalid(locale.multiplierTimePlaceholder())
                 || locale.delimiter()  == null
                 || locale.finalDelimiter() == null) {
             locale = null;
@@ -252,6 +289,23 @@ public class LocaleManager {
             logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
             logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
         }
+    }
+
+    /**
+     * Checks if all {@link String}s in a {@link Locale.TimeFormat} are null.
+     * @param timeFormat The {@link Locale.TimeFormat} to check.
+     * @return true if invalid, false if not.
+     */
+    private boolean isTimeFormatInvalid(@NotNull Locale.TimeFormat timeFormat) {
+        return timeFormat.prefix() == null
+                || timeFormat.years() == null
+                || timeFormat.months() == null
+                || timeFormat.weeks() == null
+                || timeFormat.days() == null
+                || timeFormat.hours() == null
+                || timeFormat.minutes() == null
+                || timeFormat.seconds() == null
+                || timeFormat.suffix() == null;
     }
 
     /**
@@ -286,10 +340,11 @@ public class LocaleManager {
                         "<white>/</white><green>skyprestige</green> <yellow>info</yellow>",
                         "<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>",
                         "<white>/</white><aqua>skyprestige</aqua> <yellow>level set <island_id> <level></yellow>",
-                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points add <island_id> <amount></yellow>",
-                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points remove <island_id> <amount></yellow>",
-                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points set <island_id> <amount></yellow>",
-                        "<white>/</white><aqua>skyprestige</aqua> <yellow>points get <island_id> <amount></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>multiplier event [current | next]</yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>multiplier <add | remove | set> <amount></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>multiplier get [additional | event | total]</yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>points <add | remove | set> <island_id> <amount></yellow>",
+                        "<white>/</white><green>skyprestige</green> <yellow>points get <island_id></yellow>",
                         "<white>/</white><green>skyprestige</green> <yellow>exempt <island_id></yellow>",
                         "<white>/</white><green>skyprestige</green> <yellow>unexempt <island_id></yellow>",
                         "<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>"),
@@ -339,6 +394,25 @@ public class LocaleManager {
                 "<red>This item can not be protected by a protection orb.</red>",
                 "<red>This item is already protected by a protection orb.</red>",
                 "<green>This item is now protected and will not be removed on prestige.</green>",
+                "<green>The current additional multiplier is <aqua><additional_multiplier></aqua>.</green>",
+                "<green>The current event multiplier is <aqua><event_multiplier></aqua>.</green>",
+                "<green>The current total multiplier is <aqua><total_multiplier></aqua>.</green>",
+                "<green>The prestige points multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                "<green>A <aqua><event_multiplier>x</aqua> prestige points event has now started. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                "<green>The <aqua><event_multiplier>x</aqua> prestige points event has ended. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
+                "<green>There is <time> left until the <aqua><event_multiplier>x</aqua> prestige points event ends. The total multiplier is <aqua><current_multiplier></aqua>.</green>",
+                "<green>The next <aqua><event_multiplier>x</aqua> prestige points event starts in <time>.</green>",
+                "<green>There is no prestige points multiplier event active. There is no next event scheduled.</green>",
+                new Locale.TimeFormat(
+                        "",
+                        "<aqua><years></aqua> year(s)",
+                        "<aqua><months></aqua> month(s)",
+                        "<aqua><weeks></aqua> week(s)",
+                        "<aqua><days></aqua> day(s)",
+                        "<aqua><hours></aqua> hour(s)",
+                        "<aqua><minutes></aqua> minute(s)",
+                        "<aqua><seconds></aqua> second(s)",
+                        ""),
                 ", ",
                 ", and ");
     }

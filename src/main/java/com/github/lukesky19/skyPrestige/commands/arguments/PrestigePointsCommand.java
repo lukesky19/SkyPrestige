@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * This class creates the level command argument for the skyprestige command.
+ * This class creates the points command argument for the skyprestige command.
  */
 public class PrestigePointsCommand {
     private final @NotNull SkyPrestige skyPrestige;

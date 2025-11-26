@@ -39,6 +39,7 @@ import java.util.Map;
  * @param resetPrestigeLevelOnIslandReset Legacy option for migration purposes only.
  * @param islandResetSettings The {@link IslandResetSettings}.
  * @param protectionOrbSettings The {@link ProtectionOrbSettings}.
+ * @param multiplierEventSettings The {@link MultiplierEventSettings}.
  * @param awardPointsWhileAfk Whether to increment prestige points if the player is AFK. Requires SkyPlayTime.
  * @param scaleFormula The formula to scale requirements with.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
@@ -54,6 +55,7 @@ public record Settings(
         @Deprecated(since = "1.1.0.0") @Nullable Boolean resetPrestigeLevelOnIslandReset,
         @NotNull IslandResetSettings islandResetSettings,
         @NotNull ProtectionOrbSettings protectionOrbSettings,
+        @NotNull MultiplierEventSettings multiplierEventSettings,
         boolean awardPointsWhileAfk,
         @Nullable String scaleFormula,
         int exchangePrestigeLevel,
@@ -85,6 +87,24 @@ public record Settings(
             @NotNull ItemStackConfig itemStackConfig,
             @NotNull List<String> disallowedItems,
             @Nullable String protectedLore) {}
+
+    /**
+     * This contains the configuration related to the scheduled multiplier event.
+     * @param enabled Is the multiplier event enabled?
+     * @param timezone The timezone to use.
+     * @param day What day should the multiplier event activate on?
+     * @param hour What hour should the multiplier event activate at?
+     * @param durationSeconds How long the event in seconds should last.
+     * @param multiplier The multiplier to add for the duration of the event.
+     */
+    @ConfigSerializable
+    public record MultiplierEventSettings(
+            boolean enabled,
+            @Nullable String timezone,
+            @Nullable String day,
+            int hour,
+            int durationSeconds,
+            int multiplier) {}
 
     /**
      * The config to create a {@link org.bukkit.Location}.

@@ -24,6 +24,7 @@ import com.github.lukesky19.skyPrestige.island.data.IslandData;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.points.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.settings.Settings;
 import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -66,6 +67,10 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      */
     protected final @NotNull HookManager hookManager;
     /**
+     * A {@link MultiplierManager} instance.
+     */
+    protected final @NotNull MultiplierManager multiplierManager;
+    /**
      * An {@link IslandsManager} instance.
      */
     protected final @NotNull IslandsManager islandsManager;
@@ -76,17 +81,20 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      * @param settingsManager A {@link SettingsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
+     * @param multiplierManager A {@link MultiplierManager} instance.
      */
     protected PrestigePointsListener(
             @NotNull SkyPrestige skyPrestige,
             @NotNull SettingsManager settingsManager,
             @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NotNull HookManager hookManager,
+            @NotNull MultiplierManager multiplierManager) {
         this.skyPrestige = skyPrestige;
         this.logger = skyPrestige.getComponentLogger();
         this.settingsManager = settingsManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
+        this.multiplierManager = multiplierManager;
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
     }
 
@@ -146,4 +154,15 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
             @NotNull IslandData islandData,
             @NotNull E event,
             @NotNull EventContext eventContext);
+
+    /**
+     * Adds prestiges points to the island data.
+     * This takes the base prestige points, multiplies it by the amount, and then multiplies it by the modifier.
+     * @param islandData The {@link IslandData} to add prestige points to.
+     * @param basePrestigePoints The base prestige points.
+     * @param amount The amount to multiply the base prestige points to.
+     */
+    protected void addPrestigePoints(@NotNull IslandData islandData, double basePrestigePoints, int amount) {
+        islandData.addPrestigePoints((basePrestigePoints * amount) * multiplierManager.getMultiplier());
+    }
 }

@@ -20,10 +20,12 @@ package com.github.lukesky19.skyPrestige.task;
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.leaderboard.manager.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.points.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.settings.Settings;
 import com.github.lukesky19.skyPrestige.settings.SettingsManager;
 import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
+import com.github.lukesky19.skyPrestige.task.tasks.MultiplierTask;
 import com.github.lukesky19.skyPrestige.task.tasks.SaveTask;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.scheduler.BukkitTask;
@@ -38,10 +40,12 @@ public class TaskManager {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
+    private final @NotNull MultiplierManager multiplierManager;
 
     private @Nullable BukkitTask saveTask;
     private @Nullable BukkitTask cacheTopTenTask;
     private @Nullable BukkitTask calculateTopTenTask;
+    private @Nullable BukkitTask multiplierTask;
 
     /**
      * Constructor
@@ -49,16 +53,19 @@ public class TaskManager {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param leaderboardManager  A {@link LeaderboardManager} instance.
+     * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public TaskManager(
             @NotNull SkyPrestige skyPrestige,
             @NotNull SettingsManager settingsManager,
             @NotNull IslandDataManager islandDataManager,
-            @NotNull LeaderboardManager leaderboardManager) {
+            @NotNull LeaderboardManager leaderboardManager,
+            @NotNull MultiplierManager multiplierManager) {
         this.skyPrestige = skyPrestige;
         this.settingsManager = settingsManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
+        this.multiplierManager = multiplierManager;
     }
 
     /**
@@ -70,6 +77,7 @@ public class TaskManager {
         startSaveTask();
         startCacheTopTenTask();
         startCalculateTopTenTask();
+        startMultiplierTask();
     }
 
     /**
@@ -79,6 +87,7 @@ public class TaskManager {
         stopSaveTask();
         stopCacheTopTenTask();
         stopCalculateTopTenTask();
+        stopMultiplierTask();
     }
 
     /**
@@ -112,6 +121,19 @@ public class TaskManager {
         long ticks = 20L;
 
         calculateTopTenTask = new CalculateTopTenTask(leaderboardManager).runTaskTimer(skyPrestige, ticks, ticks);
+    }
+
+    /**
+     * Starts the {@link CalculateTopTenTask}.
+     */
+    private void startMultiplierTask() {
+        @Nullable Settings settings = settingsManager.getSettings();
+        if(settings == null) return;
+        if(!settings.multiplierEventSettings().enabled()) return;
+
+        long ticks = 20L;
+
+        multiplierTask = new MultiplierTask(multiplierManager).runTaskTimer(skyPrestige, ticks, ticks);
     }
 
     /**
@@ -150,6 +172,19 @@ public class TaskManager {
             }
 
             calculateTopTenTask = null;
+        }
+    }
+
+    /**
+     * Stop the {@link CalculateTopTenTask}.
+     */
+    public void stopMultiplierTask() {
+        if(multiplierTask != null) {
+            if(!multiplierTask.isCancelled()) {
+                multiplierTask.cancel();
+            }
+
+            multiplierTask = null;
         }
     }
 }
