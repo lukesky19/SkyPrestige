@@ -113,16 +113,15 @@ public class BlockBreakListener extends PrestigePointsListener<BlockBreakEvent> 
         if(blockType == null) return;
         @Nullable EntityType entityType = eventContext.getEntityType();
 
-        @Nullable Double prestigePoints = null;
+        @Nullable Double prestigePoints;
         if(entityType != null) {
             prestigePoints = settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType, entityType);
         } else {
-            settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
+            prestigePoints = settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
         }
 
         if(prestigePoints == null) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
         addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
     }
 }

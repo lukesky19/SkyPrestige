@@ -99,7 +99,6 @@ public class PlayerBreedListener extends PrestigePointsListener<EntityBreedEvent
         if(entityType == null) return;
 
         @Nullable Double prestigePoints = settings.prestigePointsMapping().getBreedPrestigePoints(entityType);
-
         if(prestigePoints == null) return;
 
         addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());

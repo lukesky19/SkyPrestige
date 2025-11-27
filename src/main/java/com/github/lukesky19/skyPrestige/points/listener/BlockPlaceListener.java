@@ -118,11 +118,11 @@ public class BlockPlaceListener extends PrestigePointsListener<BlockPlaceEvent> 
         if(blockType == null) return;
         @Nullable EntityType entityType = eventContext.getEntityType();
 
-        @Nullable Double prestigePoints = null;
+        @Nullable Double prestigePoints;
         if(entityType != null) {
-            prestigePoints = settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType, entityType);
+            prestigePoints = settings.prestigePointsMapping().getBlockPlacePrestigePoints(blockType, entityType);
         } else {
-            settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
+            prestigePoints = settings.prestigePointsMapping().getBlockPlacePrestigePoints(blockType);
         }
 
         if(prestigePoints == null) return;
