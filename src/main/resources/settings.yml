@@ -66,6 +66,23 @@ protection-orb-settings:
         - minecraft:purple_shulker_box
         - minecraft:magenta_shulker_box
         - minecraft:pink_shulker_box
+        - minecraft:bundle
+        - minecraft:white_bundle
+        - minecraft:light_bundle
+        - minecraft:gray_bundle
+        - minecraft:black_bundle
+        - minecraft:brown_bundle
+        - minecraft:red_bundle
+        - minecraft:orange_bundle
+        - minecraft:yellow_bundle
+        - minecraft:lime_bundle
+        - minecraft:green_bundle
+        - minecraft:cyan_bundle
+        - minecraft:light_bundle
+        - minecraft:blue_bundle
+        - minecraft:purple_bundle
+        - minecraft:magenta_bundle
+        - minecraft:pink_bundle
     protected-lore: "<gray>This item is now protected and will not be removed on prestige.</gray>"
 # These settings are for the automated prestige points multiplier event.
 multiplier-event-settings:
@@ -140,6 +157,23 @@ vault-disallowed-items:
     - minecraft:purple_shulker_box
     - minecraft:magenta_shulker_box
     - minecraft:pink_shulker_box
+    - minecraft:bundle
+    - minecraft:white_bundle
+    - minecraft:light_bundle
+    - minecraft:gray_bundle
+    - minecraft:black_bundle
+    - minecraft:brown_bundle
+    - minecraft:red_bundle
+    - minecraft:orange_bundle
+    - minecraft:yellow_bundle
+    - minecraft:lime_bundle
+    - minecraft:green_bundle
+    - minecraft:cyan_bundle
+    - minecraft:light_bundle
+    - minecraft:blue_bundle
+    - minecraft:purple_bundle
+    - minecraft:magenta_bundle
+    - minecraft:pink_bundle
 # The mapping of prestige points earned for the following actions. Some actions are specific to blocks.
 prestige-points-mapping:
     play-time: 0.0014
