@@ -81,16 +81,12 @@ public class ProtectionOrbListener implements Listener {
             return;
         }
 
-        System.out.println(1);
-
         // Check if the item is already protected
         if(protectionOrbManager.isItemStackProtected(clickedSlotItemStack)) {
             inventoryClickEvent.setCancelled(true);
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.protectionOrbAlreadyProtected()));
             return;
         }
-
-        System.out.println(2);
 
         // Cancel the event
         inventoryClickEvent.setCancelled(true);
