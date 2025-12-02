@@ -217,8 +217,8 @@ public final class SkyPrestige extends SkyPlugin {
      */
     @Override
     public void onDisable() {
-        // Reload the PlaceholderAPI Expansion
-        if(placeholderManager != null) placeholderManager.reload();
+        // Unregister the PlaceholderAPI Expansion
+        if(placeholderManager != null) placeholderManager.unregisterExpansion();
 
         // Close any open GUIs
         if(guiManager != null) guiManager.closeOpenGUIs(true);
@@ -245,6 +245,9 @@ public final class SkyPrestige extends SkyPlugin {
      */
     @Override
     public void reload() {
+        // Reload the PlaceholderAPI Expansion
+        placeholderManager.reload();
+
         // Close any open GUIs
         guiManager.closeOpenGUIs(false);
 

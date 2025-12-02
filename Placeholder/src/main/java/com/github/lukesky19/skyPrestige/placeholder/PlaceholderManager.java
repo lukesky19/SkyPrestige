@@ -65,7 +65,7 @@ public class PlaceholderManager {
     /**
      * This method registers the PlaceholderAPI expansion if PlaceholderAPI is enabled.
      */
-    private void registerExpansion() {
+    public void registerExpansion() {
         if(plugin.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion == null) {
                 skyPrestigeExpansion = new SkyPrestigeExpansion(islandDataManager, leaderboardManager, hookManager);
@@ -77,7 +77,7 @@ public class PlaceholderManager {
     /**
      * This method unregisters the PlaceholderAPI expansion if PlaceholderAPI is enabled.
      */
-    private void unregisterExpansion() {
+    public void unregisterExpansion() {
         if(plugin.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion != null) {
                 skyPrestigeExpansion.unregister();
