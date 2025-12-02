@@ -355,31 +355,33 @@ public class PrestigeManager {
 
         future.thenAccept(prestigeLevels -> {
             if(prestigeLevels.isEmpty()) return;
-            if(!player.isOnline() || !player.isConnected()) return;
-            @NotNull Map<Integer, PrestigeConfig> prestigeConfigMap = prestigeConfigManager.getPrestigeConfigMap(prestigeLevels);
-            if (prestigeConfigMap.isEmpty()) return;
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if(!player.isOnline() || !player.isConnected()) return;
+                @NotNull Map<Integer, PrestigeConfig> prestigeConfigMap = prestigeConfigManager.getPrestigeConfigMap(prestigeLevels);
+                if (prestigeConfigMap.isEmpty()) return;
 
-            @Nullable Settings settings = settingsManager.getSettings();
-            if (settings == null) {
-                logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
-                return;
-            }
+                @Nullable Settings settings = settingsManager.getSettings();
+                if(settings == null) {
+                    logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
+                    return;
+                }
 
-            prestigeConfigMap.forEach((prestigeLevel, prestigeConfig) -> {
-                PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
-                PlayerSettings playerSettings = prestigeSettings.playerSettings();
-                PrestigeConfig.RewardConfig rewardConfig = prestigeConfig.rewardConfig();
+                prestigeConfigMap.forEach((prestigeLevel, prestigeConfig) -> {
+                    PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
+                    PlayerSettings playerSettings = prestigeSettings.playerSettings();
+                    PrestigeConfig.RewardConfig rewardConfig = prestigeConfig.rewardConfig();
 
-                playerSettingsProcessor.processPlayerSettingsOnLogin(
-                        playerSettings,
-                        player,
-                        prestigeSettings.startingMoney(),
-                        prestigeSettings.giveStartingMoneyToAllIslandMembers());
+                    playerSettingsProcessor.processPlayerSettingsOnLogin(
+                            playerSettings,
+                            player,
+                            prestigeSettings.startingMoney(),
+                            prestigeSettings.giveStartingMoneyToAllIslandMembers());
 
-                prestigeRewardsProcessor.processPrestigeRewardsOnLogin(player, rewardConfig, prestigeLevel);
-            });
+                    prestigeRewardsProcessor.processPrestigeRewardsOnLogin(player, rewardConfig, prestigeLevel);
+                });
 
-            databaseManager.getOfflinePrestigeTable().removeOfflinePrestige(playerId);
+                databaseManager.getOfflinePrestigeTable().removeOfflinePrestige(playerId);
+            }, 1L);
         });
     }
 }
