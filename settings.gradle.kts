@@ -8,6 +8,7 @@ include("Database")
 include("DataHandler")
 include("GUI")
 include("Hook")
+include("Island")
 include("Listener")
 include("Placeholder")
 include("Plugin")
@@ -44,4 +45,3 @@ dependencyResolutionManagement {
         }
     }
 }
-include("Island")
