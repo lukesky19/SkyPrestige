@@ -250,24 +250,29 @@ public class IslandCreator {
         @Nullable Location newIslandSpawnPoint = newIsland.getSpawnPoint(World.Environment.NORMAL);
         if(newIslandSpawnPoint != null) {
             // Set the home location for each island member
-            islandMembers.forEach(islandMemberUser -> islandsManager.setHomeLocation(islandMemberUser, newIslandSpawnPoint));
+            islandMembers.forEach(islandMemberUser -> newIsland.addHome("", newIslandSpawnPoint));
 
-            @NotNull CompletableFuture<List<UUID>> playerIdsOnOldIslandFuture = databaseManager.getPlayerLogoutLocationsTables()
-                    .getPlayerIdsWithinByBounds(
-                            oldIsland.getWorld().getName(),
-                            oldIsland.getMinX(),
-                            oldIsland.getMaxX(),
-                            oldIsland.getMinZ(),
-                            oldIsland.getMaxZ());
+            // Old island bounds
+            String worldName = oldIsland.getWorld().getName();
+            int minX = Math.min(oldIsland.getMinX(), oldIsland.getMaxX());
+            int maxX = Math.max(oldIsland.getMinX(), oldIsland.getMaxX());
+            int minZ = Math.min(oldIsland.getMinZ(), oldIsland.getMaxZ());
+            int maxZ = Math.max(oldIsland.getMinZ(), oldIsland.getMaxZ());
 
-            // Teleport online island members to the new island
+            // Teleport online island members to the new island that are on the old island
             onlineIslandMembers.forEach(islandMemberUser -> {
                 Player islandMemberPlayer = islandMemberUser.getPlayer();
-                islandMemberPlayer.setVelocity(new Vector(0, 0, 0));
-                islandMemberPlayer.setFallDistance(0F);
 
-                islandMemberPlayer.teleportAsync(newIslandSpawnPoint, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                if(isInBounds(islandMemberPlayer, worldName, minX, maxX, minZ, maxZ)) {
+                    islandMemberPlayer.setVelocity(new Vector(0, 0, 0));
+                    islandMemberPlayer.setFallDistance(0F);
+
+                    islandMemberPlayer.teleportAsync(newIslandSpawnPoint, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                }
             });
+
+            @NotNull CompletableFuture<List<UUID>> playerIdsOnOldIslandFuture = databaseManager.getPlayerLogoutLocationsTables()
+                    .getPlayerIdsWithinByBounds(worldName, minX, maxX, minZ, maxZ);
 
             // Queue any offline players within the old island's bounds to be teleported on login.
             playerIdsOnOldIslandFuture.thenAccept(playerIdsOnOldIsland -> playerIdsOnOldIsland.forEach(playerId -> {
@@ -279,6 +284,25 @@ public class IslandCreator {
 
         // Delete the old island
         islandsManager.deleteIsland(oldIsland, true, user.getUniqueId());
+    }
+
+    /**
+     * Is the player's location within the old island's bounds?
+     * @param player The {@link Player}.
+     * @param worldName The world name.
+     * @param minX The min X.
+     * @param maxX The max X.
+     * @param minZ The min Z.
+     * @param maxZ The max Z.
+     * @return true if the player is in the bounds, or false if not.
+     */
+    private boolean isInBounds(@NotNull Player player, @NotNull String worldName, int minX, int maxX, int minZ, int maxZ) {
+        @NotNull Location playerLocation = player.getLocation();
+        @NotNull String playerWorldName = playerLocation.getWorld().getName();
+        int playerX = playerLocation.getBlockX();
+        int playerZ = playerLocation.getBlockZ();
+
+        return playerWorldName.equals(worldName) && playerX >= minX && playerX <= maxX && playerZ >= minZ && playerZ <= maxZ;
     }
 
     /**

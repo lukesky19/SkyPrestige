@@ -127,21 +127,11 @@ public class PlayerLogoutLocationsTables {
     public @NotNull CompletableFuture<List<UUID>> getPlayerIdsWithinByBounds(@NotNull String worldName, int minX, int maxX, int minZ, int maxZ) {
         String selectSql = "SELECT player_id FROM " + tableName + " WHERE world = ? AND x >= ? AND x <= ? AND z >= ? AND z <= ?";
 
-        int updatedMinX = Math.min(minX, maxX);
-        int updatedMinZ = Math.min(minZ, maxZ);
-        int updatedMaxX = Math.max(minX, maxX);
-        int updatedMaxZ = Math.max(minZ, maxZ);
-
-        System.out.println(updatedMinX);
-        System.out.println(updatedMaxX);
-        System.out.println(updatedMinZ);
-        System.out.println(updatedMaxZ);
-
         StringParameter worldNameParameter = new StringParameter(worldName);
-        IntegerParameter minXParameter = new IntegerParameter(updatedMinX);
-        IntegerParameter minZParameter = new IntegerParameter(updatedMinZ);
-        IntegerParameter maxXParameter = new IntegerParameter(updatedMaxX);
-        IntegerParameter maxZParameter = new IntegerParameter(updatedMaxZ);
+        IntegerParameter minXParameter = new IntegerParameter(minX);
+        IntegerParameter maxXParameter = new IntegerParameter(maxX);
+        IntegerParameter minZParameter = new IntegerParameter(minZ);
+        IntegerParameter maxZParameter = new IntegerParameter(maxZ);
 
         List<Parameter<?>> parameterList = List.of(worldNameParameter, minXParameter, maxXParameter, minZParameter, maxZParameter);
 
@@ -152,13 +142,9 @@ public class PlayerLogoutLocationsTables {
                 while(resultSet.next()) {
                     UUID uuid = UUID.fromString(resultSet.getString("player_id"));
 
-                    System.out.println("Found " + uuid);
-
                     playerIds.add(uuid);
                 }
             } catch (SQLException e) {
-                System.out.println("SQL Exception");
-
                 throw new RuntimeException(e);
             }
 
