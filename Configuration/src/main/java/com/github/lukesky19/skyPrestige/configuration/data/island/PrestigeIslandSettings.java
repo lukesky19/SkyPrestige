@@ -1,6 +1,6 @@
 package com.github.lukesky19.skyPrestige.configuration.data.island;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.IslandSettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.island.IslandSettingsInterface;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 
 /**
@@ -15,7 +15,7 @@ public record PrestigeIslandSettings(
         boolean keepIslandSize,
         boolean keepGeneratorUpgrades,
         boolean resetPrestigePoints,
-        boolean removeRequiredPrestigePoints) implements IslandSettings {
+        boolean removeRequiredPrestigePoints) implements IslandSettingsInterface {
     @Override
     public boolean keepIslandSize() {
         return keepIslandSize;

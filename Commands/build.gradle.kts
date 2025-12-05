@@ -7,12 +7,8 @@ dependencies {
     compileOnly(project(":Configuration"))
     compileOnly(project(":Data"))
     compileOnly(project(":Database"))
+    compileOnly(project(":DataHandler"))
     compileOnly(project(":GUI"))
     compileOnly(project(":Hook"))
-    compileOnly(project(":Island"))
-    compileOnly(project(":Leaderboard"))
-    compileOnly(project(":Multiplier"))
     compileOnly(project(":Prestige"))
-    compileOnly(project(":Protection"))
-    compileOnly(project(":Vault"))
 }

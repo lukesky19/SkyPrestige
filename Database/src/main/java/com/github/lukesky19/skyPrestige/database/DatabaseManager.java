@@ -17,7 +17,6 @@
 */
 package com.github.lukesky19.skyPrestige.database;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.core.util.key.PageSlotKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
@@ -26,6 +25,7 @@ import com.github.lukesky19.skyPrestige.database.table.*;
 import com.github.lukesky19.skyPrestige.database.table.legacy.IslandVaultsTable;
 import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigeLevelsTable;
 import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigePointsTable;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

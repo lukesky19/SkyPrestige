@@ -6,8 +6,7 @@ dependencies {
     compileOnly(project(":Core"))
     compileOnly(project(":Data"))
     compileOnly(project(":Hook"))
-    compileOnly(project(":Island"))
-    compileOnly(project(":Leaderboard"))
+    compileOnly(project(":DataHandler"))
 
     // Hooks
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")

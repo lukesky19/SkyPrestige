@@ -5,19 +5,15 @@ include("Configuration")
 include("Core")
 include("Data")
 include("Database")
+include("DataHandler")
 include("GUI")
 include("Hook")
-include("Island")
-include("Leaderboard")
 include("Listener")
-include("Multiplier")
 include("Placeholder")
 include("Plugin")
 include("Prestige")
 include("Processor")
-include("Protection")
 include("Task")
-include("Vault")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
@@ -48,3 +44,4 @@ dependencyResolutionManagement {
         }
     }
 }
+include("Island")

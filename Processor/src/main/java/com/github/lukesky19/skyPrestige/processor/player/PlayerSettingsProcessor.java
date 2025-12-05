@@ -17,15 +17,16 @@
 */
 package com.github.lukesky19.skyPrestige.processor.player;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.InventorySettings;
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.PlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.inventory.InventorySettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.player.PlayerSettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.playtime.PlayTimeSettingsInterface;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.hook.hooks.PlayerAuctionsHook;
 import com.github.lukesky19.skyPrestige.hook.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.hook.hooks.SkySellWandsHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -36,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * This class manages the processing of {@link PlayerSettings}.
+ * This class manages the processing of {@link PlayerSettingsInterface}.
  */
 public class PlayerSettingsProcessor {
     private final @NotNull HookManager hookManager;
@@ -56,7 +57,7 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param playerSettings The {@link PlayerSettingsInterface} to process.
      * @param initiatingPlayer The player that initiated the processing of the player settings.
      * @param onlinePlayerList The list of online players to apply the settings to.
      * @param offlinePlayerList The list of offline players to apply the settings to.
@@ -64,7 +65,7 @@ public class PlayerSettingsProcessor {
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettings(
-            @NotNull PlayerSettings playerSettings,
+            @NotNull PlayerSettingsInterface playerSettings,
             @NotNull Player initiatingPlayer,
             @NotNull List<Player> onlinePlayerList,
             @NotNull List<OfflinePlayer> offlinePlayerList,
@@ -79,13 +80,13 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param playerSettings The {@link PlayerSettingsInterface} to process.
      * @param player The {@link Player} to apply the settings to.
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettingsOnLogin(
-            @NotNull PlayerSettings playerSettings,
+            @NotNull PlayerSettingsInterface playerSettings,
             @NotNull Player player,
             double startingMoney,
             boolean giveToAll) {
@@ -102,14 +103,14 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param playerSettings The {@link PlayerSettingsInterface} to process.
      * @param player The {@link Player} to process the settings for.
      * @param isPlayerInitiator Is the player the initiator?
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
     private void processPlayerSettings(
-            @NotNull PlayerSettings playerSettings,
+            @NotNull PlayerSettingsInterface playerSettings,
             @NotNull Player player,
             boolean isPlayerInitiator,
             double startingMoney,
@@ -130,26 +131,26 @@ public class PlayerSettingsProcessor {
     }
 
     /**
-     * Process the {@link InventorySettings} provided.
-     * @param playerInventorySettings The {@link InventorySettings} to apply to the player's Inventory.
-     * @param playerEnderChestInventorySettings The {@link InventorySettings} to apply to the player's Ender Chest.
+     * Process the {@link InventorySettingsInterface} provided.
+     * @param playerInventorySettings The {@link InventorySettingsInterface} to apply to the player's Inventory.
+     * @param playerEnderChestInventorySettings The {@link InventorySettingsInterface} to apply to the player's Ender Chest.
      * @param player The {@link Player} to process settings for.
      */
     private void processInventorySettings(
-            @NotNull InventorySettings playerInventorySettings,
-            @NotNull InventorySettings playerEnderChestInventorySettings,
+            @NotNull InventorySettingsInterface playerInventorySettings,
+            @NotNull InventorySettingsInterface playerEnderChestInventorySettings,
             @NotNull Player player) {
         processInventorySettings(playerInventorySettings, player.getInventory());
         processInventorySettings(playerEnderChestInventorySettings, player.getEnderChest());
     }
 
     /**
-     * Process the {@link InventorySettings} for the {@link Inventory} provided.
-     * @param inventorySettings The {@link InventorySettings}.
+     * Process the {@link InventorySettingsInterface} for the {@link Inventory} provided.
+     * @param inventorySettings The {@link InventorySettingsInterface}.
      * @param inventory The {@link Inventory}.
      */
     private void processInventorySettings(
-            @NotNull InventorySettings inventorySettings,
+            @NotNull InventorySettingsInterface inventorySettings,
             @NotNull Inventory inventory) {
         if(inventorySettings.clearInventory()) {
             SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
@@ -226,7 +227,7 @@ public class PlayerSettingsProcessor {
      * @param player The {@link Player}
      * @param playTimeSettings The {@link PlayTimeSettings}.
      */
-    private void resetPlayTime(@NotNull Player player, @NotNull PlayTimeSettings playTimeSettings) {
+    private void resetPlayTime(@NotNull Player player, @NotNull PlayTimeSettingsInterface playTimeSettings) {
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
 
         if(skyPlayTimeHook.isHooked()) {

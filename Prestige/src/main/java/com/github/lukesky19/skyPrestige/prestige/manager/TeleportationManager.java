@@ -21,11 +21,11 @@ import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -82,12 +82,12 @@ public class TeleportationManager {
         islandIdFuture.thenAccept(islandId -> {
             if(!player.isOnline() || !player.isConnected()) return;
             if(islandId == null) return;
-            @Nullable Settings settings = settingsManager.getSettings();
+            @Nullable Settings settings = settingsManager.getConfiguration();
             if(settings == null) {
                 logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
                 return;
             }
-            Locale locale = localeManager.getLocale();
+            Locale locale = localeManager.getConfiguration();
 
             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
             if(!bentoBoxHook.isHooked()) return;

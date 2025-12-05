@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.task.tasks;
 
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.LeaderboardManager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 

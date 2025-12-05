@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.listener.protection;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.ProtectionOrbManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,7 +57,7 @@ public class ProtectionOrbListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onItemClick(InventoryClickEvent inventoryClickEvent) {
-        @NotNull Locale locale = localeManager.getLocale();
+        @NotNull Locale locale = localeManager.getConfiguration();
         if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
         if(!(inventoryClickEvent.getClickedInventory() instanceof PlayerInventory)) return;
 

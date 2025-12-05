@@ -19,15 +19,15 @@ package com.github.lukesky19.skyPrestige.task;
 
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.MultiplierManager;
 import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.MultiplierTask;
 import com.github.lukesky19.skyPrestige.task.tasks.SaveTask;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -95,7 +95,7 @@ public class TaskManager {
      * Starts the {@link SaveTask}.
      */
     private void startSaveTask() {
-        @Nullable Settings settings = settingsManager.getSettings();
+        @Nullable Settings settings = settingsManager.getConfiguration();
         if(settings == null || settings.saveFrequencySeconds() == null) {
             plugin.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
             return;
@@ -128,7 +128,7 @@ public class TaskManager {
      * Starts the {@link CalculateTopTenTask}.
      */
     private void startMultiplierTask() {
-        @Nullable Settings settings = settingsManager.getSettings();
+        @Nullable Settings settings = settingsManager.getConfiguration();
         if(settings == null) return;
         if(!settings.multiplierEventSettings().enabled()) return;
 

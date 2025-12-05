@@ -18,10 +18,10 @@
 package com.github.lukesky19.skyPrestige.processor.prestige;
 
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;

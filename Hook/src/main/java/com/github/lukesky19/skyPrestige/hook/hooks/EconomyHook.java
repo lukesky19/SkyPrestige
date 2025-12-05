@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.hook.hooks;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;

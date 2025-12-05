@@ -17,8 +17,13 @@
 */
 package com.github.lukesky19.skyPrestige.listener.gui;
 
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
+import com.github.lukesky19.skylib.api.common.abstracts.data.HashMapDataManager;
 import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,8 +33,9 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -37,13 +43,16 @@ import java.util.UUID;
  */
 public class GUIListener implements Listener {
     private final @NotNull GUIManager guiManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
      * @param guiManager A {@link GUIManager} instance.
+     * @param hookManager A {@link HashMapDataManager} instance.
      */
-    public GUIListener(@NotNull GUIManager guiManager) {
+    public GUIListener(@NotNull GUIManager guiManager, @NotNull HookManager hookManager) {
         this.guiManager = guiManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -53,12 +62,19 @@ public class GUIListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onClick(InventoryClickEvent inventoryClickEvent) {
-        UUID uuid = inventoryClickEvent.getWhoClicked().getUniqueId();
+        if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
+        UUID uuid = player.getUniqueId();
         Inventory inventory = inventoryClickEvent.getClickedInventory();
 
-        @NotNull Optional<@NotNull BaseGUI> optionalBaseGUI = guiManager.getOpenGUI(uuid);
-        if(optionalBaseGUI.isEmpty()) return;
-        BaseGUI baseGUI = optionalBaseGUI.get();
+        @Nullable String islandId = null;
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        if(island != null) islandId = island.getUniqueId();
+
+        IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
+
+        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        if(baseGUI == null) return;
 
         baseGUI.handleGlobalClick(inventoryClickEvent);
 
@@ -76,12 +92,19 @@ public class GUIListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onDrag(InventoryDragEvent inventoryDragEvent) {
-        UUID uuid = inventoryDragEvent.getWhoClicked().getUniqueId();
+        if(!(inventoryDragEvent.getWhoClicked() instanceof Player player)) return;
+        UUID uuid = player.getUniqueId();
         Inventory inventory = inventoryDragEvent.getInventory();
 
-        @NotNull Optional<@NotNull BaseGUI> optionalBaseGUI = guiManager.getOpenGUI(uuid);
-        if (optionalBaseGUI.isEmpty()) return;
-        BaseGUI baseGUI = optionalBaseGUI.get();
+        @Nullable String islandId = null;
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        if(island != null) islandId = island.getUniqueId();
+
+        IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
+
+        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        if(baseGUI == null) return;
 
         baseGUI.handleGlobalDrag(inventoryDragEvent);
 
@@ -99,11 +122,18 @@ public class GUIListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onClose(InventoryCloseEvent inventoryCloseEvent) {
-        UUID uuid = inventoryCloseEvent.getPlayer().getUniqueId();
+        if(!(inventoryCloseEvent.getPlayer() instanceof Player player)) return;
+        UUID uuid = player.getUniqueId();
 
-        @NotNull Optional<@NotNull BaseGUI> optionalBaseGUI = guiManager.getOpenGUI(uuid);
-        if(optionalBaseGUI.isEmpty()) return;
-        BaseGUI baseGUI = optionalBaseGUI.get();
+        @Nullable String islandId = null;
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        if(island != null) islandId = island.getUniqueId();
+
+        IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
+
+        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        if(baseGUI == null) return;
 
         baseGUI.handleClose(inventoryCloseEvent);
     }

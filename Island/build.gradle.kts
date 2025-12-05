@@ -3,8 +3,10 @@ dependencies {
     compileOnly("com.github.lukesky19:SkyLib:1.4.0.0")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
 
+    compileOnly(project(":Core"))
     compileOnly(project(":Configuration"))
     compileOnly(project(":Data"))
     compileOnly(project(":Database"))
     compileOnly(project(":Hook"))
+    compileOnly(project(":Processor"))
 }

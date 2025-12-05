@@ -21,13 +21,14 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.RewardsGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandResetData;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -47,7 +48,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to view rewards for the next prestige level.
  */
-public class RewardsGUI extends ChestGUI {
+public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
     // The ConfirmPrestigeGUI to open after this one is closed. This GUI can also be opened via a command so they don't always have a ConfirmPrestigeGUI to go back to.
     private final @Nullable ConfirmPrestigeGUI confirmPrestigeGUI;
 
@@ -72,7 +73,8 @@ public class RewardsGUI extends ChestGUI {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link AbstractGUIManager} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      * @param confirmPrestigeGUI The {@link ConfirmPrestigeGUI} the player came from, if any.
      * @param islandResetData The {@link IslandResetData}.
@@ -80,11 +82,12 @@ public class RewardsGUI extends ChestGUI {
     public RewardsGUI(
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull AbstractGUIManager guiManager,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
             @Nullable ConfirmPrestigeGUI confirmPrestigeGUI,
             @NotNull IslandResetData islandResetData) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.confirmPrestigeGUI = confirmPrestigeGUI;
 
@@ -98,7 +101,8 @@ public class RewardsGUI extends ChestGUI {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link AbstractGUIManager} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      * @param confirmPrestigeGUI The {@link ConfirmPrestigeGUI} the player came from, if any.
      * @param prestigeConfig The {@link PrestigeConfig}.
@@ -106,11 +110,12 @@ public class RewardsGUI extends ChestGUI {
     public RewardsGUI(
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull AbstractGUIManager guiManager,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
             @Nullable ConfirmPrestigeGUI confirmPrestigeGUI,
             @NotNull PrestigeConfig prestigeConfig) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.confirmPrestigeGUI = confirmPrestigeGUI;
 
@@ -229,28 +234,6 @@ public class RewardsGUI extends ChestGUI {
     }
 
     /**
-     * Closes the GUI and opens the confirm prestige GUI if the player came form that GUI.
-     */
-    @Override
-    public void close() {
-        if(confirmPrestigeGUI != null) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-                guiManager.removeOpenGUI(uuid);
-            }, 1L);
-
-            confirmPrestigeGUI.open();
-        } else {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-                guiManager.removeOpenGUI(uuid);
-            }, 1L);
-        }
-    }
-
-    /**
      * Handles when the GUI is closed by the player.
      * @param inventoryCloseEvent An {@link InventoryCloseEvent}
      */
@@ -258,10 +241,7 @@ public class RewardsGUI extends ChestGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        Player player = (Player) inventoryCloseEvent.getPlayer();
-        UUID uuid = player.getUniqueId();
-
-        guiManager.removeOpenGUI(uuid);
+        guiManager.removeOpenGUI(identifier);
 
         if(confirmPrestigeGUI != null) confirmPrestigeGUI.open();
     }
@@ -373,16 +353,12 @@ public class RewardsGUI extends ChestGUI {
 
         createActionButton(exitConfig, inventoryClickEvent ->
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                    guiManager.removeOpenGUI(identifier);
+
                     if(confirmPrestigeGUI != null) {
-                        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-                        guiManager.removeOpenGUI(uuid);
-
                         confirmPrestigeGUI.open();
-                    } else {
-                        player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-                        guiManager.removeOpenGUI(uuid);
                     }
                 }, 1L));
     }

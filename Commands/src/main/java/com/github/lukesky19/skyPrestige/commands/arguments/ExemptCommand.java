@@ -19,12 +19,12 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -81,24 +81,21 @@ public class ExemptCommand {
                 .then(Commands.argument("island_id", StringArgumentType.word())
                         .suggests((ctx, suggestionsBuilder) -> {
                             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-                            if(!bentoBoxHook.isHooked()) return suggestionsBuilder.buildFuture();
                             Map<String, Message> suggestionsMap = new HashMap<>();
 
                             plugin.getServer().getOnlinePlayers().forEach(player -> {
-                                @Nullable List<Island> islands = bentoBoxHook.getIslands(player.getUniqueId());
-                                if(islands != null) {
-                                    islands.forEach(island -> {
-                                        String islandId = island.getUniqueId();
-                                        if (!suggestionsMap.containsKey(islandId)) {
-                                            String islandMembersNames = island.getMemberSet().stream().map(memberId ->
-                                                            plugin.getServer().getOfflinePlayer(memberId).getName())
-                                                    .collect(Collectors.joining(","));
-                                            Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
+                                @NotNull List<Island> islands = bentoBoxHook.getIslands(player.getUniqueId());
+                                islands.forEach(island -> {
+                                    String islandId = island.getUniqueId();
+                                    if (!suggestionsMap.containsKey(islandId)) {
+                                        String islandMembersNames = island.getMemberSet().stream().map(memberId ->
+                                                        plugin.getServer().getOfflinePlayer(memberId).getName())
+                                                .collect(Collectors.joining(","));
+                                        Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
 
-                                            suggestionsMap.put(islandId, toolTip);
-                                        }
-                                    });
-                                }
+                                        suggestionsMap.put(islandId, toolTip);
+                                    }
+                                });
                             });
 
                             suggestionsMap.forEach(suggestionsBuilder::suggest);
@@ -106,10 +103,10 @@ public class ExemptCommand {
                             return suggestionsBuilder.buildFuture();
                         })
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             String islandId = ctx.getArgument("island_id", String.class);
-                            @Nullable IslandData islandData = islandDataManager.getIslandData(islandId);
+                            @Nullable IslandData islandData = islandDataManager.getData(islandId);
                             if(islandData == null) {
                                 if(sender instanceof Player) {
                                     sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));

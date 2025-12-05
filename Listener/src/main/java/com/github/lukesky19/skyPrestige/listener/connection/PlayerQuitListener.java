@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.listener.connection;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -72,16 +72,14 @@ public class PlayerQuitListener implements Listener {
         UUID uuid = player.getUniqueId();
         Location playerLocation = player.getLocation();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        if(!bentoBoxHook.isHooked()) return;
         List<Island> islandList = bentoBoxHook.getIslands(uuid);
-        if(islandList == null) return;
 
         islandList.stream()
                 .filter(island -> !isIslandMemberOnline(island))
                 .forEach(island -> {
                     String islandId = island.getUniqueId();
-                    islandDataManager.saveIslandData(islandId)
-                            .whenComplete((v, t) -> islandDataManager.removeIslandData(islandId));
+                    islandDataManager.saveData(islandId)
+                            .whenComplete((v, t) -> islandDataManager.removeDataByIdentifier(islandId));
                 });
 
         databaseManager.getPlayerLogoutLocationsTables().setPlayerLogoutLocation(uuid, playerLocation);

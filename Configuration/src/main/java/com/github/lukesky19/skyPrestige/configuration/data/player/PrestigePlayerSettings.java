@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.player;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.InventorySettings;
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.PlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.inventory.EnderChestInventorySettings;
 import com.github.lukesky19.skyPrestige.configuration.data.inventory.PlayerInventorySettings;
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.inventory.InventorySettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.player.PlayerSettingsInterface;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,14 +41,14 @@ public record PrestigePlayerSettings(
         boolean resetExp,
         boolean resetMoney,
         boolean resetAuctionItems,
-        @NotNull PlayTimeSettings playTimeSettings) implements PlayerSettings {
+        @NotNull PlayTimeSettings playTimeSettings) implements PlayerSettingsInterface {
     @Override
-    public @NotNull InventorySettings playerInventorySettings() {
+    public @NotNull InventorySettingsInterface playerInventorySettings() {
         return inventorySettings;
     }
 
     @Override
-    public @NotNull InventorySettings playerEnderChestSettings() {
+    public @NotNull InventorySettingsInterface playerEnderChestSettings() {
         return enderChestSettings;
     }
 }

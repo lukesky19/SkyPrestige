@@ -17,7 +17,6 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.core.util.key.PageSlotKey;
 import com.github.lukesky19.skyPrestige.core.util.parameter.ByteArrayParameter;
 import com.github.lukesky19.skyPrestige.core.util.parameter.CaseSensitiveStringParameter;
@@ -26,6 +25,7 @@ import com.github.lukesky19.skyPrestige.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.leaderboard.TopTen;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.database.parameter.Parameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.DoubleParameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
@@ -79,7 +79,6 @@ public class IslandDataTable {
                 "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                         "island_id TEXT UNIQUE NOT NULL, " +
-//                        "owner_name TEXT NULL, " +
                         "level INTEGER NOT NULL DEFAULT 0, " +
                         "points DOUBLE NOT NULL, " +
                         "vault_data BLOB NOT NULL, " +
@@ -100,13 +99,14 @@ public class IslandDataTable {
      * Load the prestige level, points, vault data, and exemption status for the island id provided.
      * @param islandId The island id to load data for.
      * @param islandData The {@link IslandData} for the island.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
+    public @NotNull CompletableFuture<Void> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
         String selectSql = "SELECT level, points, vault_data, exempt FROM " + tableName + " WHERE island_id = ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
-        queueManager.queueReadTransaction(selectSql, List.of(islandIdParameter), resultSet -> {
+        return queueManager.queueReadTransaction(selectSql, List.of(islandIdParameter), resultSet -> {
             try {
                 if(resultSet.next()) {
                     int level = resultSet.getInt("level");

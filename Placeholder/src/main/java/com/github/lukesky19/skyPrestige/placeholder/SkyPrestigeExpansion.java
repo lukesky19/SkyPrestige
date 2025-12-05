@@ -20,10 +20,10 @@ package com.github.lukesky19.skyPrestige.placeholder;
 import com.github.lukesky19.skyPrestige.core.util.number.NumberUtils;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.leaderboard.Position;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -53,7 +53,8 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      */
     public SkyPrestigeExpansion(
             @NotNull IslandDataManager islandDataManager,
-            @NotNull LeaderboardManager leaderboardManager, @NotNull HookManager hookManager) {
+            @NotNull LeaderboardManager leaderboardManager,
+            @NotNull HookManager hookManager) {
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.hookManager = hookManager;
@@ -122,7 +123,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(!currentIsland.getMemberSet().contains(uuid)) return getPrimaryIslandPrestigeLevel(player);
 
                 // Get the IslandData for the current island
-                @Nullable IslandData islandData = islandDataManager.getIslandData(currentIsland.getUniqueId());
+                @Nullable IslandData islandData = islandDataManager.getData(currentIsland.getUniqueId());
                 // If the island doesn't have any island data, return the prestige level for the player's primary island.
                 if(islandData == null) return getPrimaryIslandPrestigeLevel(player);
 
@@ -143,7 +144,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(!currentIsland.getMemberSet().contains(uuid)) return getPrimaryIslandPrestigePoints(player);
 
                 // Get the IslandData for the current island
-                @Nullable IslandData islandData = islandDataManager.getIslandData(currentIsland.getUniqueId());
+                @Nullable IslandData islandData = islandDataManager.getData(currentIsland.getUniqueId());
                 // If the island doesn't have any island data, return the prestige points for the player's primary island.
                 if(islandData == null) return getPrimaryIslandPrestigePoints(player);
 
@@ -205,15 +206,13 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(!bentoBoxHook.isHooked()) return "0";
 
-        // Find the first primary island
-        Optional<Island> optionalPrimaryIsland = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
-        // If no primary island is found, return 0
-        if(optionalPrimaryIsland.isEmpty()) return "0";
-        // Get the primary island
-        Island primaryIsland = optionalPrimaryIsland.get();
+        // Find the active island
+        @Nullable Island primaryIsland = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
+        // If no island is found, return 0
+        if(primaryIsland == null) return "0";
 
         // Get the IslandData for the primary island
-        @Nullable IslandData primaryIslandData = islandDataManager.getIslandData(primaryIsland.getUniqueId());
+        @Nullable IslandData primaryIslandData = islandDataManager.getData(primaryIsland.getUniqueId());
         // If no island data was found, return 0
         if(primaryIslandData == null) return "0";
 
@@ -231,15 +230,13 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(!bentoBoxHook.isHooked()) return "0";
 
-        // Find the first primary island
-        Optional<Island> optionalPrimaryIsland = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
-        // If no primary island is found, return 0
-        if(optionalPrimaryIsland.isEmpty()) return "0";
-        // Get the primary island
-        Island primaryIsland = optionalPrimaryIsland.get();
+        // Find the active island
+        @Nullable Island primaryIsland = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
+        // If no island is found, return 0
+        if(primaryIsland == null) return "0";
 
         // Get the IslandData for the primary island
-        @Nullable IslandData primaryIslandData = islandDataManager.getIslandData(primaryIsland.getUniqueId());
+        @Nullable IslandData primaryIslandData = islandDataManager.getData(primaryIsland.getUniqueId());
         // If no island data was found, return 0
         if(primaryIslandData == null) return "0";
 

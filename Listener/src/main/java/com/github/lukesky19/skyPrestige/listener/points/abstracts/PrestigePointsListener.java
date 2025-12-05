@@ -19,16 +19,16 @@ package com.github.lukesky19.skyPrestige.listener.points.abstracts;
 
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.MultiplierManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -104,7 +104,7 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      * @param event The event to process.
      */
     protected void process(E event) {
-        @Nullable Settings settings = settingsManager.getSettings();
+        @Nullable Settings settings = settingsManager.getConfiguration();
         if(settings == null) return;
 
         @Nullable EventContext eventContext = extractor().extract(event);
@@ -120,7 +120,6 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
 
         // Island Check
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        if(!bentoBoxHook.isHooked()) return;
         Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
         if(optionalIsland.isEmpty()) return;
         Island island = optionalIsland.get();
@@ -129,7 +128,7 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
         if(!island.getMemberSet().contains(playerId)) return;
 
         // Island Data check.
-        IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
             return;

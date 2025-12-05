@@ -6,12 +6,12 @@ dependencies {
     compileOnly(project(":Core"))
     compileOnly(project(":Configuration"))
     compileOnly(project(":Data"))
+    compileOnly(project(":Database"))
 
     // Hooks
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.11.7")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("world.bentobox:bskyblock:1.18.1-SNAPSHOT")
     compileOnly("world.bentobox:magiccobblestonegenerator:2.6.0-SNAPSHOT") {
         exclude("org.bukkit", "bukkit")
     }

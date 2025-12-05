@@ -19,15 +19,15 @@ package com.github.lukesky19.skyPrestige.listener.points;
 
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.core.util.enums.SkyPrestigeNamespacedKeys;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.MultiplierManager;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Container;

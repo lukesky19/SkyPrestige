@@ -7,6 +7,6 @@ dependencies {
     compileOnly(project(":Configuration"))
     compileOnly(project(":Data"))
     compileOnly(project(":Database"))
+    compileOnly(project(":DataHandler"))
     compileOnly(project(":Hook"))
-    compileOnly(project(":Vault"))
 }

@@ -58,17 +58,13 @@ dependencies {
     implementation(project(":Database"))
     implementation(project(":GUI"))
     implementation(project(":Hook"))
-    implementation(project(":Island"))
-    implementation(project(":Leaderboard"))
+    implementation(project(":DataHandler"))
     implementation(project(":Listener"))
-    implementation(project(":Multiplier"))
     implementation(project(":Placeholder"))
     implementation(project(":Plugin"))
     implementation(project(":Prestige"))
     implementation(project(":Processor"))
-    implementation(project(":Protection"))
     implementation(project(":Task"))
-    implementation(project(":Vault"))
 }
 
 java {

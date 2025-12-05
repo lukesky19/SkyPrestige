@@ -17,9 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.hook.hooks;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bskyblock.BSkyBlock;
 import world.bentobox.magiccobblestonegenerator.StoneGeneratorAddon;
 import world.bentobox.magiccobblestonegenerator.database.objects.GeneratorDataObject;
 import world.bentobox.magiccobblestonegenerator.managers.StoneGeneratorManager;
@@ -52,7 +51,7 @@ public class MagicCobblestoneGeneratorHook implements Hook {
     }
 
     /**
-     * Attempt to get the {@link BSkyBlock} addon from BentoBox.
+     * Attempt to get the magic cobblestone generator addon from BentoBox.
      */
     @Override
     public void initialize() {

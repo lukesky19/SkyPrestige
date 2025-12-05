@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.configuration.manager.gui;
 
 import com.github.lukesky19.skyPrestige.configuration.data.gui.*;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;

@@ -22,15 +22,16 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.VaultManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
@@ -56,7 +57,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to allow island members to store items that persist across prestiges.
  */
-public class VaultGUI extends ChestGUI {
+public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
@@ -76,6 +77,7 @@ public class VaultGUI extends ChestGUI {
      * @param plugin A {@link JavaPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param vaultManager A {@link VaultManager} instance.
@@ -87,13 +89,14 @@ public class VaultGUI extends ChestGUI {
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull GUIManager guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull DatabaseManager databaseManager,
             @NotNull LocaleManager localeManager,
             @NotNull VaultManager vaultManager,
             @NotNull String islandId,
             @NotNull IslandData islandData,
             @NotNull Player player) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
@@ -168,35 +171,6 @@ public class VaultGUI extends ChestGUI {
         return super.update();
     }
 
-    @Override
-    public boolean open() {
-        if(inventoryView == null) {
-            // If the InventoryView was not created, log a warning and return false.
-            logger.warn(AdventureUtil.deserialize("Unable to open the InventoryView as it was not created."));
-            return false;
-        }
-
-        // Close the current Inventory the player has open (if any)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-            guiManager.removeOpenGUI(uuid);
-
-            guiManager.removeOpenGUI(islandId, uuid);
-        }, 1L);
-
-        // Then 1 tick later, open the GUI and track that it is open for the player.
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            inventoryView.open();
-
-            guiManager.addOpenGUI(uuid, this);
-
-            guiManager.addOpenGUI(islandId, uuid, this);
-        }, 2L);
-
-        return true;
-    }
-
     /**
      * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
      * Then stores the items stored inside the vault to the database.
@@ -207,9 +181,7 @@ public class VaultGUI extends ChestGUI {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-            guiManager.removeOpenGUI(uuid);
-
-            guiManager.removeOpenGUI(islandId, uuid);
+            guiManager.removeOpenGUI(identifier);
 
             databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
         }, 1L);
@@ -227,18 +199,14 @@ public class VaultGUI extends ChestGUI {
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-                guiManager.removeOpenGUI(uuid);
-
-                guiManager.removeOpenGUI(islandId, uuid);
+                guiManager.removeOpenGUI(identifier);
 
                 databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
             }, 1L);
         } else {
             player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-            guiManager.removeOpenGUI(uuid);
-
-            guiManager.removeOpenGUI(islandId, uuid);
+            guiManager.removeOpenGUI(identifier);
 
             databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
         }
@@ -253,9 +221,7 @@ public class VaultGUI extends ChestGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        guiManager.removeOpenGUI(uuid);
-
-        guiManager.removeOpenGUI(islandId, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
     }
@@ -299,7 +265,7 @@ public class VaultGUI extends ChestGUI {
     public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {
         inventoryClickEvent.setCancelled(true);
         if(pageConfig == null) return;
-        @NotNull Locale locale = localeManager.getLocale();
+        @NotNull Locale locale = localeManager.getConfiguration();
         @NotNull Map<Integer, ItemStack> vaultItems = islandData.getVaultItemsByPageNumber(pageNum);
 
         int clickedSlot = inventoryClickEvent.getSlot();
@@ -453,12 +419,7 @@ public class VaultGUI extends ChestGUI {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () ->
-                    player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
-
-            guiManager.removeOpenGUI(uuid);
-        });
+        createActionButton(exitConfig, inventoryClickEvent -> close());
     }
 
     /**

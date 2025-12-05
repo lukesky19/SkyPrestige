@@ -20,13 +20,13 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.ValuesGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to view the prestige points earned for certain actions.
  */
-public class ValuesGUI extends ChestGUI {
+public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull GUIManager guiManager;
     // Config
@@ -61,15 +61,17 @@ public class ValuesGUI extends ChestGUI {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link AbstractGUIManager} instance.
+     * @param guiManager A {@link GUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      */
     public ValuesGUI(
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull GUIManager guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
 
@@ -109,14 +111,14 @@ public class ValuesGUI extends ChestGUI {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
-            guiManager.removeOpenGUI(uuid);
+            guiManager.removeOpenGUI(identifier);
         }, 1L);
 
         // Then 1 tick later, open the GUI and track that it is open for the player.
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             inventoryView.open();
 
-            guiManager.addOpenGUI(uuid, this);
+            guiManager.addOpenGUI(identifier, this);
         }, 2L);
 
         return true;
@@ -160,50 +162,6 @@ public class ValuesGUI extends ChestGUI {
         createPrevPageButton();
 
         return super.update();
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
-     */
-    @Override
-    public void close() {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(player.getUniqueId());
-        }, 1L);
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * If the plugin is being disabled, the scheduler won't be used as it is unavailable during server shutdown.
-     * @param onDisable Is the plugin being disabled?
-     */
-    @Override
-    public void unload(boolean onDisable) {
-        if(!onDisable) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-                guiManager.removeOpenGUI(uuid);
-            }, 1L);
-        } else {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(uuid);
-        }
-    }
-
-    /**
-     * Handles when the GUI is closed by the player.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(uuid);
     }
 
     /**

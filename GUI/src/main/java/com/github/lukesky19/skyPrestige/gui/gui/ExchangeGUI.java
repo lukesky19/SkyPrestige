@@ -22,14 +22,14 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
@@ -39,7 +39,6 @@ import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -55,12 +54,11 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to view rewards for the next prestige level.
  */
-public class ExchangeGUI extends ChestGUI {
+public class ExchangeGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIManager guiManager;
     // Island Data
-    private final @NotNull String islandId;
     private final @NotNull IslandData islandData;
     // Config
     private final @Nullable ExchangeGUIConfig exchangeGUIConfig;
@@ -73,9 +71,9 @@ public class ExchangeGUI extends ChestGUI {
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link AbstractGUIManager} instance.
+     * @param guiManager An {@link GUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
-     * @param islandId The island id that prestige points are being exchanged with.
      * @param islandData The {@link IslandData} for the island.
      */
     public ExchangeGUI(
@@ -83,15 +81,14 @@ public class ExchangeGUI extends ChestGUI {
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull GUIManager guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
-            @NotNull String islandId,
             @NotNull IslandData islandData) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
         this.localeManager = localeManager;
 
-        this.islandId = islandId;
         this.islandData = islandData;
 
         exchangeGUIConfig = guiConfigManager.getExchangeGUIConfig();
@@ -116,35 +113,6 @@ public class ExchangeGUI extends ChestGUI {
         String guiName = Objects.requireNonNullElse(exchangeGUIConfig.guiName(), "");
 
         return create(guiType, guiName, List.of());
-    }
-
-    @Override
-    public boolean open() {
-        if(inventoryView == null) {
-            // If the InventoryView was not created, log a warning and return false.
-            logger.warn(AdventureUtil.deserialize("Unable to open the InventoryView as it was not created."));
-            return false;
-        }
-
-        // Close the current Inventory the player has open (if any)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-            guiManager.removeOpenGUI(uuid);
-
-            guiManager.removeOpenGUI(islandId, uuid);
-        }, 1L);
-
-        // Then 1 tick later, open the GUI and track that it is open for the player.
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            inventoryView.open();
-
-            guiManager.addOpenGUI(uuid, this);
-
-            guiManager.addOpenGUI(islandId, uuid, this);
-        }, 2L);
-
-        return true;
     }
 
     /**
@@ -187,58 +155,6 @@ public class ExchangeGUI extends ChestGUI {
         createPrevPageButton();
 
         return super.update();
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
-     */
-    @Override
-    public void close() {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(player.getUniqueId());
-
-            guiManager.removeOpenGUI(islandId, uuid);
-        }, 1L);
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * If the plugin is being disabled, the scheduler won't be used as it is unavailable during server shutdown.
-     * @param onDisable Is the plugin being disabled?
-     */
-    @Override
-    public void unload(boolean onDisable) {
-        if(!onDisable) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-                guiManager.removeOpenGUI(uuid);
-
-                guiManager.removeOpenGUI(islandId, uuid);
-            }, 1L);
-        } else {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(uuid);
-
-            guiManager.removeOpenGUI(islandId, uuid);
-        }
-    }
-
-    /**
-     * Handles when the GUI is closed by the player.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(uuid);
-
-        guiManager.removeOpenGUI(islandId, uuid);
     }
 
     /**
@@ -374,7 +290,7 @@ public class ExchangeGUI extends ChestGUI {
     private void createExchangesButtons() {
         if(exchangeGUIConfig == null) return;
         if(pageConfig == null) return;
-        @NotNull Locale locale = localeManager.getLocale();
+        @NotNull Locale locale = localeManager.getConfiguration();
 
         for(ExchangeGUIConfig.ExchangeButtonConfig exchangeButtonConfig : pageConfig.exchangeButtons()) {
             if(exchangeButtonConfig.slot() == null) {
@@ -410,7 +326,7 @@ public class ExchangeGUI extends ChestGUI {
                 exchangeButtonConfig.exchangeCommands().forEach(command ->
                         server.dispatchCommand(commandSender, PlaceholderAPIUtil.parsePlaceholders(player, command)));
 
-                guiManager.refreshExchangeGUIs(islandId);
+                if(identifier.islandId() != null) guiManager.refreshExchangeGUIs(identifier.islandId());
             });
         }
     }

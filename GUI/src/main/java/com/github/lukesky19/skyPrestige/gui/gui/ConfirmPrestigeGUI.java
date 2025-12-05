@@ -24,14 +24,14 @@ import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSett
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandResetData;
-import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
@@ -56,13 +56,13 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to confirm an island prestige.
  */
-public class ConfirmPrestigeGUI extends ChestGUI {
+public class ConfirmPrestigeGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull SkyPlugin plugin;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
 
-    private final @NotNull IslandResetData prestigeData;
+    private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
     private final @Nullable ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
@@ -72,24 +72,26 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
-     * @param prestigeData The {@link IslandResetData}
+     * @param guiManager A {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param islandResetData The {@link IslandResetData}
      * @param consumer The consumer that will prestige the island once the player confirms it.
      */
     public ConfirmPrestigeGUI(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull AbstractGUIManager guiManager,
-            @NotNull IslandResetData prestigeData,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
+            @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, prestigeData.getPlayer());
+        super(plugin, guiManager, identifier, islandResetData.getPlayer());
 
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
 
-        this.prestigeData = prestigeData;
+        this.islandResetData = islandResetData;
         this.consumer = consumer;
 
         confirmPrestigeGUIConfig = guiConfigManager.getConfirmPrestigeGUIConfig();
@@ -100,7 +102,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      * @return true if created successfully, otherwise false.
      */
     public boolean create() {
-        if(!prestigeData.isPrestige()) {
+        if(!islandResetData.isPrestige()) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid prestige data."));
             return false;
         }
@@ -172,17 +174,6 @@ public class ConfirmPrestigeGUI extends ChestGUI {
     }
 
     /**
-     * Handles when the inventory is closed. Ignores closures with reason UNLOADED and OPEN_NEW.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(inventoryCloseEvent.getPlayer().getUniqueId());
-    }
-
-    /**
      * Handles when items are dragged across the player's inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
@@ -245,7 +236,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         }
 
         createActionButton(confirmConfig, inventoryClickEvent -> {
-            consumer.accept(prestigeData);
+            consumer.accept(islandResetData);
 
             close();
         });
@@ -271,7 +262,7 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      */
     private void createSelectedBlueprintButton() {
         assert confirmPrestigeGUIConfig != null;
-        @Nullable BlueprintBundle blueprint = prestigeData.getBlueprint();
+        @Nullable BlueprintBundle blueprint = islandResetData.getBlueprint();
         if(blueprint == null) return;
         GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -299,12 +290,12 @@ public class ConfirmPrestigeGUI extends ChestGUI {
         }
 
         createActionButton(rewardsConfig, inventoryClickEvent -> {
-            Locale locale = localeManager.getLocale();
+            Locale locale = localeManager.getConfiguration();
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-            guiManager.removeOpenGUI(player.getUniqueId());
+            close();
 
-            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, player, this, prestigeData);
+            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, this, islandResetData);
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
@@ -333,8 +324,8 @@ public class ConfirmPrestigeGUI extends ChestGUI {
      */
     private void createConditionalButtons() {
         if(confirmPrestigeGUIConfig == null) return;
-        if(prestigeData.getPrestigeConfig() == null) return;
-        PrestigeConfig.PrestigeSettings prestigeSettings = prestigeData.getPrestigeConfig().prestigeSettings();
+        if(islandResetData.getPrestigeConfig() == null) return;
+        PrestigeConfig.PrestigeSettings prestigeSettings = islandResetData.getPrestigeConfig().prestigeSettings();
         List<TagResolver.Single> emptyList = List.of();
 
         if(!prestigeSettings.playerSettings().playerInventorySettings().clearInventory()) {

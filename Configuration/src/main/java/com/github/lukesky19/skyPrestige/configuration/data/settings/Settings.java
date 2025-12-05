@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.settings;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.IslandSettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.island.IslandSettingsInterface;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.NamespacedKey;
@@ -79,7 +79,7 @@ public record Settings(
             boolean keepIslandFlags,
             boolean resetPrestigePoints,
             boolean resetPrestigeLevel,
-            boolean clearVault) implements IslandSettings {
+            boolean clearVault) implements IslandSettingsInterface {
         @Override
         public boolean removeRequiredPrestigePoints() {
             return false;

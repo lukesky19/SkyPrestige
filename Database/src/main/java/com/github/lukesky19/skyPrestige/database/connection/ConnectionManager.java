@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.database.connection;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.database.connection.AbstractConnectionManager;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariConfig;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariDataSource;

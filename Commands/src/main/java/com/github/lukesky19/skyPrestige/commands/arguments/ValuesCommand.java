@@ -20,10 +20,11 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.gui.gui.ValuesGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -69,11 +70,13 @@ public class ValuesCommand {
         return Commands.literal("values")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.values") && ctx.getSender() instanceof Player)
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
 
+                    IslandIdUUIDKey identifier = new IslandIdUUIDKey(null, player.getUniqueId());
+
                     // Create the ValuesGUI
-                    ValuesGUI gui = new ValuesGUI(plugin, guiConfigManager, guiManager, player);
+                    ValuesGUI gui = new ValuesGUI(plugin, guiConfigManager, guiManager, identifier, player);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

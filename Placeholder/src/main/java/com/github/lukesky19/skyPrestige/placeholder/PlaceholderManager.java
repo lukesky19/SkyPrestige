@@ -17,10 +17,10 @@
 */
 package com.github.lukesky19.skyPrestige.placeholder;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

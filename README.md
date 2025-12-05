@@ -19,7 +19,6 @@
 * [SkyLib](https://github.com/lukesky19/SkyLib)
 
 ## Soft Dependencies
-* BSkyBlock addon
 * MagicCobblestoneGenerator addon
 * PlaceholderAPI
 * PlayerAuctions
@@ -58,7 +57,7 @@
 * `skyprestige.commands.skyprestige.info` - The permission to open the info GUI.
 * `skyprestige.commands.skyprestige.leaderboard` - The permission to view the prestige leaderboard.
 * `skyprestige.commands.skyprestige.level` - The permission to set an island's prestige level.
-* `skyprestige.commands.skyprestige.multiplier` - The permission to manage and view information related to the prestige points multiplier.
+* `skyprestige.commands.skyprestige.multiplier` - The permission to manage and view information related to the prestige points' multiplier.
 * `skyprestige.commands.skyprestige.multiplier.event` - The permission to view either the remaining event time, the time until the next event, or if the event is disabled.
 * `skyprestige.commands.skyprestige.multiplier.add` - The permission to add to the current additional multiplier.
 * `skyprestige.commands.skyprestige.multiplier.remove` - The permission to remove from the current additional multiplier.

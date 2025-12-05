@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.hook.hooks;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import dev.rosewood.rosestacker.api.RoseStackerAPI;
 import dev.rosewood.rosestacker.stack.StackedEntity;
 import org.bukkit.block.Block;

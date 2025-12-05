@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -58,7 +58,7 @@ public class ReloadCommand {
         return Commands.literal("reload")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.reload"))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
 
                     plugin.reload();
 

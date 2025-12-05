@@ -1,8 +1,8 @@
 package com.github.lukesky19.skyPrestige.hook.hooks;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
 import com.github.lukesky19.skySellWands.SkySellWandsAPI;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skyplaytime.SkyPlayTimeAPI;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;

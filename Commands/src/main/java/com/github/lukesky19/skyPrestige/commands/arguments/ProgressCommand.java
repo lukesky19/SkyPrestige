@@ -23,12 +23,13 @@ import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManag
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.prestige.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.gui.gui.ProgressGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -90,7 +91,7 @@ public class ProgressCommand {
         return Commands.literal("progress")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.progress") && ctx.getSender() instanceof Player)
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
                     Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
@@ -99,21 +100,22 @@ public class ProgressCommand {
                         return 0;
                     }
 
-                    IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
+                    IslandData islandData = islandDataManager.getData(island.getUniqueId());
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
                         return 0;
                     }
 
-                    PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getPrestigeConfig(islandData.getPrestigeLevel() + 1);
+                    PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
                     if(nextPrestigeLevelConfig == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressMaxPrestigeLevel()));
                         return 0;
                     }
 
+                    IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), uuid);
                     // Create the ProgressGUI
-                    ProgressGUI gui = new ProgressGUI(plugin, settingsManager, localeManager, guiConfigManager, guiManager, player, island, islandData, nextPrestigeLevelConfig);
+                    ProgressGUI gui = new ProgressGUI(plugin, settingsManager, localeManager, guiConfigManager, guiManager, identifier, player, island, islandData, nextPrestigeLevelConfig);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

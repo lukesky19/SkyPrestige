@@ -22,14 +22,15 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.gui.gui.ExchangeGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -40,7 +41,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -92,23 +92,20 @@ public class ExchangeCommand {
         return Commands.literal("exchange")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.exchange"))
                 .executes(ctx -> {
-                    @Nullable Settings settings = settingsManager.getSettings();
-                    Locale locale = localeManager.getLocale();
+                    @Nullable Settings settings = settingsManager.getConfiguration();
+                    Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
                     BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
                     if(!bentoBoxHook.isHooked()) return 0;
 
-                    Optional<Island> optionalIsland = bentoBoxHook.getIsland(player.getWorld(), uuid);
-                    if(optionalIsland.isEmpty()) {
+                    @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+                    if(island == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePlayerNotOnIsland()));
                         return 0;
                     }
 
-                    Island island = optionalIsland.get();
-                    String islandId = island.getUniqueId();
-
-                    IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
+                    @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
@@ -126,8 +123,9 @@ public class ExchangeCommand {
                         return 0;
                     }
 
+                    IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), uuid);
                     // Create the ExchangeGUI
-                    ExchangeGUI gui = new ExchangeGUI(plugin, localeManager, guiConfigManager, guiManager, player, islandId, islandData);
+                    ExchangeGUI gui = new ExchangeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, player, islandData);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

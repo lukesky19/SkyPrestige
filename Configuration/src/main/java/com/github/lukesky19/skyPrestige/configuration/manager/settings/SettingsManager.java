@@ -18,14 +18,10 @@
 package com.github.lukesky19.skyPrestige.configuration.manager.settings;
 
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
-import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,64 +34,25 @@ import java.util.Objects;
 /**
  * This class manages the plugin's settings.
  */
-public class SettingsManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull Path settingsPath;
-    private @Nullable Settings settings;
-
+public class SettingsManager extends SimpleConfigManager<Settings> {
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
     public SettingsManager(@NotNull SkyPlugin plugin) {
-        this.plugin = plugin;
-        this.logger = plugin.getComponentLogger();
-        settingsPath = Path.of(plugin.getDataFolder() + File.separator + "settings.yml");
+        super(plugin, Path.of(plugin.getDataFolder() + File.separator + "settings.yml"), Settings.class);
     }
 
-    /**
-     * Get the plugin's {@link Settings}. May be null.
-     * @return The plugin's {@link Settings} or null.
-     */
-    public @Nullable Settings getSettings() {
-        return settings;
-    }
-
-    /**
-     * A method to reload the plugin's settings.
-     */
-    public void reload() {
-        settings = null;
-
-        if(!settingsPath.toFile().exists()) {
-            plugin.saveResource("settings.yml", false);
-        }
-
-        YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(settingsPath);
-        try {
-            settings = yamlConfigurationLoader.load().get(Settings.class);
-
-            updateSettings(settingsPath);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load plugin settings. Error: " + configurateException.getMessage()));
-        }
-    }
-
-    /**
-     * Update the settings configuration to the latest version if possible, or display an error.
-     * @param path The {@link Path} to save the locale to.
-     */
-    private void updateSettings(@NotNull Path path) {
-        if(settings == null) return;
-
+    @Override
+    public @Nullable Settings migrateConfiguration(@NotNull Settings settings) {
         switch(settings.configVersion()) {
             case "1.1.0.0" -> {
                 // latest version, do nothing
+                return settings;
             }
 
             case "1.0.0.0" -> {
-                settings = new Settings(
+                return new Settings(
                         "1.1.0.0",
                         settings.locale(),
                         settings.saveFrequencySeconds(),
@@ -202,31 +159,23 @@ public class SettingsManager {
                         settings.fallbackLocation(),
                         settings.vaultDisallowedItems(),
                         settings.prestigePointsMapping());
-
-                saveSettings(path);
             }
 
-            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for settings config. Unable to update config."));
+            case null, default -> {
+                logger.warn(AdventureUtil.deserialize("Unknown config version for settings config. Unable to update config."));
+                return null;
+            }
         }
     }
 
-    /**
-     * Save the plugin's settings to the path provided.
-     * @param path The {@link Path} to save to.
-     */
-    private void saveSettings(@NotNull Path path) {
-        if(settings == null) return;
+    @Override
+    public boolean validateConfiguration() {
+        @Nullable Settings settings = getConfiguration();
+        return settings != null;
+    }
 
-        try {
-            @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
-
-            ConfigurationNode node = yamlConfigurationLoader.createNode();
-
-            node.set(Settings.class, settings);
-
-            yamlConfigurationLoader.save(node);
-        } catch (ConfigurateException e) {
-            logger.error(AdventureUtil.deserialize("Failed to save settings config file. Error: " + e.getMessage()));
-        }
+    @Override
+    public void saveBundledConfig() {
+        plugin.saveResource("settings.yml", false);
     }
 }

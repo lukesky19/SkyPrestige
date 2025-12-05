@@ -21,9 +21,9 @@ import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.MultiplierManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -78,7 +78,7 @@ public class MultiplierCommand {
         builder.then(Commands.literal("event")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.event"))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
 
                     long eventDurationSeconds = multiplierManager.getEventDuration();
@@ -99,7 +99,7 @@ public class MultiplierCommand {
                             sender.sendMessage(AdventureUtil.deserialize(locale.multiplierEventRemainingTime(), placeholderList));
                         }
                     } else {
-                        @Nullable Settings settings = settingsManager.getSettings();
+                        @Nullable Settings settings = settingsManager.getConfiguration();
                         if(settings == null) return 0;
 
                         if(nextEventSeconds > 0) {
@@ -129,7 +129,7 @@ public class MultiplierCommand {
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.add"))
                 .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double multiplier = ctx.getArgument("multiplier", double.class);
 
@@ -153,7 +153,7 @@ public class MultiplierCommand {
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.remove"))
                 .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double multiplier = ctx.getArgument("multiplier", double.class);
 
@@ -177,7 +177,7 @@ public class MultiplierCommand {
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.set"))
                 .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double multiplier = ctx.getArgument("multiplier", double.class);
 
@@ -202,7 +202,7 @@ public class MultiplierCommand {
                 .then(Commands.literal("additional")
                         .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.get.additional"))
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double additionalMultiplier = multiplierManager.getAdditionalMultiplier();
 
@@ -220,7 +220,7 @@ public class MultiplierCommand {
                 .then(Commands.literal("event")
                         .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.event"))
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double eventMultiplier = multiplierManager.getEventMultiplier();
 
@@ -238,7 +238,7 @@ public class MultiplierCommand {
                 .then(Commands.literal("total")
                         .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.get.total"))
                         .executes(ctx -> {
-                            Locale locale = localeManager.getLocale();
+                            Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
                             double totalMultiplier = multiplierManager.getMultiplier();
 
@@ -254,7 +254,7 @@ public class MultiplierCommand {
                             return 1;
                         }))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
                     double totalMultiplier = multiplierManager.getMultiplier();
 

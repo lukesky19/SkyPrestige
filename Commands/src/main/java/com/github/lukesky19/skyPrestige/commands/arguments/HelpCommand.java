@@ -52,7 +52,7 @@ public class HelpCommand {
         return Commands.literal("help")
             .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.help"))
             .executes(ctx -> {
-                Locale locale = localeManager.getLocale();
+                Locale locale = localeManager.getConfiguration();
 
                 if(ctx.getSource().getSender() instanceof Player player) {
                     for(String msg : locale.help()) {

@@ -20,13 +20,9 @@ package com.github.lukesky19.skyPrestige.configuration.manager.locale;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
-import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,10 +33,8 @@ import java.util.List;
 /**
  * This class manages the plugin's locale.
  */
-public class LocaleManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
+public class LocaleManager extends SimpleConfigManager<Locale> {
+    private final @NotNull SimpleConfigManager<Settings> settingsManager;
     private @Nullable Locale locale;
     private @NotNull Locale DEFAULT_LOCALE;
 
@@ -49,9 +43,8 @@ public class LocaleManager {
      * @param plugin A {@link SkyPlugin}.
      * @param settingsManager A {@link SettingsManager} instance.
      */
-    public LocaleManager(@NotNull SkyPlugin plugin, @NotNull SettingsManager settingsManager) {
-        this.plugin = plugin;
-        this.logger = plugin.getComponentLogger();
+    public LocaleManager(@NotNull SkyPlugin plugin, @NotNull SimpleConfigManager<Settings> settingsManager) {
+        super(plugin, Locale.class);
         this.settingsManager = settingsManager;
 
         createDefaultLocale();
@@ -61,20 +54,15 @@ public class LocaleManager {
      * Gets the plugin's locale if not null or the default locale otherwise.
      * @return The plugin's locale if not null or the default locale otherwise.
      */
-    public @NotNull Locale getLocale() {
+    @Override
+    public @NotNull Locale getConfiguration() {
         if(locale == null) return DEFAULT_LOCALE;
         return locale;
     }
 
-    /**
-     * Reloads the plugin's locale.
-     */
-    public void reload() {
-        locale = null;
-
-        copyDefaultLocales();
-
-        Settings settings = settingsManager.getSettings();
+    @Override
+    public void loadConfiguration() {
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
             logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
             return;
@@ -86,29 +74,29 @@ public class LocaleManager {
 
         String localeString = settings.locale();
         Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        setConfigurationPath(path);
 
-        YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
-        try {
-            locale = yamlConfigurationLoader.load().get(Locale.class);
+        super.loadConfiguration();
+    }
 
-            updateLocale(path);
-        } catch (ConfigurateException exception) {
-            throw new RuntimeException(exception);
+    @Override
+    public void saveBundledConfig() {
+        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
+        if(!path.toFile().exists()) {
+            plugin.saveResource("locale" + File.separator + "en_US.yml", false);
         }
-
-        validateLocale();
     }
 
     /**
      * Update the locale configuration to the latest version if possible, or display an error.
-     * @param path The {@link Path} to save the locale to.
+     * @param locale The {@link Locale} to migrate.
+     * @return The migreated {@link Locale} or null if migration failed.
      */
-    private void updateLocale(@NotNull Path path) {
-        if(locale == null) return;
-
+    public @Nullable Locale migrateConfiguration(@NotNull Locale locale) {
         switch(locale.configVersion()) {
             case "1.1.0.0" -> {
                 // latest version, do nothing
+                return locale;
             }
 
             case "1.0.0.0" -> {
@@ -123,7 +111,7 @@ public class LocaleManager {
                 help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier <add | remove | set> <amount></yellow>");
                 help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier get [additional | event | total]</yellow>");
 
-                locale = new Locale(
+                return new Locale(
                         "1.1.0.0",
                         locale.prefix(),
                         help,
@@ -194,39 +182,21 @@ public class LocaleManager {
                                 ""),
                         locale.delimiter(),
                         locale.finalDelimiter());
-
-                saveLocale(path);
             }
 
-            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
-        }
-    }
-
-    /**
-     * Save the plugin's locale to the path provided.
-     * @param path The {@link Path} to save to.
-     */
-    private void saveLocale(@NotNull Path path) {
-        if(locale == null) return;
-
-        try {
-            @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(path);
-
-            ConfigurationNode node = yamlConfigurationLoader.createNode();
-
-            node.set(Locale.class, locale);
-
-            yamlConfigurationLoader.save(node);
-        } catch (ConfigurateException e) {
-            logger.error(AdventureUtil.deserialize("Failed to save locale config file. Error: " + e.getMessage()));
+            case null, default -> {
+                logger.warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
+                return null;
+            }
         }
     }
 
     /**
      * Validates if the locale is missing any strings.
      */
-    private void validateLocale() {
-        if(locale == null) return;
+    @Override
+    public boolean validateConfiguration() {
+        if(locale == null) return false;
 
         if(locale.configVersion()  == null
                 || locale.prefix()  == null
@@ -289,7 +259,11 @@ public class LocaleManager {
 
             logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
             logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
+
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -307,16 +281,6 @@ public class LocaleManager {
                 || timeFormat.minutes() == null
                 || timeFormat.seconds() == null
                 || timeFormat.suffix() == null;
-    }
-
-    /**
-     * Copies the default locale files that come bundled with the plugin, if they do not exist at least.
-     */
-    private void copyDefaultLocales() {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
-        if (!path.toFile().exists()) {
-            plugin.saveResource("locale" + File.separator + "en_US.yml", false);
-        }
     }
 
     /**

@@ -20,19 +20,18 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.InfoGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
-import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -48,9 +47,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to view the prestige points earned for certain actions.
  */
-public class InfoGUI extends ChestGUI {
-    // Plugin Classes
-    private final @NotNull GUIManager guiManager;
+public class InfoGUI extends ChestGUI<IslandIdUUIDKey> {
     // Config
     private final @Nullable InfoGUIConfig infoGUIConfig;
     // Page info
@@ -61,17 +58,17 @@ public class InfoGUI extends ChestGUI {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link AbstractGUIManager} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      */
     public InfoGUI(
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player) {
-        super(plugin, guiManager, player);
-
-        this.guiManager = guiManager;
+        super(plugin, guiManager, identifier, player);
 
         infoGUIConfig = guiConfigManager.getInfoGUIConfig();
     }
@@ -95,31 +92,6 @@ public class InfoGUI extends ChestGUI {
         String guiName = Objects.requireNonNullElse(infoGUIConfig.guiName(), "");
 
         return create(guiType, guiName, List.of());
-    }
-
-    @Override
-    public boolean open() {
-        if(inventoryView == null) {
-            // If the InventoryView was not created, log a warning and return false.
-            logger.warn(AdventureUtil.deserialize("Unable to open the InventoryView as it was not created."));
-            return false;
-        }
-
-        // Close the current Inventory the player has open (if any)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-            guiManager.removeOpenGUI(uuid);
-        }, 1L);
-
-        // Then 1 tick later, open the GUI and track that it is open for the player.
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            inventoryView.open();
-
-            guiManager.addOpenGUI(uuid, this);
-        }, 2L);
-
-        return true;
     }
 
     /**
@@ -160,50 +132,6 @@ public class InfoGUI extends ChestGUI {
         createPrevPageButton();
 
         return super.update();
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
-     */
-    @Override
-    public void close() {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(player.getUniqueId());
-        }, 1L);
-    }
-
-    /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
-     * If the plugin is being disabled, the scheduler won't be used as it is unavailable during server shutdown.
-     * @param onDisable Is the plugin being disabled?
-     */
-    @Override
-    public void unload(boolean onDisable) {
-        if(!onDisable) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-                guiManager.removeOpenGUI(uuid);
-            }, 1L);
-        } else {
-            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-
-            guiManager.removeOpenGUI(uuid);
-        }
-    }
-
-    /**
-     * Handles when the GUI is closed by the player.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(uuid);
     }
 
     /**

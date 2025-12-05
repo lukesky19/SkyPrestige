@@ -23,17 +23,13 @@ import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManag
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.prestige.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.*;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -120,7 +116,7 @@ public class SkyPrestigeCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("skyprestige")
             .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige"))
             .executes(ctx -> {
-                Locale locale = localeManager.getLocale();
+                Locale locale = localeManager.getConfiguration();
 
                 if(ctx.getSource().getSender() instanceof Player player) {
                     prestigeManager.prestigeIsland(player);
@@ -142,8 +138,8 @@ public class SkyPrestigeCommand {
         ReloadCommand reloadCommand = new ReloadCommand(plugin, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(plugin, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
         ProtectionOrbCommand protectionOrbCommand = new ProtectionOrbCommand(localeManager, protectionOrbManager);
-        RequirementsCommand requirementsCommand = new RequirementsCommand(plugin, settingsManager, localeManager, prestigeConfigManager, islandDataManager);
-        RewardsCommand rewardsCommand = new RewardsCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
+        RequirementsCommand requirementsCommand = new RequirementsCommand(plugin, settingsManager, localeManager, prestigeConfigManager, islandDataManager, hookManager);
+        RewardsCommand rewardsCommand = new RewardsCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, hookManager);
         UnExemptCommand unExemptCommand = new UnExemptCommand(plugin, localeManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(plugin, localeManager, islandDataManager);
         ValuesCommand valuesCommand = new ValuesCommand(plugin, localeManager, guiConfigManager, guiManager);

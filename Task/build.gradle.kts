@@ -4,7 +4,5 @@ dependencies {
 
     compileOnly(project(":Core"))
     compileOnly(project(":Configuration"))
-    compileOnly(project(":Island"))
-    compileOnly(project(":Leaderboard"))
-    compileOnly(project(":Multiplier"))
+    compileOnly(project(":DataHandler"))
 }

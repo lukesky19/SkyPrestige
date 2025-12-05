@@ -21,7 +21,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.leaderboard.TopTen;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.LeaderboardManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -63,7 +63,7 @@ public class LeaderboardCommand {
         return Commands.literal("leaderboard")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.leaderboard"))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
                     @NotNull TopTen topTen = leaderboardManager.getTopTenNotExempt();
 

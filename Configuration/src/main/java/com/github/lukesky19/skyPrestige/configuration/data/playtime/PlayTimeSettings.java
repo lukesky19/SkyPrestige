@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.playtime;
 
+import com.github.lukesky19.skyPrestige.configuration.interfaces.playtime.PlayTimeSettingsInterface;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 
 /**
@@ -35,4 +36,4 @@ public record PlayTimeSettings(
         boolean resetWeekly,
         boolean resetMonthly,
         boolean resetYearly,
-        boolean resetTotal) {}
+        boolean resetTotal) implements PlayTimeSettingsInterface {}

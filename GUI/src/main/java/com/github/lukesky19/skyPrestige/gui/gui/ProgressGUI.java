@@ -25,14 +25,15 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.core.util.number.NumberUtils;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
-import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.api.math.EquationUtil;
@@ -40,7 +41,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -58,7 +58,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to view progress to the next prestige level.
  */
-public class ProgressGUI extends ChestGUI {
+public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
@@ -75,7 +75,8 @@ public class ProgressGUI extends ChestGUI {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      * @param island The player's {@link Island}.
      * @param islandData The {@link IslandData} for the island.
@@ -86,12 +87,13 @@ public class ProgressGUI extends ChestGUI {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
             @NotNull Island island,
             @NotNull IslandData islandData,
             @NotNull PrestigeConfig prestigeConfig) {
-        super(plugin, guiManager, player);
+        super(plugin, guiManager, identifier, player);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
@@ -143,8 +145,8 @@ public class ProgressGUI extends ChestGUI {
 
         int guiSize = inventoryView.getTopInventory().getSize();
 
-        Locale locale = localeManager.getLocale();
-        Settings settings = settingsManager.getSettings();
+        Locale locale = localeManager.getConfiguration();
+        Settings settings = settingsManager.getConfiguration();
 
         // Check for invalid settings
         if(settings == null || settings.scaleFormula() == null) {
@@ -175,17 +177,6 @@ public class ProgressGUI extends ChestGUI {
         createProgressButtons();
 
         return super.update();
-    }
-
-    /**
-     * Handles when the GUI is closed by the player.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(uuid);
     }
 
     /**
@@ -257,11 +248,7 @@ public class ProgressGUI extends ChestGUI {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent ->
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-                    guiManager.removeOpenGUI(uuid);
-                }, 1L));
+        createActionButton(exitConfig, inventoryClickEvent -> close());
     }
 
     /**
@@ -273,7 +260,7 @@ public class ProgressGUI extends ChestGUI {
                 progressGUIConfig.progressButtons().incomplete().itemType() == null ||
                 progressGUIConfig.progressButtons().complete().itemType() == null) return;
 
-        Settings settings = settingsManager.getSettings();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null || settings.scaleFormula() == null) return;
 
         if(prestigeConfig.requiredPrestigePoints() == null) return;

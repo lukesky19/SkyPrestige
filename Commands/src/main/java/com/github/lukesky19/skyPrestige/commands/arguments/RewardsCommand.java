@@ -22,12 +22,15 @@ import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConf
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.prestige.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.gui.gui.RewardsGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -35,7 +38,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import world.bentobox.bentobox.BentoBox;
+import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -51,6 +54,7 @@ public class RewardsCommand {
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
     private final @NotNull GUIManager guiManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
@@ -60,6 +64,7 @@ public class RewardsCommand {
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public RewardsCommand(
             @NotNull SkyPlugin plugin,
@@ -67,7 +72,8 @@ public class RewardsCommand {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -75,6 +81,7 @@ public class RewardsCommand {
         this.prestigeConfigManager = prestigeConfigManager;
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -85,30 +92,33 @@ public class RewardsCommand {
         return Commands.literal("rewards")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.rewards"))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
-                    Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
+                    BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+                    Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                     if(island == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPlayerNotOnIsland()));
                         return 0;
                     }
 
-                    IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
+                    IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), uuid);
+
+                    @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
                         return 0;
                     }
 
-                    PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getPrestigeConfig(islandData.getPrestigeLevel() + 1);
+                    PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
                     if(nextPrestigeLevelConfig == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsMaxPrestigeLevel()));
                         return 0;
                     }
 
                     // Create the RewardsGUI
-                    RewardsGUI gui = new RewardsGUI(plugin, guiConfigManager, guiManager, player, null, nextPrestigeLevelConfig);
+                    RewardsGUI gui = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, null, nextPrestigeLevelConfig);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

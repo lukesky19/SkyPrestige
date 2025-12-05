@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.ProtectionOrbManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -64,7 +64,7 @@ public class ProtectionOrbCommand {
                         .then(Commands.argument("player_name", ArgumentTypes.player())
                                 .then(Commands.argument("amount", IntegerArgumentType.integer())
                                         .executes(ctx -> {
-                                            Locale locale = localeManager.getLocale();
+                                            Locale locale = localeManager.getConfiguration();
                                             CommandSender commandSender = ctx.getSource().getSender();
                                             Player player = ctx.getArgument("player_name", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
                                             int amount = ctx.getArgument("amount", Integer.class);

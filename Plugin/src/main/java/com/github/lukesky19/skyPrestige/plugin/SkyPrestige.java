@@ -22,14 +22,12 @@ import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManag
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.prestige.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.*;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.hook.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.leaderboard.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerJoinListener;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerQuitListener;
 import com.github.lukesky19.skyPrestige.listener.gui.GUIListener;
@@ -37,16 +35,14 @@ import com.github.lukesky19.skyPrestige.listener.island.IslandListener;
 import com.github.lukesky19.skyPrestige.listener.points.*;
 import com.github.lukesky19.skyPrestige.listener.points.brewing.FreshBrewListener;
 import com.github.lukesky19.skyPrestige.listener.protection.ProtectionOrbListener;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.placeholder.PlaceholderManager;
 import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
 import com.github.lukesky19.skyPrestige.prestige.manager.TeleportationManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -96,15 +92,15 @@ public final class SkyPrestige extends SkyPlugin {
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);
         prestigeConfigManager = new PrestigeConfigManager(this);
-        guiManager = new GUIManager(this);
+        guiManager = new GUIManager();
         islandDataManager = new IslandDataManager(databaseManager, hookManager);
         leaderboardManager = new LeaderboardManager(this, islandDataManager, databaseManager, hookManager);
         multiplierManager = new MultiplierManager(this, settingsManager, localeManager);
         taskManager = new TaskManager(this, settingsManager, islandDataManager, leaderboardManager, multiplierManager);
         protectionOrbManager = new ProtectionOrbManager(this, settingsManager);
-        IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(hookManager);
+        IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
-        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, databaseManager, guiManager, islandDataManager, hookManager, islandSettingsProcessor, playerSettingsProcessor);
+        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, localeManager, databaseManager, hookManager);
         VaultManager vaultManager = new VaultManager(settingsManager);
         placeholderManager = new PlaceholderManager(this, islandDataManager, leaderboardManager, hookManager);
@@ -128,13 +124,13 @@ public final class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager, hookManager), this);
 
         // Prestige-related Listeners
-        pluginManager.registerEvents(new IslandListener(this, settingsManager, localeManager, databaseManager, islandDataManager, prestigeManager, islandSettingsProcessor), this);
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, databaseManager, islandDataManager, islandSettingsProcessor), this);
 
         // Protection Orb Listener
         pluginManager.registerEvents(new ProtectionOrbListener(localeManager, protectionOrbManager), this);
 
         // GUI-related Listeners
-        pluginManager.registerEvents(new GUIListener(guiManager), this);
+        pluginManager.registerEvents(new GUIListener(guiManager, hookManager), this);
 
         // Prestige Points Listeners
         if(hookManager.getHook(RoseStackerHook.class).isHooked()) {
@@ -201,7 +197,7 @@ public final class SkyPrestige extends SkyPlugin {
                 databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
 
                 // Load the player's island data
-                islandDataManager.loadIslandData(uuid);
+                islandDataManager.loadDataByPlayerIdentifier(uuid);
 
                 // Handle any prestiges that occurred while the player was offline
                 prestigeManager.handleOfflinePrestiges(player);
@@ -228,7 +224,7 @@ public final class SkyPrestige extends SkyPlugin {
 
         // Save any loaded island data and clean up the database.
         if(islandDataManager != null) {
-            islandDataManager.saveIslandData().thenAccept(v -> {
+            islandDataManager.saveData().thenAccept(v -> {
                 if(databaseManager != null) {
                     databaseManager.cleanUp();
                 }
@@ -252,10 +248,10 @@ public final class SkyPrestige extends SkyPlugin {
         guiManager.closeOpenGUIs(false);
 
         // Reload plugin configuration
-        settingsManager.reload();
-        localeManager.reload();
+        settingsManager.loadConfiguration();
+        localeManager.loadConfiguration();
         guiConfigManager.reload();
-        prestigeConfigManager.reload();
+        prestigeConfigManager.loadConfigurations();
         leaderboardManager.updateDatabaseTopTen();
         protectionOrbManager.reload();
         multiplierManager.reload();

@@ -18,43 +18,36 @@
 package com.github.lukesky19.skyPrestige.hook.hooks;
 
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
-import world.bentobox.bentobox.api.events.island.IslandEvent;
-import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintBundle;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bentobox.managers.AddonsManager;
-import world.bentobox.bentobox.managers.BlueprintsManager;
-import world.bentobox.bentobox.managers.IslandsManager;
-import world.bentobox.bentobox.managers.island.IslandCache;
-import world.bentobox.bentobox.managers.island.NewIsland;
+import world.bentobox.bentobox.managers.*;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This class manages interfacing with the BentoBox plugin.
  */
 public class BentoBoxHook implements Hook {
-    private final @NotNull ComponentLogger logger;
-    private @Nullable BentoBox bentoBox;
-    private @Nullable IslandsManager islandsManager;
-    private @Nullable BlueprintsManager blueprintsManager;
-    private @Nullable AddonsManager addonsManager;
+    private @NotNull IslandWorldManager islandWorldManager;
+    private @NotNull IslandsManager islandsManager;
+    private @NotNull BlueprintsManager blueprintsManager;
+    private @NotNull AddonsManager addonsManager;
+    private @NotNull PlayersManager playersManager;
 
     /**
      * Constructor
-     * @param logger A {@link ComponentLogger} instance.
      */
-    public BentoBoxHook(@NotNull ComponentLogger logger) {
-        this.logger = logger;
+    public BentoBoxHook() {
+        initialize();
     }
 
     /**
@@ -62,10 +55,12 @@ public class BentoBoxHook implements Hook {
      */
     @Override
     public void initialize() {
-        bentoBox = BentoBox.getInstance();
+        @NotNull BentoBox bentoBox = BentoBox.getInstance();
+        islandWorldManager = bentoBox.getIWM();
         islandsManager = bentoBox.getIslandsManager();
         blueprintsManager = bentoBox.getBlueprintsManager();
         addonsManager = bentoBox.getAddonsManager();
+        playersManager = bentoBox.getPlayersManager();
     }
 
     /**
@@ -74,78 +69,39 @@ public class BentoBoxHook implements Hook {
      */
     @Override
     public boolean isHooked() {
-        return bentoBox != null && islandsManager != null && blueprintsManager != null && addonsManager != null;
+        return true;
     }
 
     /**
-     * Attempt to reset an island.
-     * @param user The {@link User} resetting the island.
-     * @param gameModeAddon The {@link GameModeAddon} to reset the island for.
-     * @param island The {@link Island} to reset.
-     * @param blueprintName The blueprint name to use.
-     * @return The new {@link Island} or null.
+     * Get the {@link IslandWorldManager}.
+     * @return The {@link IslandWorldManager}.
      */
-    public @Nullable Island resetIsland(
-            @NotNull User user,
-            @NotNull GameModeAddon gameModeAddon,
-            @NotNull Island island,
-            @NotNull String blueprintName) {
-        if(bentoBox == null || islandsManager == null || blueprintsManager == null) return null;
-
-        try {
-            NewIsland.Builder islandBuilder = NewIsland.builder();
-            islandBuilder.player(user);
-            islandBuilder.addon(gameModeAddon);
-            islandBuilder.reason(IslandEvent.Reason.RESET);
-            islandBuilder.oldIsland(island);
-            islandBuilder.name(blueprintName);
-
-            Island newIsland = islandBuilder.build();
-
-            // Set the island owner and members for the new island
-            newIsland.setOwner(island.getOwner());
-            newIsland.setMembers(new HashMap<>(island.getMembers()));
-
-            IslandCache islandCache = islandsManager.getIslandCache();
-
-            // Make the new island associated with each island member and set the primary island as necessary.
-            newIsland.getMemberSet()
-                    .forEach(uuid -> {
-                        islandCache.addPlayer(uuid, newIsland);
-
-                        if(island.isPrimary(uuid)) islandCache.setPrimaryIsland(uuid, newIsland);
-                    });
-
-            IslandsManager.updateIsland(newIsland);
-
-            return newIsland;
-        } catch (IOException e) {
-            // Log an error
-            logger.error(AdventureUtil.deserialize("Failed to create new island. Error: " + e.getMessage()));
-
-            // return null
-            return null;
-        }
+    public @NotNull IslandWorldManager getIslandWorldManager() {
+        return islandWorldManager;
     }
 
     /**
-     * Attempt to delete an island.
-     * @param playerId The {@link UUID} to attribute the island deletion to.
-     * @param island The {@link Island} to delete.
+     * Get the {@link IslandsManager}.
+     * @return The {@link IslandsManager}.
      */
-    public void deleteIsland(@NotNull UUID playerId, @NotNull Island island) {
-        if(bentoBox == null || islandsManager == null || blueprintsManager == null) return;
-        IslandCache islandCache = islandsManager.getIslandCache();
+    public @NotNull IslandsManager getIslandsManager() {
+        return islandsManager;
+    }
 
-        // Set the owner of the old island to null
-        island.setOwner(null);
-        // Remove the members from the old island
-        island.getMemberSet().forEach(uuid -> islandCache.removePlayer(island, uuid));
-        // Update the island
-        IslandsManager.updateIsland(island);
+    /**
+     * Get the {@link PlayersManager}.
+     * @return The {@link PlayersManager}
+     */
+    public @NotNull PlayersManager getPlayersManager() {
+        return playersManager;
+    }
 
-        // Delete the old island
-        islandsManager.deleteIsland(island, true, playerId);
+    /**
+     * Get the {@link BlueprintsManager}.
+     * @return The {@link BlueprintsManager}
+     */
+    public @NotNull BlueprintsManager getBlueprintsManager() {
+        return blueprintsManager;
     }
 
     /**
@@ -153,9 +109,7 @@ public class BentoBoxHook implements Hook {
      * @param gameModeAddon The {@link GameModeAddon} to get blueprints for.
      * @return A {@link Map} mapping blueprint names to {@link BlueprintBundle}s or null.
      */
-    public @Nullable Map<String, BlueprintBundle> getBlueprints(@NotNull GameModeAddon gameModeAddon) {
-        if(blueprintsManager == null) return null;
-
+    public @NotNull Map<String, BlueprintBundle> getBlueprints(@NotNull GameModeAddon gameModeAddon) {
         return blueprintsManager.getBlueprintBundles(gameModeAddon);
     }
 
@@ -164,9 +118,7 @@ public class BentoBoxHook implements Hook {
      * @param playerId The player's {@link UUID}.
      * @return A {@link List} of {@link Island} or null.
      */
-    public @Nullable List<Island> getIslands(@NotNull UUID playerId) {
-        if(islandsManager == null) return null;
-
+    public @NotNull List<Island> getIslands(@NotNull UUID playerId) {
         return islandsManager.getIslands(playerId);
     }
 
@@ -174,12 +126,10 @@ public class BentoBoxHook implements Hook {
      * Get the active island for the {@link World} and player {@link UUID} provided.
      * @param world The {@link World}.
      * @param playerId The player's {@link UUID}.
-     * @return An {@link Optional} containing an {@link Island}.
+     * @return An {@link Island}. May be null.
      */
-    public @NotNull Optional<Island> getIsland(@NotNull World world, @NotNull UUID playerId) {
-        if(islandsManager == null) return Optional.empty();
-
-        return Optional.ofNullable(islandsManager.getIsland(world, playerId));
+    public @Nullable Island getIsland(@NotNull World world, @NotNull UUID playerId) {
+        return islandsManager.getIsland(world, playerId);
     }
 
     /**
@@ -188,8 +138,6 @@ public class BentoBoxHook implements Hook {
      * @return An {@link Optional} containing an {@link Island}.
      */
     public @NotNull Optional<Island> getIslandById(@NotNull String islandId) {
-        if(islandsManager == null) return Optional.empty();
-
         return islandsManager.getIslandById(islandId);
     }
 
@@ -199,8 +147,6 @@ public class BentoBoxHook implements Hook {
      * @return An {@link Optional} containing an {@link Island}.
      */
     public @NotNull Optional<Island> getIslandAtLocation(@NotNull Location location) {
-        if(islandsManager == null) return Optional.empty();
-
         return islandsManager.getIslandAt(location);
     }
 
@@ -210,8 +156,6 @@ public class BentoBoxHook implements Hook {
      * @return An {@link Optional} containing a {@link GameModeAddon}.
      */
     public @NotNull Optional<GameModeAddon> getGameModeAddon(@NotNull World world) {
-        if(addonsManager == null) return Optional.empty();
-
         return addonsManager.getGameModeAddons().stream()
                 .filter(gameModeAddon -> gameModeAddon.inWorld(world))
                 .findFirst();

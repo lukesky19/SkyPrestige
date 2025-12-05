@@ -1,6 +1,6 @@
 package com.github.lukesky19.skyPrestige.configuration.data.inventory;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.InventorySettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.inventory.InventorySettingsInterface;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 
 /**
@@ -11,7 +11,7 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
 @ConfigSerializable
 public record PlayerInventorySettings(
         boolean resetInventory,
-        boolean keepInfiniteSellWands) implements InventorySettings {
+        boolean keepInfiniteSellWands) implements InventorySettingsInterface {
     @Override
     public boolean clearInventory() {
         return resetInventory;

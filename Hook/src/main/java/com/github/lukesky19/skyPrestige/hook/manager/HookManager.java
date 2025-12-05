@@ -17,9 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.hook.manager;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.hook.hooks.*;
 import com.github.lukesky19.skyPrestige.hook.interfaces.Hook;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,11 +37,8 @@ public class HookManager {
      * @param plugin A {@link JavaPlugin} instance.
      */
     public HookManager(@NotNull SkyPlugin plugin) {
-        BentoBoxHook bentoBoxHook = new BentoBoxHook(plugin.getComponentLogger());
+        BentoBoxHook bentoBoxHook = new BentoBoxHook();
         registerHook(BentoBoxHook.class, bentoBoxHook);
-
-        BSkyBlockHook bSkyBlockHook = new BSkyBlockHook();
-        registerHook(BSkyBlockHook.class, bSkyBlockHook);
 
         EconomyHook economyHook = new EconomyHook(plugin);
         registerHook(EconomyHook.class, economyHook);

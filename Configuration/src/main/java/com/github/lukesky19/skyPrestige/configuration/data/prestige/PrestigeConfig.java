@@ -17,10 +17,10 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.prestige;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.IslandSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.island.PrestigeIslandSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.player.PrestigePlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.island.IslandSettingsInterface;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.inventory.ItemStack;
@@ -51,7 +51,7 @@ public record PrestigeConfig(
     /**
      * This record contains settings for when an island is prestiged.
      * @param playerSettings The {@link PrestigePlayerSettings}.
-     * @param islandSettings The {@link IslandSettings}.
+     * @param islandSettings The {@link IslandSettingsInterface}.
      * @param giveStartingMoneyToAllIslandMembers Whether to give the starting money to all island members or not.
      * @param startingMoney The starting amount of money to give the player.
      * Legacy options below for migration purposes only.

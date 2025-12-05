@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.connection;
 
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.prestige.manager.PrestigeManager;
 import com.github.lukesky19.skyPrestige.prestige.manager.TeleportationManager;
 import org.bukkit.entity.Player;
@@ -69,7 +69,7 @@ public class PlayerJoinListener implements Listener {
         // Insert the player's uuid into the database if it doesn't exist
         databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
 
-        islandDataManager.loadIslandData(uuid);
+        islandDataManager.loadDataByPlayerIdentifier(uuid);
 
         // Handle any prestiges that occurred while the player was offline
         prestigeManager.handleOfflinePrestiges(player);

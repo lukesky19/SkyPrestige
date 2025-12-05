@@ -22,22 +22,24 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.common.abstracts.data.HashMapDataManager;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -53,7 +55,7 @@ import java.util.function.Consumer;
 /**
  * This class is used to create the GUI to select a blueprint for island prestige.
  */
-public class BlueprintGUI extends ChestGUI {
+public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull SkyPlugin plugin;
     private final @NotNull LocaleManager localeManager;
@@ -76,8 +78,9 @@ public class BlueprintGUI extends ChestGUI {
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
-     * @param hookManager A {@link HookManager} instance.
+     * @param guiManager An {@link GUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param hookManager A {@link HashMapDataManager} instance.
      * @param islandResetData An {@link IslandResetData} instance.
      * @param consumer The consumer that will prestige the island once the player confirms it.
      */
@@ -85,11 +88,12 @@ public class BlueprintGUI extends ChestGUI {
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
             @NotNull HookManager hookManager,
             @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, islandResetData.getPlayer());
+        super(plugin, guiManager, identifier, islandResetData.getPlayer());
 
         this.plugin = plugin;
         this.localeManager = localeManager;
@@ -167,29 +171,28 @@ public class BlueprintGUI extends ChestGUI {
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(bentoBoxHook.isHooked()) {
-            @Nullable Map<String, BlueprintBundle> blueprints = bentoBoxHook.getBlueprints(islandResetData.getGameModeAddon());
-            if(blueprints != null) {
-                List<Map.Entry<String, BlueprintBundle>> blueprintList = blueprints.entrySet()
-                        .stream()
-                        .filter(entry -> {
-                            BlueprintBundle blueprint = entry.getValue();
+            @NotNull Map<String, BlueprintBundle> blueprints = bentoBoxHook.getBlueprints(islandResetData.getGameModeAddon());
 
-                            if (blueprint.isRequirePermission()) {
-                                String permission = islandResetData.getGameModeAddon().getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
+            List<Map.Entry<String, BlueprintBundle>> blueprintList = blueprints.entrySet()
+                    .stream()
+                    .filter(entry -> {
+                        BlueprintBundle blueprint = entry.getValue();
 
-                                return player.hasPermission(permission);
-                            }
+                        if (blueprint.isRequirePermission()) {
+                            String permission = islandResetData.getGameModeAddon().getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
 
-                            return true;
-                        })
-                        .sorted(Map.Entry.comparingByValue(Comparator.comparing(BlueprintBundle::getSlot)))
-                        .toList();
+                            return player.hasPermission(permission);
+                        }
 
-                createBlueprintButtons(blueprintList);
+                        return true;
+                    })
+                    .sorted(Map.Entry.comparingByValue(Comparator.comparing(BlueprintBundle::getSlot)))
+                    .toList();
 
-                if(numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) >= currentBlueprintKey) {
-                    createNextPageButton();
-                }
+            createBlueprintButtons(blueprintList);
+
+            if(numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) >= currentBlueprintKey) {
+                createNextPageButton();
             }
         }
 
@@ -212,17 +215,6 @@ public class BlueprintGUI extends ChestGUI {
         numOfBlueprintsAdded = 0;
 
         return this.update();
-    }
-
-    /**
-     * Handles when the inventory is closed. Ignores closures with reason UNLOADED and OPEN_NEW.
-     * @param inventoryCloseEvent An {@link InventoryCloseEvent}
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(inventoryCloseEvent.getPlayer().getUniqueId());
     }
 
     /**
@@ -299,14 +291,14 @@ public class BlueprintGUI extends ChestGUI {
             builder.setItemStack(itemStack);
 
             builder.setAction(inventoryClickEvent -> {
-                @NotNull Locale locale = localeManager.getLocale();
+                @NotNull Locale locale = localeManager.getConfiguration();
                 Player player = (Player) inventoryClickEvent.getWhoClicked();
 
                 islandResetData.setBlueprint(blueprint);
 
                 this.close();
 
-                ConfirmPrestigeGUI gui = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, islandResetData, consumer);
+                ConfirmPrestigeGUI gui = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, islandResetData, consumer);
 
                 boolean creationResult = gui.create();
                 if(!creationResult) {
@@ -395,12 +387,7 @@ public class BlueprintGUI extends ChestGUI {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () ->
-                    player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
-
-            guiManager.removeOpenGUI(uuid);
-        });
+        createActionButton(exitConfig, inventoryClickEvent -> close());
     }
 
     /**

@@ -17,73 +17,33 @@
 */
 package com.github.lukesky19.skyPrestige.gui.manager;
 
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
 import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.gui.gui.ExchangeGUI;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
-import com.github.lukesky19.skylib.api.gui.AbstractGUIManager;
+import com.github.lukesky19.skylib.api.gui.abstracts.AbstractGUIManager;
 import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * This class manages open GUIs.
  */
-public class GUIManager extends AbstractGUIManager {
-    private final @NotNull Map<IslandIdUUIDKey, BaseGUI> openGUIsByIslandIdAndUUID = new HashMap<>();
-
+public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
      */
-    public GUIManager(@NotNull SkyPlugin plugin) {
-        super(plugin);
-    }
-
-    /**
-     * Store the {@link BaseGUI} by the island id and the {@link UUID} provided.
-     * @param islandId The island id.
-     * @param uuid The {@link UUID} of the player.
-     * @param baseGUI The {@link BaseGUI} that they opened.
-     */
-    public void addOpenGUI(@NotNull String islandId, @NotNull UUID uuid, @NotNull BaseGUI baseGUI) {
-        openGUIsByIslandIdAndUUID.put(new IslandIdUUIDKey(islandId, uuid), baseGUI);
-    }
-
-    /**
-     * Remove any {@link BaseGUI} mapped to the island id and the {@link UUID}.
-     * @param islandId The island id.
-     * @param uuid The {@link UUID} of the player.
-     */
-    public void removeOpenGUI(@NotNull String islandId, @NotNull UUID uuid) {
-        IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
-        openGUIsByIslandIdAndUUID.keySet().removeIf(key -> key.equals(islandIdUUIDKey));
-    }
-
-    /**
-     * Closes any open {@link BaseGUI}s for all players.
-     * @param onDisable Whether the GUIs are being closed during plugin disable or not.
-     */
-    @Override
-    public void closeOpenGUIs(boolean onDisable) {
-        super.closeOpenGUIs(onDisable);
-
-        openGUIsByIslandIdAndUUID.clear();
-    }
+    public GUIManager() {}
 
     /**
      * Refresh any {@link ExchangeGUI}s that are open for the island id provided.
      * @param islandId The island id.
      */
     public void refreshExchangeGUIs(@NotNull String islandId) {
-        openGUIsByIslandIdAndUUID.entrySet().stream()
-                .filter(entry -> entry.getKey().islandId().equals(islandId))
+        dataMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null
+                        && entry.getKey().islandId() != null
+                        && entry.getKey().islandId().equals(islandId))
                 .forEach(entry -> {
-                    BaseGUI gui = entry.getValue();
+                    BaseGUI<IslandIdUUIDKey> gui = entry.getValue();
                     if(!(gui instanceof ExchangeGUI)) return;
 
                     gui.refresh();
@@ -95,10 +55,12 @@ public class GUIManager extends AbstractGUIManager {
      * @param islandId The island id.
      */
     public void refreshVaultGUIs(@NotNull String islandId) {
-        openGUIsByIslandIdAndUUID.entrySet().stream()
-                .filter(entry -> entry.getKey().islandId().equals(islandId))
+        dataMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null
+                        && entry.getKey().islandId() != null
+                        && entry.getKey().islandId().equals(islandId))
                 .forEach(entry -> {
-                    BaseGUI gui = entry.getValue();
+                    BaseGUI<IslandIdUUIDKey> gui = entry.getValue();
                     if(!(gui instanceof VaultGUI)) return;
 
                     gui.refresh();

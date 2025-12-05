@@ -18,7 +18,9 @@
 package com.github.lukesky19.skyPrestige.core.util.key;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -26,7 +28,7 @@ import java.util.UUID;
  * @param islandId The island id.
  * @param uuid The {@link UUID}.
  */
-public record IslandIdUUIDKey(@NotNull String islandId, @NotNull UUID uuid) {
+public record IslandIdUUIDKey(@Nullable String islandId, @NotNull UUID uuid) {
     /**
      * Checks if the object provided is that of a IslandIdUUIDKey and if the island id and {@link UUID} are equal.
      * @param compareObject The {@link Object} to compare.
@@ -36,6 +38,12 @@ public record IslandIdUUIDKey(@NotNull String islandId, @NotNull UUID uuid) {
     public boolean equals(@NotNull Object compareObject) {
         if(this == compareObject) return true;
         if(!(compareObject instanceof IslandIdUUIDKey(String compareIslandId, UUID compareUuid))) return false;
-        return this.islandId.equals(compareIslandId) && this.uuid.equals(compareUuid);
+
+        return (this.islandId == null && compareIslandId == null) || (this.islandId != null && this.islandId.equals(compareIslandId)) && this.uuid.equals(compareUuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(islandId, uuid);
     }
 }

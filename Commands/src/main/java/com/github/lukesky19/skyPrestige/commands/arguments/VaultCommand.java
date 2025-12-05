@@ -20,14 +20,15 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.VaultManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -35,6 +36,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -89,7 +91,7 @@ public class VaultCommand {
         return Commands.literal("vault")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.vault"))
                 .executes(ctx -> {
-                    Locale locale = localeManager.getLocale();
+                    Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
 
@@ -101,15 +103,16 @@ public class VaultCommand {
 
                     String islandId = island.getUniqueId();
 
-                    IslandData islandData = islandDataManager.getIslandData(island.getUniqueId());
+                    @Nullable IslandData islandData = islandDataManager.getData(islandId);
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
                         return 0;
                     }
 
+                    IslandIdUUIDKey identifier = new IslandIdUUIDKey(islandId, uuid);
                     // Create the VaultGUI
-                    VaultGUI gui = new VaultGUI(plugin, guiConfigManager, guiManager, databaseManager, localeManager, vaultManager, islandId, islandData, player);
+                    VaultGUI gui = new VaultGUI(plugin, guiConfigManager, guiManager, identifier, databaseManager, localeManager, vaultManager, islandId, islandData, player);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

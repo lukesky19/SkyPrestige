@@ -13,9 +13,7 @@ dependencies {
     compileOnly(project(":Database"))
     compileOnly(project(":GUI"))
     compileOnly(project(":Hook"))
-    compileOnly(project(":Island"))
-    compileOnly(project(":Multiplier"))
+    compileOnly(project(":DataHandler"))
     compileOnly(project(":Processor"))
     compileOnly(project(":Prestige"))
-    compileOnly(project(":Protection"))
 }

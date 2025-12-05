@@ -17,30 +17,29 @@
 */
 package com.github.lukesky19.skyPrestige.prestige.manager;
 
-import com.github.lukesky19.skyPrestige.configuration.data.interfaces.PlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.player.PlayerSettingsInterface;
 import com.github.lukesky19.skyPrestige.configuration.manager.gui.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.locale.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.prestige.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.settings.SettingsManager;
-import com.github.lukesky19.skyPrestige.core.abstracts.SkyPlugin;
+import com.github.lukesky19.skyPrestige.core.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.island.IslandResetData;
+import com.github.lukesky19.skyPrestige.dataHandler.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.gui.BlueprintGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
-import com.github.lukesky19.skyPrestige.hook.hooks.BSkyBlockHook;
-import com.github.lukesky19.skyPrestige.hook.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.hook.manager.HookManager;
-import com.github.lukesky19.skyPrestige.island.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.island.IslandCreator;
 import com.github.lukesky19.skyPrestige.prestige.validator.PrestigeValidator;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.prestige.PrestigeRewardsProcessor;
-import com.github.lukesky19.skyPrestige.processor.prestige.PrestigeSettingsProcessor;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -51,7 +50,10 @@ import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -69,11 +71,9 @@ public class PrestigeManager {
     private final @NotNull HookManager hookManager;
 
     private final @NotNull PrestigeValidator prestigeValidator;
-    private final @NotNull PrestigeSettingsProcessor prestigeSettingsProcessor;
+    private final @NotNull IslandSettingsProcessor islandSettingsProcessor;
     private final @NotNull PrestigeRewardsProcessor prestigeRewardsProcessor;
     private final @NotNull PlayerSettingsProcessor playerSettingsProcessor;
-
-    private final @NotNull List<String> prestigedIslandIds = new ArrayList<>();
 
     /**
      * Constructor
@@ -86,8 +86,8 @@ public class PrestigeManager {
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param hookManager A {@link HookManager} instance.
-     * @param islandSettingsProcessor An {@link IslandSettingsProcessor} instance.
      * @param playerSettingsProcessor A {@link PlayerSettingsProcessor} instance.
+     * @param islandSettingsProcessor An {@link IslandSettingsProcessor} instance.
      */
     public PrestigeManager(
             @NotNull SkyPlugin plugin,
@@ -99,8 +99,8 @@ public class PrestigeManager {
             @NotNull GUIManager guiManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
-            @NotNull IslandSettingsProcessor islandSettingsProcessor,
-            @NotNull PlayerSettingsProcessor playerSettingsProcessor) {
+            @NotNull PlayerSettingsProcessor playerSettingsProcessor,
+            @NotNull IslandSettingsProcessor islandSettingsProcessor) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
@@ -110,36 +110,11 @@ public class PrestigeManager {
         this.databaseManager = databaseManager;
         this.guiManager = guiManager;
         this.hookManager = hookManager;
-        this.playerSettingsProcessor = playerSettingsProcessor;
 
+        this.islandSettingsProcessor = islandSettingsProcessor;
         this.prestigeValidator = new PrestigeValidator(plugin, localeManager, prestigeConfigManager, islandDataManager, hookManager);
-        this.prestigeSettingsProcessor = new PrestigeSettingsProcessor(islandDataManager, databaseManager, islandSettingsProcessor, playerSettingsProcessor);
         this.prestigeRewardsProcessor = new PrestigeRewardsProcessor(plugin, hookManager);
-    }
-
-    /**
-     * Checks if an island is in the process of being prestige.
-     * @param islandId The island id to check.
-     * @return true if the island is being prestiged, otherwise false.
-     */
-    public boolean isIslandIdPrestiged(@NotNull String islandId) {
-        return prestigedIslandIds.contains(islandId);
-    }
-
-    /**
-     * Adds an island id to the list of islands in the process of being prestiged.
-     * @param islandId The island id to add.
-     */
-    public void addPrestigedIslandId(@NotNull String islandId) {
-        prestigedIslandIds.add(islandId);
-    }
-
-    /**
-     * Removes an island id from the list of islands in the process of being prestiged.
-     * @param islandId The island id to remove.
-     */
-    public void removePrestigedIslandId(@NotNull String islandId) {
-        prestigedIslandIds.removeIf(listIslandId -> listIslandId.equals(islandId));
+        this.playerSettingsProcessor = playerSettingsProcessor;
     }
 
     /**
@@ -147,9 +122,9 @@ public class PrestigeManager {
      * @param player The {@link Player}.
      */
     public void prestigeIsland(@NotNull Player player) {
-        Settings settings = settingsManager.getSettings();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null || settings.scaleFormula() == null) return;
-        @NotNull Locale locale = localeManager.getLocale();
+        @NotNull Locale locale = localeManager.getConfiguration();
 
         // Check if the player is in a world managed by a GameModeAddon
         @Nullable GameModeAddon gameModeAddon = prestigeValidator.validateGameModeAddon(player);
@@ -214,10 +189,11 @@ public class PrestigeManager {
             @NotNull Locale locale,
             @NotNull Player player,
             @NotNull Island island,
-            @NotNull com.github.lukesky19.skyPrestige.data.island.IslandData islandData,
+            @NotNull IslandData islandData,
             @NotNull GameModeAddon gameModeAddon,
             @NotNull PrestigeConfig prestigeConfig,
             int prestigeLevel) {
+        IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), player.getUniqueId());
         IslandResetData islandResetData = new IslandResetData(player, User.getInstance(player), island, islandData, gameModeAddon, prestigeConfig, prestigeLevel);
 
         // Let the player select a blueprint for the prestige
@@ -226,6 +202,7 @@ public class PrestigeManager {
                 localeManager,
                 guiConfigManager,
                 guiManager,
+                identifier,
                 hookManager,
                 islandResetData,
                 data -> {
@@ -281,13 +258,9 @@ public class PrestigeManager {
             @NotNull String blueprintName,
             @NotNull PrestigeConfig prestigeConfig,
             int prestigeLevel) {
-        Settings settings = settingsManager.getSettings();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null) return;
         if(settings.scaleFormula() == null) return;
-        Locale locale = localeManager.getLocale();
-        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        if(!bentoBoxHook.isHooked()) return;
-        String oldIslandId = oldIsland.getUniqueId();
 
         // Check if the base prestige points are valid
         @Nullable Double basePrestigePoints = prestigeValidator.validateBasePrestigePoints(
@@ -303,16 +276,23 @@ public class PrestigeManager {
         if(!prestigeValidator.hasRequiredPrestigePoints(player, oldIslandData, requiredPrestigePoints))
             return;
 
-        // Mark the Island id as being prestiged
-        addPrestigedIslandId(oldIslandId);
         // Create the new island
-        @Nullable Island newIsland = bentoBoxHook.resetIsland(user, gameModeAddon, oldIsland, blueprintName);
+        @Nullable Island newIsland = IslandCreator.builder(plugin, databaseManager, hookManager, islandSettingsProcessor)
+                .user(user)
+                .gameModeAddon(gameModeAddon)
+                .oldIsland(oldIsland)
+                .islandData(oldIslandData)
+                .islandSettings(prestigeConfig.prestigeSettings().islandSettings())
+                .name(blueprintName)
+                .requiredPrestigePoints(requiredPrestigePoints)
+                .prestigeLevel(prestigeLevel)
+                .build();
+
+        // If the new island failed to be created, log and error and return
         if(newIsland == null) {
-            // If the island failed to reset, remove the island id as a prestiged island id.
-            removePrestigedIslandId(oldIslandId);
+            logger.error(AdventureUtil.deserialize("Island Creation failed for prestige."));
             return;
         }
-        IslandData newIslandData = oldIslandData.clone();
 
         // Get online island member's players
         List<Player> onlineIslandMembers = newIsland.getMemberSet().stream()
@@ -324,25 +304,20 @@ public class PrestigeManager {
         List<OfflinePlayer> offlineIslandMembers = newIsland.getMemberSet()
                 .stream()
                 .map(memberId -> player.getServer().getOfflinePlayer(memberId))
-                .filter(OfflinePlayer::hasPlayedBefore)
+                .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
                 .toList();
 
-        // Process PrestigeSettings
-        prestigeSettingsProcessor.processPrestigeSettings(player, oldIsland, newIsland, onlineIslandMembers, offlineIslandMembers, newIslandData, requiredPrestigePoints, prestigeConfig.prestigeSettings());
-
-        // Clean up the old island
-        bentoBoxHook.deleteIsland(player.getUniqueId(), oldIsland);
+        // Process Player Settings
+        playerSettingsProcessor.processPlayerSettings(
+                prestigeConfig.prestigeSettings().playerSettings(),
+                player,
+                onlineIslandMembers,
+                offlineIslandMembers,
+                prestigeConfig.prestigeSettings().startingMoney(),
+                prestigeConfig.prestigeSettings().giveStartingMoneyToAllIslandMembers());
 
         // Process prestige rewards
         prestigeRewardsProcessor.processPrestigeRewards(player, newIsland, onlineIslandMembers, prestigeConfig.rewardConfig(), prestigeLevel);
-
-        // Send the plugin's teleport notice if BSkyBlock teleports the player to the island upon creation
-        BSkyBlockHook bSkyBlockHook = hookManager.getHook(BSkyBlockHook.class);
-        if(bSkyBlockHook.isHooked()) {
-            if(bSkyBlockHook.isTeleportPlayerToIslandUponIslandCreation()) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
-            }
-        }
     }
 
     /**
@@ -357,10 +332,10 @@ public class PrestigeManager {
             if(prestigeLevels.isEmpty()) return;
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 if(!player.isOnline() || !player.isConnected()) return;
-                @NotNull Map<Integer, PrestigeConfig> prestigeConfigMap = prestigeConfigManager.getPrestigeConfigMap(prestigeLevels);
+                @NotNull Map<Integer, PrestigeConfig> prestigeConfigMap = prestigeConfigManager.getPrestigeConfigMapForLevels(prestigeLevels);
                 if (prestigeConfigMap.isEmpty()) return;
 
-                @Nullable Settings settings = settingsManager.getSettings();
+                @Nullable Settings settings = settingsManager.getConfiguration();
                 if(settings == null) {
                     logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
                     return;
@@ -368,7 +343,7 @@ public class PrestigeManager {
 
                 prestigeConfigMap.forEach((prestigeLevel, prestigeConfig) -> {
                     PrestigeConfig.PrestigeSettings prestigeSettings = prestigeConfig.prestigeSettings();
-                    PlayerSettings playerSettings = prestigeSettings.playerSettings();
+                    PlayerSettingsInterface playerSettings = prestigeSettings.playerSettings();
                     PrestigeConfig.RewardConfig rewardConfig = prestigeConfig.rewardConfig();
 
                     playerSettingsProcessor.processPlayerSettingsOnLogin(
