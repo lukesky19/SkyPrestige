@@ -23,6 +23,7 @@ import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skylib.api.gui.abstracts.AbstractGUIManager;
 import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class manages open GUIs.
@@ -32,6 +33,15 @@ public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
      * Constructor
      */
     public GUIManager() {}
+
+    @Override
+    public @Nullable BaseGUI<IslandIdUUIDKey> getOpenGUI(@NotNull IslandIdUUIDKey identifier) {
+        BaseGUI<IslandIdUUIDKey> gui = dataMap.get(identifier);
+        if(gui != null) return gui;
+
+        IslandIdUUIDKey playerIdentifier = new IslandIdUUIDKey(null, identifier.uuid());
+        return dataMap.get(playerIdentifier);
+    }
 
     /**
      * Refresh any {@link ExchangeGUI}s that are open for the island id provided.
