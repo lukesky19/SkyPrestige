@@ -29,6 +29,7 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.database.table.OfflinePrestigeTable;
 import com.github.lukesky19.skyPrestige.gui.gui.BlueprintGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.island.IslandCreator;
@@ -305,6 +306,10 @@ public class PrestigeManager {
                 .map(memberId -> player.getServer().getOfflinePlayer(memberId))
                 .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
                 .toList();
+
+        // Insert players that were offline on island prestige to give rewards later.
+        OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
+        offlineIslandMembers.forEach(offlinePlayer -> offlinePrestigeTable.insertOfflinePrestige(offlinePlayer.getUniqueId(), newIsland.getUniqueId(), prestigeLevel));
 
         // Process Player Settings
         playerSettingsProcessor.processPlayerSettings(
