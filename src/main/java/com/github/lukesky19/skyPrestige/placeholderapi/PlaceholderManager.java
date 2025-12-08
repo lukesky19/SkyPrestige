@@ -69,8 +69,9 @@ public class PlaceholderManager {
         if(plugin.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion == null) {
                 skyPrestigeExpansion = new SkyPrestigeExpansion(islandDataManager, leaderboardManager, hookManager);
-                skyPrestigeExpansion.register();
             }
+
+            skyPrestigeExpansion.register();
         }
     }
 
