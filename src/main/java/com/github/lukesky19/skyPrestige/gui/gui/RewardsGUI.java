@@ -21,7 +21,6 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.RewardsGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -53,9 +52,7 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
     private final @Nullable ConfirmPrestigeGUI confirmPrestigeGUI;
 
     // Prestige Config
-    private final @Nullable PrestigeConfig prestigeConfig;
-    // Island Reset Data
-    private final @Nullable IslandResetData islandResetData;
+    private final @NotNull PrestigeConfig prestigeConfig;
 
     // Config
     private final @Nullable RewardsGUIConfig rewardsGUIConfig;
@@ -76,8 +73,8 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param guiManager An {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
+     * @param prestigeConfig The {@link PrestigeConfig} to display rewards for.
      * @param confirmPrestigeGUI The {@link ConfirmPrestigeGUI} the player came from, if any.
-     * @param islandResetData The {@link IslandResetData}.
      */
     public RewardsGUI(
             @NotNull SkyPlugin plugin,
@@ -85,42 +82,13 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
-            @Nullable ConfirmPrestigeGUI confirmPrestigeGUI,
-            @NotNull IslandResetData islandResetData) {
+            @NotNull PrestigeConfig prestigeConfig,
+            @Nullable ConfirmPrestigeGUI confirmPrestigeGUI) {
         super(plugin, guiManager, identifier, player);
 
-        this.confirmPrestigeGUI = confirmPrestigeGUI;
-
-        this.islandResetData = islandResetData;
-        this.prestigeConfig = islandResetData.getPrestigeConfig();
-
-        rewardsGUIConfig = guiConfigManager.getRewardsGUIConfig();
-    }
-
-    /**
-     * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
-     * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link IGUIManager} instance.
-     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
-     * @param player The {@link Player} viewing the GUI.
-     * @param confirmPrestigeGUI The {@link ConfirmPrestigeGUI} the player came from, if any.
-     * @param prestigeConfig The {@link PrestigeConfig}.
-     */
-    public RewardsGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull Player player,
-            @Nullable ConfirmPrestigeGUI confirmPrestigeGUI,
-            @NotNull PrestigeConfig prestigeConfig) {
-        super(plugin, guiManager, identifier, player);
-
-        this.confirmPrestigeGUI = confirmPrestigeGUI;
-
-        this.islandResetData = null;
         this.prestigeConfig = prestigeConfig;
+
+        this.confirmPrestigeGUI = confirmPrestigeGUI;
 
         rewardsGUIConfig = guiConfigManager.getRewardsGUIConfig();
     }
@@ -130,11 +98,6 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @return true if created successfully, otherwise false.
      */
     public boolean create() {
-        if(islandResetData == null || !islandResetData.isPrestige() || prestigeConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid data."));
-            return false;
-        }
-
         if(rewardsGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI due to invalid gui configuration."));
             return false;
@@ -172,11 +135,6 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     @Override
     public boolean update() {
-        if(prestigeConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid island reset data."));
-            return false;
-        }
-
         if(rewardsGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;

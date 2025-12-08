@@ -118,7 +118,7 @@ public class RewardsCommand {
                     }
 
                     // Create the RewardsGUI
-                    RewardsGUI gui = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, null, nextPrestigeLevelConfig);
+                    RewardsGUI gui = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, nextPrestigeLevelConfig, null);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

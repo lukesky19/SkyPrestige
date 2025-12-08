@@ -95,7 +95,7 @@ public class IslandResetData {
      * @return true if so, or false.
      */
     public boolean isPrestige() {
-        return prestigeConfig != null && prestigeLevel != null && prestigeLevel > 0;
+        return prestigeConfig != null && prestigeLevel != null && prestigeLevel >= 0;
     }
 
     /**

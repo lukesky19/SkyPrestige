@@ -38,7 +38,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -291,11 +290,12 @@ public class ConfirmPrestigeGUI extends ChestGUI<IslandIdUUIDKey> {
 
         createActionButton(rewardsConfig, inventoryClickEvent -> {
             Locale locale = localeManager.getConfiguration();
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
             close();
 
-            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, this, islandResetData);
+            if(islandResetData.getPrestigeConfig() == null) return;
+
+            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, islandResetData.getPrestigeConfig(), this);
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
