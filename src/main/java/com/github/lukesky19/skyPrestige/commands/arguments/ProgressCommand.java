@@ -27,6 +27,8 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.gui.gui.ProgressGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -37,7 +39,6 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -54,6 +55,7 @@ public class ProgressCommand {
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
     private final @NotNull GUIManager guiManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
@@ -64,6 +66,7 @@ public class ProgressCommand {
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public ProgressCommand(
             @NotNull SkyPlugin plugin,
@@ -72,7 +75,8 @@ public class ProgressCommand {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
@@ -81,6 +85,7 @@ public class ProgressCommand {
         this.prestigeConfigManager = prestigeConfigManager;
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -94,7 +99,9 @@ public class ProgressCommand {
                     Locale locale = localeManager.getConfiguration();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
-                    Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
+                    BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+
+                    Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                     if(island == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
                         return 0;
@@ -104,6 +111,11 @@ public class ProgressCommand {
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                        return 0;
+                    }
+
+                    if(islandData.isPrestigeExempt()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressPrestigeExempt()));
                         return 0;
                     }
 

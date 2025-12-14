@@ -15,9 +15,12 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.processor.prestige;
+package com.github.lukesky19.skyPrestige.processor.reward;
 
-import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.CommandReward;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.ItemReward;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.MoneyReward;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skyPrestige.integration.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -41,7 +44,7 @@ import java.util.Optional;
 /**
  * This class handles the processing of prestige rewards.
  */
-public class PrestigeRewardsProcessor {
+public class RewardsProcessor {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private final @NotNull HookManager hookManager;
@@ -51,25 +54,25 @@ public class PrestigeRewardsProcessor {
      * @param plugin A {@link JavaPlugin} instance.
      * @param hookManager A {@link HookManager} instance.
      */
-    public PrestigeRewardsProcessor(@NotNull SkyPlugin plugin, @NotNull HookManager hookManager) {
+    public RewardsProcessor(@NotNull SkyPlugin plugin, @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.hookManager = hookManager;
     }
 
     /**
-     * Process the {@link PrestigeConfig.RewardConfig} for the prestige level.
-     * @param prestigingPlayer The {@link Player} prestiging the island.
+     * Process the {@link RewardConfig} for the prestige level.
+     * @param initiatingPlayer The {@link Player} that initiated the rewards.
      * @param island The new {@link Island}.
      * @param onlineIslandMembers The {@link List} of {@link Player}s that are online and on the player's team.
-     * @param rewardConfig The {@link PrestigeConfig.RewardConfig} to process.
-     * @param prestigeLevel The prestige level being processed.
+     * @param rewardConfig The {@link RewardConfig} to process.
+     * @param prestigeLevel The prestige level being processed. Or -1 for non-prestige.
      */
     public void processPrestigeRewards(
-            @NotNull Player prestigingPlayer,
+            @NotNull Player initiatingPlayer,
             @NotNull Island island,
             @NotNull List<Player> onlineIslandMembers,
-            @NotNull PrestigeConfig.RewardConfig rewardConfig,
+            @NotNull RewardConfig rewardConfig,
             int prestigeLevel) {
         Server server = plugin.getServer();
         ConsoleCommandSender commandSender = server.getConsoleSender();
@@ -89,11 +92,16 @@ public class PrestigeRewardsProcessor {
                         onlineIslandMembers.forEach(memberPlayer ->
                                 PlayerUtil.giveItem(memberPlayer.getInventory(), itemStack, itemStack.getAmount(), memberPlayer.getLocation()));
                     } else {
-                        PlayerUtil.giveItem(prestigingPlayer.getInventory(), itemStack, itemStack.getAmount(), prestigingPlayer.getLocation());
+                        PlayerUtil.giveItem(initiatingPlayer.getInventory(), itemStack, itemStack.getAmount(), initiatingPlayer.getLocation());
                     }
                 } else {
-                    prestigingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-                    logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                    if(prestigeLevel == -1) {
+                        initiatingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                        logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
+                    } else {
+                        initiatingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                        logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                    }
                 }
             }
         });
@@ -109,7 +117,7 @@ public class PrestigeRewardsProcessor {
                                     .forEach(parsedCommand -> server.dispatchCommand(commandSender, parsedCommand)));
                 } else {
                     commandReward.commands().stream()
-                            .map(command -> PlaceholderAPIUtil.parsePlaceholders(prestigingPlayer, command))
+                            .map(command -> PlaceholderAPIUtil.parsePlaceholders(initiatingPlayer, command))
                             .forEach(parsedCommand -> server.dispatchCommand(commandSender, parsedCommand));
                 }
             }
@@ -123,13 +131,18 @@ public class PrestigeRewardsProcessor {
                     if (moneyReward.giveToAllIslandMembers()) {
                         onlineIslandMembers.forEach(memberPlayer -> economyHook.addToBalance(memberPlayer, moneyReward.money()));
                     } else {
-                        economyHook.addToBalance(prestigingPlayer, moneyReward.money());
+                        economyHook.addToBalance(initiatingPlayer, moneyReward.money());
                     }
                 }
             });
         } else {
-            prestigingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-            logger.warn(AdventureUtil.deserialize("Unable to give money rewards due to no economy hooked into."));
+            if(prestigeLevel == -1) {
+                initiatingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
+            } else {
+                initiatingPlayer.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                logger.warn(AdventureUtil.deserialize("Unable to give money rewards due to no economy hooked into."));
+            }
         }
 
         // Island Range Reward
@@ -142,16 +155,16 @@ public class PrestigeRewardsProcessor {
      * Process the reward config for the player.
      * This is meant for use when the player's island was prestiged while they were offline.
      * @param player The {@link Player} to give rewards to.
-     * @param rewardConfig The {@link PrestigeConfig.RewardConfig} to process.
+     * @param rewardConfig The {@link RewardConfig} to process.
      * @param prestigeLevel The prestige level the rewards are being processed for.
      */
     public void processPrestigeRewardsOnLogin(
             @NotNull Player player,
-            @NotNull PrestigeConfig.RewardConfig rewardConfig,
+            @NotNull RewardConfig rewardConfig,
             int prestigeLevel) {
         rewardConfig.itemRewards()
                 .stream()
-                .filter(PrestigeConfig.ItemReward::giveToAllIslandMembers)
+                .filter(ItemReward::giveToAllIslandMembers)
                 .forEach(itemReward -> {
                     if(itemReward.rewardItem().itemType() != null) {
                         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
@@ -163,8 +176,13 @@ public class PrestigeRewardsProcessor {
 
                             PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
                         } else {
-                            player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-                            logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                            if(prestigeLevel == -1) {
+                                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                                logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
+                            } else {
+                                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                                logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack. Prestige level: " + prestigeLevel));
+                            }
                         }
                     }
                 });
@@ -173,7 +191,7 @@ public class PrestigeRewardsProcessor {
         CommandSender commandSender = server.getConsoleSender();
         rewardConfig.commandRewards()
                 .stream()
-                .filter(PrestigeConfig.CommandReward::giveToAllIslandMembers)
+                .filter(CommandReward::giveToAllIslandMembers)
                 .forEach(commandReward ->
                         commandReward.commands().stream()
                                 .map(command -> PlaceholderAPIUtil.parsePlaceholders(player, command))
@@ -183,15 +201,20 @@ public class PrestigeRewardsProcessor {
         if(economyHook.isHooked()) {
             rewardConfig.moneyRewards()
                     .stream()
-                    .filter(PrestigeConfig.MoneyReward::giveToAllIslandMembers)
+                    .filter(MoneyReward::giveToAllIslandMembers)
                     .forEach(moneyReward -> {
                         if(moneyReward.money() > 0) {
                             economyHook.addToBalance(player, moneyReward.money());
                         }
                     });
         } else {
-            player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
-            logger.warn(AdventureUtil.deserialize("Unable to give money rewards due to no economy hooked into."));
+            if(prestigeLevel == -1) {
+                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
+            } else {
+                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
+                logger.warn(AdventureUtil.deserialize("Unable to give money rewards due to no economy hooked into."));
+            }
         }
     }
 }

@@ -19,14 +19,14 @@ package com.github.lukesky19.skyPrestige.processor.player;
 
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.InventorySettingsInterface;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.PlayerSettingsInterface;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.PlayTimeSettingsInterface;
-import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.PlayerSettingsInterface;
 import com.github.lukesky19.skyPrestige.integration.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.PlayerAuctionsHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkySellWandsHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -161,7 +161,7 @@ public class PlayerSettingsProcessor {
                 ItemStack itemStack = inventory.getItem(i);
                 if(itemStack == null || itemStack.isEmpty()) continue;
                 if(inventorySettings.keepInfiniteSellWands() && skySellWandsHook.isInfiniteSellWand(itemStack)) continue;
-                if(protectionOrbManager.isItemStackProtected(itemStack)) continue;
+                if(inventorySettings.keepProtectedItems() && protectionOrbManager.isItemStackProtected(itemStack)) continue;
 
                 inventory.setItem(i, emptyStack);
             }

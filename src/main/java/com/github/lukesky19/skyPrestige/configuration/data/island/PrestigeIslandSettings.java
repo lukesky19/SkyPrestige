@@ -4,7 +4,7 @@ import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsI
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 
 /**
- * Settings related to keeping or resetting island data.
+ * Settings related to keeping or resetting island data on prestige.
  * @param keepIslandSize Whether to keep island size on prestige or not.
  * @param keepGeneratorUpgrades Whether to keep generator upgrades on prestige or not.
  * @param resetPrestigePoints Whether to reset prestige points on prestige or not.

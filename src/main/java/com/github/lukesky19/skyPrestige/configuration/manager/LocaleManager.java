@@ -116,7 +116,6 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                         help,
                         locale.reload(),
                         locale.guiOpenError(),
-                        locale.islandNotFound(),
                         locale.islandDataNotFound(),
                         locale.islandPrestigeLevelUpdated(),
                         locale.prestigePlayerOnly(),
@@ -126,34 +125,29 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                         locale.prestigeIslandNotOwned(),
                         locale.prestigePlayerNotMemberOrOwner(),
                         locale.prestigeNotEnoughPrestigePoints(),
-                        locale.prestigeInventoryReset(),
-                        locale.prestigeEnderChestReset(),
-                        locale.prestigeExperienceReset(),
-                        locale.prestigeBalanceReset(),
-                        "<yellow>Your auction house items have been cleared as part of your island being prestiged.",
-                        locale.prestigeStartingMoneyGiven(),
-                        locale.islandMemberPrestigeNotice(),
-                        locale.otherPrestigeNotice(),
-                        locale.islandMemberIslandTeleportNotice(),
-                        locale.islandMemberFallbackTeleportNotice(),
-                        locale.otherIslandTeleportNotice(),
-                        locale.otherFallbackTeleportNotice(),
+                        "<red>You cannot prestige an island that is opted out of prestige.</red>",
                         locale.prestigeConfigError(),
                         locale.prestigeConfigRequirementError(),
                         locale.progressPlayerNotOnIsland(),
                         locale.progressMaxPrestigeLevel(),
+                        "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
                         locale.rewardsPlayerNotOnIsland(),
                         locale.rewardsMaxPrestigeLevel(),
+                        "<red>Your island is opted out of prestige. Prestige rewards can only be viewed for islands that can prestige.</red>",
                         locale.exchangePlayerNotOnIsland(),
                         locale.exchangePrestigeLevelNotMet(),
                         locale.exchangeNotEnoughPrestigePoints(),
+                        "<red>Your island is opted out of prestige. Only islands that can prestige can exchange prestige points.</red>",
                         locale.vaultPlayerNotOnIsland(),
                         locale.vaultItemNotAllowed(),
+                        "<red>Your island is opted out of prestige. The vault can only be used by islands opted into prestige.</red>",
                         "<red>The level provided is not a prestige level.</red>",
                         "<red>Unable to view prestige level requirements due to a configuration error.</red>",
                         "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
                         "<green>Island <yellow><island_id></yellow> is now exempt from top placeholders.</green>",
                         "<green>Island <yellow><island_id></yellow> is now unexempt from top placeholders.</green>",
+                        "<red>Your island is already opted into prestige.</red>",
+                        "<red>Your island is already opted out of prestige.</red>",
                         "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>",
                         "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>",
                         "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>",
@@ -179,6 +173,10 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                                 "<aqua><minutes></aqua> minute(s)",
                                 "<aqua><seconds></aqua> second(s)",
                                 ""),
+                        "<red>You must be in an island world to opt in or out of prestige.</red>",
+                        "<red>You must be on your island to opt in or out of prestige.</red>",
+                        "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",
+                        "<red>You must be the island owner or an island member to opt in or out of prestige.</red>",
                         locale.delimiter(),
                         locale.finalDelimiter());
             }
@@ -201,7 +199,6 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || locale.prefix()  == null
                 || locale.reload()  == null
                 || locale.guiOpenError()  == null
-                || locale.islandNotFound()  == null
                 || locale.islandDataNotFound()  == null
                 || locale.islandPrestigeLevelUpdated()  == null
                 || locale.prestigePlayerOnly()  == null
@@ -211,31 +208,24 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || locale.prestigeIslandNotOwned()  == null
                 || locale.prestigePlayerNotMemberOrOwner()  == null
                 || locale.prestigeNotEnoughPrestigePoints()  == null
-                || locale.prestigeInventoryReset()  == null
-                || locale.prestigeEnderChestReset()  == null
-                || locale.prestigeExperienceReset()  == null
-                || locale.prestigeBalanceReset()  == null
-                || locale.prestigeAuctionHouseItemsReset() == null
-                || locale.prestigeStartingMoneyGiven()  == null
-                || locale.islandMemberPrestigeNotice()  == null
-                || locale.otherPrestigeNotice()  == null
-                || locale.islandMemberIslandTeleportNotice()  == null
-                || locale.islandMemberFallbackTeleportNotice()  == null
-                || locale.otherIslandTeleportNotice()  == null
-                || locale.otherFallbackTeleportNotice()  == null
+                || locale.prestigeIslandOptedOut() == null
                 || locale.prestigeConfigError()  == null
                 || locale.prestigeConfigRequirementError()  == null
                 || locale.progressPlayerNotOnIsland()  == null
                 || locale.progressMaxPrestigeLevel()  == null
+                || locale.progressPrestigeExempt() == null
                 || locale.rewardsPlayerNotOnIsland()  == null
                 || locale.rewardsMaxPrestigeLevel()  == null
                 || locale.vaultItemNotAllowed() == null
                 || locale.vaultPlayerNotOnIsland() == null
+                || locale.vaultPrestigeExempt() == null
                 || locale.requirementsLevelNotFound() == null
                 || locale.requirementsConfigError() == null
                 || locale.requirementsPointsForLevel() == null
                 || locale.islandExempt() == null
                 || locale.islandUnexempt() == null
+                || locale.islandAlreadyOptedIn() == null
+                || locale.islandAlreadyOptedOut() == null
                 || locale.leaderboardTitle() == null
                 || locale.leaderboardPosition() == null
                 || locale.leaderboardPositionEmpty() == null
@@ -252,7 +242,11 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || locale.multiplierEventNextTime() == null
                 || locale.multiplierEventDisabled() == null
                 || isTimeFormatInvalid(locale.multiplierTimePlaceholder())
-                || locale.delimiter()  == null
+                || locale.prestigeStatusPlayerInWrongWorld() == null
+                || locale.prestigeStatusPlayerNotOnIsland() == null
+                || locale.prestigeStatusIslandNotOwned() == null
+                || locale.prestigeStatusPlayerNotMemberOrOwner() == null
+                || locale.delimiter() == null
                 || locale.finalDelimiter() == null) {
             locale = null;
 
@@ -314,7 +308,6 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                         "<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>"),
                 "<green>The plugin has reloaded successfully.</green>",
                 "<red>Unable to open this GUI because of a configuration error.</red>",
-                "<red>No island found for the island id <island_id>.</red>",
                 "<red>No island data was found for the island.</red>",
                 "<green>Island <island_id> had their prestige level set to <prestige_level>.</green>",
                 "<red>Only players are able to prestige islands.</red>",
@@ -324,34 +317,29 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 "<red>You cannot prestige an island that is not owned.</red>",
                 "<red>You must be the island owner or an island member to prestige.</red>",
                 "<red>You do not have enough prestige points to prestige.</red>",
-                "<yellow>Your inventory has been reset as part of your island being prestiged.</yellow>",
-                "<yellow>Your ender chest has been reset as part of your island being prestiged.</yellow>",
-                "<yellow>Your experience has been reset as part of your island being prestiged.</yellow>",
-                "<yellow>Your balance has been reset as part of your island being prestiged.</yellow>",
-                "<yellow>Your auction house items have been cleared as part of your island being prestiged.",
-                "<yellow>You received <money> to start your new island with.</yellow>",
-                "<green>Your island has been prestiged.</green>",
-                "<green>An island your are cooped or trusted on was prestiged.</green>",
-                "<green>Your island was prestiged. Teleporting you to your new island...</green>",
-                "<yellow>Your island was prestiged, but your spawn point could not be found. Teleporting you to the fallback location.</yellow>",
-                "<green>The island you were on was prestiged. Teleporting you to the new island...</green>",
-                "<yellow>The island you were on was prestiged, but the spawn point could not be found. Teleporting you to the fallback location.</yellow>",
+                "<red>You cannot prestige an island that is opted out of prestige.</red>",
                 "<red>Unable to prestige your island due to a configuration error.</red>",
                 "<red>Unable to check the required prestige points due to a configuration error.</red>",
-                "<red>You must be on your island to view prestige requirements.</red>",
-                "<green>No requirements to view because your island is at the max prestige level.</green>",
+                "<red>You must be on your island to view prestige progress.</red>",
+                "<green>No progress to view because your island is at the max prestige level.</green>",
+                "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
                 "<red>You must be on your island to view prestige rewards.</red>",
                 "<green>No rewards to view because your island is at the max prestige level.</green>",
+                "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
                 "<red>You must be on your island to exchange prestige points.</red>",
                 "<red>Your island doesn't meet the required prestige level to exchange prestige points.</red>",
                 "<red>You do not have enough prestige points to exchange.</red>",
+                "<red>Your island is opted out of prestige. Only islands that can prestige can exchange prestige points.</red>",
                 "<red>You must be on your island to view the island vault.</red>",
                 "<red>The item you clicked is not allowed to be placed inside the vault.</red>",
+                "<red>Your island is opted out of prestige. The vault can only be used by islands opted into prestige.</red>",
                 "<red>The level provided is not a prestige level.</red>",
                 "<red>Unable to view prestige level requirements due to a configuration error.</red>",
                 "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
                 "<green>Island <yellow><island_id></yellow> is now exempt from top placeholders.</green>",
                 "<green>Island <yellow><island_id></yellow> is now unexempt from top placeholders.</green>",
+                "<red>Your island is already opted into prestige.</red>",
+                "<red>Your island is already opted out of prestige.</red>",
                 "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>",
                 "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>",
                 "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>",
@@ -377,6 +365,10 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                         "<aqua><minutes></aqua> minute(s)",
                         "<aqua><seconds></aqua> second(s)",
                         ""),
+                "<red>You must be in an island world to opt in or out of prestige.</red>",
+                "<red>You must be on your island to opt in or out of prestige.</red>",
+                "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",
+                "<red>You must be the island owner or an island member to opt in or out of prestige.</red>",
                 ", ",
                 ", and ");
     }

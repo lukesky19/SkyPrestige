@@ -56,6 +56,12 @@ permissions:
     skyprestige.commands.skyprestige.multiplier.get.total:
         description: Permission to get the current total multiplier.
         default: op
+    skyprestige.commands.skyprestige.opt-in:
+        description: Permission to use /skyprestige opt-in to opt in of prestige.
+        default: op
+    skyprestige.commands.skyprestige.opt-out:
+        description: Permission to use /skyprestige opt-out to opt out of prestige.
+        default: op
     skyprestige.commands.skyprestige.points:
         description: Permission to view and manage prestige points.
         default: op

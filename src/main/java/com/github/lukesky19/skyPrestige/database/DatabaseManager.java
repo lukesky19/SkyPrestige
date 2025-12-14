@@ -50,6 +50,7 @@ public class DatabaseManager {
     private PlayerIdsTable playerIdsTable;
     private IslandDataTable islandDataTable;
     private OfflinePrestigeTable offlinePrestigeTable;
+    private OfflineStatusChangeTable offlineStatusChangeTable;
     private PlayerLogoutLocationsTables playerLogoutLocationsTables;
     private PlayerTeleportTable playerTeleportTable;
     // Legacy only
@@ -87,6 +88,14 @@ public class DatabaseManager {
      */
     public OfflinePrestigeTable getOfflinePrestigeTable() {
         return offlinePrestigeTable;
+    }
+
+    /**
+     * Get the {@link OfflineStatusChangeTable}.
+     * @return The {@link OfflineStatusChangeTable}
+     */
+    public OfflineStatusChangeTable getOfflineStatusChangeTable() {
+        return offlineStatusChangeTable;
     }
 
     /**
@@ -138,6 +147,9 @@ public class DatabaseManager {
 
         offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager, versionsTable);
         futureList.add(offlinePrestigeTable.createTable().thenCompose(v -> offlinePrestigeTable.migrate()));
+
+        offlineStatusChangeTable = new OfflineStatusChangeTable(logger, queueManager, versionsTable);
+        futureList.add(offlineStatusChangeTable.createTable());
 
         playerLogoutLocationsTables = new PlayerLogoutLocationsTables(queueManager, versionsTable);
         futureList.add(playerLogoutLocationsTables.createTable());

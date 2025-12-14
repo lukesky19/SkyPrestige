@@ -28,6 +28,12 @@ public interface InventorySettingsInterface {
     boolean clearInventory();
 
     /**
+     * Should items protected by protection orbs not be cleared?
+     * @return true if not cleared, or false to clear.
+     */
+    boolean keepProtectedItems();
+
+    /**
      * Should infinite sell wands not be cleared?
      * @return true if not cleared, or false to clear.
      */

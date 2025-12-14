@@ -39,6 +39,7 @@ public class IslandResetData {
     // Prestige Only
     private final @Nullable PrestigeConfig prestigeConfig;
     private final @Nullable Integer prestigeLevel;
+    private final @Nullable Double prestigePoints;
 
     /**
      * Constructor
@@ -49,6 +50,7 @@ public class IslandResetData {
      * @param gameModeAddon The {@link GameModeAddon}.
      * @param prestigeConfig The {@link PrestigeConfig}.
      * @param prestigeLevel The prestige level.
+     * @param prestigePoints The prestige points required for this reset.
      */
     public IslandResetData(
             @NotNull Player player,
@@ -57,7 +59,8 @@ public class IslandResetData {
             @NotNull IslandData oldIslandData,
             @NotNull GameModeAddon gameModeAddon,
             @NotNull PrestigeConfig prestigeConfig,
-            int prestigeLevel) {
+            int prestigeLevel,
+            double prestigePoints) {
         this.player = player;
         this.user = user;
         this.oldIsland = oldIsland;
@@ -65,6 +68,7 @@ public class IslandResetData {
         this.gameModeAddon = gameModeAddon;
         this.prestigeConfig = prestigeConfig;
         this.prestigeLevel = prestigeLevel;
+        this.prestigePoints = prestigePoints;
     }
 
     /**
@@ -88,6 +92,7 @@ public class IslandResetData {
         this.gameModeAddon = gameModeAddon;
         this.prestigeConfig = null;
         this.prestigeLevel = null;
+        this.prestigePoints = null;
     }
 
     /**
@@ -168,5 +173,13 @@ public class IslandResetData {
      */
     public @Nullable Integer getPrestigeLevel() {
         return prestigeLevel;
+    }
+
+    /**
+     * Get the prestige points required for this island reset.
+     * @return The prestige points or null.
+     */
+    public @Nullable Double getPrestigePoints() {
+        return prestigePoints;
     }
 }

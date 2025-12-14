@@ -134,6 +134,9 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
             return;
         }
 
+        // Check for prestige exemption
+        if(islandData.isPrestigeExempt()) return;
+
         // Handle the event and event context
         handle(settings, islandData, event, eventContext);
     }

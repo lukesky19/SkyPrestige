@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
  * @param playTimeSettings The {@link PlayTimeSettings}.
  */
 @ConfigSerializable
-public record PrestigePlayerSettings(
+public record PlayerSettings(
         @NotNull PlayerInventorySettings inventorySettings,
         @NotNull EnderChestInventorySettings enderChestSettings,
         boolean resetExp,

@@ -80,40 +80,45 @@ public class MagicCobblestoneGeneratorHook implements Hook {
     public void copyGeneratorData(@NotNull Island oldIsland, @NotNull Island newIsland) {
         if(stoneGeneratorAddon == null || stoneGeneratorManager == null) return;
 
-        @Nullable GeneratorDataObject oldIslandData = stoneGeneratorManager.validateIslandData(oldIsland);
-        if(oldIslandData == null) {
-            logger.error(AdventureUtil.deserialize("Failed to copy generator data due to invalid island generator data."));
+        @Nullable GeneratorDataObject oldIslandGeneratorData = stoneGeneratorManager.validateIslandData(oldIsland);
+        if(oldIslandGeneratorData == null) {
+            logger.error(AdventureUtil.deserialize("Failed to copy generator data due to invalid island generator data for the old island."));
+            return;
+        }
+        @Nullable GeneratorDataObject newIslandGeneratorData = stoneGeneratorManager.validateIslandData(newIsland);
+        if(newIslandGeneratorData == null) {
+            logger.error(AdventureUtil.deserialize("Failed to copy generator data due to invalid island generator data for the new island."));
             return;
         }
 
-        // Create the new GeneratorDataObject
-        GeneratorDataObject newIslandData = new GeneratorDataObject();
-
         // Set the island/unique id
-        newIslandData.setUniqueId(newIsland.getUniqueId());
+        newIslandGeneratorData.setUniqueId(newIsland.getUniqueId());
 
         // Copy Unlocked Tiers
-        newIslandData.setUnlockedTiers(new HashSet<>(oldIslandData.getUnlockedTiers()));
+        newIslandGeneratorData.setUnlockedTiers(new HashSet<>(oldIslandGeneratorData.getUnlockedTiers()));
 
         // Copy Purchased Tiers
-        newIslandData.setPurchasedTiers(new HashSet<>(oldIslandData.getPurchasedTiers()));
+        newIslandGeneratorData.setPurchasedTiers(new HashSet<>(oldIslandGeneratorData.getPurchasedTiers()));
 
         // Copy Active Tiers
-        newIslandData.setActiveGeneratorList(new HashSet<>(oldIslandData.getActiveGeneratorList()));
+        newIslandGeneratorData.setActiveGeneratorList(new HashSet<>(oldIslandGeneratorData.getActiveGeneratorList()));
 
         // Copy active generator count
-        newIslandData.setIslandActiveGeneratorCount(oldIslandData.getIslandActiveGeneratorCount());
-        newIslandData.setOwnerActiveGeneratorCount(oldIslandData.getOwnerActiveGeneratorCount());
+        newIslandGeneratorData.setIslandActiveGeneratorCount(oldIslandGeneratorData.getIslandActiveGeneratorCount());
+        newIslandGeneratorData.setOwnerActiveGeneratorCount(oldIslandGeneratorData.getOwnerActiveGeneratorCount());
 
         // Copy Bundles
-        newIslandData.setIslandBundle(oldIslandData.getIslandBundle());
-        newIslandData.setOwnerBundle(oldIslandData.getOwnerBundle());
+        newIslandGeneratorData.setIslandBundle(oldIslandGeneratorData.getIslandBundle());
+        newIslandGeneratorData.setOwnerBundle(oldIslandGeneratorData.getOwnerBundle());
 
         // Copy Working Ranges
-        newIslandData.setIslandWorkingRange(oldIslandData.getIslandWorkingRange());
-        newIslandData.setOwnerWorkingRange(oldIslandData.getOwnerWorkingRange());
+        newIslandGeneratorData.setIslandWorkingRange(oldIslandGeneratorData.getIslandWorkingRange());
+        newIslandGeneratorData.setOwnerWorkingRange(oldIslandGeneratorData.getOwnerWorkingRange());
 
-        // Lastly save updated data
-        stoneGeneratorManager.saveGeneratorData(newIslandData);
+        // Save updated data
+        stoneGeneratorManager.saveGeneratorData(newIslandGeneratorData);
+
+        // Delete old data
+        stoneGeneratorManager.wipeGeneratorData(oldIslandGeneratorData);
     }
 }

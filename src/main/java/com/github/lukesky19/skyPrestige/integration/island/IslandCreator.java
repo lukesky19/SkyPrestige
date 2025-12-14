@@ -69,6 +69,7 @@ public class IslandCreator {
     private final @Nullable IslandSettingsInterface islandSettings;
     private final @Nullable Double requiredPrestigePoints;
     private final @Nullable Integer prestigeLevel;
+    private final @Nullable Boolean prestigeExempt;
     private final @NotNull String blueprintName;
     private final @NotNull NewIslandLocationStrategy locationStrategy;
 
@@ -105,7 +106,8 @@ public class IslandCreator {
         this.islandData = builder.oldIslandData;
         this.islandSettings = builder.islandSettings;
         this.requiredPrestigePoints = builder.requiredPrestigePoints;
-        this.prestigeLevel= builder.prestigeLevel;
+        this.prestigeLevel = builder.prestigeLevel;
+        this.prestigeExempt = builder.prestigeExempt;
         this.blueprintName = builder.blueprintName;
         this.locationStrategy = new DefaultNewIslandLocationStrategy();
 
@@ -162,6 +164,8 @@ public class IslandCreator {
         // Process IslandSettings
         if(requiredPrestigePoints != null && prestigeLevel != null) {
             islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData, requiredPrestigePoints, prestigeLevel);
+        } else if(prestigeExempt != null) {
+            islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData, prestigeExempt);
         } else {
             islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData);
         }
@@ -339,6 +343,7 @@ public class IslandCreator {
         private @Nullable IslandSettingsInterface islandSettings;
         private @Nullable Double requiredPrestigePoints;
         private @Nullable Integer prestigeLevel;
+        private @Nullable Boolean prestigeExempt;
 
         /**
          * Constructor
@@ -437,6 +442,16 @@ public class IslandCreator {
          */
         public @NotNull Builder prestigeLevel(int prestigeLevel) {
             this.prestigeLevel = prestigeLevel;
+            return this;
+        }
+
+        /**
+         * Set the exemption status to apply to the island.
+         * @param prestigeExempt true if opt out, false for opt in.
+         * @return The {@link IslandCreator.Builder}.
+         */
+        public @NotNull Builder prestigeExempt(boolean prestigeExempt) {
+            this.prestigeExempt = prestigeExempt;
             return this;
         }
 

@@ -118,6 +118,11 @@ public class ExchangeCommand {
                         return 0;
                     }
 
+                    if(islandData.isPrestigeExempt()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePrestigeExempt()));
+                        return 0;
+                    }
+
                     if(islandData.getPrestigeLevel() < settings.exchangePrestigeLevel()) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePrestigeLevelNotMet()));
                         return 0;

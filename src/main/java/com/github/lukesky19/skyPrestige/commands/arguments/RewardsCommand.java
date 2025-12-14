@@ -111,6 +111,11 @@ public class RewardsCommand {
                         return 0;
                     }
 
+                    if(islandData.isPrestigeExempt()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPrestigeExempt()));
+                        return 0;
+                    }
+
                     PrestigeConfig nextPrestigeLevelConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
                     if(nextPrestigeLevelConfig == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsMaxPrestigeLevel()));

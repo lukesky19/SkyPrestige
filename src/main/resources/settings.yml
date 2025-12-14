@@ -4,6 +4,18 @@ config-version: 1.1.0.0
 locale: en_US
 # How frequently island data is periodically saved. Island data are also saved on player disconnect and server shutdown.
 save-frequency-seconds: 900
+# Requires SkyPlayTime
+award-points-while-afk: false
+# The formula used to scale requirements.
+scale-formula: r*(1+((p-1)/(k)))
+# The required prestige level necessary to exchange prestige points.
+exchange-prestige-level: 0
+# The fallback location to teleport players to if unable to teleport them to an island.
+fallback-location:
+    world: world
+    x: 0
+    y: 64
+    z: 0
 # These settings apply when an island is reset outside of prestige.
 island-reset-settings:
     keep-island-size: true
@@ -12,6 +24,108 @@ island-reset-settings:
     reset-prestige-points: true
     reset-prestige-level: false
     clear-vault: false
+opt-in-settings:
+    island-settings:
+        keep-island-size: false
+        keep-generator-upgrades: false
+        keep-island-flags: true
+        reset-prestige-points: true
+        reset-prestige-level: true
+        clear-vault: true
+    player-settings:
+        inventory-settings:
+            reset-inventory: true
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-ender-chest: true
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        reset-exp: true
+        reset-money: true
+        reset-auction-items: true
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-total: false
+    reward-config:
+        item-rewards:
+            -   display-item:
+                    item-type: iron_pickaxe
+                    amount: 1
+                    lore:
+                        - "<gray>This reward is given to all island members.</gray>"
+                give-to-all-island-members: true
+                reward-item:
+                    item-type: iron_pickaxe
+                    amount: 1
+        command-rewards:
+            -   display-item:
+                    item-type: diamond
+                    amount: 1
+                    lore:
+                        - "<gray>This reward is only given to the player who opted in the island.</gray>"
+                give-to-all-island-members: false
+                commands:
+                    - "give %player_name% diamond 1"
+        island-range-reward:
+            display-item:
+                item-type: grass_block
+                name: <white>Island Expansion</white>
+                amount: 1
+                lore:
+                    - <gray>Expansion by 25 blocks on each side.</gray>
+            range-to-add: 25
+    give-starting-money-to-all-island-members: true
+    starting-money: 2000.0
+opt-out-settings:
+    island-settings:
+        keep-island-size: false
+        keep-generator-upgrades: false
+        keep-island-flags: true
+        reset-prestige-points: true
+        reset-prestige-level: true
+        clear-vault: true
+    player-settings:
+        inventory-settings:
+            reset-inventory: true
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-ender-chest: true
+            keep-infinite-sell-wands: false
+        reset-exp: true
+        reset-money: true
+        reset-auction-items: true
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-total: false
+    reward-config:
+        item-rewards:
+            -   display-item:
+                    item-type: iron_pickaxe
+                    amount: 1
+                    lore:
+                        - "<gray>This reward is given to all island members.</gray>"
+                give-to-all-island-members: true
+                reward-item:
+                    item-type: iron_pickaxe
+                    amount: 1
+        command-rewards:
+            -   display-item:
+                    item-type: diamond
+                    amount: 1
+                    lore:
+                        - "<gray>This reward is only given to the player who opted in the island.</gray>"
+                give-to-all-island-members: false
+                commands:
+                    - "give %player_name% diamond 1"
+    give-starting-money-to-all-island-members: true
+    starting-money: 2000.0
 # These settings are related to the protection orb.
 protection-orb-settings:
     item-stack-config:
@@ -100,18 +214,6 @@ multiplier-event-settings:
     duration-seconds: 86400
     # The multiplier to apply.
     multiplier: 2.0
-# Requires SkyPlayTime
-award-points-while-afk: false
-# The formula used to scale requirements.
-scale-formula: r*(1+((p-1)/(k)))
-# The required prestige level necessary to exchange prestige points.
-exchange-prestige-level: 0
-# The fallback location to teleport players to if unable to teleport them to an island.
-fallback-location:
-    world: world
-    x: 0
-    y: 64
-    z: 0
 # The list of namespaced keys for items not allowed inside vaults.
 vault-disallowed-items:
     - minecraft:spawner

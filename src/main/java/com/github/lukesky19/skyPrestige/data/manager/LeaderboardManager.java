@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.data.manager;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.TopTen;
@@ -25,6 +26,8 @@ import com.github.lukesky19.skyPrestige.database.table.IslandDataTable;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,7 +90,7 @@ public class LeaderboardManager {
         @NotNull Map<String, IslandData> loadedIslandData = islandDataManager.getAllData();
         // Calculate the top ten positions from the online island data.
         @NotNull List<Position> onlineTopTenPositions = loadedIslandData.entrySet().stream()
-                .filter(entry -> !entry.getValue().isExempt())
+                .filter(entry -> !entry.getValue().isLeaderboardExempt())
                 .map(entry -> {
                     String islandId = entry.getKey();
                     IslandData islandData = entry.getValue();
@@ -97,13 +100,8 @@ public class LeaderboardManager {
                         Island island = optionalIsland.get();
 
                         // Attempt to get the island's owner's name
-                        @Nullable String ownerName = "Unknown Island Owner";
-                        if(island.getOwner() != null) {
-                            @Nullable Player player = server.getPlayer(island.getOwner());
-                            if(player != null && player.isOnline() && player.isConnected()) {
-                                ownerName = player.getName();
-                            }
-                        }
+                        @Nullable UUID ownerId = island.getOwner();
+                        @NotNull String ownerName = getPlayerName(ownerId);
 
                         return new Position(entry.getKey(), ownerName, islandData.getPrestigeLevel(), islandData.getPrestigePoints());
                     }
@@ -164,4 +162,44 @@ public class LeaderboardManager {
 
         return topTen.getPosition(positionNumber);
     }
+
+    private @NotNull String getPlayerName(@Nullable UUID playerId) {
+        @NotNull String ownerName = "Unknown Island Owner";
+
+        if(playerId != null) {
+            @Nullable Player player = server.getPlayer(playerId);
+
+            if(player != null && player.isOnline() && player.isConnected()) {
+                ownerName = player.getName();
+            } else {
+                @Nullable PlayerProfile playerProfile = PlayerUtil.getCachedPlayerProfile(playerId);
+                if(playerProfile != null) {
+                    @Nullable String profilePlayerName = playerProfile.getName();
+                    if(profilePlayerName != null) {
+                        ownerName = profilePlayerName;
+                    } else {
+                        @Nullable String offlinePlayerName = getOfflinePlayerName(playerId);
+
+                        if(offlinePlayerName != null) {
+                            ownerName = offlinePlayerName;
+                        }
+                    }
+                } else {
+                    @Nullable String offlinePlayerName = getOfflinePlayerName(playerId);
+
+                    if(offlinePlayerName != null) {
+                        ownerName = offlinePlayerName;
+                    }
+                }
+            }
+        }
+
+        return ownerName;
+    }
+
+    private @Nullable String getOfflinePlayerName(@NotNull UUID playerId) {
+        OfflinePlayer offlinePlayer = server.getOfflinePlayer(playerId);
+        return offlinePlayer.getName();
+    }
+
 }

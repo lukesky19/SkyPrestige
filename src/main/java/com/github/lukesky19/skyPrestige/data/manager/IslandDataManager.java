@@ -52,10 +52,12 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
     /**
      * Load islands data for all islands the {@link UUID} is attached to.
      * @param uuid The {@link UUID} of a player.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void loadDataByPlayerIdentifier(@NotNull UUID uuid) {
+    public @NotNull CompletableFuture<Void> loadDataByPlayerIdentifier(@NotNull UUID uuid) {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         @NotNull List<Island> islandList = bentoBoxHook.getIslands(uuid);
+        @NotNull List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
         islandList.forEach(island -> {
             String islandId = island.getUniqueId();
@@ -71,9 +73,11 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
                 setData(islandId, newIslandData);
 
                 // Load any data from the database.
-                databaseManager.getIslandDataTable().loadIslandData(islandId, newIslandData);
+                futureList.add(databaseManager.getIslandDataTable().loadIslandData(islandId, newIslandData));
             }
         });
+
+        return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
     }
 
     /**

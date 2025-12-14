@@ -30,7 +30,6 @@ import java.util.List;
  * @param help The list of messages to send for the plugin's help message.
  * @param reload The plugin's reload message.
  * @param guiOpenError The message sent to a player when a GUI fails to open.
- * @param islandNotFound The message sent when an island cannot be found.
  * @param islandDataNotFound The message sent when the island's data were not found for an island.
  * @param islandPrestigeLevelUpdated The message sent when an island has its prestige level updated.
  * @param prestigePlayerOnly The message sent when a non-player tries to prestige.
@@ -40,34 +39,29 @@ import java.util.List;
  * @param prestigeIslandNotOwned The message sent when a player tries to prestige an island that is not owned.
  * @param prestigePlayerNotMemberOrOwner The message sent when a player tries to prestige an island they are not the owner or a member of.
  * @param prestigeNotEnoughPrestigePoints The message sent when the island doesn't have enough prestige points to prestige.
- * @param prestigeInventoryReset The message sent when a player has their inventory reset as part of prestiging their island.
- * @param prestigeEnderChestReset The message sent when a player has their ender chest reset as part of prestiging their island.
- * @param prestigeExperienceReset The message sent when a player has their experience reset as part of prestiging their island.
- * @param prestigeBalanceReset The message sent when a player has their balance reset as part of prestiging their island.
- * @param prestigeAuctionHouseItemsReset The message sent when a player has their auction house items reset as a part of prestiging their island.
- * @param prestigeStartingMoneyGiven The message sent when a player has been given starting money as part of prestiging their island.
- * @param islandMemberPrestigeNotice The message sent to island members when their island was prestiged.
- * @param otherPrestigeNotice The message sent to non-island members when an island they are cooped or trusted on was prestiged.
- * @param islandMemberIslandTeleportNotice The message sent when an island member is being teleported to their new island due to the island being prestiged.
- * @param islandMemberFallbackTeleportNotice The message sent when an island member is being teleported to the fallback location due to their island being prestiged and the spawn point being null.
- * @param otherIslandTeleportNotice The message sent when any other player is being teleported to a new island due to the island being prestiged.
- * @param otherFallbackTeleportNotice The message sent when any other player is being teleported to the fallback location due to the island being prestiged and the spawn point being null.
+ * @param prestigeIslandOptedOut The message sent when the island is opted out of prestige, but a player tries to prestige.
  * @param prestigeConfigError The message sent when a player tries to prestige their island, but it fails due to a config error.
  * @param prestigeConfigRequirementError The message sent when a player tries to prestige their island, but it fails due to a requirement config error.
  * @param progressPlayerNotOnIsland The message sent when a player tries to view their progress towards the next prestige level while not on an island.
  * @param progressMaxPrestigeLevel The message sent when a player tries to view their progress towards the next prestige level, but their island is at the max prestige level.
+ * @param progressPrestigeExempt The message sent when a player tries to view their progress towards the next prestige level, but their island is opted out of prestige.
  * @param rewardsPlayerNotOnIsland The message sent when a player tries to view their next prestige level's rewards while not on an island.
  * @param rewardsMaxPrestigeLevel The message sent when a player tries to view their next prestige level's rewards, but their island is at the max prestige level.
+ * @param rewardsPrestigeExempt The message sent when a player tries to view the rewards for next prestige level, but their island is opted out of prestige.
  * @param exchangePlayerNotOnIsland The message sent when a player tries to exchange their prestige points, while not on an island.
  * @param exchangePrestigeLevelNotMet The message sent when a player tries to exchange their prestige points, but don't meet the required prestige level.
  * @param exchangeNotEnoughPrestigePoints The message sent when a player tries to exchange their prestige points, but doesn't have enough prestige points for an exchange.
+ * @param exchangePrestigeExempt The message sent when a player tries to exchange prestige points, but their island is opted out of prestige.
  * @param vaultPlayerNotOnIsland The message sent when a player tries to open their island vault while not on an island.
  * @param vaultItemNotAllowed The message sent when a player tries to put an item in their island vault that isn't allowed.
+ * @param vaultPrestigeExempt The message sent when a player tries to open their island vault, but their island is opted out of prestige.
  * @param requirementsConfigError The message sent to a player when there is a config error when viewing prestige level requirements.
  * @param requirementsLevelNotFound The message sent to a player when there is no prestige level configured for the level number provided.
  * @param requirementsPointsForLevel The message sent to a player to display prestige points required for a level.
  * @param islandExempt The message sent when an island is marked as exempt from the top leaderboard placeholders.
  * @param islandUnexempt The message sent when an island is marked as not exempt from the top leaderboard placeholders.
+ * @param islandAlreadyOptedIn The message sent when a player tries to opt into prestige, but they are already opted in.
+ * @param islandAlreadyOptedOut The message sent when a player tries to opt-out of prestige, but they are opted out.
  * @param leaderboardTitle The leaderboard title.
  * @param leaderboardPosition The leaderboard positon text.
  * @param leaderboardPositionEmpty The leaderboard positon empty text.
@@ -84,6 +78,10 @@ import java.util.List;
  * @param multiplierEventNextTime The message sent to the player to display the remaining time until the next event.
  * @param multiplierEventDisabled The message sent to the player when the multiplier event is disabled.
  * @param multiplierTimePlaceholder The {@link TimeFormat} to use for {@literal <time>} placeholders.
+ * @param prestigeStatusPlayerInWrongWorld The message sent when a player tries to opt in or out of prestige in a non-BentoBox world.
+ * @param prestigeStatusPlayerNotOnIsland The message sent when a player tries to opt in or out of prestige while not on an Island.
+ * @param prestigeStatusIslandNotOwned The message sent when a player tries to opt in or out of prestige and that island is not owned.
+ * @param prestigeStatusPlayerNotMemberOrOwner The message sent when a player tries to opt in or out of prestige an island they are not the owner or a member of.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -94,7 +92,6 @@ public record Locale(
         @NotNull List<String> help,
         String reload,
         String guiOpenError,
-        String islandNotFound,
         String islandDataNotFound,
         String islandPrestigeLevelUpdated,
         String prestigePlayerOnly,
@@ -104,34 +101,29 @@ public record Locale(
         String prestigeIslandNotOwned,
         String prestigePlayerNotMemberOrOwner,
         String prestigeNotEnoughPrestigePoints,
-        String prestigeInventoryReset,
-        String prestigeEnderChestReset,
-        String prestigeExperienceReset,
-        String prestigeBalanceReset,
-        String prestigeAuctionHouseItemsReset,
-        String prestigeStartingMoneyGiven,
-        String islandMemberPrestigeNotice,
-        String otherPrestigeNotice,
-        String islandMemberIslandTeleportNotice,
-        String islandMemberFallbackTeleportNotice,
-        String otherIslandTeleportNotice,
-        String otherFallbackTeleportNotice,
+        String prestigeIslandOptedOut,
         String prestigeConfigError,
         String prestigeConfigRequirementError,
         String progressPlayerNotOnIsland,
         String progressMaxPrestigeLevel,
+        String progressPrestigeExempt,
         String rewardsPlayerNotOnIsland,
         String rewardsMaxPrestigeLevel,
+        String rewardsPrestigeExempt,
         String exchangePlayerNotOnIsland,
         String exchangePrestigeLevelNotMet,
         String exchangeNotEnoughPrestigePoints,
+        String exchangePrestigeExempt,
         String vaultPlayerNotOnIsland,
         String vaultItemNotAllowed,
+        String vaultPrestigeExempt,
         String requirementsLevelNotFound,
         String requirementsConfigError,
         String requirementsPointsForLevel,
         String islandExempt,
         String islandUnexempt,
+        String islandAlreadyOptedIn,
+        String islandAlreadyOptedOut,
         String leaderboardTitle,
         String leaderboardPosition,
         String leaderboardPositionEmpty,
@@ -148,6 +140,10 @@ public record Locale(
         String multiplierEventNextTime,
         String multiplierEventDisabled,
         TimeFormat multiplierTimePlaceholder,
+        String prestigeStatusPlayerInWrongWorld,
+        String prestigeStatusPlayerNotOnIsland,
+        String prestigeStatusIslandNotOwned,
+        String prestigeStatusPlayerNotMemberOrOwner,
         String delimiter,
         String finalDelimiter) {
     /**

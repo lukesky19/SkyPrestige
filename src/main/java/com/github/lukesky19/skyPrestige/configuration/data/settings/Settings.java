@@ -17,7 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.settings;
 
-import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.data.island.NonPrestigeIslandSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.player.PlayerSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.NamespacedKey;
@@ -37,54 +39,52 @@ import java.util.Map;
  * @param configVersion The file's config version.
  * @param locale The locale to use.
  * @param saveFrequencySeconds How frequently island data is periodically saved.
- * @param resetPrestigeLevelOnIslandReset Legacy option for migration purposes only.
- * @param islandResetSettings The {@link IslandResetSettings}.
- * @param protectionOrbSettings The {@link ProtectionOrbSettings}.
- * @param multiplierEventSettings The {@link MultiplierEventSettings}.
  * @param awardPointsWhileAfk Whether to increment prestige points if the player is AFK. Requires SkyPlayTime.
  * @param scaleFormula The formula to scale requirements with.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
  * @param fallbackLocation The location to teleport a player if the plugin is unable to teleport them to their island.
+ * @param islandResetSettings The {@link NonPrestigeIslandSettings}.
+ * @param optInSettings The {@link OptInOutSettings} for prestige opt in.
+ * @param optOutSettings The {@link OptInOutSettings} for prestige opt out.
+ * @param protectionOrbSettings The {@link ProtectionOrbSettings}.
+ * @param multiplierEventSettings The {@link MultiplierEventSettings}.
  * @param vaultDisallowedItems A {@link List} of {@link String}s for the {@link ItemType} names/keys not allowed inside prestige vaults.
  * @param prestigePointsMapping This configuration for the prestige points to give for a variety of actions.
+ * @param resetPrestigeLevelOnIslandReset Legacy option for migration purposes only.
  */
 @ConfigSerializable
 public record Settings(
         @Nullable String configVersion,
         @Nullable String locale,
         @Nullable Integer saveFrequencySeconds,
-        @Deprecated(since = "1.1.0.0") @Nullable Boolean resetPrestigeLevelOnIslandReset,
-        @NotNull IslandResetSettings islandResetSettings,
-        @NotNull ProtectionOrbSettings protectionOrbSettings,
-        @NotNull MultiplierEventSettings multiplierEventSettings,
         boolean awardPointsWhileAfk,
         @Nullable String scaleFormula,
         int exchangePrestigeLevel,
         @NotNull Location fallbackLocation,
+        @NotNull NonPrestigeIslandSettings islandResetSettings,
+        @NotNull OptInOutSettings optInSettings,
+        @NotNull OptInOutSettings optOutSettings,
+        @NotNull ProtectionOrbSettings protectionOrbSettings,
+        @NotNull MultiplierEventSettings multiplierEventSettings,
         @NotNull List<String> vaultDisallowedItems,
-        @NotNull PrestigePointsMapping prestigePointsMapping) {
+        @NotNull PrestigePointsMapping prestigePointsMapping,
+        // Legacy Options
+        @Deprecated(since = "1.1.0.0") @Nullable Boolean resetPrestigeLevelOnIslandReset) {
     /**
-     * Island reset settings that apply to all non-prestiged islands (normal resets only).
-     * @param keepIslandSize Should the island's protection range carry over?
-     * @param keepGeneratorUpgrades Should generator upgrades carry over?
-     * @param keepIslandFlags Should the island flags carry over?
-     * @param resetPrestigePoints Should prestige points be reset?
-     * @param resetPrestigeLevel Should prestige level be reset?
-     * @param clearVault Should the island's vault be cleared?
+     * The settings to apply when an island opts out of prestige.
+     * @param islandSettings The {@link NonPrestigeIslandSettings}.
+     * @param playerSettings The {@link PlayerSettings}.
+     * @param rewardConfig The {@link RewardConfig}.
+     * @param giveStartingMoneyToAllIslandMembers Whether to give starting money to all island members.
+     * @param startingMoney The starting money amount.
      */
     @ConfigSerializable
-    public record IslandResetSettings(
-            boolean keepIslandSize,
-            boolean keepGeneratorUpgrades,
-            boolean keepIslandFlags,
-            boolean resetPrestigePoints,
-            boolean resetPrestigeLevel,
-            boolean clearVault) implements IslandSettingsInterface {
-        @Override
-        public boolean removeRequiredPrestigePoints() {
-            return false;
-        }
-    }
+    public record OptInOutSettings(
+            @NotNull NonPrestigeIslandSettings islandSettings,
+            @NotNull PlayerSettings playerSettings,
+            @NotNull RewardConfig rewardConfig,
+            boolean giveStartingMoneyToAllIslandMembers,
+            double startingMoney) {}
 
     /**
      * This contains the configuration related to the protection orb that protects an item from being reset on prestige.

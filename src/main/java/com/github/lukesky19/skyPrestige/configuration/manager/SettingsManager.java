@@ -17,6 +17,13 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
+import com.github.lukesky19.skyPrestige.configuration.data.inventory.EnderChestInventorySettings;
+import com.github.lukesky19.skyPrestige.configuration.data.inventory.PlayerInventorySettings;
+import com.github.lukesky19.skyPrestige.configuration.data.island.NonPrestigeIslandSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.player.PlayerSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.IslandRangeReward;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -28,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,18 +60,95 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
             }
 
             case "1.0.0.0" -> {
+                PlayerSettings playerSettings = new PlayerSettings(
+                        new PlayerInventorySettings(true, false, true),
+                        new EnderChestInventorySettings(true, false, true),
+                        true,
+                        true,
+                        true,
+                        new PlayTimeSettings(false, false, false, false, false, false));
                 return new Settings(
                         "1.1.0.0",
                         settings.locale(),
                         settings.saveFrequencySeconds(),
-                        null,
-                        new Settings.IslandResetSettings(
+                        settings.awardPointsWhileAfk(),
+                        settings.scaleFormula(),
+                        settings.exchangePrestigeLevel(),
+                        settings.fallbackLocation(),
+                        new NonPrestigeIslandSettings(
                                 true,
                                 true,
                                 true,
                                 Objects.requireNonNullElse(settings.resetPrestigeLevelOnIslandReset(), false),
-                                false,
                                 false),
+                        new Settings.OptInOutSettings(
+                                new NonPrestigeIslandSettings(
+                                        false,
+                                        false,
+                                        true,
+                                        true,
+                                        true),
+                                playerSettings,
+                                new RewardConfig(
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        new IslandRangeReward(
+                                                new ItemStackConfig(
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        List.of(),
+                                                        null,
+                                                        null,
+                                                        List.of(),
+                                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                                        null,
+                                                        List.of(),
+                                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                                        List.of(),
+                                                        new ItemStackConfig.OptionsConfig(true, null, null, null, null)),
+                                                10
+                                        )),
+                                true,
+                                2000),
+                        new Settings.OptInOutSettings(
+                                new NonPrestigeIslandSettings(
+                                        false,
+                                        false,
+                                        true,
+                                        true,
+                                        true),
+                                playerSettings,
+                                new RewardConfig(
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        new IslandRangeReward(
+                                                new ItemStackConfig(
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        List.of(),
+                                                        null,
+                                                        null,
+                                                        List.of(),
+                                                        new ItemStackConfig.PotionConfig(null, List.of()),
+                                                        new ItemStackConfig.ColorConfig(false, null, null, null),
+                                                        null,
+                                                        List.of(),
+                                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
+                                                        new ItemStackConfig.ArmorTrimConfig(null, null),
+                                                        List.of(),
+                                                        new ItemStackConfig.OptionsConfig(true, null, null, null, null)),
+                                                10
+                                        )),
+                                true,
+                                2000),
                         new Settings.ProtectionOrbSettings(
                                 new ItemStackConfig(
                                         "heart_of_the_sea",
@@ -153,12 +238,9 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
                                 10,
                                 86400,
                                 2),
-                        settings.awardPointsWhileAfk(),
-                        settings.scaleFormula(),
-                        settings.exchangePrestigeLevel(),
-                        settings.fallbackLocation(),
                         settings.vaultDisallowedItems(),
-                        settings.prestigePointsMapping());
+                        settings.prestigePointsMapping(),
+                        null);
             }
 
             case null, default -> {

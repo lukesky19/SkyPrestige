@@ -17,13 +17,12 @@
 */
 package com.github.lukesky19.skyPrestige.gui.gui;
 
-import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmPrestigeGUIConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmOptInOutGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
@@ -53,67 +52,62 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * This class is used to create the GUI to confirm an island prestige.
+ * This class is used to create the GUI to confirm opting into prestige.
  */
-public class ConfirmPrestigeGUI extends ConfirmGUI {
-    // Plugin Classes
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
+public class ConfirmOptInGUI extends ConfirmGUI {
+    private final @NotNull SettingsManager settingsManager;
 
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
-    private final @Nullable ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
+    private final @Nullable ConfirmOptInOutGUIConfig confirmOptInGUIConfig;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param islandResetData The {@link IslandResetData}
-     * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param consumer The consumer that will reset the island once the player confirms it.
      */
-    public ConfirmPrestigeGUI(
+    public ConfirmOptInGUI(
             @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
+            @NotNull SettingsManager settingsManager,
             @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer) {
         super(plugin, guiManager, identifier, islandResetData.getPlayer());
-
-        this.plugin = plugin;
-        this.localeManager = localeManager;
-        this.guiConfigManager = guiConfigManager;
+        this.settingsManager = settingsManager;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
 
-        confirmPrestigeGUIConfig = guiConfigManager.getConfirmPrestigeGUIConfig();
+        confirmOptInGUIConfig = guiConfigManager.getConfirmOptInGUIConfig();
     }
 
     /**
      * Create the {@link InventoryView} for this GUI.
      * @return true if created successfully, otherwise false.
      */
+    @Override
     public boolean create() {
-        if(!islandResetData.isPrestige()) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid prestige data."));
+        if(islandResetData.isPrestige()) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid island reset data."));
             return false;
         }
 
-        if(confirmPrestigeGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
+        if(confirmOptInGUIConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
             return false;
         }
 
-        GUIType guiType = confirmPrestigeGUIConfig.guiType();
+        GUIType guiType = confirmOptInGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -121,12 +115,12 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             case CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54 -> {}
 
             default -> {
-                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in confirm prestige GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in confirm opt-in GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
 
-        String guiName = Objects.requireNonNullElse(confirmPrestigeGUIConfig.guiName(), "");
+        String guiName = Objects.requireNonNullElse(confirmOptInGUIConfig.guiName(), "");
 
         return create(guiType, guiName, List.of());
     }
@@ -137,8 +131,8 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      */
     @Override
     public boolean update() {
-        if(confirmPrestigeGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
+        if(confirmOptInGUIConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
             return false;
         }
 
@@ -159,12 +153,11 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         createCancelButton();
 
         createSelectedBlueprintButton();
-        createRewardsButton();
 
         List<TagResolver.Single> emptyList = List.of();
-        createDisplayButton(confirmPrestigeGUIConfig.keepMembers(), emptyList);
-        createDisplayButton(confirmPrestigeGUIConfig.keepFlags(), emptyList);
-        createDisplayButton(confirmPrestigeGUIConfig.keepCommandRanks(), emptyList);
+        createDisplayButton(confirmOptInGUIConfig.keepMembers(), emptyList);
+        createDisplayButton(confirmOptInGUIConfig.keepFlags(), emptyList);
+        createDisplayButton(confirmOptInGUIConfig.keepCommandRanks(), emptyList);
 
         // Conditional Buttons
         createConditionalButtons();
@@ -205,9 +198,9 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param guiSize The size of the GUI.
      */
     private void createFillerButtons(int guiSize) {
-        if(confirmPrestigeGUIConfig == null) return;
+        if(confirmOptInGUIConfig == null) return;
 
-        ItemStackConfig fillerConfig = confirmPrestigeGUIConfig.filler();
+        ItemStackConfig fillerConfig = confirmOptInGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
         itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
 
@@ -226,11 +219,11 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * Create the confirm button for the GUI.
      */
     private void createConfirmButton() {
-        assert confirmPrestigeGUIConfig != null;
-        ButtonConfig confirmConfig = confirmPrestigeGUIConfig.confirmButton();
+        assert confirmOptInGUIConfig != null;
+        ButtonConfig confirmConfig = confirmOptInGUIConfig.confirmButton();
 
         if(confirmConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the confirm button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the confirm button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -245,11 +238,11 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * Create the cancel button for the GUI.
      */
     private void createCancelButton() {
-        if(confirmPrestigeGUIConfig == null) return;
-        ButtonConfig cancelConfig = confirmPrestigeGUIConfig.cancelButton();
+        if(confirmOptInGUIConfig == null) return;
+        ButtonConfig cancelConfig = confirmOptInGUIConfig.cancelButton();
 
         if(cancelConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the cancel button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add the cancel button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -257,10 +250,10 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
     }
 
     /**
-     * Created the selected blueprint button that will be used when the island is prestiged.
+     * Created the selected blueprint button that will be used when the island is reset.
      */
     private void createSelectedBlueprintButton() {
-        assert confirmPrestigeGUIConfig != null;
+        assert confirmOptInGUIConfig != null;
         @Nullable BlueprintBundle blueprint = islandResetData.getBlueprint();
         if(blueprint == null) return;
         GUIButton.Builder builder = new GUIButton.Builder();
@@ -273,141 +266,105 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         itemStack.setItemMeta(itemMeta);
 
         builder.setItemStack(itemStack);
-        setButton(confirmPrestigeGUIConfig.blueprintBundleSlot(), builder.build());
+        setButton(confirmOptInGUIConfig.blueprintBundleSlot(), builder.build());
     }
 
     /**
-     * Create the rewards button for the GUI.
-     */
-    private void createRewardsButton() {
-        if(confirmPrestigeGUIConfig == null) return;
-        ButtonConfig rewardsConfig = confirmPrestigeGUIConfig.rewardsButton();
-
-        if(rewardsConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the rewards button to the confirm prestige GUI due to an invalid slot."));
-            return;
-        }
-
-        createActionButton(rewardsConfig, inventoryClickEvent -> {
-            Locale locale = localeManager.getConfiguration();
-
-            close();
-
-            if(islandResetData.getPrestigeConfig() == null) return;
-
-            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, islandResetData.getPrestigeConfig(), this);
-
-            boolean creationResult = rewardsGUI.create();
-            if(!creationResult) {
-                logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                return;
-            }
-
-            boolean updateResult = rewardsGUI.update();
-            if(!updateResult) {
-                logger.error(AdventureUtil.deserialize("Unable to decorate the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                return;
-            }
-
-            boolean openResult = rewardsGUI.open();
-            if(!openResult) {
-                logger.error(AdventureUtil.deserialize("Unable to open the rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-            }
-        });
-    }
-
-    /**
-     * Create the conditional buttons for the GUI depending on prestige settings.
+     * Create the conditional buttons for the GUI depending on opt in settings.
      */
     private void createConditionalButtons() {
-        if(confirmPrestigeGUIConfig == null) return;
-        if(islandResetData.getPrestigeConfig() == null) return;
-        PrestigeConfig.PrestigeSettings prestigeSettings = islandResetData.getPrestigeConfig().prestigeSettings();
+        if(confirmOptInGUIConfig == null) return;
+        @Nullable Settings settings = settingsManager.getConfiguration();
+        if(settings == null) return;
+        Settings.OptInOutSettings optInSettings = settings.optInSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!prestigeSettings.playerSettings().playerInventorySettings().clearInventory()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepInventory(), emptyList);
+        if(!optInSettings.playerSettings().playerInventorySettings().clearInventory()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepInventory(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearInventory(), emptyList);
         }
 
-        if(prestigeSettings.islandSettings().keepGeneratorUpgrades()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepGeneratorUpgrades(), emptyList);
+        if(optInSettings.islandSettings().keepGeneratorUpgrades()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepGeneratorUpgrades(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().enderChestSettings().resetEnderChest()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
+        if(optInSettings.islandSettings().clearVault()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearEnderChest(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetExp()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepExp(), emptyList);
+        if(!optInSettings.playerSettings().enderChestSettings().resetEnderChest()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetExp(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearEnderChest(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetMoney()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepMoney(), emptyList);
+        if(!optInSettings.playerSettings().resetExp()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepExp(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetMoney(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetExp(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetAuctionItems()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
+        if(!optInSettings.playerSettings().resetMoney()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepMoney(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetMoney(), emptyList);
         }
 
-        if(prestigeSettings.startingMoney() > 0) {
-            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(prestigeSettings.startingMoney())));
-
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().startingMoney(), placeholders);
+        if(!optInSettings.playerSettings().resetAuctionItems()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().noStartingMoney(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
         }
 
-        PlayTimeSettings playTimeSettings = prestigeSettings.playerSettings().playTimeSettings();
+        if(optInSettings.startingMoney() > 0) {
+            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(optInSettings.startingMoney())));
+
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().startingMoney(), placeholders);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().noStartingMoney(), emptyList);
+        }
+
+        PlayTimeSettings playTimeSettings = optInSettings.playerSettings().playTimeSettings();
 
         if(!playTimeSettings.resetSession()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetSessionPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetSessionPlayTime(), emptyList);
         }
 
         if(!playTimeSettings.resetDaily()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepDailyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepDailyPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetDailyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetDailyPlayTime(), emptyList);
         }
 
         if(!playTimeSettings.resetWeekly()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepWeeklyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepWeeklyPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetWeeklyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetWeeklyPlayTime(), emptyList);
         }
 
         if(!playTimeSettings.resetMonthly()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepMonthlyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepMonthlyPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetMonthlyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetMonthlyPlayTime(), emptyList);
         }
 
         if(!playTimeSettings.resetYearly()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepYearlyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepYearlyPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetYearlyPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetYearlyPlayTime(), emptyList);
         }
 
         if(!playTimeSettings.resetTotal()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepTotalPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepTotalPlayTime(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetTotalPlayTime(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetTotalPlayTime(), emptyList);
         }
     }
 
@@ -415,11 +372,11 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * Create the dummy buttons for the GUI.
      */
     private void createDummyButtons() {
-        if(confirmPrestigeGUIConfig == null) return;
+        if(confirmOptInGUIConfig == null) return;
 
-        confirmPrestigeGUIConfig.dummyButtons().forEach(buttonConfig -> {
+        confirmOptInGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the confirm prestige GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the confirm opt-in GUI due to an invalid slot."));
                 return;
             }
 
@@ -434,7 +391,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -460,7 +417,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the confirm prestige GUI due to an invalid slot."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 

@@ -64,7 +64,7 @@ public class IslandSettingsProcessor {
     }
 
     /**
-     * Process the island settings.
+     * Process the island settings. This method is used to process general island settings, regardless of source.
      * @param islandSettings The {@link IslandSettingsInterface} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
@@ -147,7 +147,32 @@ public class IslandSettingsProcessor {
     }
 
     /**
-     * Process the island settings.
+     * Process the island settings. This method is used to process island settings when an island is opted in or out of prestige.
+     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(IslandSettingsInterface, Island, Island, IslandData)}.
+     * @param islandSettings The {@link IslandSettingsInterface} to process.
+     * @param oldIsland The old {@link Island}.
+     * @param newIsland The new {@link Island}.
+     * @param oldIslandData The {@link IslandData}.
+     * @param prestigeExempt true for opt out, false of opt in.
+     */
+    public void processIslandSettings(
+            @NotNull IslandSettingsInterface islandSettings,
+            @NotNull Island oldIsland,
+            @NotNull Island newIsland,
+            @NotNull IslandData oldIslandData,
+            boolean prestigeExempt) {
+        IslandData newIslandData = oldIslandData.clone();
+
+        newIslandData.setPrestigeExempt(prestigeExempt);
+
+        newIslandData.setLeaderboardExempt(prestigeExempt);
+
+        processIslandSettings(islandSettings, oldIsland, newIsland, newIslandData);
+    }
+
+    /**
+     * Process the island settings. This method is used to process island settings when an island is prestiged.
+     * It processes prestige specific settings, then calls {@link #processIslandSettings(IslandSettingsInterface, Island, Island, IslandData)}.
      * @param islandSettings The {@link IslandSettingsInterface} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.

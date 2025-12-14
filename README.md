@@ -39,6 +39,8 @@
 * /skyprestige multiplier event
 * /skyprestige multiplier <add | remove | set> <multiplier>
 * /skyprestige multiplier get [additional | event | total]
+* /skyprestige opt-in - Opts the player's island in of prestige.
+* /skyprestige opt-out - Opts the player's island out of prestige.
 * /skyprestige points <add | remove | set> <island_id> <prestige_points>
 * /skyprestige points get <island_id>
 * /skyprestige progress - View the requirements for the next prestige level.
@@ -82,7 +84,7 @@
 ## FAQ
 Q: What versions does this plugin support?
 
-A: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, and 1.21.10
+A: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, and 1.21.11.
 
 Q: Are there any plans to support any other versions?
 

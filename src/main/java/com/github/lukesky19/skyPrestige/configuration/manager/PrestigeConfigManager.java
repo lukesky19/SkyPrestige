@@ -83,18 +83,18 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
             configuration = yamlConfigurationLoader.load().get(configClass);
             if(configuration == null) return;
 
-            if(validateConfiguration(configuration)) {
-                @Nullable PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
-                if(migratedConfiguration == null) return;
+            @Nullable PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
+            if(migratedConfiguration == null) return;
 
-                // Store the configuration
-                setData(configuration.prestigeLevel(), migratedConfiguration);
+            if(!validateConfiguration(migratedConfiguration)) return;
 
-                // Save the migrated configuration if different
-                if(configuration != migratedConfiguration) {
-                    saveConfiguration(configClass, configurationPath, migratedConfiguration);
-                }
+            // Save the migrated configuration if different
+            if(configuration != migratedConfiguration) {
+                saveConfiguration(configClass, configurationPath, migratedConfiguration);
             }
+
+            // Store the configuration
+            setData(migratedConfiguration.prestigeLevel(), migratedConfiguration);
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.deserialize("Failed to load the configuration. Error: " + configurateException.getMessage()));
         }

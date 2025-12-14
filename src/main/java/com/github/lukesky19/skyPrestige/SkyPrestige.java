@@ -38,9 +38,11 @@ import com.github.lukesky19.skyPrestige.listener.points.brewing.FreshBrewListene
 import com.github.lukesky19.skyPrestige.listener.protection.ProtectionOrbListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.placeholderapi.PlaceholderManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
+import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
@@ -104,13 +106,15 @@ public final class SkyPrestige extends SkyPlugin {
         protectionOrbManager = new ProtectionOrbManager(this, settingsManager);
         IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
-        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor);
-        TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, localeManager, databaseManager, hookManager);
+        RewardsProcessor rewardsProcessor = new RewardsProcessor(this, hookManager);
+        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
+        PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, settingsManager, localeManager, guiConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
+        TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
         VaultManager vaultManager = new VaultManager(settingsManager);
         placeholderManager = new PlaceholderManager(this, islandDataManager, leaderboardManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigeManager, prestigeExemptionManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -124,7 +128,7 @@ public final class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new FreshBrewListener(hookManager), this);
 
         // Connection-related Listeners
-        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, islandDataManager, teleportationManager), this);
+        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, prestigeExemptionManager, islandDataManager, teleportationManager), this);
         pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager, hookManager), this);
 
         // Prestige-related Listeners

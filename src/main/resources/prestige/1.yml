@@ -7,9 +7,11 @@ prestige-settings:
     player-settings:
         inventory-settings:
             reset-inventory: true
+            keep-protected-items: true
             keep-infinite-sell-wands: false
         ender-chest-settings:
             reset-ender-chest: true
+            keep-protected-items: true
             keep-infinite-sell-wands: false
         reset-exp: true
         reset-money: true

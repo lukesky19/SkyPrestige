@@ -114,7 +114,7 @@ public class UnExemptCommand {
                                 return 0;
                             }
 
-                            islandData.setExempt(false);
+                            islandData.setLeaderboardExempt(false);
 
                             if(sender instanceof Player) {
                                 sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandExempt(), List.of(Placeholder.parsed("island_id", islandId))));

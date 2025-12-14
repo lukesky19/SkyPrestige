@@ -22,7 +22,9 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
+import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -58,6 +60,7 @@ import java.util.function.Consumer;
 public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull SkyPlugin plugin;
+    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull HookManager hookManager;
@@ -66,7 +69,9 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
+    private final @NotNull BlueprintMode blueprintMode;
     private final @Nullable BlueprintGUIConfig blueprintGUIConfig;
+
     // Page info
     private int blueprintsPerPage;
     private int pageNum = 0;
@@ -75,7 +80,9 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Constructor
+     *
      * @param plugin A {@link JavaPlugin} instance.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager An {@link GUIManager} instance.
@@ -83,46 +90,53 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param hookManager A {@link HashMapDataManager} instance.
      * @param islandResetData An {@link IslandResetData} instance.
      * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param blueprintMode The {@link BlueprintMode}.
      */
     public BlueprintGUI(
             @NotNull SkyPlugin plugin,
+            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull HookManager hookManager,
             @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer) {
+            @NotNull Consumer<IslandResetData> consumer,
+            @NotNull BlueprintMode blueprintMode) {
         super(plugin, guiManager, identifier, islandResetData.getPlayer());
 
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
+        this.settingsManager = settingsManager;
         this.hookManager = hookManager;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
 
         blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
+
+        this.blueprintMode = blueprintMode;
     }
 
     /**
      * Create the {@link InventoryView} for this GUI.
+     *
      * @return true if created successfully, otherwise false.
      */
     public boolean create() {
-        if(blueprintGUIConfig == null) {
+        if (blueprintGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = blueprintGUIConfig.guiType();
-        if(guiType == null) {
+        if (guiType == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI due to an invalid GUIType."));
             return false;
         }
 
-        switch(guiType) {
+        switch (guiType) {
             case CHEST_27 -> blueprintsPerPage = 7;
 
             case CHEST_36 -> blueprintsPerPage = 14;
@@ -144,19 +158,20 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create all the buttons and decorate the GUI.
+     *
      * @return true if updated successfully, otherwise false.
      */
     @Override
     public boolean update() {
         clearButtons();
 
-        if(blueprintGUIConfig == null) {
+        if (blueprintGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
-        if(inventoryView == null) {
+        if (inventoryView == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
@@ -191,12 +206,12 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
             createBlueprintButtons(blueprintList);
 
-            if(numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) >= currentBlueprintKey) {
+            if (numOfBlueprintsAdded >= blueprintsPerPage && (blueprintList.size() - 1) >= currentBlueprintKey) {
                 createNextPageButton();
             }
         }
 
-        if(pageNum > 0) {
+        if (pageNum > 0) {
             createPrevPageButton();
         }
 
@@ -205,12 +220,13 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Refresh all the buttons in the GUI.
+     *
      * @return true if successful, otherwise false.
      */
     @Override
     public boolean refresh() {
         currentBlueprintKey = currentBlueprintKey - numOfBlueprintsAdded;
-        if(currentBlueprintKey < 0) currentBlueprintKey = 0;
+        if (currentBlueprintKey < 0) currentBlueprintKey = 0;
 
         numOfBlueprintsAdded = 0;
 
@@ -219,13 +235,16 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Handles when items are dragged across the player's inventory. This method does nothing.
+     *
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {
+    }
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
+     *
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
@@ -233,6 +252,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Handles when the player's inventory is clicked. This method does nothing.
+     *
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
@@ -240,6 +260,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Handles when a click occurs in either inventory. This method does nothing.
+     *
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
@@ -247,10 +268,11 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create the filler buttons for the GUI.
+     *
      * @param guiSize The size of the GUI.
      */
     private void createFillerButtons(int guiSize) {
-        if(blueprintGUIConfig == null) return;
+        if (blueprintGUIConfig == null) return;
 
         ItemStackConfig fillerConfig = blueprintGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
@@ -261,7 +283,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
 
-            for(int i = 0; i <= guiSize - 1; i++) {
+            for (int i = 0; i <= guiSize - 1; i++) {
                 setButton(i, builder.build());
             }
         });
@@ -269,12 +291,13 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create buttons to display the blueprints that the player can select for their island.
+     *
      * @param blueprintList A {@link List} of {@link Map.Entry} mapping a blueprint name/id as a {@link String} to a {@link BlueprintBundle}.
      */
     private void createBlueprintButtons(@NotNull List<Map.Entry<String, BlueprintBundle>> blueprintList) {
         int blueprintListSize = blueprintList.size();
-        while(numOfBlueprintsAdded < blueprintsPerPage) {
-            if(currentBlueprintKey >= blueprintListSize) break;
+        while (numOfBlueprintsAdded < blueprintsPerPage) {
+            if (currentBlueprintKey >= blueprintListSize) break;
 
             Map.Entry<String, BlueprintBundle> entry = blueprintList.get(currentBlueprintKey);
             BlueprintBundle blueprint = entry.getValue();
@@ -298,30 +321,33 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
                 this.close();
 
-                ConfirmPrestigeGUI gui = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, islandResetData, consumer);
+                @NotNull ConfirmGUI confirmGUI = switch(blueprintMode) {
+                    case PRESTIGE -> new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, islandResetData, consumer);
 
-                boolean creationResult = gui.create();
-                if(!creationResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                    case OPT_IN -> new ConfirmOptInGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, islandResetData, consumer);
+
+                    case OPT_OUT -> new ConfirmOptOutGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, islandResetData, consumer);
+                };
+
+                boolean creationResult = confirmGUI.create();
+                if (!creationResult) {
+                    logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
-                boolean updateResult = gui.update();
-                if(!updateResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to decorate the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                boolean updateResult = confirmGUI.update();
+                if (!updateResult) {
+                    logger.error(AdventureUtil.deserialize("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
-                boolean openResult = gui.open();
-                if(!openResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to open the blueprints GUI for player " + player.getName() + " due to a configuration error."));
+                boolean openResult = confirmGUI.open();
+                if (!openResult) {
+                    logger.error(AdventureUtil.deserialize("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                    return;
                 }
-
-                gui.open();
             });
 
             setButton(getBlueprintSlot(), builder.build());
@@ -334,11 +360,11 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the next page button for the GUI.
      */
     private void createNextPageButton() {
-        if(blueprintGUIConfig == null) return;
+        if (blueprintGUIConfig == null) return;
 
         ButtonConfig nextPageConfig = blueprintGUIConfig.nextPage();
 
-        if(nextPageConfig.slot() == null) {
+        if (nextPageConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the blueprints GUI due to an invalid slot."));
             return;
         }
@@ -355,18 +381,18 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the previous page button for the GUI.
      */
     private void createPrevPageButton() {
-        if(blueprintGUIConfig == null) return;
+        if (blueprintGUIConfig == null) return;
 
         ButtonConfig prevPageConfig = blueprintGUIConfig.prevPage();
 
-        if(prevPageConfig.slot() == null) {
+        if (prevPageConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the blueprints GUI due to an invalid slot."));
             return;
         }
 
         createActionButton(prevPageConfig, inventoryClickEvent -> {
             currentBlueprintKey = currentBlueprintKey - (numOfBlueprintsAdded + blueprintsPerPage);
-            if(currentBlueprintKey < 0) currentBlueprintKey = 0;
+            if (currentBlueprintKey < 0) currentBlueprintKey = 0;
 
             numOfBlueprintsAdded = 0;
             pageNum--;
@@ -379,10 +405,10 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the exit button for the GUI.
      */
     private void createExitButton() {
-        if(blueprintGUIConfig == null) return;
+        if (blueprintGUIConfig == null) return;
         ButtonConfig exitConfig = blueprintGUIConfig.exit();
 
-        if(exitConfig.slot() == null) {
+        if (exitConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the blueprint GUI due to an invalid slot."));
             return;
         }
@@ -394,10 +420,10 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the dummy buttons for the GUI.
      */
     private void createDummyButtons() {
-        if(blueprintGUIConfig == null) return;
+        if (blueprintGUIConfig == null) return;
 
         blueprintGUIConfig.dummyButtons().forEach(buttonConfig -> {
-            if(buttonConfig.slot() == null) {
+            if (buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the blueprint GUI due to an invalid slot."));
                 return;
             }
@@ -408,11 +434,12 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create a button with a custom action to take when clicked.
+     *
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
     private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
-        if(buttonConfig.slot() == null) {
+        if (buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the blueprints GUI due to an invalid slot."));
             return;
         }
@@ -434,11 +461,12 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create a button that has no action associated with it.
+     *
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
     private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
-        if(buttonConfig.slot() == null) {
+        if (buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the blueprints GUI due to an invalid slot."));
             return;
         }
@@ -458,11 +486,12 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Get the slot to place a blueprint button at based on the current number of blueprints added.
+     *
      * @return A slot number as an int.
      * @throws RuntimeException If the number of blueprints would exceed the size of the GUI.
      */
     private int getBlueprintSlot() {
-        return switch(numOfBlueprintsAdded) {
+        return switch (numOfBlueprintsAdded) {
             case 0 -> 10;
             case 1 -> 11;
             case 2 -> 12;
@@ -491,7 +520,25 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             case 25 -> 41;
             case 26 -> 42;
             case 27 -> 43;
-            default -> throw new RuntimeException("Number of requirements added exceeds the size of the GUI!");
+            default -> throw new RuntimeException("Number of blueprints added exceeds the size of the GUI!");
         };
+    }
+
+    /**
+     * This enum defines blueprint modes. Used to know which confirm GUI to open.
+     */
+    public enum BlueprintMode {
+        /**
+         * This enum defines a blueprint being selected for prestige.
+         */
+        PRESTIGE,
+        /**
+         * This enum defines a blueprint being selected for prestige opt-in.
+         */
+        OPT_IN,
+        /**
+         * This enum defines a blueprint being selected for prestige opt-out.
+         */
+        OPT_OUT
     }
 }

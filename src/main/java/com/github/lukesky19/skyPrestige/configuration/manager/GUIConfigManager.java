@@ -49,6 +49,8 @@ public class GUIConfigManager {
     private @Nullable VaultGUIConfig vaultGUIConfig;
     private @Nullable ValuesGUIConfig valuesGUIConfig;
     private @Nullable InfoGUIConfig infoGUIConfig;
+    private @Nullable ConfirmOptInOutGUIConfig confirmOptInGUIConfig;
+    private @Nullable ConfirmOptInOutGUIConfig confirmOptOutGUIConfig;
 
     private final @NotNull Path progressPath;
     private final @NotNull Path blueprintsPath;
@@ -58,6 +60,8 @@ public class GUIConfigManager {
     private final @NotNull Path vaultPath;
     private final @NotNull Path valuesPath;
     private final @NotNull Path infoPath;
+    private final @NotNull Path confirmOptInPath;
+    private final @NotNull Path confirmOptOutPath;
 
     /**
      * Constructor
@@ -75,6 +79,8 @@ public class GUIConfigManager {
         vaultPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "vault.yml");
         valuesPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "values.yml");
         infoPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "info.yml");
+        confirmOptInPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_in.yml");
+        confirmOptOutPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_out.yml");
     }
 
     /**
@@ -142,6 +148,22 @@ public class GUIConfigManager {
     }
 
     /**
+     * Get the {@link ConfirmOptInOutGUIConfig} for opt-in. May be null.
+     * @return The {@link ConfirmOptInOutGUIConfig} or null.
+     */
+    public @Nullable ConfirmOptInOutGUIConfig getConfirmOptInGUIConfig() {
+        return confirmOptInGUIConfig;
+    }
+
+    /**
+     * Get the {@link ConfirmOptInOutGUIConfig} for opt-out. May be null.
+     * @return The {@link ConfirmOptInOutGUIConfig} or null.
+     */
+    public @Nullable ConfirmOptInOutGUIConfig getConfirmOptOutGUIConfig() {
+        return confirmOptOutGUIConfig;
+    }
+
+    /**
      * (Re-)load the GUI configurations.
      */
     public void reload() {
@@ -157,6 +179,8 @@ public class GUIConfigManager {
         YamlConfigurationLoader vaultLoader = ConfigurationUtility.getYamlConfigurationLoader(vaultPath);
         YamlConfigurationLoader valuesLoader = ConfigurationUtility.getYamlConfigurationLoader(valuesPath);
         YamlConfigurationLoader infoLoader = ConfigurationUtility.getYamlConfigurationLoader(infoPath);
+        YamlConfigurationLoader optInLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmOptInPath);
+        YamlConfigurationLoader optOutLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmOptOutPath);
 
         try {
             progressGUIConfig = progressLoader.load().get(ProgressGUIConfig.class);
@@ -207,6 +231,18 @@ public class GUIConfigManager {
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.deserialize("Failed to load the info GUI config. Error:" + configurateException.getMessage()));
         }
+
+        try {
+            confirmOptInGUIConfig = optInLoader.load().get(ConfirmOptInOutGUIConfig.class);
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Failed to load the confirm opt-in GUI config. Error:" + configurateException.getMessage()));
+        }
+
+        try {
+            confirmOptOutGUIConfig = optOutLoader.load().get(ConfirmOptInOutGUIConfig.class);
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Failed to load the confirm opt-out GUI config. Error:" + configurateException.getMessage()));
+        }
     }
 
     /**
@@ -243,7 +279,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                39),
+                                32),
                         new ButtonConfig(
                                 new ItemStackConfig(
                                         "coal_ore",
@@ -262,7 +298,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                39),
+                                32),
                         conditionalButtons.keepEnderChest(),
                         conditionalButtons.clearEnderChest(),
                         conditionalButtons.keepExp(),
@@ -287,7 +323,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                41),
+                                30),
                         new ButtonConfig(
                                 new ItemStackConfig(
                                         "orange_shulker_box",
@@ -306,7 +342,7 @@ public class GUIConfigManager {
                                         new ItemStackConfig.ArmorTrimConfig(null, null),
                                         List.of(),
                                         new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                41),
+                                30),
                         conditionalButtons.startingMoney(),
                         conditionalButtons.noStartingMoney(),
                         conditionalButtons.keepSessionPlayTime(),
@@ -381,6 +417,12 @@ public class GUIConfigManager {
         }
         if(!infoPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "info.yml", false);
+        }
+        if(!confirmOptInPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "confirm_opt_in.yml", false);
+        }
+        if(!confirmOptOutPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "confirm_opt_out.yml", false);
         }
     }
 }

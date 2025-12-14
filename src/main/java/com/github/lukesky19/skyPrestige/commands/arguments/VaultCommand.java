@@ -110,6 +110,11 @@ public class VaultCommand {
                         return 0;
                     }
 
+                    if(islandData.isPrestigeExempt()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultPrestigeExempt()));
+                        return 0;
+                    }
+
                     IslandIdUUIDKey identifier = new IslandIdUUIDKey(islandId, uuid);
                     // Create the VaultGUI
                     VaultGUI gui = new VaultGUI(plugin, guiConfigManager, guiManager, identifier, databaseManager, localeManager, vaultManager, islandId, islandData, player);

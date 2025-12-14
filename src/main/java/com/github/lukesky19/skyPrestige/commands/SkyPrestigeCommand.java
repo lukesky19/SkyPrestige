@@ -29,6 +29,7 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.vault.VaultManager;
@@ -53,6 +54,7 @@ public class SkyPrestigeCommand {
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
     private final @NotNull PrestigeManager prestigeManager;
+    private final @NotNull PrestigeExemptionManager prestigeExemptionManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull GUIManager guiManager;
@@ -70,6 +72,7 @@ public class SkyPrestigeCommand {
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
      * @param islandDataManager A {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param guiManager A {@link GUIManager} instance.
@@ -86,6 +89,7 @@ public class SkyPrestigeCommand {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull PrestigeManager prestigeManager,
+            @NotNull PrestigeExemptionManager prestigeExemptionManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
             @NotNull GUIManager guiManager,
@@ -100,6 +104,7 @@ public class SkyPrestigeCommand {
         this.guiConfigManager = guiConfigManager;
         this.prestigeConfigManager = prestigeConfigManager;
         this.prestigeManager = prestigeManager;
+        this.prestigeExemptionManager = prestigeExemptionManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.guiManager = guiManager;
@@ -138,9 +143,11 @@ public class SkyPrestigeCommand {
         InfoCommand infoCommand = new InfoCommand(plugin, localeManager, guiConfigManager, guiManager);
         LeaderboardCommand leaderboardCommand = new LeaderboardCommand(localeManager, leaderboardManager);
         MultiplierCommand multiplierCommand = new MultiplierCommand(plugin, settingsManager, localeManager, multiplayerManager);
+        OptInCommand optInCommand = new OptInCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
+        OptOutCommand optOutCommand = new OptOutCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(plugin, localeManager, islandDataManager);
         ReloadCommand reloadCommand = new ReloadCommand(plugin, localeManager);
-        ProgressCommand progressCommand = new ProgressCommand(plugin, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager);
+        ProgressCommand progressCommand = new ProgressCommand(plugin, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, hookManager);
         ProtectionOrbCommand protectionOrbCommand = new ProtectionOrbCommand(localeManager, protectionOrbManager);
         RequirementsCommand requirementsCommand = new RequirementsCommand(plugin, settingsManager, localeManager, prestigeConfigManager, islandDataManager, hookManager);
         RewardsCommand rewardsCommand = new RewardsCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, guiManager, islandDataManager, hookManager);
@@ -156,6 +163,8 @@ public class SkyPrestigeCommand {
         builder.then(infoCommand.createCommand());
         builder.then(leaderboardCommand.createCommand());
         builder.then(multiplierCommand.createCommand());
+        builder.then(optInCommand.createCommand());
+        builder.then(optOutCommand.createCommand());
         builder.then(reloadCommand.createCommand());
         builder.then(progressCommand.createCommand());
         builder.then(protectionOrbCommand.createCommand());

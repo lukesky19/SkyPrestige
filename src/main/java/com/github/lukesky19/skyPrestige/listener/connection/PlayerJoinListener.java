@@ -19,6 +19,7 @@ package com.github.lukesky19.skyPrestige.listener.connection;
 
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
 import org.bukkit.entity.Player;
@@ -29,6 +30,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Listens for when a player joins and creates or loads any data necessary for their islands.
@@ -36,6 +38,7 @@ import java.util.UUID;
 public class PlayerJoinListener implements Listener {
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull PrestigeManager prestigeManager;
+    private final @NotNull PrestigeExemptionManager prestigeStatusManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull TeleportationManager teleportationManager;
 
@@ -43,16 +46,19 @@ public class PlayerJoinListener implements Listener {
      * Constructor
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param prestigeStatusManager A {@link PrestigeExemptionManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param teleportationManager A {@link TeleportationManager} instance.
      */
     public PlayerJoinListener(
             @NotNull DatabaseManager databaseManager,
             @NotNull PrestigeManager prestigeManager,
+            @NotNull PrestigeExemptionManager prestigeStatusManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull TeleportationManager teleportationManager) {
         this.databaseManager = databaseManager;
         this.prestigeManager = prestigeManager;
+        this.prestigeStatusManager = prestigeStatusManager;
         this.islandDataManager = islandDataManager;
         this.teleportationManager = teleportationManager;
     }
@@ -69,12 +75,16 @@ public class PlayerJoinListener implements Listener {
         // Insert the player's uuid into the database if it doesn't exist
         databaseManager.getPlayerIdsTable().insertPlayerId(uuid);
 
-        islandDataManager.loadDataByPlayerIdentifier(uuid);
-
-        // Handle any prestiges that occurred while the player was offline
-        prestigeManager.handleOfflinePrestiges(player);
-
         // Handle any queued teleports for the player.
         teleportationManager.handleQueuedTeleports(player);
+
+        @NotNull CompletableFuture<Void> loadFuture = islandDataManager.loadDataByPlayerIdentifier(uuid);
+        loadFuture.thenAccept(v -> {
+            // Handle any prestiges that occurred while the player was offline
+            prestigeManager.handleOfflinePrestiges(player);
+
+            // Handle any prestige exemption changes that occurred while the player was offline
+            prestigeStatusManager.handleOfflineStatusChanges(player);
+        });
     }
 }

@@ -32,7 +32,8 @@ public class IslandData implements Cloneable {
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
     private final @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
-    private boolean exempt = false;
+    private boolean leaderboardExempt = false;
+    private boolean prestigeExempt = false;
 
     /**
      * Constructor
@@ -43,15 +44,15 @@ public class IslandData implements Cloneable {
      * Constructor
      * @param prestigeLevel The island's prestige level.
      * @param prestigePoints The island's prestige points
-     * @param exempt Whether the island is exempt from leaderboard reporting or not.
+     * @param leaderboardExempt Whether the island is exempt from leaderboard reporting or not.
      */
     public IslandData(
             int prestigeLevel,
             double prestigePoints,
-            boolean exempt) {
+            boolean leaderboardExempt) {
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
-        this.exempt = exempt;
+        this.leaderboardExempt = leaderboardExempt;
     }
 
     /**
@@ -181,15 +182,31 @@ public class IslandData implements Cloneable {
      * Is the island exempt from leaderboard reporting?
      * @return true if exempt, or false if not.
      */
-    public boolean isExempt() {
-        return exempt;
+    public boolean isLeaderboardExempt() {
+        return leaderboardExempt;
     }
 
     /**
      * Set the island's leaderboard exemption status
-     * @param exempt true if exempt, or false if not.
+     * @param leaderboardExempt true if exempt, or false if not.
      */
-    public void setExempt(boolean exempt) {
-        this.exempt = exempt;
+    public void setLeaderboardExempt(boolean leaderboardExempt) {
+        this.leaderboardExempt = leaderboardExempt;
+    }
+
+    /**
+     * Is the island exempt from prestige?
+     * @return true if exempt, or false if not.
+     */
+    public boolean isPrestigeExempt() {
+        return prestigeExempt;
+    }
+
+    /**
+     * Set whether the island is exempt from prestige or not.
+     * @param prestigeExempt true if exempt from prestige, or false if not.
+     */
+    public void setPrestigeExempt(boolean prestigeExempt) {
+        this.prestigeExempt = prestigeExempt;
     }
 }

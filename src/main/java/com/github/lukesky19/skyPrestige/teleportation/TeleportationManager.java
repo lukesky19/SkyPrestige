@@ -17,9 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.teleportation;
 
-import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
@@ -46,7 +44,6 @@ public class TeleportationManager {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
-    private final @NotNull LocaleManager localeManager;
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull HookManager hookManager;
 
@@ -54,20 +51,17 @@ public class TeleportationManager {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param settingsManager A {@link SettingsManager} instance.
-     * @param localeManager A {@link LocaleManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public TeleportationManager(
             @NotNull SkyPlugin plugin,
             @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
             @NotNull DatabaseManager databaseManager,
             @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
-        this.localeManager = localeManager;
         this.databaseManager = databaseManager;
         this.hookManager = hookManager;
     }
@@ -87,7 +81,6 @@ public class TeleportationManager {
                 logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
                 return;
             }
-            Locale locale = localeManager.getConfiguration();
 
             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
             if(!bentoBoxHook.isHooked()) return;
@@ -100,12 +93,6 @@ public class TeleportationManager {
             Island island = optionalIsland.get();
             @Nullable Location spawnPoint = island.getSpawnPoint(World.Environment.NORMAL);
             if(spawnPoint != null) {
-                if(island.getMemberSet().contains(playerId)) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberIslandTeleportNotice()));
-                } else {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherIslandTeleportNotice()));
-                }
-
                 player.teleportAsync(spawnPoint);
             } else {
                 Settings.Location fallbackLocationConfig = settings.fallbackLocation();
@@ -132,12 +119,6 @@ public class TeleportationManager {
                 }
 
                 Location fallbackLocation = new Location(world, fallbackLocationConfig.x(), fallbackLocationConfig.y(), fallbackLocationConfig.z());
-
-                if(island.getMemberSet().contains(playerId)) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberFallbackTeleportNotice()));
-                } else {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.otherFallbackTeleportNotice()));
-                }
 
                 player.teleportAsync(fallbackLocation);
             }

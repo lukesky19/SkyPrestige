@@ -20,6 +20,8 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.RewardsGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.*;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -325,12 +327,12 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the buttons to display rewards for the GUI.
      */
     private void createRewardsButtons(@NotNull PrestigeConfig prestigeConfig) {
-        PrestigeConfig.RewardConfig rewardConfig = prestigeConfig.rewardConfig();
+        RewardConfig rewardConfig = prestigeConfig.rewardConfig();
         int totalRewardsCount = getTotalRewardsCount(rewardConfig);
 
         while(numOfRewardsAdded < rewardsPerPage && currentRewardKey < totalRewardsCount) {
             // Determine the current reward based on the current key
-            PrestigeConfig.Reward currentReward = getCurrentReward(rewardConfig);
+            IReward currentReward = getCurrentReward(rewardConfig);
 
             if(currentReward != null) {
                 addRewardButton(currentReward);
@@ -339,7 +341,7 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
         }
     }
 
-    private int getTotalRewardsCount(@NotNull PrestigeConfig.RewardConfig rewardConfig) {
+    private int getTotalRewardsCount(@NotNull RewardConfig rewardConfig) {
         int count = rewardConfig.itemRewards().size() +
                 rewardConfig.commandRewards().size() +
                 rewardConfig.moneyRewards().size();
@@ -353,18 +355,18 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create a reward button that displays a reward.
-     * @param reward The {@link PrestigeConfig.ItemReward}, {@link PrestigeConfig.CommandReward}, or {@link PrestigeConfig.MoneyReward} to process. May be null.
+     * @param reward The {@link ItemReward}, {@link CommandReward}, or {@link MoneyReward} to process. May be null.
      */
-    private void addRewardButton(@NotNull PrestigeConfig.Reward reward) {
+    private void addRewardButton(@NotNull IReward reward) {
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
         switch(reward) {
-            case PrestigeConfig.ItemReward itemReward ->
+            case ItemReward itemReward ->
                     itemStackBuilder.fromItemStackConfig(itemReward.displayItem(), player, null, List.of());
-            case PrestigeConfig.CommandReward commandReward ->
+            case CommandReward commandReward ->
                     itemStackBuilder.fromItemStackConfig(commandReward.displayItem(), player, null, List.of());
-            case PrestigeConfig.MoneyReward moneyReward ->
+            case MoneyReward moneyReward ->
                     itemStackBuilder.fromItemStackConfig(moneyReward.displayItem(), player, null, List.of());
-            case PrestigeConfig.IslandRangeReward islandRangeReward ->
+            case IslandRangeReward islandRangeReward ->
                     itemStackBuilder.fromItemStackConfig(islandRangeReward.displayItem(), player, null, List.of());
             default -> {
                     logger.warn(AdventureUtil.deserialize("Unable to add a reward display item as the " +
@@ -385,10 +387,10 @@ public class RewardsGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Get the current reward based on the {@link #currentRewardKey}.
-     * @param rewardConfig The {@link PrestigeConfig.RewardConfig}.
-     * @return A {@link PrestigeConfig.Reward} to process. May be null.
+     * @param rewardConfig The {@link RewardConfig}.
+     * @return A {@link IReward} to process. May be null.
      */
-    private @Nullable PrestigeConfig.Reward getCurrentReward(@NotNull PrestigeConfig.RewardConfig rewardConfig) {
+    private @Nullable IReward getCurrentReward(@NotNull RewardConfig rewardConfig) {
         int itemRewardsCount = rewardConfig.itemRewards().size();
         int commandRewardsCount = rewardConfig.commandRewards().size();
         int moneyRewardsCount = rewardConfig.moneyRewards().size();

@@ -136,7 +136,7 @@ public class OfflinePrestigeTable {
      * {@link CompletableFuture}.
      */
     public @NotNull CompletableFuture<@NotNull List<@NotNull Integer>> getPrestigeLevels(@NotNull UUID playerId) {
-        String selectSql = "SELECT level FROM " + tableName + " WHERE player_id = ?";
+        String selectSql = "SELECT level FROM " + tableName + " WHERE player_id = ? ORDER BY prestige_time ASC";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 

@@ -18,12 +18,12 @@
 package com.github.lukesky19.skyPrestige.configuration.data.prestige;
 
 import com.github.lukesky19.skyPrestige.configuration.data.island.PrestigeIslandSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.player.PrestigePlayerSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.player.PlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ import java.util.List;
  * @param requiredPrestigePoints The base number of prestige points required to prestige. This value will be scaled to the number of players on the island.
  * @param prestigeSettings The {@link PrestigeSettings} for this level.
  * @param rewardConfig The {@link RewardConfig} for this level.
- * @param rewards The legacy {@link List} of {@link Reward}s for this level. Migration purposes only.
+ * @param rewards The legacy {@link List} of {@link LegacyReward}s for this level. Migration purposes only.
  */
 @ConfigSerializable
 public record PrestigeConfig(
@@ -50,7 +50,7 @@ public record PrestigeConfig(
         @Deprecated(since = "1.1.0.0") @NotNull List<LegacyReward> rewards) {
     /**
      * This record contains settings for when an island is prestiged.
-     * @param playerSettings The {@link PrestigePlayerSettings}.
+     * @param playerSettings The {@link PlayerSettings}.
      * @param islandSettings The {@link IslandSettingsInterface}.
      * @param giveStartingMoneyToAllIslandMembers Whether to give the starting money to all island members or not.
      * @param startingMoney The starting amount of money to give the player.
@@ -64,7 +64,7 @@ public record PrestigeConfig(
      */
     @ConfigSerializable
     public record PrestigeSettings(
-            @NotNull PrestigePlayerSettings playerSettings,
+            @NotNull PlayerSettings playerSettings,
             @NotNull PrestigeIslandSettings islandSettings,
             boolean giveStartingMoneyToAllIslandMembers,
             double startingMoney,
@@ -75,97 +75,6 @@ public record PrestigeConfig(
             @Deprecated(since = "1.1.0.0") boolean resetMoney,
             @Deprecated(since = "1.1.0.0") @NotNull PlayTimeSettings playTimeSettings,
             @Deprecated(since = "1.1.0.0") boolean resetPrestigePoints) {}
-
-    /**
-     * The rewards to give when the prestige level is reached.
-     * @param itemRewards The {@link List} of {@link ItemReward}s.
-     * @param commandRewards The {@link List} of {@link CommandReward}s.
-     * @param moneyRewards The {@link List} of {@link MoneyReward}s.
-     * @param islandRangeReward The {@link IslandRangeReward}.
-     */
-    @ConfigSerializable
-    public record RewardConfig(
-            @NotNull List<ItemReward> itemRewards,
-            @NotNull List<CommandReward> commandRewards,
-            @NotNull List<MoneyReward> moneyRewards,
-            @NotNull IslandRangeReward islandRangeReward) {}
-
-    /**
-     * This interface is used to create reward configurations.
-     */
-    public interface Reward {
-        /**
-         * Get the {@link ItemStackConfig} to create an {@link ItemStack} that is displayed inside the rewards GUI.
-         * @return An {@link ItemStackConfig}.
-         */
-        @NotNull ItemStackConfig displayItem();
-    }
-
-    /**
-     * The configuration for an item reward.
-     * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
-     * @param giveToAllIslandMembers Whether to give this item to all island members.
-     * @param rewardItem The {@link ItemStackConfig} to give to the player.
-     */
-    @ConfigSerializable
-    public record ItemReward(
-            @NotNull ItemStackConfig displayItem,
-            boolean giveToAllIslandMembers,
-            @NotNull ItemStackConfig rewardItem) implements Reward {
-        @Override
-        public @NotNull ItemStackConfig displayItem() {
-            return displayItem;
-        }
-    }
-
-    /**
-     * The configuration for a command reward.
-     * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
-     * @param giveToAllIslandMembers Whether to run the commands for to all island members.
-     * @param commands The {@link List} of commands as a {@link String}.
-     */
-    @ConfigSerializable
-    public record CommandReward(
-            @NotNull ItemStackConfig displayItem,
-            boolean giveToAllIslandMembers,
-            @NotNull List<String> commands) implements Reward {
-        @Override
-        public @NotNull ItemStackConfig displayItem() {
-            return displayItem;
-        }
-    }
-
-    /**
-     * The configuration for a money reward.
-     * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
-     * @param giveToAllIslandMembers Whether to give the money to all island members.
-     * @param money The amount of money to give.
-     */
-    @ConfigSerializable
-    public record MoneyReward(
-            @NotNull ItemStackConfig displayItem,
-            boolean giveToAllIslandMembers,
-            double money) implements Reward {
-        @Override
-        public @NotNull ItemStackConfig displayItem() {
-            return displayItem;
-        }
-    }
-
-    /**
-     * The configuration for the island range to add.
-     * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
-     * @param rangeToAdd The range to add to the island.
-     */
-    @ConfigSerializable
-    public record IslandRangeReward(
-            @NotNull ItemStackConfig displayItem,
-            int rangeToAdd) implements Reward {
-        @Override
-        public @NotNull ItemStackConfig displayItem() {
-            return displayItem;
-        }
-    }
 
     /**
      * This records contains an individual reward configuration to give on successful prestige.

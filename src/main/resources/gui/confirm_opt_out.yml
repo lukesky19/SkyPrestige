@@ -1,6 +1,6 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.1.0.0
-gui-name: "Confirm Prestige"
+config-version: 1.0.0.0
+gui-name: "Confirm Prestige Opt-Out"
 gui-type: CHEST_54
 # The slot to display the blueprint bundle at.
 blueprint-button-slot: 0
@@ -11,38 +11,28 @@ filler:
 confirm-button:
     item:
         item-type: emerald_block
-        name: "<green>Click to confirm prestige.</green>"
+        name: "<green>Click to confirm opting out of prestige.</green>"
         lore:
-            - "<gray>By prestiging your island, your island will be reset"
-            - "<gray>and a new island will be created based on the blueprint selected."
-            - ""
-            - "<gray>The effects of prestiging will apply to offline players when they log on next."
+            - "<gray>By opting out of prestige, your island will be reset."
+            - "<gray>A new island will be created based on the blueprint selected."
+            - ''
+            - "<gray>The effects of opting out will apply to offline players when they log on next."
         amount: 1
     slot: 3
 cancel-button:
     item:
         item-type: redstone_block
-        name: "<red>Click to cancel the prestige.</red>"
+        name: "<red>Click to cancel opting out.</red>"
         lore:
-            - "<gray>By cancelling the prestige, nothing will be reset"
-            - "<gray>and you will not prestige."
+            - "<gray>By cancelling opting out, nothing will be reset."
         amount: 1
     slot: 5
-rewards-button:
-    item:
-        item-type: barrel
-        name: "<white>Click to view prestige rewards."
-        lore:
-            - "<white>These are the rewards given after you prestige your island.</white>"
-            - "<white>Rewards are given to each island member.</white>"
-        amount: 1
-    slot: 53
 keep-members:
     item:
         item-type: armor_stand
         name: "<white>Island Members"
         lore:
-            - "<gray>Island Members will be carried over on prestige."
+            - "<gray>Island Members will be carried over on opt-out."
         amount: 1
     slot: 10
 keep-flags:
@@ -50,7 +40,7 @@ keep-flags:
         item-type: red_banner
         name: "<white>Island Flags"
         lore:
-            - "<gray>Island Flags will be carried over on prestige."
+            - "<gray>Island Flags will be carried over on opt-out."
         amount: 1
     slot: 11
 keep-command-ranks:
@@ -58,7 +48,7 @@ keep-command-ranks:
         item-type: tripwire_hook
         name: "<white>Island Ranks"
         lore:
-            - "<gray>Island Ranks will be carried over on prestige."
+            - "<gray>Island Ranks will be carried over on opt-out."
         amount: 1
     slot: 12
 # Buttons that changed depending on conditions.
@@ -68,7 +58,7 @@ conditional-buttons:
             item-type: chest
             name: "<white>Player Inventory"
             lore:
-                - "<gray>Your inventory will be carried over on prestige."
+                - "<gray>Your inventory will be carried over on opt-out."
             amount: 1
         slot: 13
     clear-inventory:
@@ -76,7 +66,7 @@ conditional-buttons:
             item-type: chest
             name: "<white>Player Inventory"
             lore:
-                - "<gray>Your inventory will be cleared on prestige."
+                - "<gray>Your inventory will be cleared on opt-out."
             amount: 1
         slot: 13
     keep-ender-chest:
@@ -84,7 +74,7 @@ conditional-buttons:
             item-type: ender_chest
             name: "<white>Player Ender Chest"
             lore:
-                - "<gray>Your ender chest will be carried over on prestige."
+                - "<gray>Your ender chest will be carried over on opt-out."
             amount: 1
         slot: 14
     clear-ender-chest:
@@ -92,7 +82,7 @@ conditional-buttons:
             item-type: ender_chest
             name: "<white>Player Ender Chest"
             lore:
-                - "<gray>Your ender chest will be reset on prestige."
+                - "<gray>Your ender chest will be reset on opt-out."
             amount: 1
         slot: 14
     keep-exp:
@@ -100,7 +90,7 @@ conditional-buttons:
             item-type: experience_bottle
             name: "<white>Player Experience"
             lore:
-                - "<gray>Your experience levels will be carried over on prestige."
+                - "<gray>Your experience levels will be carried over on opt-out."
             amount: 1
         slot: 15
     reset-exp:
@@ -108,7 +98,7 @@ conditional-buttons:
             item-type: experience_bottle
             name: "<white>Player Experience"
             lore:
-                - "<gray>Your experience levels will be reset on prestige."
+                - "<gray>Your experience levels will be reset on opt-out."
             amount: 1
         slot: 15
     keep-money:
@@ -116,7 +106,7 @@ conditional-buttons:
             item-type: paper
             name: "<white>Player Balance"
             lore:
-                - "<gray>Your balance will be carried over on prestige."
+                - "<gray>Your balance will be carried over on opt-out."
             amount: 1
         slot: 16
     reset-money:
@@ -124,7 +114,7 @@ conditional-buttons:
             item-type: paper
             name: "<white>Player Balance"
             lore:
-                - "<gray>Your balance will be reset on prestige."
+                - "<gray>Your balance will be reset on opt-out."
             amount: 1
         slot: 16
     starting-money:
@@ -132,7 +122,7 @@ conditional-buttons:
             item-type: emerald
             name: "<white>Starting Money"
             lore:
-                - "<gray>You will start with $<amount> on prestige."
+                - "<gray>You will start with $<amount> on opt-out."
             amount: 1
         slot: 19
     no-starting-money:
@@ -140,7 +130,7 @@ conditional-buttons:
             item-type: emerald
             name: "<white>Starting Money"
             lore:
-                - "<gray>You will start with no extra money on prestige."
+                - "<gray>You will start with no extra money on opt-out."
             amount: 1
         slot: 19
     keep-session-play-time:
@@ -148,7 +138,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Session Play Time"
             lore:
-                - "<gray>Your session play time will be carried over on prestige."
+                - "<gray>Your session play time will be carried over on opt-out."
             amount: 1
         slot: 20
     reset-session-play-time:
@@ -156,7 +146,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Session Play Time"
             lore:
-                - "<gray>Your session play time will be reset on prestige."
+                - "<gray>Your session play time will be reset on opt-out."
             amount: 1
         slot: 20
     keep-daily-play-time:
@@ -164,7 +154,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Daily Play Time"
             lore:
-                - "<gray>Your daily play time will be carried over on prestige."
+                - "<gray>Your daily play time will be carried over on opt-out."
             amount: 1
         slot: 21
     reset-daily-play-time:
@@ -172,7 +162,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Daily Play Time"
             lore:
-                - "<gray>Your daily play time will be reset on prestige."
+                - "<gray>Your daily play time will be reset on opt-out."
             amount: 1
         slot: 21
     keep-weekly-play-time:
@@ -180,7 +170,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Weekly Play Time"
             lore:
-                - "<gray>Your weekly play time will be carried over on prestige."
+                - "<gray>Your weekly play time will be carried over on opt-out."
             amount: 1
         slot: 22
     reset-weekly-play-time:
@@ -188,7 +178,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Weekly Play Time"
             lore:
-                - "<gray>Your weekly play time will be reset on prestige."
+                - "<gray>Your weekly play time will be reset on opt-out."
             amount: 1
         slot: 22
     keep-monthly-play-time:
@@ -196,7 +186,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Monthly Play Time"
             lore:
-                - "<gray>Your monthly play time will be carried over on prestige."
+                - "<gray>Your monthly play time will be carried over on opt-out."
             amount: 1
         slot: 23
     reset-monthly-play-time:
@@ -204,7 +194,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Monthly Play Time"
             lore:
-                - "<gray>Your monthly play time will be reset on prestige."
+                - "<gray>Your monthly play time will be reset on opt-out."
             amount: 1
         slot: 23
     keep-yearly-play-time:
@@ -212,7 +202,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Yearly Play Time"
             lore:
-                - "<gray>Your yearly play time will be carried over on prestige."
+                - "<gray>Your yearly play time will be carried over on opt-out."
             amount: 1
         slot: 24
     reset-yearly-play-time:
@@ -220,7 +210,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Yearly Play Time"
             lore:
-                - "<gray>Your yearly play time will be reset on prestige."
+                - "<gray>Your yearly play time will be reset on opt-out."
             amount: 1
         slot: 24
     keep-total-play-time:
@@ -228,7 +218,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Total Play Time"
             lore:
-                - "<gray>Your total play time will be carried over on prestige."
+                - "<gray>Your total play time will be carried over on opt-out."
             amount: 1
         slot: 25
     reset-total-play-time:
@@ -236,7 +226,7 @@ conditional-buttons:
             item-type: clock
             name: "<white>Total Play Time"
             lore:
-                - "<gray>Your total play time will be reset on prestige."
+                - "<gray>Your total play time will be reset on opt-out."
             amount: 1
         slot: 25
     keep-auction-items:
@@ -244,7 +234,7 @@ conditional-buttons:
             item-type: orange_shulker_box
             name: "<white>Auction House Items"
             lore:
-                - "<gray>Your auction house items will be carried over on prestige."
+                - "<gray>Your auction house items will be carried over on opt-out."
             amount: 1
         slot: 30
     reset-auction-items:
@@ -252,15 +242,31 @@ conditional-buttons:
             item-type: orange_shulker_box
             name: "<white>Auction House Items"
             lore:
-                - "<gray>Your auction house items will be reset on prestige."
+                - "<gray>Your auction house items will be reset on opt-out."
             amount: 1
         slot: 30
+    keep-vault-items:
+        item:
+            item-type: green_shulker_box
+            name: "<white>Island Vault"
+            lore:
+                - "<gray>The island's vault will be carried over on opt-out."
+            amount: 1
+        slot: 31
+    clear-vault-items:
+        item:
+            item-type: green_shulker_box
+            name: "<white>Island Vault"
+            lore:
+                - "<gray>The island's vault will be reset on opt-out."
+            amount: 1
+        slot: 31
     keep-generator-upgrades:
         item:
             item-type: coal_ore
             name: "<white>Generator Upgrades"
             lore:
-                - "<gray>Your generator upgrades will be carried over on prestige."
+                - "<gray>Your generator upgrades will be carried over on opt-out."
             amount: 1
         slot: 32
     reset-generator-upgrades:
@@ -268,6 +274,6 @@ conditional-buttons:
             item-type: coal_ore
             name: "<white>Generator Upgrades"
             lore:
-                - "<gray>Your generator upgrades will be reset on prestige."
+                - "<gray>Your generator upgrades will be reset on opt-out."
             amount: 1
         slot: 32

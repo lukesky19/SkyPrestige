@@ -82,7 +82,8 @@ public class IslandDataTable {
                         "level INTEGER NOT NULL DEFAULT 0, " +
                         "points DOUBLE NOT NULL, " +
                         "vault_data BLOB NOT NULL, " +
-                        "exempt INTEGER NOT NULL, " +
+                        "leaderboard_exempt INTEGER NOT NULL DEFAULT 0, " +
+                        "prestige_exempt INTEGER NOT NULL DEFAULT 0, " +
                         "last_updated LONG NOT NULL DEFAULT 0, " +
                         "FOREIGN KEY (island_id) REFERENCES skyprestige_island_ids(island_id) ON UPDATE CASCADE ON DELETE CASCADE)";
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_skyprestige_island_data_island_id ON " + tableName + "(island_id)";
@@ -102,7 +103,7 @@ public class IslandDataTable {
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
     public @NotNull CompletableFuture<Void> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
-        String selectSql = "SELECT level, points, vault_data, exempt FROM " + tableName + " WHERE island_id = ?";
+        String selectSql = "SELECT level, points, vault_data, leaderboard_exempt, prestige_exempt FROM " + tableName + " WHERE island_id = ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
@@ -111,14 +112,16 @@ public class IslandDataTable {
                 if(resultSet.next()) {
                     int level = resultSet.getInt("level");
                     double points = resultSet.getDouble("points");
+                    boolean leaderboardExempt = resultSet.getBoolean("leaderboard_exempt");
+                    boolean prestigeExempt = resultSet.getBoolean("prestige_exempt");
                     byte[] rawVaultData = resultSet.getBytes("vault_data");
-                    boolean exempt = resultSet.getBoolean("exempt");
                     @NotNull Map<PageSlotKey, ItemStack> vaultData = deserializeItemMap(islandId, rawVaultData);
 
                     islandData.setPrestigeLevel(level);
                     islandData.setPrestigePoints(points);
+                    islandData.setLeaderboardExempt(leaderboardExempt);
+                    islandData.setPrestigeExempt(prestigeExempt);
                     islandData.setVaultItems(vaultData);
-                    islandData.setExempt(exempt);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -140,15 +143,17 @@ public class IslandDataTable {
                 "level, " +
                 "points, " +
                 "vault_data, " +
-                "exempt, " +
+                "leaderboard_exempt, " +
+                "prestige_exempt, " +
                 "last_updated) " +
-                "VALUES (?, ?, ?, ?, ?, ?) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (island_id) " +
                 "DO UPDATE SET " +
                 "level = ?, " +
                 "points = ?, " +
                 "vault_data = ?, " +
-                "exempt = ?, " +
+                "leaderboard_exempt = ?, " +
+                "prestige_exempt = ?, " +
                 "last_updated = ? " +
                 "WHERE last_updated < ?";
 
@@ -156,7 +161,8 @@ public class IslandDataTable {
         IntegerParameter prestigeLevelParameter = new IntegerParameter(islandData.getPrestigeLevel());
         DoubleParameter prestigePointsParameter = new DoubleParameter(islandData.getPrestigePoints());
         ByteArrayParameter vaultDataParameter = new ByteArrayParameter(serializeItemMap(islandData.getVaultItems()));
-        IntegerParameter exemptParameter = new IntegerParameter(islandData.isExempt() ? 1 : 0);
+        IntegerParameter leaderboardExemptParameter = new IntegerParameter(islandData.isLeaderboardExempt() ? 1 : 0);
+        IntegerParameter prestigeExemptParameter = new IntegerParameter(islandData.isPrestigeExempt() ? 1 : 0);
         LongParameter lastUpdatedParameter = new LongParameter(System.currentTimeMillis());
 
         return queueManager.queueWriteTransaction(updateSql, List.of(
@@ -164,12 +170,14 @@ public class IslandDataTable {
                 prestigeLevelParameter,
                 prestigePointsParameter,
                 vaultDataParameter,
-                exemptParameter,
+                leaderboardExemptParameter,
+                prestigeExemptParameter,
                 lastUpdatedParameter,
                 prestigeLevelParameter,
                 prestigePointsParameter,
                 vaultDataParameter,
-                exemptParameter,
+                leaderboardExemptParameter,
+                prestigeExemptParameter,
                 lastUpdatedParameter,
                 lastUpdatedParameter)).thenRun(() -> {});
     }
@@ -185,15 +193,17 @@ public class IslandDataTable {
                 "level, " +
                 "points, " +
                 "vault_data, " +
-                "exempt, " +
+                "leaderboard_exempt = ?, " +
+                "prestige_exempt = ?, " +
                 "last_updated) " +
-                "VALUES (?, ?, ?, ?, ?, ?) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (island_id) " +
                 "DO UPDATE SET " +
                 "level = ?, " +
                 "points = ?, " +
                 "vault_data = ?, " +
-                "exempt = ?, " +
+                "leaderboard_exempt = ?, " +
+                "prestige_exempt = ?, " +
                 "last_updated = ? " +
                 "WHERE last_updated < ?";
         List<List<Parameter<?>>> listOfParameterLists = new ArrayList<>();
@@ -203,7 +213,8 @@ public class IslandDataTable {
             IntegerParameter prestigeLevelParameter = new IntegerParameter(islandData.getPrestigeLevel());
             DoubleParameter prestigePointsParameter = new DoubleParameter(islandData.getPrestigePoints());
             ByteArrayParameter vaultDataParameter = new ByteArrayParameter(serializeItemMap(islandData.getVaultItems()));
-            IntegerParameter exemptParameter = new IntegerParameter(islandData.isExempt() ? 1 : 0);
+            IntegerParameter leaderboardExemptParameter = new IntegerParameter(islandData.isLeaderboardExempt() ? 1 : 0);
+            IntegerParameter prestigeExemptParameter = new IntegerParameter(islandData.isPrestigeExempt() ? 1 : 0);
             LongParameter lastUpdatedParameter = new LongParameter(System.currentTimeMillis());
 
             listOfParameterLists.add(List.of(
@@ -211,12 +222,14 @@ public class IslandDataTable {
                     prestigeLevelParameter,
                     prestigePointsParameter,
                     vaultDataParameter,
-                    exemptParameter,
+                    leaderboardExemptParameter,
+                    prestigeExemptParameter,
                     lastUpdatedParameter,
                     prestigeLevelParameter,
                     prestigePointsParameter,
                     vaultDataParameter,
-                    exemptParameter,
+                    leaderboardExemptParameter,
+                    prestigeExemptParameter,
                     lastUpdatedParameter,
                     lastUpdatedParameter));
         });
@@ -229,7 +242,7 @@ public class IslandDataTable {
      * @return A {@link CompletableFuture} containing the {@link TopTen} by prestige levels then prestige points.
      */
     public @NotNull CompletableFuture<@NotNull TopTen> getTopTenByPrestigeLevelAndPointsNotExempt() {
-        String sql = "SELECT island_id, level, points FROM " + tableName + " WHERE exempt = 0 ORDER BY level DESC, points DESC LIMIT 10";
+        String sql = "SELECT island_id, level, points FROM " + tableName + " WHERE leaderboard_exempt = 0 ORDER BY level DESC, points DESC LIMIT 10";
         return queueManager.queueReadTransaction(sql, resultSet -> {
             List<Position> positionList = new LinkedList<>();
 
