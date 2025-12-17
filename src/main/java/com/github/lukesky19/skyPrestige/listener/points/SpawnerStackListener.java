@@ -72,13 +72,15 @@ public class SpawnerStackListener extends PrestigePointsListener<SpawnerStackEve
     @Override
     protected @NotNull EventContextExtractor<SpawnerStackEvent> extractor() {
         return spawnerStackEvent -> {
+            @Nullable Settings settings = settingsManager.getConfiguration();
+            if(settings == null) return null;
             Player player = spawnerStackEvent.getPlayer();
             StackedSpawner stackedSpawner = spawnerStackEvent.getStack();
             Spawner spawner = stackedSpawner.getSpawner();
             @Nullable EntityType entityType = spawner.getSpawnedType();
             BlockType blockType = stackedSpawner.getBlock().getType().asBlockType();
             if(blockType == null) return null;
-            int amount = spawnerStackEvent.getIncreaseAmount();
+            int amount = settings.accurateRoseStacker() ? spawnerStackEvent.getIncreaseAmount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);

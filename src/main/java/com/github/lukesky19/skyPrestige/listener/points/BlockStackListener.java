@@ -69,11 +69,13 @@ public class BlockStackListener extends PrestigePointsListener<BlockStackEvent> 
     @Override
     protected @NotNull EventContextExtractor<BlockStackEvent> extractor() {
         return blockStackEvent -> {
+            @Nullable Settings settings = settingsManager.getConfiguration();
+            if(settings == null) return null;
             Player player = blockStackEvent.getPlayer();
             StackedBlock stackedBlock = blockStackEvent.getStack();
             BlockType blockType = stackedBlock.getBlock().getType().asBlockType();
             if(blockType == null) return null;
-            int amount = blockStackEvent.getIncreaseAmount();
+            int amount = settings.accurateRoseStacker() ? blockStackEvent.getIncreaseAmount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);

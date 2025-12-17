@@ -72,13 +72,15 @@ public class SpawnerUnstackListener extends PrestigePointsListener<SpawnerUnstac
     @Override
     protected @NotNull EventContextExtractor<SpawnerUnstackEvent> extractor() {
         return spawnerUnstackEvent -> {
+            @Nullable Settings settings = settingsManager.getConfiguration();
+            if(settings == null) return null;
             Player player = spawnerUnstackEvent.getPlayer();
             StackedSpawner stackedSpawner = spawnerUnstackEvent.getStack();
             Spawner spawner = stackedSpawner.getSpawner();
             @Nullable EntityType entityType = spawner.getSpawnedType();
             BlockType blockType = stackedSpawner.getBlock().getType().asBlockType();
             if(blockType == null) return null;
-            int amount = spawnerUnstackEvent.getDecreaseAmount();
+            int amount = settings.accurateRoseStacker() ? spawnerUnstackEvent.getDecreaseAmount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);

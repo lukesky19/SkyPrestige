@@ -70,11 +70,13 @@ public class EntityStackMultipleDeathListener extends PrestigePointsListener<Ent
     @Override
     protected @NotNull EventContextExtractor<EntityStackMultipleDeathEvent> extractor() {
         return entityStackMultipleDeathEvent -> {
+            @Nullable Settings settings = settingsManager.getConfiguration();
+            if(settings == null) return null;
             StackedEntity stackedEntity = entityStackMultipleDeathEvent.getStack();
             Player player = stackedEntity.getEntity().getKiller();
             if(player == null) return null;
             EntityType entityType = stackedEntity.getEntity().getType();
-            int amountKilled = entityStackMultipleDeathEvent.getEntityKillCount();
+            int amountKilled = settings.accurateRoseStacker() ? entityStackMultipleDeathEvent.getEntityKillCount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);

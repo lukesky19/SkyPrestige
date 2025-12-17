@@ -43,6 +43,7 @@ import java.util.Map;
  * @param scaleFormula The formula to scale requirements with.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
  * @param fallbackLocation The location to teleport a player if the plugin is unable to teleport them to their island.
+ * @param accurateRoseStacker Should stacked blocks and entities be considered when rewarding prestige points?
  * @param islandResetSettings The {@link NonPrestigeIslandSettings}.
  * @param optInSettings The {@link OptInOutSettings} for prestige opt in.
  * @param optOutSettings The {@link OptInOutSettings} for prestige opt out.
@@ -61,6 +62,7 @@ public record Settings(
         @Nullable String scaleFormula,
         int exchangePrestigeLevel,
         @NotNull Location fallbackLocation,
+        boolean accurateRoseStacker,
         @NotNull NonPrestigeIslandSettings islandResetSettings,
         @NotNull OptInOutSettings optInSettings,
         @NotNull OptInOutSettings optOutSettings,

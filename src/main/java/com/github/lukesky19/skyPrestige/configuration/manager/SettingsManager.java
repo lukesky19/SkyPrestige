@@ -75,6 +75,7 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
                         settings.scaleFormula(),
                         settings.exchangePrestigeLevel(),
                         settings.fallbackLocation(),
+                        true,
                         new NonPrestigeIslandSettings(
                                 true,
                                 true,

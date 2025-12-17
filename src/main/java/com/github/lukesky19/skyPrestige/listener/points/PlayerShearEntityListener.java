@@ -21,12 +21,12 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -72,15 +72,19 @@ public class PlayerShearEntityListener extends PrestigePointsListener<PlayerShea
     @Override
     protected @NotNull EventContextExtractor<PlayerShearEntityEvent> extractor() {
         return playerShearEntityEvent -> {
+            @Nullable Settings settings = settingsManager.getConfiguration();
+            if(settings == null) return null;
             Player player = playerShearEntityEvent.getPlayer();
             Entity entity = playerShearEntityEvent.getEntity();
             EntityType entityType = entity.getType();
             int amount = 1;
 
-            RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
-            if(roseStackerHook.isHooked()) {
-                if(entity instanceof LivingEntity livingEntity) {
-                    amount = roseStackerHook.getStackSize(livingEntity);
+            if(settings.accurateRoseStacker()) {
+                RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
+                if(roseStackerHook.isHooked()) {
+                    if(entity instanceof LivingEntity livingEntity) {
+                        amount = roseStackerHook.getStackSize(livingEntity);
+                    }
                 }
             }
 
