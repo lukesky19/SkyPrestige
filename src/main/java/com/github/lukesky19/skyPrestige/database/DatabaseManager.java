@@ -24,6 +24,7 @@ import com.github.lukesky19.skyPrestige.database.table.*;
 import com.github.lukesky19.skyPrestige.database.table.legacy.IslandVaultsTable;
 import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigeLevelsTable;
 import com.github.lukesky19.skyPrestige.database.table.legacy.PrestigePointsTable;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -45,13 +46,14 @@ public class DatabaseManager {
     private final @NotNull ComponentLogger logger;
     private final @NotNull ConnectionManager connectionManager;
     private final @NotNull QueueManager queueManager;
+    private final @NotNull HookManager hookManager;
 
     private IslandIdsTable islandIdsTable;
     private PlayerIdsTable playerIdsTable;
     private IslandDataTable islandDataTable;
     private OfflinePrestigeTable offlinePrestigeTable;
     private OfflineStatusChangeTable offlineStatusChangeTable;
-    private PlayerLogoutLocationsTables playerLogoutLocationsTables;
+    private PlayerLogoutLocationsTable playerLogoutLocationsTables;
     private PlayerTeleportTable playerTeleportTable;
     // Legacy only
     private PrestigeLevelsTable prestigeLevelsTable;
@@ -99,10 +101,10 @@ public class DatabaseManager {
     }
 
     /**
-     * Get the {@link PlayerLogoutLocationsTables}.
-     * @return The {@link PlayerLogoutLocationsTables}
+     * Get the {@link PlayerLogoutLocationsTable}.
+     * @return The {@link PlayerLogoutLocationsTable}
      */
-    public PlayerLogoutLocationsTables getPlayerLogoutLocationsTables() {
+    public PlayerLogoutLocationsTable getPlayerLogoutLocationsTables() {
         return playerLogoutLocationsTables;
     }
 
@@ -118,10 +120,12 @@ public class DatabaseManager {
      * Constructor
      * Initializes the {@link ConnectionManager}, {@link QueueManager}, and all tables.
      * @param plugin A {@link SkyPlugin}.
+     * @param hookManager A {@link HookManager} instance.
      */
-    public DatabaseManager(@NotNull SkyPlugin plugin) {
+    public DatabaseManager(@NotNull SkyPlugin plugin, @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
+        this.hookManager = hookManager;
         connectionManager = new ConnectionManager(plugin);
         queueManager = new QueueManager(connectionManager);
     }
@@ -136,13 +140,13 @@ public class DatabaseManager {
         VersionsTable versionsTable = new VersionsTable(queueManager);
         futureList.add(versionsTable.createTable());
 
-        islandIdsTable = new IslandIdsTable(logger, queueManager, versionsTable);
+        islandIdsTable = new IslandIdsTable(queueManager, versionsTable);
         futureList.add(islandIdsTable.createTable());
 
         playerIdsTable = new PlayerIdsTable(queueManager, versionsTable);
         futureList.add(playerIdsTable.createTable());
 
-        islandDataTable = new IslandDataTable(plugin, queueManager, versionsTable);
+        islandDataTable = new IslandDataTable(plugin, queueManager, hookManager, versionsTable);
         futureList.add(islandDataTable.createTable());
 
         offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager, versionsTable);
@@ -151,7 +155,7 @@ public class DatabaseManager {
         offlineStatusChangeTable = new OfflineStatusChangeTable(logger, queueManager, versionsTable);
         futureList.add(offlineStatusChangeTable.createTable());
 
-        playerLogoutLocationsTables = new PlayerLogoutLocationsTables(queueManager, versionsTable);
+        playerLogoutLocationsTables = new PlayerLogoutLocationsTable(queueManager, versionsTable);
         futureList.add(playerLogoutLocationsTables.createTable());
 
         playerTeleportTable = new PlayerTeleportTable(queueManager, versionsTable);
@@ -191,7 +195,7 @@ public class DatabaseManager {
                             Map<String, IslandData> islandDataMap = new HashMap<>();
 
                             islandIdList.forEach(islandId -> {
-                                @NotNull IslandData islandData = new IslandData();
+                                @NotNull IslandData islandData = new IslandData(islandId);
                                 @Nullable Integer level = levelsMap.get(islandId);
                                 @Nullable Double points = pointsMap.get(islandId);
                                 @Nullable Map<PageSlotKey, ItemStack> vaultMap = vaultDataMap.get(islandId);

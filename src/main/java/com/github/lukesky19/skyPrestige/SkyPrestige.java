@@ -60,7 +60,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * The main class for the SkyPrestige plugin.
  */
-public final class SkyPrestige extends SkyPlugin {
+public class SkyPrestige extends SkyPlugin {
     // Plugin Classes
     private SettingsManager settingsManager;
     private LocaleManager localeManager;
@@ -92,7 +92,7 @@ public final class SkyPrestige extends SkyPlugin {
 
         // Set up plugin classes
         HookManager hookManager = new HookManager(this);
-        databaseManager = new DatabaseManager(this);
+        databaseManager = new DatabaseManager(this, hookManager);
         CompletableFuture<Void> databaseFuture = databaseManager.setup();
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);

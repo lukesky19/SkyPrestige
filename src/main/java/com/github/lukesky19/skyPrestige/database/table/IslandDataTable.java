@@ -21,6 +21,8 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.TopTen;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import com.github.lukesky19.skyPrestige.util.parameter.ByteArrayParameter;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
@@ -36,7 +38,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.io.*;
@@ -51,6 +52,7 @@ public class IslandDataTable {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private final @NotNull QueueManager queueManager;
+    private final @NotNull HookManager hookManager;
     private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_island_data";
 
@@ -58,15 +60,18 @@ public class IslandDataTable {
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param hookManager A {@link HookManager} instance.
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public IslandDataTable(
             @NotNull SkyPlugin plugin,
             @NotNull QueueManager queueManager,
+            @NotNull HookManager hookManager,
             @NotNull VersionsTable versionsTable) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.queueManager = queueManager;
+        this.hookManager = hookManager;
         this.versionsTable = versionsTable;
     }
 
@@ -102,7 +107,7 @@ public class IslandDataTable {
      * @param islandData The {@link IslandData} for the island.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
+    public @NotNull CompletableFuture<IslandData> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
         String selectSql = "SELECT level, points, vault_data, leaderboard_exempt, prestige_exempt FROM " + tableName + " WHERE island_id = ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
@@ -128,7 +133,7 @@ public class IslandDataTable {
             }
 
             return islandData;
-        }).thenRun(() -> {});
+        });
     }
 
     /**
@@ -193,8 +198,8 @@ public class IslandDataTable {
                 "level, " +
                 "points, " +
                 "vault_data, " +
-                "leaderboard_exempt = ?, " +
-                "prestige_exempt = ?, " +
+                "leaderboard_exempt, " +
+                "prestige_exempt, " +
                 "last_updated) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (island_id) " +
@@ -242,6 +247,8 @@ public class IslandDataTable {
      * @return A {@link CompletableFuture} containing the {@link TopTen} by prestige levels then prestige points.
      */
     public @NotNull CompletableFuture<@NotNull TopTen> getTopTenByPrestigeLevelAndPointsNotExempt() {
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+
         String sql = "SELECT island_id, level, points FROM " + tableName + " WHERE leaderboard_exempt = 0 ORDER BY level DESC, points DESC LIMIT 10";
         return queueManager.queueReadTransaction(sql, resultSet -> {
             List<Position> positionList = new LinkedList<>();
@@ -249,7 +256,7 @@ public class IslandDataTable {
             try {
                 while(resultSet.next()) {
                     String islandId = resultSet.getString("island_id");
-                    Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandById(islandId, false);
+                    Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
                     int level = resultSet.getInt("level");
                     double points = resultSet.getDouble("points");
                     @Nullable String ownerName = null;
@@ -281,7 +288,7 @@ public class IslandDataTable {
      * @return A byte array.
      * @throws RuntimeException on any IO exception.
      */
-    private byte[] serializeItemMap(@NotNull Map<PageSlotKey, ItemStack> itemMap) {
+    public byte[] serializeItemMap(@NotNull Map<PageSlotKey, ItemStack> itemMap) {
         Map<PageSlotKey, byte[]> rawMap = new HashMap<>();
 
         itemMap.forEach((pageSlotKey, itemStack) -> {
@@ -307,24 +314,14 @@ public class IslandDataTable {
      * @throws RuntimeException on any IOException or ClassNotFoundException.
      */
     @SuppressWarnings("unchecked")
-    private @NotNull Map<PageSlotKey, ItemStack> deserializeItemMap(@NotNull String islandId, byte[] mapBytes) {
+    public @NotNull Map<PageSlotKey, ItemStack> deserializeItemMap(@NotNull String islandId, byte[] mapBytes) {
         try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(mapBytes))) {
             Map<PageSlotKey, ItemStack> itemMap = new HashMap<>();
 
             if(ois.readObject() instanceof Map<?, ?> map) {
                 if(map.isEmpty()) return itemMap;
 
-                boolean isValidType = true;
-                for(Object key : map.keySet()) {
-                    if(!(key instanceof PageSlotKey)) {
-                        isValidType = false;
-                        break;
-                    }
-
-                    break;
-                }
-
-                if(!isValidType) {
+                if(!(map.keySet().stream().allMatch(key -> key instanceof PageSlotKey))) {
                     logger.warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
                     return itemMap;
                 }

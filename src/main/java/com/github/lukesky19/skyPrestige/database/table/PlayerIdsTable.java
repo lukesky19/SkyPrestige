@@ -62,12 +62,13 @@ public class PlayerIdsTable {
     /**
      * Stores the {@link UUID} of the {@link Player} inside the player ids table.
      * @param uuid The {@link UUID} of the {@link Player}.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertPlayerId(@NotNull UUID uuid) {
+    public @NotNull CompletableFuture<Void> insertPlayerId(@NotNull UUID uuid) {
         String insertPlayerIdSql = "INSERT INTO " + tableName + " (player_id) VALUES (?) ON CONFLICT (player_id) DO NOTHING";
 
         UUIDParameter parameter = new UUIDParameter(uuid);
 
-        queueManager.queueWriteTransaction(insertPlayerIdSql, List.of(parameter));
+        return queueManager.queueWriteTransaction(insertPlayerIdSql, List.of(parameter)).thenRun(() -> {});
     }
 }

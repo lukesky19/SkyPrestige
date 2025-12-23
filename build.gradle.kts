@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
 }
 
 group = "com.github.lukesky19"
@@ -7,7 +8,6 @@ version = "1.1.0.0"
 
 repositories {
     mavenLocal()
-    mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/") {
         name = "papermc-repo"
     }
@@ -20,6 +20,9 @@ repositories {
     maven("https://repo.codemc.org/repository/maven-public/") {
         name = "codemc"
     }
+    maven("https://repo.codemc.io/repository/bentoboxworld/") {
+        name = "CodeMC - BentoBox"
+    }
     maven("https://repo.rosewooddev.io/repository/public/") {
         name = "RoseWood"
     }
@@ -29,10 +32,11 @@ repositories {
     maven("https://repo.olziedev.com/") {
         name = "PlayerAuctions Repo"
     }
+    mavenCentral()
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.github.lukesky19:SkyLib:1.4.0.0")
 
     // Hooks
@@ -46,6 +50,22 @@ dependencies {
     compileOnly("com.github.lukesky19:SkyPlayTime:1.0.0.0")
     compileOnly("com.github.lukesky19:SkySellWands:1.4.0.0")
     compileOnly("com.olziedev:playerauctions-api:1.32.1")
+
+    // Test Dependencies
+    testImplementation("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    testImplementation("com.github.lukesky19:SkyLib:1.4.0.0")
+    testImplementation("world.bentobox:bentobox:2.7.0-SNAPSHOT")
+    testImplementation("world.bentobox:magiccobblestonegenerator:2.6.0-SNAPSHOT") {
+        exclude("org.bukkit", "bukkit")
+    }
+    testImplementation("world.bentobox:level:2.8.1-SNAPSHOT")
+    testImplementation("world.bentobox:bank:1.9.0-SNAPSHOT")
+    testImplementation("org.xerial:sqlite-jdbc:3.51.1.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.14.1")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.14.1")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.21.0")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.98.0")
 }
 
 java {
@@ -69,6 +89,22 @@ tasks {
         (options as StandardJavadocDocletOptions).apply {
             tags("apiNote:a:API Note:")
             addStringOption("sourcepath", "")
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
+
+        reports {
+            xml.required = false
+            csv.required = false
+            html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
         }
     }
 

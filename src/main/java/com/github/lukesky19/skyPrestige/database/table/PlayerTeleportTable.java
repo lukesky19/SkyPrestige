@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
-import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
+import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import org.jetbrains.annotations.NotNull;
@@ -70,26 +70,28 @@ public class PlayerTeleportTable {
      * Store the {@link UUID} and island id to teleport them to.
      * @param playerId The {@link UUID} of the player.
      * @param islandId The island id to teleport the player to.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertPlayerIdAndIslandId(@NotNull UUID playerId, @NotNull String islandId) {
+    public @NotNull CompletableFuture<Void> insertPlayerIdAndIslandId(@NotNull UUID playerId, @NotNull String islandId) {
         String insertSql = "INSERT INTO " + tableName + " (player_id, island_id) VALUES (?, ?) ON CONFLICT (player_id) DO NOTHING";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
-        queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter));
+        return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter)).thenRun(() -> {});
     }
 
     /**
      * Delete any data associated with the player id provided.
      * @param playerId The {@link UUID} of the player.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void deletePlayerIdAndIslandId(@NotNull UUID playerId) {
+    public @NotNull CompletableFuture<Void> deletePlayerIdAndIslandId(@NotNull UUID playerId) {
         String deleteSql = "DELETE FROM " +  tableName + " WHERE player_id = ?";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 
-        queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter));
+        return queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter)).thenRun(() -> {});
     }
 
     /**

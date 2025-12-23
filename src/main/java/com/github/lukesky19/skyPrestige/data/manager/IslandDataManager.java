@@ -69,11 +69,11 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
             // If not loaded (null), create and load the data for that island.
             if(islandData == null) {
                 // Create the new IslandData
-                IslandData newIslandData = new IslandData();
+                IslandData newIslandData = new IslandData(islandId);
                 setData(islandId, newIslandData);
 
                 // Load any data from the database.
-                futureList.add(databaseManager.getIslandDataTable().loadIslandData(islandId, newIslandData));
+                futureList.add(databaseManager.getIslandDataTable().loadIslandData(islandId, newIslandData).thenRun(() -> {}));
             }
         });
 
@@ -87,11 +87,11 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
      */
     @Override
     public @NotNull CompletableFuture<Void> loadData(@NotNull String islandId) {
-        IslandData islandData = new IslandData();
+        IslandData islandData = new IslandData(islandId);
 
         setData(islandId, islandData);
 
-        return databaseManager.getIslandDataTable().loadIslandData(islandId, islandData);
+        return databaseManager.getIslandDataTable().loadIslandData(islandId, islandData).thenRun(() -> {});
     }
 
     /**

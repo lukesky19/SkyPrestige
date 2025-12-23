@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * This class contains the data for an island.
  */
 public class IslandData implements Cloneable {
+    private @NotNull String islandId;
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
     private final @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
@@ -36,23 +37,41 @@ public class IslandData implements Cloneable {
     private boolean prestigeExempt = false;
 
     /**
-     * Constructor
+     * Use {@link #IslandData(String)} or {@link #IslandData(String, int, double, boolean, boolean)} instead.
+     * @throws RuntimeException if used.
      */
-    public IslandData() {}
+    @Deprecated(since = "1.1.0.0")
+    public IslandData() {
+        throw new RuntimeException("The default constructor cannot be used.");
+    }
 
     /**
      * Constructor
+     * @param islandId The unique id of the island.
+     */
+    public IslandData(@NotNull String islandId) {
+        this.islandId = islandId;
+    }
+
+    /**
+     * Constructor
+     * @param islandId The unique id of the island.
      * @param prestigeLevel The island's prestige level.
      * @param prestigePoints The island's prestige points
      * @param leaderboardExempt Whether the island is exempt from leaderboard reporting or not.
+     * @param prestigeExempt Whether the island is exempt from prestige or not.
      */
     public IslandData(
+            @NotNull String islandId,
             int prestigeLevel,
             double prestigePoints,
-            boolean leaderboardExempt) {
+            boolean leaderboardExempt,
+            boolean prestigeExempt) {
+        this.islandId = islandId;
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
         this.leaderboardExempt = leaderboardExempt;
+        this.prestigeExempt = prestigeExempt;
     }
 
     /**
@@ -65,6 +84,40 @@ public class IslandData implements Cloneable {
         } catch (CloneNotSupportedException cloneNotSupportedException) {
             throw new RuntimeException(cloneNotSupportedException);
         }
+    }
+
+    /**
+     * Checks if the contents of the two IslandData objects are equal.
+     * Will return false for any non-IslandData object.
+     * @param compareObject The {@link Object} to compare.
+     * @return true if equal, otherwise false.
+     */
+    @Override
+    public boolean equals(@NotNull Object compareObject) {
+        if(!(compareObject instanceof IslandData compareIslandData)) return false;
+
+        return this.getIslandId().equals(compareIslandData.getIslandId())
+                && this.getPrestigeLevel() == compareIslandData.getPrestigeLevel()
+                && this.getPrestigePoints() == compareIslandData.getPrestigePoints()
+                && this.getVaultItems().equals(compareIslandData.getVaultItems())
+                && this.isLeaderboardExempt() == compareIslandData.isLeaderboardExempt()
+                && this.isPrestigeExempt() == compareIslandData.isPrestigeExempt();
+    }
+
+    /**
+     * Get the island id that this IslandData belongs to.
+     * @return The island id.
+     */
+    public @NotNull String getIslandId() {
+        return islandId;
+    }
+
+    /**
+     * Set the island id that this IslandData belongs to.
+     * @param islandId The island id.
+     */
+    public void setIslandId(@NotNull String islandId) {
+        this.islandId = islandId;
     }
 
     /**

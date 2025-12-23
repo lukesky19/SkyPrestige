@@ -138,7 +138,7 @@ public class BentoBoxHook implements Hook {
      * @return An {@link Optional} containing an {@link Island}.
      */
     public @NotNull Optional<Island> getIslandById(@NotNull String islandId) {
-        return islandsManager.getIslandById(islandId);
+        return islandsManager.getIslandById(islandId, false);
     }
 
     /**

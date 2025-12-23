@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Creates a table to store the location and island the player logged out on.
  */
-public class PlayerLogoutLocationsTables {
+public class PlayerLogoutLocationsTable {
     private final @NotNull QueueManager queueManager;
     private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_player_logout_locations";
@@ -46,7 +46,7 @@ public class PlayerLogoutLocationsTables {
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
      * @param versionsTable A {@link VersionsTable} instance.
      */
-    public PlayerLogoutLocationsTables(
+    public PlayerLogoutLocationsTable(
             @NotNull QueueManager queueManager,
             @NotNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
@@ -68,15 +68,17 @@ public class PlayerLogoutLocationsTables {
                 "FOREIGN KEY (player_id) REFERENCES skyprestige_player_ids(player_id) ON UPDATE CASCADE ON DELETE CASCADE)";
         String playerIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_logout_locations_player_id ON " + tableName + "(player_id)";
 
-        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql))
+                .thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**
      * Store the logout location for a player.
      * @param uuid The {@link UUID} of the player.
      * @param location The {@link Location} the player logged out at.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void setPlayerLogoutLocation(@NotNull UUID uuid, @NotNull Location location) {
+    public @NotNull CompletableFuture<Void> setPlayerLogoutLocation(@NotNull UUID uuid, @NotNull Location location) {
         String updateSql = "INSERT INTO " + tableName + " (" +
                 "player_id, " +
                 "world, " +
@@ -112,7 +114,7 @@ public class PlayerLogoutLocationsTables {
 
         parameterList.add(lastUpdatedParameter);
 
-        queueManager.queueWriteTransaction(updateSql, parameterList);
+        return queueManager.queueWriteTransaction(updateSql, parameterList).thenRun(() -> {});
     }
 
     /**

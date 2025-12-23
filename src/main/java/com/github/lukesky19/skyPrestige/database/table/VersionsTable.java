@@ -84,7 +84,7 @@ public class VersionsTable {
      * @param tableId The table id.
      * @return A {@link CompletableFuture} of type {@link Integer} containing the version number. -1 is returned for no version stored.
      */
-    public @NotNull CompletableFuture<Integer> getTableVersion(@NotNull String tableId) {
+    public @NotNull CompletableFuture<Integer> getVersion(@NotNull String tableId) {
         String readSql = "SELECT version FROM " + tableName + " WHERE table_id = ?";
 
         StringParameter tableIdParameter = new StringParameter(tableId);

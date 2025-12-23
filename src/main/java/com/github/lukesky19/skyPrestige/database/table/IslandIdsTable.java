@@ -19,9 +19,7 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -33,22 +31,18 @@ import java.util.concurrent.CompletableFuture;
  * This class creates a table to store all island ids.
  */
 public class IslandIdsTable {
-    private final @NotNull ComponentLogger logger;
     private final @NotNull QueueManager queueManager;
     private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyprestige_island_ids";
 
     /**
      * Constructor
-     * @param logger The plugin's {@link ComponentLogger}.
      * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public IslandIdsTable(
-            @NotNull ComponentLogger logger,
             @NotNull QueueManager queueManager,
             @NotNull VersionsTable versionsTable) {
-        this.logger = logger;
         this.queueManager = queueManager;
         this.versionsTable = versionsTable;
     }
@@ -62,19 +56,21 @@ public class IslandIdsTable {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (island_id TEXT PRIMARY KEY NOT NULL UNIQUE);";
         String indexCreationSql = "CREATE INDEX IF NOT EXISTS idx_island_ids_island_id ON " + tableName + "(island_id);";
 
-        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, indexCreationSql))
+                .thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**
      * Stores the unique id of an island inside the island ids table.
      * @param islandId The unique id of an island.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertIslandId(@NotNull String islandId) {
+    public @NotNull CompletableFuture<Void> insertIslandId(@NotNull String islandId) {
         String insertIslandIdSql = "INSERT INTO " + tableName + " (island_id) VALUES (?) ON CONFLICT (island_id) DO NOTHING";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
-        queueManager.queueWriteTransaction(insertIslandIdSql, List.of(islandIdParameter));
+        return queueManager.queueWriteTransaction(insertIslandIdSql, List.of(islandIdParameter)).thenRun(() -> {});
     }
 
     /**
@@ -89,25 +85,7 @@ public class IslandIdsTable {
         CaseSensitiveStringParameter oldIslandIdParameter = new CaseSensitiveStringParameter(oldIslandId);
         CaseSensitiveStringParameter newIslandIdParameter = new CaseSensitiveStringParameter(newIslandId);
 
-        return queueManager.queueWriteTransaction(updateSql, List.of(newIslandIdParameter, oldIslandIdParameter))
-                .thenAccept(integer -> {})
-                .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIslandId + " to new island id " + newIslandId + " Error: " + ex.getMessage()));
-                    return null;
-                });
-    }
-
-    /**
-     * Delete an island id from the table.
-     * Deletion wil cascade to other tables.
-     * @param islandId The island id to delete.
-     */
-    public void deleteIslandId(@NotNull String islandId) {
-        String deletionSql = "DELETE FROM " + tableName + " WHERE island_id = ?";
-
-        CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
-
-        queueManager.queueWriteTransaction(deletionSql, List.of(islandIdParameter));
+        return queueManager.queueWriteTransaction(updateSql, List.of(newIslandIdParameter, oldIslandIdParameter)).thenRun(() -> {});
     }
 
     /**

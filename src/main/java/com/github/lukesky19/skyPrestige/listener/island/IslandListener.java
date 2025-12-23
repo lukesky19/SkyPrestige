@@ -79,7 +79,7 @@ public class IslandListener implements Listener {
 
         databaseManager.getIslandIdsTable().insertIslandId(island.getUniqueId());
 
-        IslandData islandData = new IslandData();
+        IslandData islandData = new IslandData(islandId);
         islandDataManager.setData(islandId, islandData);
     }
 
