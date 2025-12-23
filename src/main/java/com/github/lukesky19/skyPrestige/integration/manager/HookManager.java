@@ -43,7 +43,7 @@ public class HookManager {
         EconomyHook economyHook = new EconomyHook(plugin);
         registerHook(EconomyHook.class, economyHook);
 
-        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook(plugin);
+        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook(plugin.getComponentLogger());
         registerHook(MagicCobblestoneGeneratorHook.class, magicCobblestoneGeneratorHook);
 
         RoseStackerHook roseStackerHook = new RoseStackerHook(plugin);
