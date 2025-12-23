@@ -325,8 +325,6 @@ public class MultiplierManager {
             long calculatedDuration = multiplierEventSettings.durationSeconds() - secondsPassed;
 
             if(calculatedDuration > 0) {
-                System.out.println(eventDuration);
-
                 eventDuration = calculatedDuration;
                 eventMultiplier = multiplierEventSettings.multiplier() - 1;
             }

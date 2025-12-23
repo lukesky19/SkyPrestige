@@ -71,8 +71,6 @@ public class OptInCommand {
         return Commands.literal("opt-in")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.opt-in"))
                 .executes(ctx -> {
-                    System.out.println("Opt-in");
-
                     @NotNull Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
                     if(!(sender instanceof Player player)) return 0;

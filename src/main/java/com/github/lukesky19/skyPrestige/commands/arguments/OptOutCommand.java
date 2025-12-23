@@ -71,14 +71,10 @@ public class OptOutCommand {
         return Commands.literal("opt-out")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.opt-out"))
                 .executes(ctx -> {
-                    System.out.println("Opt-out");
-
                     @NotNull Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
                     if(!(sender instanceof Player player)) return 0;
                     @NotNull BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-
-                    System.out.println("a");
 
                     @NotNull Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
                     if(optionalIsland.isEmpty()) {
@@ -87,22 +83,16 @@ public class OptOutCommand {
                     }
                     Island island = optionalIsland.get();
 
-                    System.out.println("b");
-
                     @Nullable IslandData islandData = islandDataManager.getData(optionalIsland.get().getUniqueId());
                     if(islandData == null) {
                         sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         return 0;
                     }
 
-                    System.out.println("c");
-
                     if(islandData.isPrestigeExempt()) {
                         sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandAlreadyOptedOut()));
                         return 0;
                     }
-
-                    System.out.println("Command pass");
 
                     prestigeExemptionManager.toggleIslandPrestigeStatus(player, island, islandData);
 

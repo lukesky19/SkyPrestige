@@ -112,15 +112,11 @@ public class PrestigeExemptionManager {
             return;
         }
 
-        System.out.println("1");
-
         // Check if the player attempting to toggle the island's prestige status is not the owner or an island member.
         if((island.getOwner() == null || !island.getOwner().equals(playerId)) && !island.getMemberSet().contains(playerId)) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeStatusPlayerNotMemberOrOwner()));
             return;
         }
-
-        System.out.println("2");
 
         // Open the blueprint GUI
         openBlueprintGUI(
