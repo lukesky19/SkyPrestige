@@ -79,7 +79,7 @@ public class OfflinePrestigeTable {
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_island_id ON " + tableName + "(island_id)";
 
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
-                .thenCompose(v -> versionsTable.getTableVersion(tableName).thenCompose(version -> {
+                .thenCompose(v -> versionsTable.getVersion(tableName).thenCompose(version -> {
                     if(version > 1) {
                         return versionsTable.updateVersion(tableName, 2);
                     }
@@ -97,34 +97,38 @@ public class OfflinePrestigeTable {
      * @param playerId The {@link UUID} of the player.
      * @param islandId The new island's unique id.
      * @param prestigeLevel The prestige level that was completed.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertOfflinePrestige(@NotNull UUID playerId, @NotNull String islandId, int prestigeLevel) {
+    public @NotNull CompletableFuture<Void> insertOfflinePrestige(@NotNull UUID playerId, @NotNull String islandId, int prestigeLevel) {
         String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, level) VALUES (?, ?, ?)";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
         IntegerParameter levelParameter = new IntegerParameter(prestigeLevel);
 
-        queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, levelParameter))
+        return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, levelParameter))
+                .thenRun(() -> {})
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Failed to insert offline prestige: " + ex.getMessage()));
-                    return 0;
+                    return null;
                 });
     }
 
     /**
      * Removes any offline prestige from the table for the given player id.
      * @param playerId The {@link UUID} of the player.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void removeOfflinePrestige(@NotNull UUID playerId) {
+    public @NotNull CompletableFuture<Void> removeOfflinePrestige(@NotNull UUID playerId) {
         String deleteSql = "DELETE FROM " + tableName + " WHERE player_id = ?";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 
-        queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
+        return queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
+                .thenRun(() -> {})
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Failed to remove offline prestige: " + ex.getMessage()));
-                    return 0;
+                    return null;
                 });
     }
 
@@ -163,53 +167,64 @@ public class OfflinePrestigeTable {
      * Migrate the table from version 1 to version 2.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
+    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
     public @NotNull CompletableFuture<Void> migrate() {
-        return versionsTable.getTableVersion(tableName).thenCompose(version -> {
-            if(version <= 1) {
-                List<OfflinePrestigeData> offlinePrestigeDataList = new ArrayList<>();
-                String readSql = "SELECT player_id, island_id, level, prestige_time FROM " + tableName;
+        return versionsTable.getVersion(tableName).thenCompose(version -> {
+           if(version <= 1) {
+               return getData().thenCompose(dataList -> {
+                   String deleteSql = "DROP TABLE " + tableName;
 
-                return queueManager.queueReadTransaction(readSql, resultSet -> {
-                    try {
-                        while(resultSet.next()) {
-                            offlinePrestigeDataList.add(new OfflinePrestigeData(
-                                    resultSet.getString("player_id"),
-                                    resultSet.getString("island_id"),
-                                    resultSet.getInt("level"),
-                                    resultSet.getTimestamp("prestige_time")));
-                        }
-                    } catch(SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                   return queueManager.queueWriteTransaction(deleteSql).thenCompose(v1 -> {
+                       return createTable().thenCompose(v2 -> {
+                           String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, level, prestige_time) VALUES (?, ?, ?, ?)";
 
-                    return null;
-                }).thenCompose(o1 -> {
-                    String deleteSql = "DROP TABLE " + tableName;
+                           if(!dataList.isEmpty()) {
+                               List<List<Parameter<?>>> listOfParameterLists = new ArrayList<>();
 
-                    return queueManager.queueWriteTransaction(deleteSql).thenCompose(v2 -> createTable()
-                            .thenCompose(v3 -> {
-                                String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, level) VALUES (?, ?, ?)";
+                               dataList.forEach(offlinePrestigeData -> {
+                                   listOfParameterLists.add(List.of(
+                                           new StringParameter(offlinePrestigeData.playerId),
+                                           new CaseSensitiveStringParameter(offlinePrestigeData.islandId),
+                                           new IntegerParameter(offlinePrestigeData.level),
+                                           new TimestampParameter(offlinePrestigeData.prestigeTime)
+                                   ));
+                               });
 
-                                if(!offlinePrestigeDataList.isEmpty()) {
-                                    List<List<Parameter<?>>> listOfParameterLists = new ArrayList<>();
+                               return queueManager.queueBulkWriteTransaction(insertSql, listOfParameterLists)
+                                       .thenCompose(list -> versionsTable.updateVersion(tableName, 2));
+                           } else {
+                               return versionsTable.updateVersion(tableName, 2);
+                           }
+                       });
+                   });
+               });
+           } else {
+               return versionsTable.updateVersion(tableName, 2);
+           }
+        });
+    }
 
-                                    offlinePrestigeDataList.forEach(offlinePrestigeData ->
-                                            listOfParameterLists.add(List.of(
-                                                    new StringParameter(offlinePrestigeData.playerId),
-                                                    new StringParameter(offlinePrestigeData.islandId),
-                                                    new IntegerParameter(offlinePrestigeData.level),
-                                                    new TimestampParameter(offlinePrestigeData.prestigeTime)
-                                            )));
+    /**
+     * Get all existing data in the table.
+     * @return A {@link CompletableFuture} containing a {@link List} of {@link OfflinePrestigeTable}.
+     */
+    protected @NotNull CompletableFuture<List<OfflinePrestigeData>> getData() {
+        List<OfflinePrestigeData> dataList = new ArrayList<>();
+        String readSql = "SELECT player_id, island_id, level, prestige_time FROM " + tableName;
 
-                                    return queueManager.queueBulkWriteTransaction(insertSql, listOfParameterLists)
-                                            .thenCompose(list -> versionsTable.updateVersion(tableName, 2));
-                                } else {
-                                    return versionsTable.updateVersion(tableName, 2);
-                                }
-                    }));
-                });
-            } else {
-                return versionsTable.updateVersion(tableName, 2);
+        return queueManager.queueReadTransaction(readSql, resultSet -> {
+            try {
+                while(resultSet.next()) {
+                    dataList.add(new OfflinePrestigeData(
+                            resultSet.getString("player_id"),
+                            resultSet.getString("island_id"),
+                            resultSet.getInt("level"),
+                            resultSet.getTimestamp("prestige_time")));
+                }
+
+                return dataList;
+            } catch(SQLException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -221,7 +236,7 @@ public class OfflinePrestigeTable {
      * @param level The prestige level achieved.
      * @param prestigeTime The time the prestige occurred.
      */
-    private record OfflinePrestigeData(
+    protected record OfflinePrestigeData(
             @NotNull String playerId,
             @NotNull String islandId,
             @NotNull Integer level,

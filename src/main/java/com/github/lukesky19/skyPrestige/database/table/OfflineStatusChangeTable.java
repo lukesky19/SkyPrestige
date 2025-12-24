@@ -59,15 +59,9 @@ public class OfflineStatusChangeTable {
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_island_id ON " + tableName + "(island_id)";
 
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
-                .thenCompose(v -> versionsTable.getTableVersion(tableName).thenCompose(version -> {
-                    if(version > 1) {
-                        return versionsTable.updateVersion(tableName, 2);
-                    }
-
-                    return CompletableFuture.completedFuture(null);
-                }))
+                .thenCompose(v -> versionsTable.updateVersion(tableName, 2))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Offline Prestige Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtil.deserialize("Offline Status Change Table creation failed: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -77,34 +71,38 @@ public class OfflineStatusChangeTable {
      * @param playerId The {@link UUID} of the player.
      * @param islandId The new island's unique id.
      * @param status 1 for opt in, 0 for opt out
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertOfflineStatusChange(@NotNull UUID playerId, @NotNull String islandId, int status) {
+    public @NotNull CompletableFuture<Void> insertOfflineStatusChange(@NotNull UUID playerId, @NotNull String islandId, int status) {
         String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, status) VALUES (?, ?, ?)";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
         IntegerParameter statusParameter = new IntegerParameter(status);
 
-        queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, statusParameter))
+        return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, statusParameter))
+                .thenRun(() -> {})
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Failed to insert or update offline prestige status change: " + ex.getMessage()));
-                    return 0;
+                    return null;
                 });
     }
 
     /**
      * Removes any offline prestige status changes from the table for the given player id.
      * @param playerId The {@link UUID} of the player.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void removeOfflineStatusChanges(@NotNull UUID playerId) {
+    public @NotNull CompletableFuture<Void> removeOfflineStatusChange(@NotNull UUID playerId) {
         String deleteSql = "DELETE FROM " + tableName + " WHERE player_id = ?";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 
-        queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
+        return queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
+                .thenRun(() -> {})
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Failed to remove offline opt out: " + ex.getMessage()));
-                    return 0;
+                    return null;
                 });
     }
 

@@ -62,13 +62,13 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
 
         server.addSimpleWorld("world");
 
-        // Setup versions table
+        // Setup table classes
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
-
-        // Setup PlayerIdsTable
         playerIdsTable = new PlayerIdsTable(liveQueueManager, versionsTable);
-        playerIdsTable.createTable();
+
+        // Create tables
+        versionsTable.createTable()
+                .thenCompose(v1 -> playerIdsTable.createTable()).join();
 
         // Setup classes for tests
         livePlayerLogoutLocationsTables = new PlayerLogoutLocationsTable(liveQueueManager, versionsTable);

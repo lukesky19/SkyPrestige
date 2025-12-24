@@ -50,7 +50,7 @@ public class PlayerIdsTableTest extends AbstractTableTest {
 
         // Setup versions table
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
+        versionsTable.createTable().join();
 
         // Setup class being tested
         livePlayerIdsTable = new PlayerIdsTable(liveQueueManager, versionsTable);

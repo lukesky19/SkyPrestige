@@ -56,7 +56,7 @@ public class IslandIdTableTest extends AbstractTableTest {
 
         // Setup versions table
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
+        versionsTable.createTable().join();
 
         // Setup classes being tested
         liveIslandIdsTable = new IslandIdsTable(liveQueueManager, versionsTable);

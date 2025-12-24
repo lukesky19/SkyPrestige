@@ -290,7 +290,7 @@ public class PrestigeExemptionManager {
                     rewardsProcessor.processPrestigeRewardsOnLogin(player, statusChangeSettings.rewardConfig(), -1);
                 });
 
-                databaseManager.getOfflineStatusChangeTable().removeOfflineStatusChanges(playerId);
+                databaseManager.getOfflineStatusChangeTable().removeOfflineStatusChange(playerId);
             }, 1L);
         });
     }

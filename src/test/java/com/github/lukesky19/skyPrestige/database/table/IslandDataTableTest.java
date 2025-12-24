@@ -85,13 +85,13 @@ public class IslandDataTableTest extends AbstractTableTest {
 
         when(skyPrestige.getComponentLogger()).thenReturn(logger);
 
-        // Setup versions table
+        // Setup table classes
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
-
-        // Setup IslandIdsTable
         islandIdsTable = new IslandIdsTable(liveQueueManager, versionsTable);
-        islandIdsTable.createTable();
+
+        // Create tables
+        versionsTable.createTable()
+                .thenCompose(v1 -> islandIdsTable.createTable()).join();
 
         // Setup classes for tests
         liveIslandDataTable = new IslandDataTable(skyPrestige, liveQueueManager, hookManager, versionsTable);

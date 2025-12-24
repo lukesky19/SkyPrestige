@@ -52,7 +52,7 @@ public class VersionsTableTest extends AbstractTableTest {
 
         // Setup versions table
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
+        versionsTable.createTable().join();
 
         // Setup test class
         liveVersionsTable = new VersionsTable(liveQueueManager);

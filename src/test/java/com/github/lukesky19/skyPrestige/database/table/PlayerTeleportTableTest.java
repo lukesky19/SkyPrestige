@@ -58,17 +58,15 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
 
         server.addSimpleWorld("world");
 
-        // Setup versions table
+        // Setup table classes
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
-        versionsTable.createTable();
-
-        // Setup IslandIdsTable
         islandIdsTable = new IslandIdsTable(liveQueueManager, versionsTable);
-        islandIdsTable.createTable();
-
-        // Setup PlayerIdsTable
         playerIdsTable = new PlayerIdsTable(liveQueueManager, versionsTable);
-        playerIdsTable.createTable();
+
+        // Create tables
+        versionsTable.createTable()
+                .thenCompose(v1 -> islandIdsTable.createTable()
+                        .thenCompose(v2 -> playerIdsTable.createTable())).join();
 
         // Setup classes for tests
         livePlayerTeleportTable = new PlayerTeleportTable(liveQueueManager, versionsTable);
@@ -125,7 +123,7 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
                     });
                 });
             });
-        });
+        }).join();
     }
 
     /**
@@ -154,7 +152,7 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
                     });
                 });
             });
-        });
+        }).join();
     }
 
     /**
