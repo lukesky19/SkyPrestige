@@ -190,6 +190,23 @@ public class PrestigeManager {
             return;
         }
 
+        // Get online island member's players
+        List<Player> onlineIslandMembers = island.getMemberSet().stream()
+                .map(plugin.getServer()::getPlayer)
+                .filter(Objects::nonNull)
+                .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
+                .toList();
+        // Get offline island member's unique ids
+        List<UUID> offlineIslandMembers = island.getMemberSet()
+                .stream()
+                .map(memberId -> player.getServer().getOfflinePlayer(memberId))
+                .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
+                .map(OfflinePlayer::getUniqueId)
+                .toList();
+
+        // Process early rewards (will be undone if cancelled)
+        rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembers, prestigeConfig.rewardConfig());
+
         // Open the blueprint GUI
         openBlueprintGUI(
                 locale,
@@ -234,6 +251,7 @@ public class PrestigeManager {
                 guiManager,
                 identifier,
                 hookManager,
+                rewardsProcessor,
                 islandResetData,
                 data -> {
                     if(data.getBlueprint() == null
@@ -329,16 +347,17 @@ public class PrestigeManager {
                 .filter(Objects::nonNull)
                 .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
                 .toList();
-        // Get offline island member's players
-        List<OfflinePlayer> offlineIslandMembers = newIsland.getMemberSet()
+        // Get offline island member's unique ids
+        List<UUID> offlineIslandMembers = newIsland.getMemberSet()
                 .stream()
                 .map(memberId -> player.getServer().getOfflinePlayer(memberId))
                 .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
+                .map(OfflinePlayer::getUniqueId)
                 .toList();
 
         // Insert players that were offline on island prestige to give rewards later.
         OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
-        offlineIslandMembers.forEach(offlinePlayer -> offlinePrestigeTable.insertOfflinePrestige(offlinePlayer.getUniqueId(), newIsland.getUniqueId(), prestigeLevel));
+        offlineIslandMembers.forEach(offlineMemberId -> offlinePrestigeTable.insertOfflinePrestige(offlineMemberId, newIsland.getUniqueId(), prestigeLevel));
 
         // Process Player Settings
         playerSettingsProcessor.processPlayerSettings(
@@ -350,7 +369,7 @@ public class PrestigeManager {
                 prestigeConfig.prestigeSettings().giveStartingMoneyToAllIslandMembers());
 
         // Process prestige rewards
-        rewardsProcessor.processPrestigeRewards(player, newIsland, onlineIslandMembers, prestigeConfig.rewardConfig(), prestigeLevel);
+        rewardsProcessor.processPostRewards(player, newIsland, onlineIslandMembers, offlineIslandMembers, prestigeConfig.rewardConfig(), prestigeLevel);
     }
 
     /**
@@ -385,7 +404,7 @@ public class PrestigeManager {
                             prestigeSettings.startingMoney(),
                             prestigeSettings.giveStartingMoneyToAllIslandMembers());
 
-                    rewardsProcessor.processPrestigeRewardsOnLogin(player, rewardConfig, prestigeLevel);
+                    rewardsProcessor.processRewardsOnLogin(player, rewardConfig, prestigeLevel);
                 });
 
                 databaseManager.getOfflinePrestigeTable().removeOfflinePrestige(playerId);

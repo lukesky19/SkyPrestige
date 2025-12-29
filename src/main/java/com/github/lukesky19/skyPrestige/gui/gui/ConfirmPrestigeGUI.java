@@ -26,6 +26,7 @@ import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
+import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -38,6 +39,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -60,6 +62,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NotNull RewardsProcessor rewardsProcessor;
 
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
@@ -73,6 +76,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param rewardsProcessor A {@link RewardsProcessor} instance.
      * @param islandResetData The {@link IslandResetData}
      * @param consumer The consumer that will prestige the island once the player confirms it.
      */
@@ -82,6 +86,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
+            @NotNull RewardsProcessor rewardsProcessor,
             @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer) {
         super(plugin, guiManager, identifier, islandResetData.getPlayer());
@@ -89,6 +94,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
+        this.rewardsProcessor = rewardsProcessor;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
@@ -172,6 +178,17 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         return super.update();
     }
 
+    @Override
+    public void cancel() {
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+
+            guiManager.removeOpenGUI(identifier);
+
+            rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+        }, 1L);
+    }
+
     /**
      * Handles when items are dragged across the player's inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
@@ -253,7 +270,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(cancelConfig, inventoryClickEvent -> this.close());
+        createActionButton(cancelConfig, inventoryClickEvent -> this.cancel());
     }
 
     /**

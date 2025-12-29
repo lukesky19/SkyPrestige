@@ -27,7 +27,6 @@ import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkySellWandsHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +34,7 @@ import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class manages the processing of {@link PlayerSettingsInterface}.
@@ -60,7 +60,7 @@ public class PlayerSettingsProcessor {
      * @param playerSettings The {@link PlayerSettingsInterface} to process.
      * @param initiatingPlayer The player that initiated the processing of the player settings.
      * @param onlinePlayerList The list of online players to apply the settings to.
-     * @param offlinePlayerList The list of offline players to apply the settings to.
+     * @param offlinePlayerIds The list of offline player ids to apply the settings to.
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
@@ -68,14 +68,14 @@ public class PlayerSettingsProcessor {
             @NotNull PlayerSettingsInterface playerSettings,
             @NotNull Player initiatingPlayer,
             @NotNull List<Player> onlinePlayerList,
-            @NotNull List<OfflinePlayer> offlinePlayerList,
+            @NotNull List<UUID> offlinePlayerIds,
             double startingMoney,
             boolean giveToAll) {
         // Online Player Settings
         onlinePlayerList.forEach(player -> processPlayerSettings(playerSettings, player, initiatingPlayer.equals(player), startingMoney, giveToAll));
 
         // Offline Player Settings
-        offlinePlayerList.forEach(this::resetAuctionHouse);
+        offlinePlayerIds.forEach(this::resetAuctionHouse);
     }
 
     /**
@@ -124,7 +124,7 @@ public class PlayerSettingsProcessor {
         processEconomySettings(player, isPlayerInitiator, playerSettings.resetMoney(), startingMoney, giveToAll);
 
         if(playerSettings.resetAuctionItems()) {
-            resetAuctionHouse(player);
+            resetAuctionHouse(player.getUniqueId());
         }
 
         resetPlayTime(player, playerSettings.playTimeSettings());
@@ -211,14 +211,14 @@ public class PlayerSettingsProcessor {
     }
 
     /**
-     * Reset the auction house items for the player provided.
-     * @param player The {@link OfflinePlayer}.
+     * Reset the auction house items for the player id provided.
+     * @param playerId The {@link UUID}.
      */
-    private void resetAuctionHouse(@NotNull OfflinePlayer player) {
+    private void resetAuctionHouse(@NotNull UUID playerId) {
         PlayerAuctionsHook playerAuctionsHook = hookManager.getHook(PlayerAuctionsHook.class);
 
         if(playerAuctionsHook.isHooked()) {
-            playerAuctionsHook.clearPlayerAuctions(player.getUniqueId());
+            playerAuctionsHook.clearPlayerAuctions(playerId);
         }
     }
 

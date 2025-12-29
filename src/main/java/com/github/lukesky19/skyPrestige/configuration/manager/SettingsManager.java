@@ -94,6 +94,8 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
                                         new ArrayList<>(),
                                         new ArrayList<>(),
                                         new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
                                         new IslandRangeReward(
                                                 new ItemStackConfig(
                                                         null,
@@ -125,6 +127,8 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
                                         true),
                                 playerSettings,
                                 new RewardConfig(
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
                                         new ArrayList<>(),
                                         new ArrayList<>(),
                                         new ArrayList<>(),

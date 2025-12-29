@@ -173,16 +173,17 @@ public class PrestigeExemptionManager {
                 .filter(Objects::nonNull)
                 .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
                 .toList();
-        // Get offline island member's players
-        List<OfflinePlayer> offlineIslandMembers = newIsland.getMemberSet()
+        // Get offline island member's unique ids
+        List<UUID> offlineIslandMembers = newIsland.getMemberSet()
                 .stream()
                 .map(memberId -> player.getServer().getOfflinePlayer(memberId))
                 .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
+                .map(OfflinePlayer::getUniqueId)
                 .toList();
 
         // Insert players that were offline on prestige opt out to process player settings later
         OfflineStatusChangeTable offlineOptOutTable = databaseManager.getOfflineStatusChangeTable();
-        offlineIslandMembers.forEach(offlinePlayer -> offlineOptOutTable.insertOfflineStatusChange(offlinePlayer.getUniqueId(), newIsland.getUniqueId(), status));
+        offlineIslandMembers.forEach(offlineMemberId -> offlineOptOutTable.insertOfflineStatusChange(offlineMemberId, newIsland.getUniqueId(), status));
 
         // Process Player Settings
         playerSettingsProcessor.processPlayerSettings(
@@ -194,7 +195,7 @@ public class PrestigeExemptionManager {
                 prestigeOptInOutSettings.giveStartingMoneyToAllIslandMembers());
 
         // Process prestige rewards
-        rewardsProcessor.processPrestigeRewards(player, newIsland, onlineIslandMembers, prestigeOptInOutSettings.rewardConfig(), -1);
+        rewardsProcessor.processPostRewards(player, newIsland, onlineIslandMembers, offlineIslandMembers, prestigeOptInOutSettings.rewardConfig(), -1);
 
         if(optType.equals(OptType.OPT_OUT)) {
             // Clear any offline prestiges queued
@@ -230,6 +231,7 @@ public class PrestigeExemptionManager {
                 guiManager,
                 identifier,
                 hookManager,
+                rewardsProcessor,
                 islandResetData,
                 data -> {
                     if(data.getBlueprint() == null) return;
@@ -287,7 +289,7 @@ public class PrestigeExemptionManager {
                             statusChangeSettings.startingMoney(),
                             statusChangeSettings.giveStartingMoneyToAllIslandMembers());
 
-                    rewardsProcessor.processPrestigeRewardsOnLogin(player, statusChangeSettings.rewardConfig(), -1);
+                    rewardsProcessor.processRewardsOnLogin(player, statusChangeSettings.rewardConfig(), -1);
                 });
 
                 databaseManager.getOfflineStatusChangeTable().removeOfflineStatusChange(playerId);

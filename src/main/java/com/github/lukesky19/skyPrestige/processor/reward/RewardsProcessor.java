@@ -28,6 +28,7 @@ import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -40,14 +41,17 @@ import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
- * This class handles the processing of prestige rewards.
+ * This class handles the processing of rewards.
  */
 public class RewardsProcessor {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private final @NotNull HookManager hookManager;
+
+    private final @NotNull LuckPermsRewardsProcessor luckPermsRewardsProcessor;
 
     /**
      * Constructor
@@ -58,20 +62,39 @@ public class RewardsProcessor {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.hookManager = hookManager;
+
+        luckPermsRewardsProcessor = new LuckPermsRewardsProcessor(plugin, logger, hookManager);
     }
 
     /**
-     * Process the {@link RewardConfig} for the prestige level.
+     * Process rewards to be given before the island is reset.
+     * @param initiatingPlayer The {@link Player} that initiated the rewards.
+     * @param onlineIslandMembers The {@link List} of {@link Player}s that are online and on the island's team.
+     * @param offlineIslandMembers The {@link List} of {@link UUID}s that are offline and on the island's team.
+     * @param rewardConfig The {@link RewardConfig} to process.
+     */
+    public void processEarlyRewards(
+            @NotNull Player initiatingPlayer,
+            @NotNull List<Player> onlineIslandMembers,
+            @NotNull List<UUID> offlineIslandMembers,
+            @NotNull RewardConfig rewardConfig) {
+        luckPermsRewardsProcessor.processEarlyRewards(initiatingPlayer, onlineIslandMembers, offlineIslandMembers, rewardConfig);
+    }
+
+    /**
+     * Process rewards to be given after the island is reset.
      * @param initiatingPlayer The {@link Player} that initiated the rewards.
      * @param island The new {@link Island}.
-     * @param onlineIslandMembers The {@link List} of {@link Player}s that are online and on the player's team.
+     * @param onlineIslandMembers The {@link List} of {@link Player}s that are online and on the island's team.
+     * @param offlineIslandMembers The {@link List} of {@link UUID}s that are offline and on the island's team.
      * @param rewardConfig The {@link RewardConfig} to process.
      * @param prestigeLevel The prestige level being processed. Or -1 for non-prestige.
      */
-    public void processPrestigeRewards(
+    public void processPostRewards(
             @NotNull Player initiatingPlayer,
             @NotNull Island island,
             @NotNull List<Player> onlineIslandMembers,
+            @NotNull List<UUID> offlineIslandMembers,
             @NotNull RewardConfig rewardConfig,
             int prestigeLevel) {
         Server server = plugin.getServer();
@@ -123,6 +146,9 @@ public class RewardsProcessor {
             }
         });
 
+        // Permission/Group Rewards
+        luckPermsRewardsProcessor.processPostRewards(initiatingPlayer, onlineIslandMembers, offlineIslandMembers, rewardConfig);
+
         // Money Rewards
         EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
         if(economyHook.isHooked()) {
@@ -156,9 +182,9 @@ public class RewardsProcessor {
      * This is meant for use when the player's island was prestiged while they were offline.
      * @param player The {@link Player} to give rewards to.
      * @param rewardConfig The {@link RewardConfig} to process.
-     * @param prestigeLevel The prestige level the rewards are being processed for.
+     * @param prestigeLevel The prestige level the rewards are being processed for. Or -1 if not a prestige.
      */
-    public void processPrestigeRewardsOnLogin(
+    public void processRewardsOnLogin(
             @NotNull Player player,
             @NotNull RewardConfig rewardConfig,
             int prestigeLevel) {
@@ -177,7 +203,7 @@ public class RewardsProcessor {
                             PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
                         } else {
                             if(prestigeLevel == -1) {
-                                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige opt in/out due to a configuration error. Contact your server's system administrator.</red>"));
                                 logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
                             } else {
                                 player.sendMessage(AdventureUtil.deserialize("<red>Failed to give an ItemStack reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
@@ -209,12 +235,20 @@ public class RewardsProcessor {
                     });
         } else {
             if(prestigeLevel == -1) {
-                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige opt out due to a configuration error. Contact your server's system administrator.</red>"));
+                player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige opt in/out due to a configuration error. Contact your server's system administrator.</red>"));
                 logger.warn(AdventureUtil.deserialize("Unable to process an ItemStack reward due to an invalid ItemStack on prestige opt out."));
             } else {
                 player.sendMessage(AdventureUtil.deserialize("<red>Failed to give a money reward for prestige level " + prestigeLevel + " due to a configuration error. Contact your server's system administrator.</red>"));
                 logger.warn(AdventureUtil.deserialize("Unable to give money rewards due to no economy hooked into."));
             }
         }
+    }
+
+    /**
+     * Revert any early rewards given.
+     * @param uniqueIds The {@link ImmutableSet} of {@link UUID}s to remove early rewards from.
+     */
+    public void revertEarlyRewards(@NotNull ImmutableSet<UUID> uniqueIds) {
+        luckPermsRewardsProcessor.revertEarlyRewards(uniqueIds);
     }
 }

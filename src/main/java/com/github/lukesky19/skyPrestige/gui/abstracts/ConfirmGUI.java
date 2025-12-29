@@ -49,4 +49,9 @@ public abstract class ConfirmGUI extends ChestGUI<IslandIdUUIDKey> {
      * @return true if successful, otherwise false.
      */
     public abstract boolean create();
+
+    /**
+     * Cancel the confirmation process.
+     */
+    public abstract void cancel();
 }

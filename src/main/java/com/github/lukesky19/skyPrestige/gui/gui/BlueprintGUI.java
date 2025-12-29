@@ -28,6 +28,7 @@ import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -42,6 +43,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -64,6 +66,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull HookManager hookManager;
+    private final @NotNull RewardsProcessor rewardsProcessor;
 
     // Island Reset Data
     private final @NotNull IslandResetData islandResetData;
@@ -80,7 +83,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Constructor
-     *
      * @param plugin A {@link JavaPlugin} instance.
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
@@ -88,6 +90,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param guiManager An {@link GUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param hookManager A {@link HashMapDataManager} instance.
+     * @param rewardsProcessor A {@link RewardsProcessor} instance.
      * @param islandResetData An {@link IslandResetData} instance.
      * @param consumer The consumer that will prestige the island once the player confirms it.
      * @param blueprintMode The {@link BlueprintMode}.
@@ -100,6 +103,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull HookManager hookManager,
+            @NotNull RewardsProcessor rewardsProcessor,
             @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer,
             @NotNull BlueprintMode blueprintMode) {
@@ -110,6 +114,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
         this.guiConfigManager = guiConfigManager;
         this.settingsManager = settingsManager;
         this.hookManager = hookManager;
+        this.rewardsProcessor = rewardsProcessor;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
@@ -233,14 +238,33 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
         return this.update();
     }
 
+    @Override
+    public void close() {
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+
+            guiManager.removeOpenGUI(identifier);
+
+            // Remove early rewards given
+            rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+        }, 1L);
+    }
+
+    @Override
+    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+        super.handleClose(inventoryCloseEvent);
+
+        // Remove early rewards given
+        rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+    }
+
     /**
      * Handles when items are dragged across the player's inventory. This method does nothing.
      *
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {
-    }
+    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
@@ -322,11 +346,11 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
                 this.close();
 
                 @NotNull ConfirmGUI confirmGUI = switch(blueprintMode) {
-                    case PRESTIGE -> new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, islandResetData, consumer);
+                    case PRESTIGE -> new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, rewardsProcessor, islandResetData, consumer);
 
-                    case OPT_IN -> new ConfirmOptInGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, islandResetData, consumer);
+                    case OPT_IN -> new ConfirmOptInGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, rewardsProcessor, islandResetData, consumer);
 
-                    case OPT_OUT -> new ConfirmOptOutGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, islandResetData, consumer);
+                    case OPT_OUT -> new ConfirmOptOutGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, rewardsProcessor, islandResetData, consumer);
                 };
 
                 boolean creationResult = confirmGUI.create();

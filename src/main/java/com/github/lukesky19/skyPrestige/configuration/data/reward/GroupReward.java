@@ -17,25 +17,25 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.reward;
 
+import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * The rewards to give when the island is reset is reached.
- * @param itemRewards The {@link List} of {@link ItemReward}s.
- * @param commandRewards The {@link List} of {@link CommandReward}s.
- * @param permissionRewards The {@link List} of {@link PermissionReward}s.
- * @param groupRewards The {@link List} of {@link GroupReward}s.
- * @param moneyRewards The {@link List} of {@link MoneyReward}s.
- * @param islandRangeReward The {@link IslandRangeReward}.
+ * The configuration for a permission reward.
+ * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
+ * @param giveToAllIslandMembers Whether to run the commands for to all island members.
+ * @param beforeIslandReset Should the permission be given before the island is reset?
+ * @param removeGroup Should the group be removed?
+ * @param groupName The group name.
  */
 @ConfigSerializable
-public record RewardConfig(
-        @NotNull List<ItemReward> itemRewards,
-        @NotNull List<CommandReward> commandRewards,
-        @NotNull List<PermissionReward> permissionRewards,
-        @NotNull List<GroupReward> groupRewards,
-        @NotNull List<MoneyReward> moneyRewards,
-        @NotNull IslandRangeReward islandRangeReward) {}
+public record GroupReward(
+        @NotNull ItemStackConfig displayItem,
+        boolean giveToAllIslandMembers,
+        boolean beforeIslandReset,
+        boolean removeGroup,
+        @Nullable String groupName) implements IReward {
+}
