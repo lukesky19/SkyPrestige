@@ -167,7 +167,16 @@ public class GUIConfigManager {
      * (Re-)load the GUI configurations.
      */
     public void reload() {
+        progressGUIConfig = null;
         blueprintGUIConfig = null;
+        confirmPrestigeGUIConfig = null;
+        rewardsGUIConfig = null;
+        exchangeGUIConfig = null;
+        vaultGUIConfig = null;
+        valuesGUIConfig = null;
+        infoGUIConfig = null;
+        confirmOptInGUIConfig = null;
+        confirmOptOutGUIConfig = null;
 
         saveDefaultConfig();
 
