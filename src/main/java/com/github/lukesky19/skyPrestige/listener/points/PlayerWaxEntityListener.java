@@ -21,11 +21,11 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.version.VersionUtil;
 import org.bukkit.entity.CopperGolem;
@@ -78,8 +78,10 @@ public class PlayerWaxEntityListener extends PrestigePointsListener<PlayerIntera
         return playerInteractEntityEvent -> {
             Player player = playerInteractEntityEvent.getPlayer();
             Entity entity = playerInteractEntityEvent.getRightClicked();
-            if(!(entity instanceof CopperGolem copperGolem)) return null;
-            if(copperGolem.getOxidizing().equals(CopperGolem.Oxidizing.waxed())) return null;
+            if(VersionUtil.getMajorVersion() > 21 || (VersionUtil.getMajorVersion() == 21 && VersionUtil.getMinorVersion() >= 9)) {
+                if(!(entity instanceof CopperGolem copperGolem)) return null;
+                if(copperGolem.getOxidizing().equals(CopperGolem.Oxidizing.waxed())) return null;
+            }
             EntityType entityType = entity.getType();
             ItemType itemTypeUsed = player.getInventory().getItemInMainHand().getType().asItemType();
             if(itemTypeUsed == null) return null;
