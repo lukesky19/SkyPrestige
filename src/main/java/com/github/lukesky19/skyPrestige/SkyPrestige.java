@@ -37,6 +37,7 @@ import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.placeholderapi.PlaceholderManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
@@ -120,13 +121,14 @@ public class SkyPrestige extends SkyPlugin {
         IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
         RewardsProcessor rewardsProcessor = new RewardsProcessor(this, hookManager);
-        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
+        PrestigePointsManager prestigePointsManager = new PrestigePointsManager(this.getComponentLogger(), prestigeConfigManager, prestigePointsConfigManager, islandDataManager);
+        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, prestigePointsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, localeManager, guiConfigManager, optInConfigManager, optOutConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
-        placeholderManager = new PlaceholderManager(this, islandDataManager, leaderboardManager, hookManager);
+        placeholderManager = new PlaceholderManager(this, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigePointsConfigManager, multiplierConfigManager, prestigeManager, prestigeExemptionManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, multiplierConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -144,7 +146,7 @@ public class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager, hookManager), this);
 
         // Prestige-related Listeners
-        pluginManager.registerEvents(new IslandListener(this, settingsManager, databaseManager, islandDataManager, islandSettingsProcessor), this);
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, prestigePointsManager, databaseManager, islandDataManager, islandSettingsProcessor), this);
 
         // Protection Orb Listener
         pluginManager.registerEvents(new ProtectionOrbListener(localeManager, protectionOrbManager), this);

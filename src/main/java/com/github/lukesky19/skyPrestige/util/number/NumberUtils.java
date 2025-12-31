@@ -38,14 +38,14 @@ public class NumberUtils {
     }
 
     /**
-     * Format the provided value to 4 decimal places.
+     * Format the provided value to 2 decimal places.
      * @param value The value to format.
-     * @return A {@link String} for the decimal formatted to 4 decimal places.
+     * @return A {@link String} for the decimal formatted to 2decimal places.
      */
     public static @NotNull String formatDecimal(double value) {
         value = round(value);
 
-        DecimalFormat decimalFormat = new DecimalFormat("#.####");
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return decimalFormat.format(value);
     }
 

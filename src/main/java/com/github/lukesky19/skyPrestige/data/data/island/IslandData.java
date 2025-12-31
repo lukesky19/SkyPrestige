@@ -20,6 +20,7 @@ package com.github.lukesky19.skyPrestige.data.data.island;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -172,6 +173,23 @@ public class IslandData implements Cloneable {
      */
     public double getPrestigePoints() {
         return prestigePoints;
+    }
+
+    /**
+     * Set the prestige points required for the island to prestige.
+     * @param requiredPrestigePoints The prestige points required for the island to prestige.
+     * @apiNote This method should not be used to set a custom amount required to prestige as this value is updated occasionally.
+     */
+    public void setRequiredPrestigePoints(@Nullable Double requiredPrestigePoints) {
+        this.requiredPrestigePoints = requiredPrestigePoints;
+    }
+
+    /**
+     * Get the prestige points required for the island to prestige.
+     * @return The prestige points required for the island to prestige. Returns null if no value has been cached yet.
+     */
+    public @Nullable Double getRequiredPrestigePoints() {
+        return requiredPrestigePoints;
     }
 
     /**

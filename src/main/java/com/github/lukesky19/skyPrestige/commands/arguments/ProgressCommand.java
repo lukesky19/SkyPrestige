@@ -22,13 +22,13 @@ import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConf
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.gui.gui.ProgressGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -53,7 +53,7 @@ public class ProgressCommand {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+    private final @NotNull PrestigePointsManager prestigePointsManager;
 
     private final @NotNull GUIManager guiManager;
     private final @NotNull IslandDataManager islandDataManager;
@@ -65,7 +65,7 @@ public class ProgressCommand {
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
-     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
@@ -75,7 +75,7 @@ public class ProgressCommand {
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull GUIManager guiManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager) {
@@ -84,7 +84,7 @@ public class ProgressCommand {
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.prestigeConfigManager = prestigeConfigManager;
-        this.prestigePointsConfigManager = prestigePointsConfigManager;
+        this.prestigePointsManager = prestigePointsManager;
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
@@ -130,7 +130,7 @@ public class ProgressCommand {
                     IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), uuid);
 
                     // Create the ProgressGUI
-                    ProgressGUI gui = new ProgressGUI(plugin, guiManager, identifier, player, localeManager, guiConfigManager, prestigePointsConfigManager, island, islandData, nextPrestigeLevelConfig);
+                    ProgressGUI gui = new ProgressGUI(plugin, guiManager, identifier, player, prestigePointsManager, guiConfigManager, island, islandData);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

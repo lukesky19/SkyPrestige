@@ -22,6 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -34,14 +35,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.api.events.island.IslandCreatedEvent;
 import world.bentobox.bentobox.api.events.island.IslandResetEvent;
+import world.bentobox.bentobox.api.events.team.TeamJoinEvent;
+import world.bentobox.bentobox.api.events.team.TeamJoinedEvent;
+import world.bentobox.bentobox.api.events.team.TeamKickEvent;
+import world.bentobox.bentobox.api.events.team.TeamLeaveEvent;
 import world.bentobox.bentobox.database.objects.Island;
 
 /**
- * Listens for when an island is created or reset to store or update the island id stored in the database.
+ * This class listens for events related to islands.
  */
 public class IslandListener implements Listener {
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
+    private final @NotNull PrestigePointsManager prestigePointsManager;
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull IslandSettingsProcessor islandSettingsProcessor;
@@ -50,6 +56,7 @@ public class IslandListener implements Listener {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param islandSettingsProcessor An {@link IslandSettingsProcessor} instance.
@@ -57,11 +64,13 @@ public class IslandListener implements Listener {
     public IslandListener(
             @NotNull SkyPlugin plugin,
             @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull DatabaseManager databaseManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull IslandSettingsProcessor islandSettingsProcessor) {
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
+        this.prestigePointsManager = prestigePointsManager;
         this.databaseManager = databaseManager;
         this.islandDataManager = islandDataManager;
         this.islandSettingsProcessor = islandSettingsProcessor;
@@ -103,5 +112,32 @@ public class IslandListener implements Listener {
         if(settings != null) {
             islandSettingsProcessor.processIslandSettings(settings.islandResetSettings(), oldIsland, newIsland, islandData);
         }
+    }
+
+    /**
+     * Listens to when a player joins an island's team and updates the island's required prestige points.
+     * @param teamJoinedEvent A {@link TeamJoinEvent}.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onIslandTeamJoin(TeamJoinedEvent teamJoinedEvent) {
+        prestigePointsManager.recalculateRequiredPrestigePoints(teamJoinedEvent.getIsland());
+    }
+
+    /**
+     * Listens to when a player leaves an island's team and updates the island's required prestige points.
+     * @param teamLeaveEvent A {@link TeamLeaveEvent}.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onIslandTeamLeave(TeamLeaveEvent teamLeaveEvent) {
+        prestigePointsManager.recalculateRequiredPrestigePoints(teamLeaveEvent.getIsland());
+    }
+
+    /**
+     * Listens to when a player is kicked from an island's team and updates the island's required prestige points.
+     * @param teamKickEvent A {@link TeamKickEvent}.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onIslandTeamKick(TeamKickEvent teamKickEvent) {
+        prestigePointsManager.recalculateRequiredPrestigePoints(teamKickEvent.getIsland());
     }
 }

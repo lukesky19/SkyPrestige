@@ -19,13 +19,9 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 
 import com.github.lukesky19.skyPrestige.configuration.data.gui.ProgressGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -36,7 +32,6 @@ import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
 import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
-import com.github.lukesky19.skylib.api.math.EquationUtil;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
@@ -49,7 +44,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,13 +54,11 @@ import java.util.function.Consumer;
  */
 public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+    private final @NotNull PrestigePointsManager prestigePointsManager;
     // BentoBox
     private final @NotNull Island island;
     private final @NotNull IslandData islandData;
     // Config
-    private final @NotNull PrestigeConfig prestigeConfig;
     private final @Nullable ProgressGUIConfig progressGUIConfig;
 
     /**
@@ -75,30 +67,24 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param guiManager An {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
-     * @param localeManager A {@link LocaleManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param island The player's {@link Island}.
      * @param islandData The {@link IslandData} for the island.
-     * @param prestigeConfig The {@link PrestigeConfig} for the next prestige level.
      */
     public ProgressGUI(
             @NotNull SkyPlugin plugin,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
-            @NotNull LocaleManager localeManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull Island island,
-            @NotNull IslandData islandData,
-            @NotNull PrestigeConfig prestigeConfig) {
+            @NotNull IslandData islandData) {
         super(plugin, guiManager, identifier, player);
 
-        this.localeManager = localeManager;
-        this.prestigePointsConfigManager = prestigePointsConfigManager;
+        this.prestigePointsManager = prestigePointsManager;
 
-        this.prestigeConfig = prestigeConfig;
         this.progressGUIConfig = guiConfigManager.getProgressGUIConfig();
 
         this.island = island;
@@ -144,16 +130,6 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
         }
 
         int guiSize = inventoryView.getTopInventory().getSize();
-
-        Locale locale = localeManager.getConfiguration();
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
-
-        // Check for invalid settings
-        if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigError()));
-            logger.error(AdventureUtil.deserialize("Unable to display prestige requirement due to invalid prestige points config and or scale formula."));
-            return false;
-        }
 
         clearButtons();
 
@@ -260,27 +236,14 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
                 progressGUIConfig.progressButtons().incomplete().itemType() == null ||
                 progressGUIConfig.progressButtons().complete().itemType() == null) return;
 
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
-        if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) return;
-
-        if(prestigeConfig.requiredPrestigePoints() == null) return;
-
-        double requiredPoints;
-        if (prestigeConfig.scaleFactor() != null && prestigeConfig.scaleFactor() != 0) {
-            HashMap<String, String> variables = new HashMap<>();
-            variables.put("r", String.valueOf(prestigeConfig.requiredPrestigePoints()));
-            variables.put("p", String.valueOf(island.getMemberSet().size()));
-            variables.put("k", String.valueOf(prestigeConfig.scaleFactor()));
-
-            requiredPoints = EquationUtil.evaluateEquation(prestigePointsConfig.scaleFormula(), variables).intValue();
-        } else {
-            requiredPoints = prestigeConfig.requiredPrestigePoints();
+        if(islandData.getRequiredPrestigePoints() == null) {
+            prestigePointsManager.recalculateRequiredPrestigePoints(island);
         }
 
         // Calculate current progress percentage
         double currentPercentage;
-        if(requiredPoints > 0) {
-            currentPercentage = Math.min(islandData.getPrestigePoints() / requiredPoints * 100, 100);
+        if(islandData.getRequiredPrestigePoints() > 0) {
+            currentPercentage = Math.min(islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints() * 100, 100);
         } else {
             currentPercentage = 0.0;
         }
@@ -289,9 +252,9 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
         List<TagResolver.Single> placeholders = List.of(
                 Placeholder.parsed("current_percentage", String.valueOf(currentPercentage)),
                 Placeholder.parsed("needed_percentage", String.valueOf((100 - currentPercentage))),
-                Placeholder.parsed("needed_points", NumberUtils.formatDecimal(Math.max(requiredPoints - islandData.getPrestigePoints(), 0))),
+                Placeholder.parsed("needed_points", NumberUtils.formatDecimal(Math.max(islandData.getRequiredPrestigePoints() - islandData.getPrestigePoints(), 0))),
                 Placeholder.parsed("island_points", NumberUtils.formatDecimal(islandData.getPrestigePoints())),
-                Placeholder.parsed("required_points", String.valueOf(requiredPoints)));
+                Placeholder.parsed("required_points", String.valueOf(islandData.getRequiredPrestigePoints())));
 
         // Calculate the percentage of progress per button
         double percentagePerButton = (double) 100 / progressGUIConfig.progressSlots().size();
