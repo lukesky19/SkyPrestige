@@ -439,8 +439,8 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
         } else if(currentRewardKey < itemRewardsCount + commandRewardsCount + permissionRewardsCount) {
             return rewardConfig.permissionRewards().get(currentRewardKey - itemRewardsCount - commandRewardsCount);
         } else if(currentRewardKey < itemRewardsCount + commandRewardsCount + permissionRewardsCount + groupRewardsCount) {
-            return rewardConfig.moneyRewards().get(currentRewardKey - itemRewardsCount - commandRewardsCount - permissionRewardsCount);
-        } else if(currentRewardKey < itemRewardsCount + commandRewardsCount + moneyRewardsCount) {
+            return rewardConfig.groupRewards().get(currentRewardKey - itemRewardsCount - commandRewardsCount - permissionRewardsCount);
+        } else if(currentRewardKey < itemRewardsCount + commandRewardsCount + permissionRewardsCount + groupRewardsCount + moneyRewardsCount) {
             return rewardConfig.moneyRewards().get(currentRewardKey - itemRewardsCount - commandRewardsCount - permissionRewardsCount - groupRewardsCount);
         } else if(rewardConfig.islandSizeReward().islandSize() > 0
                 && currentRewardKey == itemRewardsCount + commandRewardsCount + permissionRewardsCount + groupRewardsCount + moneyRewardsCount) {
