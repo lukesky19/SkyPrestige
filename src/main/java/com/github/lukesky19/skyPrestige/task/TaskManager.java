@@ -17,7 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.task;
 
+import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
@@ -39,6 +41,8 @@ import org.jetbrains.annotations.Nullable;
 public class TaskManager {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull SettingsManager settingsManager;
+    private final @NotNull MultiplierConfigManager multiplierConfigManager;
+
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull MultiplierManager multiplierManager;
@@ -52,6 +56,7 @@ public class TaskManager {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param settingsManager A {@link SettingsManager} instance.
+     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param leaderboardManager  A {@link LeaderboardManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -59,11 +64,13 @@ public class TaskManager {
     public TaskManager(
             @NotNull SkyPlugin plugin,
             @NotNull SettingsManager settingsManager,
+            @NotNull MultiplierConfigManager multiplierConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
             @NotNull MultiplierManager multiplierManager) {
         this.plugin = plugin;
         this.settingsManager = settingsManager;
+        this.multiplierConfigManager = multiplierConfigManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.multiplierManager = multiplierManager;
@@ -128,9 +135,8 @@ public class TaskManager {
      * Starts the {@link CalculateTopTenTask}.
      */
     private void startMultiplierTask() {
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
-        if(!settings.multiplierEventSettings().enabled()) return;
+        @Nullable MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
+        if(multiplierConfig == null || !multiplierConfig.enabled()) return;
 
         long ticks = 20L;
 

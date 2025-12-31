@@ -20,13 +20,13 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.VaultConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -50,37 +50,38 @@ public class VaultCommand {
     private final @NotNull ComponentLogger logger;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NotNull VaultConfigManager vaultConfigManager;
+
     private final @NotNull GUIManager guiManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull VaultManager vaultManager;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param vaultConfigManager A {@link VaultConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
-     * @param vaultManager A {@link VaultManager} instance.
      */
     public VaultCommand(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
+            @NotNull VaultConfigManager vaultConfigManager,
             @NotNull GUIManager guiManager,
             @NotNull IslandDataManager islandDataManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull VaultManager vaultManager) {
+            @NotNull DatabaseManager databaseManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
+        this.vaultConfigManager = vaultConfigManager;
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
         this.databaseManager = databaseManager;
-        this.vaultManager = vaultManager;
     }
 
     /**
@@ -117,7 +118,7 @@ public class VaultCommand {
 
                     IslandIdUUIDKey identifier = new IslandIdUUIDKey(islandId, uuid);
                     // Create the VaultGUI
-                    VaultGUI gui = new VaultGUI(plugin, guiConfigManager, guiManager, identifier, databaseManager, localeManager, vaultManager, islandId, islandData, player);
+                    VaultGUI gui = new VaultGUI(plugin, guiConfigManager, guiManager, identifier, databaseManager, localeManager, vaultConfigManager, islandId, islandData, player);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

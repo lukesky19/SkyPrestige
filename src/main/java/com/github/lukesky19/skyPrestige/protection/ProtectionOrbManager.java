@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.protection;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.protection_orb.ProtectionOrbConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.ProtectionOrbConfigManager;
 import com.github.lukesky19.skyPrestige.util.enums.SkyPrestigeNamespacedKeys;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -45,7 +45,7 @@ import java.util.Optional;
  */
 public class ProtectionOrbManager {
     private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
+    private final @NotNull ProtectionOrbConfigManager protectionOrbConfigManager;
 
     private @Nullable ItemStack protectionOrbStack;
     private @Nullable Component loreComponent;
@@ -53,13 +53,13 @@ public class ProtectionOrbManager {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param protectionOrbConfigManager A {@link ProtectionOrbConfigManager} instance.
      */
     public ProtectionOrbManager(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager) {
+            @NotNull ProtectionOrbConfigManager protectionOrbConfigManager) {
         this.logger = plugin.getComponentLogger();
-        this.settingsManager = settingsManager;
+        this.protectionOrbConfigManager = protectionOrbConfigManager;
     }
 
     /**
@@ -97,10 +97,10 @@ public class ProtectionOrbManager {
      * @return true if disallowed or if settings are null, otherwise false.
      */
     public boolean isProtectionOrbItemTypeDisallowed(@NotNull ItemType itemType) {
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return true;
+        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+        if(protectionOrbConfig == null) return true;
 
-        return settings.protectionOrbSettings().disallowedItems().contains(itemType.getKey().toString());
+        return protectionOrbConfig.disallowedItems().contains(itemType.getKey().toString());
     }
 
     /**
@@ -167,12 +167,12 @@ public class ProtectionOrbManager {
      * Create the {@link ItemStack} for the protection orb.
      */
     private void createProtectionOrb() {
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
+        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+        if(protectionOrbConfig == null) return;
 
         Optional<ItemStack> optionalItemStack = new ItemStackBuilder(logger)
                 .fromItemStackConfig(
-                        settings.protectionOrbSettings().itemStackConfig(),
+                        protectionOrbConfig.itemStackConfig(),
                         null,
                         null,
                         List.of()).buildItemStack();
@@ -196,10 +196,10 @@ public class ProtectionOrbManager {
      * Create the lore added to items that are protected.
      */
     private void createProtectedLore() {
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
+        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+        if(protectionOrbConfig == null) return;
 
-        @Nullable String protectedLoreString = settings.protectionOrbSettings().protectedLore();
+        @Nullable String protectedLoreString = protectionOrbConfig.protectedLore();
         if(protectedLoreString != null && !protectedLoreString.isEmpty()) {
             loreComponent = AdventureUtil.deserialize(protectedLoreString);
         }

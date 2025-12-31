@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -52,18 +52,18 @@ public class PlayerPickupItemListener extends PrestigePointsListener<EntityPicku
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerPickupItemListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -105,7 +105,7 @@ public class PlayerPickupItemListener extends PrestigePointsListener<EntityPicku
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull EntityPickupItemEvent entityPickupItemEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull EntityPickupItemEvent entityPickupItemEvent, @NotNull EventContext eventContext) {
         @Nullable ItemType itemType = eventContext.getItemType();
         if(itemType == null) return;
         @Nullable PotionType potionType = eventContext.getPotionType();
@@ -115,15 +115,15 @@ public class PlayerPickupItemListener extends PrestigePointsListener<EntityPicku
         if(enchantments != null && !enchantments.isEmpty()) {
             double totalPoints = 0;
             for(Map.Entry<Enchantment, Integer> enchantmentEntry : enchantments.entrySet()) {
-                @Nullable Double points = settings.prestigePointsMapping().getItemPickupPrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
+                @Nullable Double points = prestigePointsConfig.prestigePointsMapping().getItemPickupPrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
                 if(points != null) totalPoints += points;
             }
 
             if(totalPoints > 0) prestigePoints = totalPoints;
         } else if(potionType != null) {
-            prestigePoints = settings.prestigePointsMapping().getItemPickupPrestigePoints(itemType, potionType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getItemPickupPrestigePoints(itemType, potionType);
         } else {
-            prestigePoints = settings.prestigePointsMapping().getItemPickupPrestigePoints(itemType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getItemPickupPrestigePoints(itemType);
         }
 
         if(prestigePoints == null) return;

@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.1.0.0
+config-version: 2.0.0.0
 prefix: "<green><bold>SkyPrestige</bold></green><gray> ▪ </gray>"
 help:
     - "<green>SkyPrestige is developed by <white><bold>lukeskywlker19</bold></white>.</green>"
@@ -10,7 +10,8 @@ help:
     - "<white>/</white><green>skyprestige</green> <yellow>help</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>reload</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>progress</yellow>"
-    - "<white>/</white><green>skyprestige</green> <yellow>rewards</yellow>"
+    - "<white>/</white><green>skyprestige</green> <yellow>rewards [prestige] [level]</yellow>"
+    - "<white>/</white><green>skyprestige</green> <yellow>rewards [opt-in | opt-out]</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>vault</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>values</yellow>"
     - "<white>/</white><green>skyprestige</green> <yellow>info</yellow>"
@@ -36,18 +37,12 @@ prestige-island-not-owned: "<red>You cannot prestige an island that is not owned
 prestige-player-not-member-or-owner: "<red>You must be the island owner or an island member to prestige.</red>"
 prestige-not-enough-prestige-points: "<red>You do not have enough prestige points to prestige.</red>"
 prestige-island-opted-out: "<red>You cannot prestige an island that is opted out of prestige.</red>"
-prestige-inventory-reset: "<yellow>Your inventory has been reset as part of your island being prestiged.</yellow>"
-prestige-ender-chest-reset: "<yellow>Your ender chest has been reset as part of your island being prestiged.</yellow>"
-prestige-experience-reset: "<yellow>Your experience has been reset as part of your island being prestiged.</yellow>"
-prestige-balance-reset: "<yellow>Your balance has been reset as part of your island being prestiged.</yellow>"
-prestige-auction-house-items-reset: "<yellow>Your auction house items have been cleared as part of your island being prestiged."
-prestige-starting-money-given: "<yellow>You received <money> to start your new island with.</yellow>"
 prestige-config-error: "<red>Unable to prestige your island due to a configuration error.</red>"
 prestige-config-requirement-error: "<red>Unable to check the required prestige points due to a configuration error.</red>"
 progress-player-not-on-island: "<red>You must be on your island to view prestige progress.</red>"
 progress-max-prestige-level: "<green>No progress to view because your island is at the max prestige level.</green>"
 progress-prestige-exempt: "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>"
-rewards-player-not-on-island: "<red>You must be on your island to view prestige rewards.</red>"
+rewards-player-not-on-island: "<red>You must be on your island to view rewards.</red>"
 rewards-max-prestige-level: "<green>No rewards to view because your island is at the max prestige level.</green>"
 rewards-prestige-exempt: "<red>Your island is opted out of prestige. Prestige rewards can only be viewed for islands that can prestige.</red>"
 exchange-player-not-on-island: "<red>You must be on your island to exchange prestige points.</red>"

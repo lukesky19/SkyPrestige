@@ -18,13 +18,10 @@
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.gui.*;
-import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * Manages the plugin's GUI configurations.
@@ -43,23 +39,31 @@ public class GUIConfigManager {
 
     private @Nullable ProgressGUIConfig progressGUIConfig;
     private @Nullable BlueprintGUIConfig blueprintGUIConfig;
-    private @Nullable ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
-    private @Nullable RewardsGUIConfig rewardsGUIConfig;
     private @Nullable ExchangeGUIConfig exchangeGUIConfig;
     private @Nullable VaultGUIConfig vaultGUIConfig;
     private @Nullable ValuesGUIConfig valuesGUIConfig;
     private @Nullable InfoGUIConfig infoGUIConfig;
-    private @Nullable ConfirmOptInOutGUIConfig confirmOptInGUIConfig;
-    private @Nullable ConfirmOptInOutGUIConfig confirmOptOutGUIConfig;
+
+    private @Nullable RewardsGUIConfig prestigeRewardsGUIConfig;
+    private @Nullable RewardsGUIConfig optInRewardsGUIConfig;
+    private @Nullable RewardsGUIConfig optOutRewardsGUIConfig;
+
+    private @Nullable ConfirmGUIConfig confirmPrestigeGUIConfig;
+    private @Nullable ConfirmGUIConfig confirmOptInGUIConfig;
+    private @Nullable ConfirmGUIConfig confirmOptOutGUIConfig;
 
     private final @NotNull Path progressPath;
     private final @NotNull Path blueprintsPath;
-    private final @NotNull Path confirmPrestigePath;
-    private final @NotNull Path rewardsPath;
     private final @NotNull Path exchangePath;
     private final @NotNull Path vaultPath;
     private final @NotNull Path valuesPath;
     private final @NotNull Path infoPath;
+
+    private final @NotNull Path prestigeRewardsPath;
+    private final @NotNull Path optInRewardsPath;
+    private final @NotNull Path optOutRewardsPath;
+
+    private final @NotNull Path confirmPrestigePath;
     private final @NotNull Path confirmOptInPath;
     private final @NotNull Path confirmOptOutPath;
 
@@ -73,12 +77,16 @@ public class GUIConfigManager {
 
         progressPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "progress.yml");
         blueprintsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "blueprints.yml");
-        confirmPrestigePath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_prestige.yml");
-        rewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "rewards.yml");
         exchangePath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "exchange.yml");
         vaultPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "vault.yml");
         valuesPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "values.yml");
         infoPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "info.yml");
+
+        prestigeRewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "prestige_rewards.yml");
+        optInRewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "opt_in_rewards.yml");
+        optOutRewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "opt_out_rewards.yml");
+
+        confirmPrestigePath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_prestige.yml");
         confirmOptInPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_in.yml");
         confirmOptOutPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_out.yml");
     }
@@ -97,22 +105,6 @@ public class GUIConfigManager {
      */
     public @Nullable BlueprintGUIConfig getBlueprintGUIConfig() {
         return blueprintGUIConfig;
-    }
-
-    /**
-     * Get the {@link ConfirmPrestigeGUIConfig}. May be null.
-     * @return The {@link ConfirmPrestigeGUIConfig} or null.
-     */
-    public @Nullable ConfirmPrestigeGUIConfig getConfirmPrestigeGUIConfig() {
-        return confirmPrestigeGUIConfig;
-    }
-
-    /**
-     * Get the {@link RewardsGUIConfig}. May be null.
-     * @return The {@link RewardsGUIConfig} or null.
-     */
-    public @Nullable RewardsGUIConfig getRewardsGUIConfig() {
-        return rewardsGUIConfig;
     }
 
     /**
@@ -148,18 +140,50 @@ public class GUIConfigManager {
     }
 
     /**
-     * Get the {@link ConfirmOptInOutGUIConfig} for opt-in. May be null.
-     * @return The {@link ConfirmOptInOutGUIConfig} or null.
+     * Get the {@link RewardsGUIConfig} for prestige. May be null.
+     * @return The {@link RewardsGUIConfig} or null.
      */
-    public @Nullable ConfirmOptInOutGUIConfig getConfirmOptInGUIConfig() {
+    public @Nullable RewardsGUIConfig getPrestigeRewardsGUIConfig() {
+        return prestigeRewardsGUIConfig;
+    }
+
+    /**
+     * Get the {@link RewardsGUIConfig} for opt in. May be null.
+     * @return The {@link RewardsGUIConfig} or null.
+     */
+    public @Nullable RewardsGUIConfig getOptInRewardsGUIConfig() {
+        return optInRewardsGUIConfig;
+    }
+
+    /**
+     * Get the {@link RewardsGUIConfig} for opt out. May be null.
+     * @return The {@link RewardsGUIConfig} or null.
+     */
+    public @Nullable RewardsGUIConfig getOptOutRewardsGUIConfig() {
+        return optOutRewardsGUIConfig;
+    }
+
+    /**
+     * Get the {@link ConfirmGUIConfig} for prestige confirmation. May be null.
+     * @return The {@link ConfirmGUIConfig} or null.
+     */
+    public @Nullable ConfirmGUIConfig getConfirmPrestigeGUIConfig() {
+        return confirmPrestigeGUIConfig;
+    }
+
+    /**
+     * Get the {@link ConfirmGUIConfig} for opt-in. May be null.
+     * @return The {@link ConfirmGUIConfig} or null.
+     */
+    public @Nullable ConfirmGUIConfig getConfirmOptInGUIConfig() {
         return confirmOptInGUIConfig;
     }
 
     /**
-     * Get the {@link ConfirmOptInOutGUIConfig} for opt-out. May be null.
-     * @return The {@link ConfirmOptInOutGUIConfig} or null.
+     * Get the {@link ConfirmGUIConfig} for opt-out. May be null.
+     * @return The {@link ConfirmGUIConfig} or null.
      */
-    public @Nullable ConfirmOptInOutGUIConfig getConfirmOptOutGUIConfig() {
+    public @Nullable ConfirmGUIConfig getConfirmOptOutGUIConfig() {
         return confirmOptOutGUIConfig;
     }
 
@@ -169,233 +193,52 @@ public class GUIConfigManager {
     public void reload() {
         progressGUIConfig = null;
         blueprintGUIConfig = null;
-        confirmPrestigeGUIConfig = null;
-        rewardsGUIConfig = null;
         exchangeGUIConfig = null;
         vaultGUIConfig = null;
         valuesGUIConfig = null;
         infoGUIConfig = null;
+
+        prestigeRewardsGUIConfig = null;
+        optInRewardsGUIConfig = null;
+        optOutRewardsGUIConfig = null;
+
+        confirmPrestigeGUIConfig = null;
         confirmOptInGUIConfig = null;
         confirmOptOutGUIConfig = null;
 
         saveDefaultConfig();
 
-        YamlConfigurationLoader progressLoader = ConfigurationUtility.getYamlConfigurationLoader(progressPath);
-        YamlConfigurationLoader blueprintsLoader = ConfigurationUtility.getYamlConfigurationLoader(blueprintsPath);
-        YamlConfigurationLoader confirmPrestigeLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmPrestigePath);
-        YamlConfigurationLoader rewardsLoader = ConfigurationUtility.getYamlConfigurationLoader(rewardsPath);
-        YamlConfigurationLoader exchangeLoader = ConfigurationUtility.getYamlConfigurationLoader(exchangePath);
-        YamlConfigurationLoader vaultLoader = ConfigurationUtility.getYamlConfigurationLoader(vaultPath);
-        YamlConfigurationLoader valuesLoader = ConfigurationUtility.getYamlConfigurationLoader(valuesPath);
-        YamlConfigurationLoader infoLoader = ConfigurationUtility.getYamlConfigurationLoader(infoPath);
-        YamlConfigurationLoader optInLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmOptInPath);
-        YamlConfigurationLoader optOutLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmOptOutPath);
+        progressGUIConfig = loadConfiguration(progressPath, ProgressGUIConfig.class);
+        blueprintGUIConfig = loadConfiguration(blueprintsPath, BlueprintGUIConfig.class);
+        exchangeGUIConfig = loadConfiguration(exchangePath, ExchangeGUIConfig.class);
+        vaultGUIConfig = loadConfiguration(vaultPath, VaultGUIConfig.class);
+        valuesGUIConfig = loadConfiguration(valuesPath, ValuesGUIConfig.class);
+        infoGUIConfig = loadConfiguration(infoPath, InfoGUIConfig.class);
 
-        try {
-            progressGUIConfig = progressLoader.load().get(ProgressGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load progress GUI config. Error:" + configurateException.getMessage()));
-        }
+        prestigeRewardsGUIConfig = loadConfiguration(prestigeRewardsPath, RewardsGUIConfig.class);
+        optInRewardsGUIConfig = loadConfiguration(confirmOptInPath, RewardsGUIConfig.class);
+        optOutRewardsGUIConfig = loadConfiguration(optOutRewardsPath, RewardsGUIConfig.class);
 
-        try {
-            blueprintGUIConfig = blueprintsLoader.load().get(BlueprintGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load blueprints GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            confirmPrestigeGUIConfig = confirmPrestigeLoader.load().get(ConfirmPrestigeGUIConfig.class);
-
-            updateConfirmGUIConfig();
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load confirm prestige GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            rewardsGUIConfig = rewardsLoader.load().get(RewardsGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load rewards GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            exchangeGUIConfig = exchangeLoader.load().get(ExchangeGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the exchange GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            vaultGUIConfig = vaultLoader.load().get(VaultGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the vault GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            valuesGUIConfig = valuesLoader.load().get(ValuesGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the values GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            infoGUIConfig = infoLoader.load().get(InfoGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the info GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            confirmOptInGUIConfig = optInLoader.load().get(ConfirmOptInOutGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the confirm opt-in GUI config. Error:" + configurateException.getMessage()));
-        }
-
-        try {
-            confirmOptOutGUIConfig = optOutLoader.load().get(ConfirmOptInOutGUIConfig.class);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the confirm opt-out GUI config. Error:" + configurateException.getMessage()));
-        }
+        confirmPrestigeGUIConfig = loadConfiguration(confirmPrestigePath, ConfirmGUIConfig.class);
+        confirmOptInGUIConfig = loadConfiguration(confirmOptInPath, ConfirmGUIConfig.class);
+        confirmOptOutGUIConfig = loadConfiguration(confirmOptOutPath, ConfirmGUIConfig.class);
     }
 
     /**
-     * Update the confirm gui configuration to the latest version if possible, or display an error.
+     * Load the configuration.
+     * @param path The path to load the config for.
+     * @param clazz The class to load configuration to.
+     * @return The configuration or null.
+     * @param <T> The class created for the configuration.
      */
-    private void updateConfirmGUIConfig() {
-        if(confirmPrestigeGUIConfig == null) return;
+    private <T> @Nullable T loadConfiguration(@NotNull Path path, @NotNull Class<T> clazz) {
+        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
 
-        switch(confirmPrestigeGUIConfig.configVersion()) {
-            case "1.1.0.0" -> {
-                // latest version, do nothing
-            }
-
-            case "1.0.0.0" -> {
-                ConfirmPrestigeGUIConfig.ConditionalButtons conditionalButtons = confirmPrestigeGUIConfig.conditionalButtons();
-                ConfirmPrestigeGUIConfig.ConditionalButtons newConditionalButtons = new ConfirmPrestigeGUIConfig.ConditionalButtons(
-                        conditionalButtons.keepInventory(),
-                        conditionalButtons.clearInventory(),
-                        new ButtonConfig(
-                                new ItemStackConfig(
-                                        "coal_ore",
-                                        1,
-                                        null,
-                                        "<white>Generator Upgrades",
-                                        List.of("<gray>Your generator upgrades will be carried over on prestige."),
-                                        null,
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.PotionConfig(null, List.of()),
-                                        new ItemStackConfig.ColorConfig(false, null, null, null),
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
-                                        new ItemStackConfig.ArmorTrimConfig(null, null),
-                                        List.of(),
-                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                32),
-                        new ButtonConfig(
-                                new ItemStackConfig(
-                                        "coal_ore",
-                                        1,
-                                        null,
-                                        "<white>Generator Upgrades",
-                                        List.of("<gray>Your generator upgrades will be reset on prestige."),
-                                        null,
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.PotionConfig(null, List.of()),
-                                        new ItemStackConfig.ColorConfig(false, null, null, null),
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
-                                        new ItemStackConfig.ArmorTrimConfig(null, null),
-                                        List.of(),
-                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                32),
-                        conditionalButtons.keepEnderChest(),
-                        conditionalButtons.clearEnderChest(),
-                        conditionalButtons.keepExp(),
-                        conditionalButtons.resetExp(),
-                        conditionalButtons.keepMoney(),
-                        conditionalButtons.resetMoney(),
-                        new ButtonConfig(
-                                new ItemStackConfig(
-                                        "orange_shulker_box",
-                                        1,
-                                        null,
-                                        "<white>Auction House Items",
-                                        List.of("<gray>Your auction house items will be carried over on prestige."),
-                                        null,
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.PotionConfig(null, List.of()),
-                                        new ItemStackConfig.ColorConfig(false, null, null, null),
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
-                                        new ItemStackConfig.ArmorTrimConfig(null, null),
-                                        List.of(),
-                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                30),
-                        new ButtonConfig(
-                                new ItemStackConfig(
-                                        "orange_shulker_box",
-                                        1,
-                                        null,
-                                        "<white>Auction House Items",
-                                        List.of("<gray>Your auction house items will be reset on prestige."),
-                                        null,
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.PotionConfig(null, List.of()),
-                                        new ItemStackConfig.ColorConfig(false, null, null, null),
-                                        null,
-                                        List.of(),
-                                        new ItemStackConfig.DecoratedPotConfig(null, null, null, null),
-                                        new ItemStackConfig.ArmorTrimConfig(null, null),
-                                        List.of(),
-                                        new ItemStackConfig.OptionsConfig(null, null, null, null, null)),
-                                30),
-                        conditionalButtons.startingMoney(),
-                        conditionalButtons.noStartingMoney(),
-                        conditionalButtons.keepSessionPlayTime(),
-                        conditionalButtons.resetSessionPlayTime(),
-                        conditionalButtons.keepDailyPlayTime(),
-                        conditionalButtons.resetDailyPlayTime(),
-                        conditionalButtons.keepWeeklyPlayTime(),
-                        conditionalButtons.resetWeeklyPlayTime(),
-                        conditionalButtons.keepMonthlyPlayTime(),
-                        conditionalButtons.resetMonthlyPlayTime(),
-                        conditionalButtons.keepYearlyPlayTime(),
-                        conditionalButtons.resetYearlyPlayTime(),
-                        conditionalButtons.keepTotalPlayTime(),
-                        conditionalButtons.resetTotalPlayTime());
-
-                this.confirmPrestigeGUIConfig = new ConfirmPrestigeGUIConfig(
-                        "1.1.0.0",
-                        confirmPrestigeGUIConfig.guiName(),
-                        confirmPrestigeGUIConfig.guiType(),
-                        confirmPrestigeGUIConfig.blueprintBundleSlot(),
-                        confirmPrestigeGUIConfig.filler(),
-                        confirmPrestigeGUIConfig.confirmButton(),
-                        confirmPrestigeGUIConfig.cancelButton(),
-                        confirmPrestigeGUIConfig.rewardsButton(),
-                        confirmPrestigeGUIConfig.keepMembers(),
-                        confirmPrestigeGUIConfig.keepFlags(),
-                        confirmPrestigeGUIConfig.keepCommandRanks(),
-                        newConditionalButtons,
-                        confirmPrestigeGUIConfig.dummyButtons());
-
-                try {
-                    @NotNull YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(confirmPrestigePath);
-
-                    ConfigurationNode node = yamlConfigurationLoader.createNode();
-
-                    node.set(ConfirmPrestigeGUIConfig.class, confirmPrestigeGUIConfig);
-
-                    yamlConfigurationLoader.save(node);
-                } catch (ConfigurateException e) {
-                    logger.error(AdventureUtil.deserialize("Failed to save confirm prestige gui config file. Error: " + e.getMessage()));
-                }
-            }
-
-            case null, default -> logger.warn(AdventureUtil.deserialize("Unknown config version for confirm prestige gui config. Unable to update config."));
+        try {
+            return loader.load().get(clazz);
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
+            return null;
         }
     }
 
@@ -409,12 +252,6 @@ public class GUIConfigManager {
         if(!blueprintsPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "blueprints.yml", false);
         }
-        if(!confirmPrestigePath.toFile().exists()) {
-            plugin.saveResource("gui" + File.separator + "confirm_prestige.yml", false);
-        }
-        if(!rewardsPath.toFile().exists()) {
-            plugin.saveResource("gui" + File.separator + "rewards.yml", false);
-        }
         if(!exchangePath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "exchange.yml", false);
         }
@@ -426,6 +263,20 @@ public class GUIConfigManager {
         }
         if(!infoPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "info.yml", false);
+        }
+
+        if(!prestigeRewardsPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "prestige_rewards.yml", false);
+        }
+        if(!optInRewardsPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "opt_in_rewards.yml", false);
+        }
+        if(!optOutRewardsPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "opt_out_rewards.yml", false);
+        }
+
+        if(!confirmPrestigePath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "confirm_prestige.yml", false);
         }
         if(!confirmOptInPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "confirm_opt_in.yml", false);

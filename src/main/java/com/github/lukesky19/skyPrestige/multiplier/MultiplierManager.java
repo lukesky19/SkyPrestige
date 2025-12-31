@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.multiplier;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.time.Time;
@@ -43,8 +43,8 @@ import java.util.List;
  */
 public class MultiplierManager {
     private final @NotNull SkyPlugin plugin;
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
+    private final @NotNull MultiplierConfigManager multiplierConfigManager;
 
     private double eventMultiplier = 0.0;
     private double additionalMultiplier = 0.0;
@@ -54,15 +54,15 @@ public class MultiplierManager {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
      */
     public MultiplierManager(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager) {
+            @NotNull LocaleManager localeManager,
+            @NotNull MultiplierConfigManager multiplierConfigManager) {
         this.plugin = plugin;
-        this.settingsManager = settingsManager;
+        this.multiplierConfigManager = multiplierConfigManager;
         this.localeManager = localeManager;
     }
 
@@ -300,21 +300,21 @@ public class MultiplierManager {
      * Also updates the scheduled multiplier if the calculated event duration is > 0.
      */
     private void calculateEventDuration() {
-        Settings settings = settingsManager.getConfiguration();
-        if(settings == null) {
-            timeUntilNextEvent = -1;
-            return;
-        }
-        Settings.MultiplierEventSettings multiplierEventSettings = settings.multiplierEventSettings();
-        if(!multiplierEventSettings.enabled() || multiplierEventSettings.timezone() == null || multiplierEventSettings.day() == null || multiplierEventSettings.durationSeconds() <= 0) {
+        MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
+        if(multiplierConfig == null) {
             timeUntilNextEvent = -1;
             return;
         }
 
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierEventSettings.timezone()));
+        if(!multiplierConfig.enabled() || multiplierConfig.timezone() == null || multiplierConfig.day() == null || multiplierConfig.durationSeconds() <= 0) {
+            timeUntilNextEvent = -1;
+            return;
+        }
 
-        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierEventSettings.day().toUpperCase());
-        int eventHour = multiplierEventSettings.hour();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierConfig.timezone()));
+
+        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierConfig.day().toUpperCase());
+        int eventHour = multiplierConfig.hour();
 
         // Create ZonedDateTime for the event hour on the current day
         ZonedDateTime eventTimeToday = now.with(eventDay).withHour(eventHour).withMinute(0).withSecond(0);
@@ -322,11 +322,11 @@ public class MultiplierManager {
         if(now.isEqual(eventTimeToday) || now.isAfter(eventTimeToday)) {
             Duration durationSinceEvent = Duration.between(now, eventTimeToday);
             long secondsPassed = durationSinceEvent.getSeconds();
-            long calculatedDuration = multiplierEventSettings.durationSeconds() - secondsPassed;
+            long calculatedDuration = multiplierConfig.durationSeconds() - secondsPassed;
 
             if(calculatedDuration > 0) {
                 eventDuration = calculatedDuration;
-                eventMultiplier = multiplierEventSettings.multiplier() - 1;
+                eventMultiplier = multiplierConfig.multiplier() - 1;
             }
         }
     }
@@ -335,21 +335,21 @@ public class MultiplierManager {
      * Calculate the number of seconds until the next event.
      */
     private void calculateNextEventSeconds() {
-        Settings settings = settingsManager.getConfiguration();
-        if(settings == null) {
-            timeUntilNextEvent = -1;
-            return;
-        }
-        Settings.MultiplierEventSettings multiplierEventSettings = settings.multiplierEventSettings();
-        if(!multiplierEventSettings.enabled() || multiplierEventSettings.timezone() == null || multiplierEventSettings.day() == null || multiplierEventSettings.durationSeconds() <= 0) {
+        MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
+        if(multiplierConfig == null) {
             timeUntilNextEvent = -1;
             return;
         }
 
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierEventSettings.timezone()));
+        if(!multiplierConfig.enabled() || multiplierConfig.timezone() == null || multiplierConfig.day() == null || multiplierConfig.durationSeconds() <= 0) {
+            timeUntilNextEvent = -1;
+            return;
+        }
 
-        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierEventSettings.day().toUpperCase());
-        int eventHour = multiplierEventSettings.hour();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierConfig.timezone()));
+
+        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierConfig.day().toUpperCase());
+        int eventHour = multiplierConfig.hour();
 
         ZonedDateTime nextEvent = now.with(eventDay).withHour(eventHour).withMinute(0).withSecond(0);
 

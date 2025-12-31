@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -44,18 +44,18 @@ public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteract
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerMilkCowListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -88,7 +88,7 @@ public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteract
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull PlayerInteractEntityEvent playerInteractEntityEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerInteractEntityEvent playerInteractEntityEvent, @NotNull EventContext eventContext) {
         @Nullable ItemType itemType = eventContext.getItemType();
         if(itemType == null) return;
         @Nullable EntityType entityType = eventContext.getEntityType();
@@ -97,16 +97,16 @@ public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteract
         double prestigePoints = 0;
         if(itemType.equals(ItemType.BUCKET)) {
             if(entityType.equals(EntityType.COW)) {
-                @Nullable Double entityPrestigePoints = settings.prestigePointsMapping().getMilkPrestigePoints(entityType);
+                @Nullable Double entityPrestigePoints = prestigePointsConfig.prestigePointsMapping().getMilkPrestigePoints(entityType);
 
                 if(entityPrestigePoints != null) prestigePoints += entityPrestigePoints;
             }
         } else if(itemType.equals(ItemType.BOWL)) {
             if(entityType.equals(EntityType.MOOSHROOM)) {
-                @Nullable Double entityPrestigePoints = settings.prestigePointsMapping().getMilkPrestigePoints(entityType);
+                @Nullable Double entityPrestigePoints = prestigePointsConfig.prestigePointsMapping().getMilkPrestigePoints(entityType);
                 if(entityPrestigePoints != null) prestigePoints += entityPrestigePoints;
 
-                @Nullable Double itemPrestigePoints = settings.prestigePointsMapping().getFillPrestigePoints(ItemType.MUSHROOM_STEW);
+                @Nullable Double itemPrestigePoints = prestigePointsConfig.prestigePointsMapping().getFillPrestigePoints(ItemType.MUSHROOM_STEW);
                 if(itemPrestigePoints != null) prestigePoints += itemPrestigePoints;
             }
         }

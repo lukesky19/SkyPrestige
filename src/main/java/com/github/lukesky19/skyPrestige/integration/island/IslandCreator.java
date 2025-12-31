@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.integration.island;
 
-import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
@@ -66,7 +66,7 @@ public class IslandCreator {
     private final @Nullable GameModeAddon gameModeAddon;
     private final @Nullable Island oldIsland;
     private final @Nullable IslandData islandData;
-    private final @Nullable IslandSettingsInterface islandSettings;
+    private final @Nullable IslandSettings islandSettings;
     private final @Nullable Double requiredPrestigePoints;
     private final @Nullable Integer prestigeLevel;
     private final @Nullable Boolean prestigeExempt;
@@ -340,7 +340,7 @@ public class IslandCreator {
         private @Nullable World world;
         private @NotNull String blueprintName = BlueprintsManager.DEFAULT_BUNDLE_NAME;
         private @Nullable GameModeAddon gameModeAddon;
-        private @Nullable IslandSettingsInterface islandSettings;
+        private @Nullable IslandSettings islandSettings;
         private @Nullable Double requiredPrestigePoints;
         private @Nullable Integer prestigeLevel;
         private @Nullable Boolean prestigeExempt;
@@ -416,11 +416,11 @@ public class IslandCreator {
         }
 
         /**
-         * Set the {@link IslandSettingsInterface} to process for this island.
-         * @param islandSettings The {@link IslandSettingsInterface}.
+         * Set the {@link IslandSettings} to process for this island.
+         * @param islandSettings The {@link IslandSettings}.
          * @return The {@link IslandCreator.Builder}.
          */
-        public @NotNull Builder islandSettings(@NotNull IslandSettingsInterface islandSettings) {
+        public @NotNull Builder islandSettings(@NotNull IslandSettings islandSettings) {
             this.islandSettings = islandSettings;
             return this;
         }

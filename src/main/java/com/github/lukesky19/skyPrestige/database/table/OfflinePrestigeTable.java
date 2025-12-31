@@ -19,18 +19,14 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skyPrestige.util.parameter.TimestampParameter;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.database.parameter.Parameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -79,13 +75,7 @@ public class OfflinePrestigeTable {
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_island_id ON " + tableName + "(island_id)";
 
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
-                .thenCompose(v -> versionsTable.getVersion(tableName).thenCompose(version -> {
-                    if(version > 1) {
-                        return versionsTable.updateVersion(tableName, 2);
-                    }
-
-                    return CompletableFuture.completedFuture(null);
-                }))
+                .thenCompose(v -> versionsTable.updateVersion(tableName, 1))
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Offline Prestige Table creation failed: " + ex.getMessage()));
                     return null;
@@ -162,83 +152,4 @@ public class OfflinePrestigeTable {
             return new ArrayList<>();
         });
     }
-
-    /**
-     * Migrate the table from version 1 to version 2.
-     * @return A {@link CompletableFuture} of type {@link Void} when complete.
-     */
-    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public @NotNull CompletableFuture<Void> migrate() {
-        return versionsTable.getVersion(tableName).thenCompose(version -> {
-           if(version <= 1) {
-               return getData().thenCompose(dataList -> {
-                   String deleteSql = "DROP TABLE " + tableName;
-
-                   return queueManager.queueWriteTransaction(deleteSql).thenCompose(v1 -> {
-                       return createTable().thenCompose(v2 -> {
-                           String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, level, prestige_time) VALUES (?, ?, ?, ?)";
-
-                           if(!dataList.isEmpty()) {
-                               List<List<Parameter<?>>> listOfParameterLists = new ArrayList<>();
-
-                               dataList.forEach(offlinePrestigeData -> {
-                                   listOfParameterLists.add(List.of(
-                                           new StringParameter(offlinePrestigeData.playerId),
-                                           new CaseSensitiveStringParameter(offlinePrestigeData.islandId),
-                                           new IntegerParameter(offlinePrestigeData.level),
-                                           new TimestampParameter(offlinePrestigeData.prestigeTime)
-                                   ));
-                               });
-
-                               return queueManager.queueBulkWriteTransaction(insertSql, listOfParameterLists)
-                                       .thenCompose(list -> versionsTable.updateVersion(tableName, 2));
-                           } else {
-                               return versionsTable.updateVersion(tableName, 2);
-                           }
-                       });
-                   });
-               });
-           } else {
-               return versionsTable.updateVersion(tableName, 2);
-           }
-        });
-    }
-
-    /**
-     * Get all existing data in the table.
-     * @return A {@link CompletableFuture} containing a {@link List} of {@link OfflinePrestigeTable}.
-     */
-    protected @NotNull CompletableFuture<List<OfflinePrestigeData>> getData() {
-        List<OfflinePrestigeData> dataList = new ArrayList<>();
-        String readSql = "SELECT player_id, island_id, level, prestige_time FROM " + tableName;
-
-        return queueManager.queueReadTransaction(readSql, resultSet -> {
-            try {
-                while(resultSet.next()) {
-                    dataList.add(new OfflinePrestigeData(
-                            resultSet.getString("player_id"),
-                            resultSet.getString("island_id"),
-                            resultSet.getInt("level"),
-                            resultSet.getTimestamp("prestige_time")));
-                }
-
-                return dataList;
-            } catch(SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    /**
-     * This record temporarily stores offline prestige data for migration purposes.
-     * @param playerId The player's {@link UUID} as a String.
-     * @param islandId The island's id.
-     * @param level The prestige level achieved.
-     * @param prestigeTime The time the prestige occurred.
-     */
-    protected record OfflinePrestigeData(
-            @NotNull String playerId,
-            @NotNull String islandId,
-            @NotNull Integer level,
-            @NotNull Timestamp prestigeTime) {}
 }

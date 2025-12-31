@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -52,18 +52,18 @@ public class PlayerFishListener extends PrestigePointsListener<PlayerFishEvent> 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerFishListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -107,7 +107,7 @@ public class PlayerFishListener extends PrestigePointsListener<PlayerFishEvent> 
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull PlayerFishEvent playerFishEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerFishEvent playerFishEvent, @NotNull EventContext eventContext) {
         @Nullable ItemType itemType = eventContext.getItemType();
         if(itemType == null) return;
         @Nullable PotionType potionType = eventContext.getPotionType();
@@ -117,15 +117,15 @@ public class PlayerFishListener extends PrestigePointsListener<PlayerFishEvent> 
         if(enchantments != null && !enchantments.isEmpty()) {
             double totalPoints = 0;
             for(Map.Entry<Enchantment, Integer> enchantmentEntry : enchantments.entrySet()) {
-                @Nullable Double points = settings.prestigePointsMapping().getFishPrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
+                @Nullable Double points = prestigePointsConfig.prestigePointsMapping().getFishPrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
                 if(points != null) totalPoints += points;
             }
 
             if(totalPoints > 0) prestigePoints = totalPoints;
         } else if(potionType != null) {
-            prestigePoints = settings.prestigePointsMapping().getFishPrestigePoints(itemType, potionType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getFishPrestigePoints(itemType, potionType);
         } else {
-            prestigePoints = settings.prestigePointsMapping().getFishPrestigePoints(itemType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getFishPrestigePoints(itemType);
         }
 
         if(prestigePoints == null) return;

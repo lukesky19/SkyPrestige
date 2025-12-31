@@ -17,17 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.prestige;
 
-import com.github.lukesky19.skyPrestige.configuration.data.island.PrestigeIslandSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.player.PlayerSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * This record contains the configuration for a prestige level.
@@ -35,9 +29,8 @@ import java.util.List;
  * @param prestigeLevel The prestige level this configuration is for.
  * @param scaleFactor The scale factor used in conjunction with the formula in settings.yml to scale the required prestige points.
  * @param requiredPrestigePoints The base number of prestige points required to prestige. This value will be scaled to the number of players on the island.
- * @param prestigeSettings The {@link PrestigeSettings} for this level.
+ * @param prestigeSettings The {@link ResetSettings} for this level.
  * @param rewardConfig The {@link RewardConfig} for this level.
- * @param rewards The legacy {@link List} of {@link LegacyReward}s for this level. Migration purposes only.
  */
 @ConfigSerializable
 public record PrestigeConfig(
@@ -45,50 +38,5 @@ public record PrestigeConfig(
         int prestigeLevel,
         @Nullable Double scaleFactor,
         @Nullable Double requiredPrestigePoints,
-        @NotNull PrestigeSettings prestigeSettings,
-        @NotNull RewardConfig rewardConfig,
-        @Deprecated(since = "1.1.0.0") @NotNull List<LegacyReward> rewards) {
-    /**
-     * This record contains settings for when an island is prestiged.
-     * @param playerSettings The {@link PlayerSettings}.
-     * @param islandSettings The {@link IslandSettingsInterface}.
-     * @param giveStartingMoneyToAllIslandMembers Whether to give the starting money to all island members or not.
-     * @param startingMoney The starting amount of money to give the player.
-     * Legacy options below for migration purposes only.
-     * @param resetInventory Legacy reset inventory setting. Migration purposes only.
-     * @param resetEnderChest Legacy reset ender chest setting. Migration purposes only.
-     * @param resetExp Legacy reset experience setting. Migration purposes only.
-     * @param resetMoney Legacy reset money setting. Migration purposes only.
-     * @param playTimeSettings Legacy {@link PlayTimeSettings}. Migration purposes only.
-     * @param resetPrestigePoints Legacy reset prestige points setting. Migration purposes only.
-     */
-    @ConfigSerializable
-    public record PrestigeSettings(
-            @NotNull PlayerSettings playerSettings,
-            @NotNull PrestigeIslandSettings islandSettings,
-            boolean giveStartingMoneyToAllIslandMembers,
-            double startingMoney,
-            // Legacy options below for migration purposes only.
-            @Deprecated(since = "1.1.0.0") boolean resetInventory,
-            @Deprecated(since = "1.1.0.0") boolean resetEnderChest,
-            @Deprecated(since = "1.1.0.0") boolean resetExp,
-            @Deprecated(since = "1.1.0.0") boolean resetMoney,
-            @Deprecated(since = "1.1.0.0") @NotNull PlayTimeSettings playTimeSettings,
-            @Deprecated(since = "1.1.0.0") boolean resetPrestigePoints) {}
-
-    /**
-     * This records contains an individual reward configuration to give on successful prestige.
-     * @param giveToAllIslandMembers Whether to this reward to all island members or not.
-     * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
-     * @param rewardItem The {@link ItemStackConfig} to give as a reward.
-     * @param commands The {@link List} of {@link String}s for the commands to execute in console.
-     * @deprecated Replaced by {@link RewardConfig}.
-     */
-    @Deprecated(since = "1.1.0.0")
-    @ConfigSerializable
-    public record LegacyReward(
-            @Deprecated(since = "1.1.0.0") boolean giveToAllIslandMembers,
-            @Deprecated(since = "1.1.0.0") @NotNull ItemStackConfig displayItem,
-            @Deprecated(since = "1.1.0.0") @NotNull ItemStackConfig rewardItem,
-            @Deprecated(since = "1.1.0.0") @NotNull List<String> commands) {}
-}
+        @NotNull ResetSettings prestigeSettings,
+        @NotNull RewardConfig rewardConfig) {}

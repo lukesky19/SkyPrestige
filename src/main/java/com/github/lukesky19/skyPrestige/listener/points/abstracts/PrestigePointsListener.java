@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points.abstracts;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
@@ -55,9 +55,9 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      */
     protected final @NotNull ComponentLogger logger;
     /**
-     * A {@link SettingsManager} instance.
+     * A {@link PrestigePointsConfigManager} instance.
      */
-    protected final @NotNull SettingsManager settingsManager;
+    protected final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
     /**
      * An {@link IslandDataManager} instance.
      */
@@ -74,20 +74,20 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     protected PrestigePointsListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
-        this.settingsManager = settingsManager;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
         this.multiplierManager = multiplierManager;
@@ -104,8 +104,11 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      * @param event The event to process.
      */
     protected void process(E event) {
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
         @Nullable EventContext eventContext = extractor().extract(event);
         if(eventContext == null) return;
@@ -116,7 +119,7 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
 
         // AFK check
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
-        if(skyPlayTimeHook.isHooked() && !settings.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(playerId)) return;
+        if(skyPlayTimeHook.isHooked() && !prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(playerId)) return;
 
         // Island Check
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
@@ -138,18 +141,18 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
         if(islandData.isPrestigeExempt()) return;
 
         // Handle the event and event context
-        handle(settings, islandData, event, eventContext);
+        handle(prestigePointsConfig, islandData, event, eventContext);
     }
 
     /**
      * Handles the event and event context to increment prestige points.
-     * @param settings The plugin's {@link Settings}.
+     * @param prestigePointsConfig The plugin's {@link PrestigePointsConfig}.
      * @param islandData The {@link IslandData} to add prestige points to.
      * @param event The {@link E}. The event the class is handling.
      * @param eventContext The {@link EventContext}.
      */
     protected abstract void handle(
-            @NotNull Settings settings,
+            @NotNull PrestigePointsConfig prestigePointsConfig,
             @NotNull IslandData islandData,
             @NotNull E event,
             @NotNull EventContext eventContext);

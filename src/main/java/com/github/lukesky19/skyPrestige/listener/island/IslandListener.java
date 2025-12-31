@@ -18,7 +18,6 @@
 package com.github.lukesky19.skyPrestige.listener.island;
 
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
@@ -102,9 +101,7 @@ public class IslandListener implements Listener {
 
         @Nullable Settings settings = settingsManager.getConfiguration();
         if(settings != null) {
-            IslandSettingsInterface islandSettings = settings.islandResetSettings();
-
-            islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData);
+            islandSettingsProcessor.processIslandSettings(settings.islandResetSettings(), oldIsland, newIsland, islandData);
         }
     }
 }

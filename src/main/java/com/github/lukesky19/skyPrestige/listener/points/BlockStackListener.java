@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -44,18 +44,18 @@ public class BlockStackListener extends PrestigePointsListener<BlockStackEvent> 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public BlockStackListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
     /**
      * Listens for when a block is stacked on an island and increments prestige points.
@@ -69,13 +69,13 @@ public class BlockStackListener extends PrestigePointsListener<BlockStackEvent> 
     @Override
     protected @NotNull EventContextExtractor<BlockStackEvent> extractor() {
         return blockStackEvent -> {
-            @Nullable Settings settings = settingsManager.getConfiguration();
-            if(settings == null) return null;
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) return null;
             Player player = blockStackEvent.getPlayer();
             StackedBlock stackedBlock = blockStackEvent.getStack();
             BlockType blockType = stackedBlock.getBlock().getType().asBlockType();
             if(blockType == null) return null;
-            int amount = settings.accurateRoseStacker() ? blockStackEvent.getIncreaseAmount() : 1;
+            int amount = prestigePointsConfig.accurateRoseStacker() ? blockStackEvent.getIncreaseAmount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);
@@ -87,11 +87,11 @@ public class BlockStackListener extends PrestigePointsListener<BlockStackEvent> 
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull BlockStackEvent blockStackEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull BlockStackEvent blockStackEvent, @NotNull EventContext eventContext) {
         @Nullable BlockType blockType = eventContext.getBlockType();
         if(blockType == null) return;
 
-        @Nullable Double prestigePoints = settings.prestigePointsMapping().getBlockPlacePrestigePoints(blockType);
+        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getBlockPlacePrestigePoints(blockType);
         if(prestigePoints == null) return;
 
         addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());

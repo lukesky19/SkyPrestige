@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -46,18 +46,18 @@ public class SpawnerUnstackListener extends PrestigePointsListener<SpawnerUnstac
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public SpawnerUnstackListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -72,15 +72,15 @@ public class SpawnerUnstackListener extends PrestigePointsListener<SpawnerUnstac
     @Override
     protected @NotNull EventContextExtractor<SpawnerUnstackEvent> extractor() {
         return spawnerUnstackEvent -> {
-            @Nullable Settings settings = settingsManager.getConfiguration();
-            if(settings == null) return null;
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) return null;
             Player player = spawnerUnstackEvent.getPlayer();
             StackedSpawner stackedSpawner = spawnerUnstackEvent.getStack();
             Spawner spawner = stackedSpawner.getSpawner();
             @Nullable EntityType entityType = spawner.getSpawnedType();
             BlockType blockType = stackedSpawner.getBlock().getType().asBlockType();
             if(blockType == null) return null;
-            int amount = settings.accurateRoseStacker() ? spawnerUnstackEvent.getDecreaseAmount() : 1;
+            int amount = prestigePointsConfig.accurateRoseStacker() ? spawnerUnstackEvent.getDecreaseAmount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);
@@ -93,16 +93,16 @@ public class SpawnerUnstackListener extends PrestigePointsListener<SpawnerUnstac
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull SpawnerUnstackEvent spawnerUnstackEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull SpawnerUnstackEvent spawnerUnstackEvent, @NotNull EventContext eventContext) {
         @Nullable BlockType blockType = eventContext.getBlockType();
         if(blockType == null) return;
         @Nullable EntityType entityType = eventContext.getEntityType();
 
         @Nullable Double prestigePoints;
         if(entityType != null) {
-            prestigePoints = settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType, entityType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBlockBreakPrestigePoints(blockType, entityType);
         } else {
-            prestigePoints = settings.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
         }
 
         if(prestigePoints == null) return;

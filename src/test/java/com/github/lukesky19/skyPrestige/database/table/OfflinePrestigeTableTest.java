@@ -18,7 +18,6 @@
 package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -32,6 +31,7 @@ import org.mockito.Mockito;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -304,141 +304,19 @@ public class OfflinePrestigeTableTest extends AbstractTableTest {
     }
 
     /**
-     * Test migration of the table from version one to version two.
-     */
-    @Test
-    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testMigrate() {
-        UUID playerId = UUID.randomUUID();
-        String islandId = "BSkyBlock" + UUID.randomUUID();
-        int prestigeLevel = 2;
-
-        createVersionOneTable().thenCompose(v1 -> {
-            return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
-                return playerIdsTable.insertPlayerId(playerId).thenCompose(v3 -> {
-                    return liveOfflinePrestigeTable.insertOfflinePrestige(playerId, islandId, prestigeLevel).thenCompose(v5 -> {
-                        return liveOfflinePrestigeTable.migrate().thenCompose(v6 -> {
-                            return liveOfflinePrestigeTable.getPrestigeLevels(playerId).thenApply(levels -> {
-                                assertTrue(levels.contains(prestigeLevel));
-                                return null;
-                            });
-                        });
-                    });
-                });
-            });
-        }).join();
-    }
-
-    /**
-     * Test migration of the table from version one to version two with no data in the table.
-     */
-    @Test
-    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testMigrateNoData() {
-        UUID playerId = UUID.randomUUID();
-
-        createVersionOneTable().thenCompose(v1 -> {
-            return liveOfflinePrestigeTable.migrate().thenCompose(v2 -> {
-                return getData(playerId).thenApply(data -> {
-                    assertNull(data);
-                    return null;
-                });
-            });
-        }).join();
-    }
-
-    /**
-     * Test migration of the table, but the table is already version 2.
-     */
-    @Test
-    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testMigrateVersionTwo() {
-        liveOfflinePrestigeTable.createTable().thenCompose(v1 -> {
-            return versionsTable.updateVersion("skyprestige_offline_player_prestige", 2).thenCompose(v2 -> {
-                return liveOfflinePrestigeTable.migrate().thenCompose(v3 -> {
-                    return versionsTable.getVersion("skyprestige_offline_player_prestige").thenApply(version -> {
-                        assertEquals(2, version);
-                        return null;
-                    });
-                });
-            });
-        }).join();
-    }
-
-    /**
-     * Test getting all data in the database, but an error occurs.
-     */
-    @Test
-    @SuppressWarnings("resource") // The ResultSet here is a mock, so a try-with-resources block is unnecessary.
-    public void testGetDataError() {
-        // Created a mocked ResultSet
-        ResultSet resultSetMock = Mockito.mock(ResultSet.class);
-
-        // When the ResultSet is used, throw an SQLException for the test
-        try {
-            when(resultSetMock.next()).thenThrow(new SQLException("Test Error"));
-        } catch (SQLException e) { // Required to make the IDE happy
-            throw new RuntimeException(e);
-        }
-
-        // When a read transaction is queued, intercept the invocation to replace the existing ResultSet with the mocked one.
-        when(mockedQueueManager.queueReadTransaction(anyString(), Mockito.<Function<ResultSet, List<OfflinePrestigeTable.OfflinePrestigeData>>>any()))
-                .thenAnswer(invocation -> {
-                    // Get the function
-                    Function<ResultSet, List<OfflinePrestigeTable.OfflinePrestigeData>> function = invocation.getArgument(1);
-                    // Call the function with the mocked ResultSet instead.
-                    return CompletableFuture.completedFuture(function.apply(resultSetMock));
-                });
-
-        // Ensure that a RunTimeException is thrown
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                offlinePrestigeTableWithMockedQueueManager.getData()
-                        .join());
-
-        // Ensure the error message is the same as the one used above
-        assertEquals("Test Error", exception.getCause().getMessage());
-    }
-
-    /**
-     * Create the version one table for migration testing.
-     * @return A {@link CompletableFuture} of type {@link Void} when complete.
-     */
-    private @NotNull CompletableFuture<Void> createVersionOneTable() {
-        String tableName = "skyprestige_offline_player_prestige";
-        String tableCreationSql =
-                "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "player_id VARCHAR(36) NOT NULL UNIQUE, " +
-                        "island_id TEXT NOT NULL, " +
-                        "level INTEGER NOT NULL DEFAULT 0, " +
-                        "prestige_time DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                        "FOREIGN KEY (player_id) REFERENCES skyprestige_player_ids(player_id) ON UPDATE CASCADE ON DELETE CASCADE, " +
-                        "FOREIGN KEY (island_id) REFERENCES skyprestige_island_ids(island_id) ON UPDATE CASCADE ON DELETE CASCADE)";
-        String playerIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_player_id ON " + tableName + "(player_id)";
-        String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_island_id ON " + tableName + "(island_id)";
-
-        return liveQueueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
-                .thenCompose(v -> versionsTable.updateVersion(tableName, 1))
-                .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Offline Prestige Table creation failed: " + ex.getMessage()));
-                    return null;
-                });
-    }
-
-    /**
      * Get the offline prestige data from table. Used for validation.
      * @param playerId The {@link UUID} to get data for.
      * @return A {@link CompletableFuture} containing the {@link OfflinePrestigeTable} or null.
      */
-    private @NotNull CompletableFuture<OfflinePrestigeTable.@Nullable OfflinePrestigeData> getData(@NotNull UUID playerId) {
+    private @NotNull CompletableFuture<@Nullable OfflinePrestigeData> getData(@NotNull UUID playerId) {
         String readSql = "SELECT player_id, island_id, level, prestige_time FROM skyprestige_offline_player_prestige WHERE player_id = ?";
 
         return liveQueueManager.queueReadTransaction(readSql, List.of(new UUIDParameter(playerId)), resultSet -> {
-            @Nullable OfflinePrestigeTable.OfflinePrestigeData data = null;
+            @Nullable OfflinePrestigeData data = null;
 
             try {
                 if(resultSet.next()) {
-                    data = new OfflinePrestigeTable.OfflinePrestigeData(
+                    data = new OfflinePrestigeData(
                             resultSet.getString("player_id"),
                             resultSet.getString("island_id"),
                             resultSet.getInt("level"),
@@ -451,4 +329,17 @@ public class OfflinePrestigeTableTest extends AbstractTableTest {
             }
         });
     }
+
+    /**
+     * This record stores offline prestige data for validation.
+     * @param playerId The player id.
+     * @param islandId The island id.
+     * @param level The prestige level.
+     * @param prestigeTime The prestige timestamp.
+     */
+    private record OfflinePrestigeData(
+            @NotNull String playerId,
+            @NotNull String islandId,
+            int level,
+            @NotNull Timestamp prestigeTime) {}
 }

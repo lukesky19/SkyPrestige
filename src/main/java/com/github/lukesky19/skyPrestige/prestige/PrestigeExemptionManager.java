@@ -1,10 +1,28 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package com.github.lukesky19.skyPrestige.prestige;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.data.opt_in_out.OptInOutConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.OptInConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.OptOutConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
@@ -43,9 +61,12 @@ import java.util.concurrent.CompletableFuture;
 public class PrestigeExemptionManager {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
+
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NotNull OptInConfigManager optInConfigManager;
+    private final @NotNull OptOutConfigManager optOutConfigManager;
+
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull HookManager hookManager;
@@ -57,9 +78,10 @@ public class PrestigeExemptionManager {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param optInConfigManager An {@link OptInConfigManager} instance.
+     * @param optOutConfigManager An {@link OptOutConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param hookManager A {@link HookManager} instance.
@@ -69,9 +91,10 @@ public class PrestigeExemptionManager {
      */
     public PrestigeExemptionManager(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
+            @NotNull OptInConfigManager optInConfigManager,
+            @NotNull OptOutConfigManager optOutConfigManager,
             @NotNull DatabaseManager databaseManager,
             @NotNull GUIManager guiManager,
             @NotNull HookManager hookManager,
@@ -80,9 +103,12 @@ public class PrestigeExemptionManager {
             @NotNull RewardsProcessor rewardsProcessor) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
-        this.settingsManager = settingsManager;
+
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
+        this.optInConfigManager = optInConfigManager;
+        this.optOutConfigManager = optOutConfigManager;
+
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
         this.hookManager = hookManager;
@@ -99,8 +125,6 @@ public class PrestigeExemptionManager {
      * @param  islandData The {@link IslandData}.
      */
     public void toggleIslandPrestigeStatus(@NotNull Player player, @NotNull Island island, @NotNull IslandData islandData) {
-        Settings settings = settingsManager.getConfiguration();
-        if(settings == null || settings.scaleFormula() == null) return;
         @NotNull Locale locale = localeManager.getConfiguration();
         @NotNull BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         UUID playerId = player.getUniqueId();
@@ -144,11 +168,13 @@ public class PrestigeExemptionManager {
             @NotNull IslandData oldIslandData,
             @NotNull GameModeAddon gameModeAddon,
             @NotNull String blueprintName) {
-        Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
-        Settings.OptInOutSettings prestigeOptInOutSettings = oldIslandData.isPrestigeExempt() ?  settings.optInSettings() : settings.optOutSettings();
-        OptType optType = oldIslandData.isPrestigeExempt() ?  OptType.OPT_IN : OptType.OPT_OUT;
-        int status = oldIslandData.isPrestigeExempt() ? 1 : 0;
+        @Nullable OptInOutConfig optInOutConfig = oldIslandData.isPrestigeExempt() ? optInConfigManager.getConfiguration() : optOutConfigManager.getConfiguration();
+        if(optInOutConfig == null) {
+            logger.error(AdventureUtil.deserialize("Unable to toggle island prestige status due to invalid configuration."));
+            return;
+        }
+        // Store the new prestige exemption status. true = opting out, false = opting in.
+        boolean newStatus = !oldIslandData.isPrestigeExempt();
 
         // Create the new island
         @Nullable Island newIsland = IslandCreator.builder(plugin, databaseManager, hookManager, islandSettingsProcessor)
@@ -156,9 +182,9 @@ public class PrestigeExemptionManager {
                 .gameModeAddon(gameModeAddon)
                 .oldIsland(oldIsland)
                 .islandData(oldIslandData)
-                .islandSettings(prestigeOptInOutSettings.islandSettings())
+                .islandSettings(optInOutConfig.resetSettings().islandSettings())
                 .name(blueprintName)
-                .prestigeExempt(!oldIslandData.isPrestigeExempt())
+                .prestigeExempt(newStatus)
                 .build();
 
         // If the new island failed to be created, log and error and return
@@ -183,22 +209,22 @@ public class PrestigeExemptionManager {
 
         // Insert players that were offline on prestige opt out to process player settings later
         OfflineStatusChangeTable offlineOptOutTable = databaseManager.getOfflineStatusChangeTable();
-        offlineIslandMembers.forEach(offlineMemberId -> offlineOptOutTable.insertOfflineStatusChange(offlineMemberId, newIsland.getUniqueId(), status));
+        offlineIslandMembers.forEach(offlineMemberId -> offlineOptOutTable.insertOfflineStatusChange(offlineMemberId, newIsland.getUniqueId(), newStatus));
 
         // Process Player Settings
         playerSettingsProcessor.processPlayerSettings(
-                prestigeOptInOutSettings.playerSettings(),
+                optInOutConfig.resetSettings().playerSettings(),
                 player,
                 onlineIslandMembers,
                 offlineIslandMembers,
-                prestigeOptInOutSettings.startingMoney(),
-                prestigeOptInOutSettings.giveStartingMoneyToAllIslandMembers());
+                optInOutConfig.resetSettings().startingMoney(),
+                optInOutConfig.resetSettings().giveStartingMoneyToAllIslandMembers());
 
         // Process prestige rewards
-        rewardsProcessor.processPostRewards(player, newIsland, onlineIslandMembers, offlineIslandMembers, prestigeOptInOutSettings.rewardConfig(), -1);
+        rewardsProcessor.processPostRewards(player, newIsland, onlineIslandMembers, offlineIslandMembers, optInOutConfig.rewardConfig(), -1);
 
-        if(optType.equals(OptType.OPT_OUT)) {
-            // Clear any offline prestiges queued
+        // Clear any offline prestiges queued if opting out
+        if(newStatus) {
             OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
             newIsland.getMemberSet().forEach((offlinePrestigeTable::removeOfflinePrestige));
         }
@@ -220,25 +246,42 @@ public class PrestigeExemptionManager {
             @NotNull GameModeAddon gameModeAddon) {
         IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), player.getUniqueId());
         IslandResetData islandResetData = new IslandResetData(player, User.getInstance(player), island, islandData, gameModeAddon);
-        BlueprintGUI.BlueprintMode blueprintMode = islandData.isPrestigeExempt() ? BlueprintGUI.BlueprintMode.OPT_IN : BlueprintGUI.BlueprintMode.OPT_OUT;
 
         // Let the player select a blueprint
-        BlueprintGUI gui = new BlueprintGUI(
-                plugin,
-                settingsManager,
-                localeManager,
-                guiConfigManager,
-                guiManager,
-                identifier,
-                hookManager,
-                rewardsProcessor,
-                islandResetData,
-                data -> {
-                    if(data.getBlueprint() == null) return;
+        @NotNull BlueprintGUI gui;
+        if(islandData.isPrestigeExempt()) {
+            gui = new BlueprintGUI(
+                    plugin,
+                    guiManager,
+                    identifier,
+                    localeManager,
+                    guiConfigManager,
+                    optInConfigManager,
+                    hookManager,
+                    rewardsProcessor,
+                    islandResetData,
+                    data -> {
+                        if(data.getBlueprint() == null) return;
 
-                    toggleIslandPrestigeStatus(data.getPlayer(), data.getUser(), data.getOldIsland(), data.getOldIslandData(), data.getGameModeAddon(), data.getBlueprint().getUniqueId());
-                },
-                blueprintMode);
+                        toggleIslandPrestigeStatus(data.getPlayer(), data.getUser(), data.getOldIsland(), data.getOldIslandData(), data.getGameModeAddon(), data.getBlueprint().getUniqueId());
+                    });
+        } else {
+            gui = new BlueprintGUI(
+                    plugin,
+                    guiManager,
+                    identifier,
+                    localeManager,
+                    guiConfigManager,
+                    optOutConfigManager,
+                    hookManager,
+                    rewardsProcessor,
+                    islandResetData,
+                    data -> {
+                        if(data.getBlueprint() == null) return;
+
+                        toggleIslandPrestigeStatus(data.getPlayer(), data.getUser(), data.getOldIsland(), data.getOldIslandData(), data.getGameModeAddon(), data.getBlueprint().getUniqueId());
+                    });
+        }
 
         // Create the GUI
         boolean creationResult = gui.create();
@@ -270,35 +313,43 @@ public class PrestigeExemptionManager {
      */
     public void handleOfflineStatusChanges(@NotNull Player player) {
         UUID playerId = player.getUniqueId();
-        CompletableFuture<List<Integer>> future = databaseManager.getOfflineStatusChangeTable().getOfflineStatusChanges(playerId);
+        CompletableFuture<List<Boolean>> future = databaseManager.getOfflineStatusChangeTable().getOfflineStatusChanges(playerId);
 
         future.thenAccept(statusChangesList -> {
             if(statusChangesList.isEmpty()) return;
 
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 if(!player.isOnline() || !player.isConnected()) return;
-                @Nullable Settings settings = settingsManager.getConfiguration();
-                if(settings == null) return;
+                @Nullable OptInOutConfig optInConfig = optInConfigManager.getConfiguration();
+                @Nullable OptInOutConfig optOutConfig = optOutConfigManager.getConfiguration();
+
+                if(optInConfig == null || optOutConfig == null) {
+                    logger.error(AdventureUtil.deserialize("Unable to process any offline prestige exemption changes for player " + player.getName() + " because the opt in or opt out config is invalid."));
+                    return;
+                }
 
                 statusChangesList.forEach(status -> {
-                    Settings.OptInOutSettings statusChangeSettings = status == 1 ? settings.optInSettings() : settings.optOutSettings();
+                    if(status) {
+                        playerSettingsProcessor.processPlayerSettingsOnLogin(
+                                optOutConfig.resetSettings().playerSettings(),
+                                player,
+                                optOutConfig.resetSettings().startingMoney(),
+                                optOutConfig.resetSettings().giveStartingMoneyToAllIslandMembers());
 
-                    playerSettingsProcessor.processPlayerSettingsOnLogin(
-                            statusChangeSettings.playerSettings(),
-                            player,
-                            statusChangeSettings.startingMoney(),
-                            statusChangeSettings.giveStartingMoneyToAllIslandMembers());
+                        rewardsProcessor.processRewardsOnLogin(player, optOutConfig.rewardConfig(), -1);
+                    } else {
+                        playerSettingsProcessor.processPlayerSettingsOnLogin(
+                                optInConfig.resetSettings().playerSettings(),
+                                player,
+                                optInConfig.resetSettings().startingMoney(),
+                                optInConfig.resetSettings().giveStartingMoneyToAllIslandMembers());
 
-                    rewardsProcessor.processRewardsOnLogin(player, statusChangeSettings.rewardConfig(), -1);
+                        rewardsProcessor.processRewardsOnLogin(player, optInConfig.rewardConfig(), -1);
+                    }
                 });
 
                 databaseManager.getOfflineStatusChangeTable().removeOfflineStatusChange(playerId);
             }, 1L);
         });
-    }
-
-    private enum OptType {
-        OPT_IN,
-        OPT_OUT
     }
 }

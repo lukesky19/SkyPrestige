@@ -17,15 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import io.papermc.paper.event.block.PlayerShearBlockEvent;
 import org.bukkit.block.Block;
@@ -44,18 +44,18 @@ public class PlayerShearBlockListener extends PrestigePointsListener<PlayerShear
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerShearBlockListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -85,11 +85,11 @@ public class PlayerShearBlockListener extends PrestigePointsListener<PlayerShear
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull PlayerShearBlockEvent playerShearBlockEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerShearBlockEvent playerShearBlockEvent, @NotNull EventContext eventContext) {
         @Nullable BlockType blockType = eventContext.getBlockType();
         if(blockType == null) return;
 
-        @Nullable Double prestigePoints = settings.prestigePointsMapping().getShearPrestigePoints(blockType);
+        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getShearPrestigePoints(blockType);
         if(prestigePoints == null) return;
 
         addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());

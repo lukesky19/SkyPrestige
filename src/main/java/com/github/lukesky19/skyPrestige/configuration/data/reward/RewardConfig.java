@@ -29,7 +29,7 @@ import java.util.List;
  * @param permissionRewards The {@link List} of {@link PermissionReward}s.
  * @param groupRewards The {@link List} of {@link GroupReward}s.
  * @param moneyRewards The {@link List} of {@link MoneyReward}s.
- * @param islandRangeReward The {@link IslandRangeReward}.
+ * @param islandSizeReward The {@link IslandRangeReward}.
  */
 @ConfigSerializable
 public record RewardConfig(
@@ -38,4 +38,4 @@ public record RewardConfig(
         @NotNull List<PermissionReward> permissionRewards,
         @NotNull List<GroupReward> groupRewards,
         @NotNull List<MoneyReward> moneyRewards,
-        @NotNull IslandRangeReward islandRangeReward) {}
+        @NotNull IslandRangeReward islandSizeReward) {}

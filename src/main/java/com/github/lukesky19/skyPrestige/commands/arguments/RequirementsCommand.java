@@ -18,11 +18,11 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigeConfigManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
@@ -51,32 +51,34 @@ import java.util.UUID;
  */
 public class RequirementsCommand {
     private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
+
     private final @NotNull LocaleManager localeManager;
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
+    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager}
      * @param localeManager A {@link LocaleManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public RequirementsCommand(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager) {
         this.logger = plugin.getComponentLogger();
-        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.prestigeConfigManager = prestigeConfigManager;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
     }
@@ -99,8 +101,8 @@ public class RequirementsCommand {
                             Player player = (Player) ctx.getSource().getSender();
                             UUID uuid = player.getUniqueId();
 
-                            @Nullable Settings settings = settingsManager.getConfiguration();
-                            if(settings == null || settings.scaleFormula() == null) {
+                            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+                            if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) {
                                 player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementsConfigError()));
                                 return 0;
                             }
@@ -137,7 +139,7 @@ public class RequirementsCommand {
                                 variables.put("p", String.valueOf(island.getMemberSet().size()));
                                 variables.put("k", String.valueOf(prestigeConfig.scaleFactor()));
 
-                                requiredPoints = EquationUtil.evaluateEquation(settings.scaleFormula(), variables).intValue();
+                                requiredPoints = EquationUtil.evaluateEquation(prestigePointsConfig.scaleFormula(), variables).intValue();
                             } else {
                                 requiredPoints = prestigeConfig.requiredPrestigePoints();
                             }

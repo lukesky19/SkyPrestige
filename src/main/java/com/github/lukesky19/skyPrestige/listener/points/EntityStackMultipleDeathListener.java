@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -44,18 +44,18 @@ public class EntityStackMultipleDeathListener extends PrestigePointsListener<Ent
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public EntityStackMultipleDeathListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -70,13 +70,13 @@ public class EntityStackMultipleDeathListener extends PrestigePointsListener<Ent
     @Override
     protected @NotNull EventContextExtractor<EntityStackMultipleDeathEvent> extractor() {
         return entityStackMultipleDeathEvent -> {
-            @Nullable Settings settings = settingsManager.getConfiguration();
-            if(settings == null) return null;
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) return null;
             StackedEntity stackedEntity = entityStackMultipleDeathEvent.getStack();
             Player player = stackedEntity.getEntity().getKiller();
             if(player == null) return null;
             EntityType entityType = stackedEntity.getEntity().getType();
-            int amountKilled = settings.accurateRoseStacker() ? entityStackMultipleDeathEvent.getEntityKillCount() : 1;
+            int amountKilled = prestigePointsConfig.accurateRoseStacker() ? entityStackMultipleDeathEvent.getEntityKillCount() : 1;
 
             EventContext eventContext = new EventContext();
             eventContext.setPlayer(player);
@@ -88,11 +88,11 @@ public class EntityStackMultipleDeathListener extends PrestigePointsListener<Ent
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull EntityStackMultipleDeathEvent entityStackMultipleDeathEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull EntityStackMultipleDeathEvent entityStackMultipleDeathEvent, @NotNull EventContext eventContext) {
         @Nullable EntityType entityType = eventContext.getEntityType();
         if(entityType == null) return;
 
-        @Nullable Double prestigePoints = settings.prestigePointsMapping().getKillPrestigePoints(entityType);
+        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getKillPrestigePoints(entityType);
         if(prestigePoints == null) return;
 
         addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());

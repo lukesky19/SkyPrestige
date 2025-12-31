@@ -27,6 +27,15 @@ cancel-button:
             - "<gray>By cancelling opting in, nothing will be reset."
         amount: 1
     slot: 5
+rewards-button:
+    item:
+        item-type: barrel
+        name: "<white>Click to view opt-in rewards."
+        lore:
+            - "<white>These are the rewards given after you opt-in your island.</white>"
+            - "<white>Rewards are given to each island member.</white>"
+        amount: 1
+    slot: 53
 keep-members:
     item:
         item-type: armor_stand

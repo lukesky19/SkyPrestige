@@ -20,11 +20,11 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.ProgressGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
@@ -60,8 +60,8 @@ import java.util.function.Consumer;
  */
 public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
+    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
     // BentoBox
     private final @NotNull Island island;
     private final @NotNull IslandData islandData;
@@ -72,34 +72,34 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
-     * @param localeManager A {@link LocaleManager} instance.
-     * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager An {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param island The player's {@link Island}.
      * @param islandData The {@link IslandData} for the island.
      * @param prestigeConfig The {@link PrestigeConfig} for the next prestige level.
      */
     public ProgressGUI(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player,
+            @NotNull LocaleManager localeManager,
+            @NotNull GUIConfigManager guiConfigManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull Island island,
             @NotNull IslandData islandData,
             @NotNull PrestigeConfig prestigeConfig) {
         super(plugin, guiManager, identifier, player);
 
-        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
-        this.prestigeConfig = prestigeConfig;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
 
-        progressGUIConfig = guiConfigManager.getProgressGUIConfig();
+        this.prestigeConfig = prestigeConfig;
+        this.progressGUIConfig = guiConfigManager.getProgressGUIConfig();
 
         this.island = island;
         this.islandData = islandData;
@@ -146,12 +146,12 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
         int guiSize = inventoryView.getTopInventory().getSize();
 
         Locale locale = localeManager.getConfiguration();
-        Settings settings = settingsManager.getConfiguration();
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
 
         // Check for invalid settings
-        if(settings == null || settings.scaleFormula() == null) {
+        if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigError()));
-            logger.error(AdventureUtil.deserialize("Unable to display prestige requirement due to invalid plugin settings or scale formula."));
+            logger.error(AdventureUtil.deserialize("Unable to display prestige requirement due to invalid prestige points config and or scale formula."));
             return false;
         }
 
@@ -260,8 +260,8 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
                 progressGUIConfig.progressButtons().incomplete().itemType() == null ||
                 progressGUIConfig.progressButtons().complete().itemType() == null) return;
 
-        Settings settings = settingsManager.getConfiguration();
-        if(settings == null || settings.scaleFormula() == null) return;
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) return;
 
         if(prestigeConfig.requiredPrestigePoints() == null) return;
 
@@ -272,7 +272,7 @@ public class ProgressGUI extends ChestGUI<IslandIdUUIDKey> {
             variables.put("p", String.valueOf(island.getMemberSet().size()));
             variables.put("k", String.valueOf(prestigeConfig.scaleFactor()));
 
-            requiredPoints = EquationUtil.evaluateEquation(settings.scaleFormula(), variables).intValue();
+            requiredPoints = EquationUtil.evaluateEquation(prestigePointsConfig.scaleFormula(), variables).intValue();
         } else {
             requiredPoints = prestigeConfig.requiredPrestigePoints();
         }

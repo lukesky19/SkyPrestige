@@ -41,7 +41,6 @@ import java.util.concurrent.CompletableFuture;
  * This class handles teleporting offline players who logged out on an island that was prestiged.
  */
 public class TeleportationManager {
-    private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull DatabaseManager databaseManager;
@@ -59,7 +58,6 @@ public class TeleportationManager {
             @NotNull SettingsManager settingsManager,
             @NotNull DatabaseManager databaseManager,
             @NotNull HookManager hookManager) {
-        this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
         this.databaseManager = databaseManager;
@@ -95,32 +93,7 @@ public class TeleportationManager {
             if(spawnPoint != null) {
                 player.teleportAsync(spawnPoint);
             } else {
-                Settings.Location fallbackLocationConfig = settings.fallbackLocation();
-                if(fallbackLocationConfig.world() == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid fallback location world name."));
-                    return;
-                }
-                World world = plugin.getServer().getWorld(fallbackLocationConfig.world());
-                if(world == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to no world found for world name " + fallbackLocationConfig.world() + " for the fallback location config."));
-                    return;
-                }
-                if(fallbackLocationConfig.x() == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid X coordinate for the fallback location config."));
-                    return;
-                }
-                if(fallbackLocationConfig.y() == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid Y coordinate for the fallback location config."));
-                    return;
-                }
-                if(fallbackLocationConfig.z() == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to an invalid Z coordinate for the fallback location config."));
-                    return;
-                }
-
-                Location fallbackLocation = new Location(world, fallbackLocationConfig.x(), fallbackLocationConfig.y(), fallbackLocationConfig.z());
-
-                player.teleportAsync(fallbackLocation);
+                logger.warn(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to now island spawn point set for island id " + islandId + "."));
             }
 
             databaseManager.getPlayerTeleportTable().deletePlayerIdAndIslandId(playerId);

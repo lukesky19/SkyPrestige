@@ -22,11 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.VaultConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skyPrestige.vault.VaultManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -62,7 +62,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
     private final @NotNull GUIManager guiManager;
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull VaultManager vaultManager;
+    private final @NotNull VaultConfigManager vaultConfigManager;
     // Island
     private final @NotNull String islandId;
     private final @NotNull IslandData islandData;
@@ -80,7 +80,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
-     * @param vaultManager A {@link VaultManager} instance.
+     * @param vaultConfigManager A {@link VaultConfigManager} instance.
      * @param islandId The island's unique id.
      * @param islandData The island's {@link IslandData}.
      * @param player The {@link Player} viewing the GUI.
@@ -92,7 +92,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
             @NotNull IslandIdUUIDKey identifier,
             @NotNull DatabaseManager databaseManager,
             @NotNull LocaleManager localeManager,
-            @NotNull VaultManager vaultManager,
+            @NotNull VaultConfigManager vaultConfigManager,
             @NotNull String islandId,
             @NotNull IslandData islandData,
             @NotNull Player player) {
@@ -101,7 +101,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
         this.guiManager = guiManager;
         this.databaseManager = databaseManager;
         this.localeManager = localeManager;
-        this.vaultManager = vaultManager;
+        this.vaultConfigManager = vaultConfigManager;
 
         this.islandId = islandId;
         this.islandData = islandData;
@@ -275,7 +275,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
         if(itemType == null) return;
 
         // If the item is restricted, don't add the item to the vault and send the player an error message
-        if(vaultManager.isVaultItemTypeDisallowed(itemType)) {
+        if(vaultConfigManager.isVaultItemTypeDisallowed(itemType)) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultItemNotAllowed()));
             return;
         }

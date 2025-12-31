@@ -172,8 +172,12 @@ public class RewardsProcessor {
         }
 
         // Island Range Reward
-        if(rewardConfig.islandRangeReward().rangeToAdd() > 0) {
-            island.setProtectionRange(island.getProtectionRange() + rewardConfig.islandRangeReward().rangeToAdd());
+        if(rewardConfig.islandSizeReward().islandSize() > 0) {
+            if(rewardConfig.islandSizeReward().setSize()) {
+                island.setProtectionRange(rewardConfig.islandSizeReward().islandSize());
+            } else {
+                island.setProtectionRange(island.getProtectionRange() + rewardConfig.islandSizeReward().islandSize());
+            }
         }
     }
 

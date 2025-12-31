@@ -122,7 +122,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     public void testInsertOfflineStatusChange() {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        int status = 1;
+        boolean status = true;
 
         liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
             return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
@@ -151,7 +151,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Error")));
 
         // Check that the table creation errored
-        offlineStatusChangeTableWithMockedQueueManager.insertOfflineStatusChange(UUID.randomUUID(), "BSkyBlock" + UUID.randomUUID(), 1)
+        offlineStatusChangeTableWithMockedQueueManager.insertOfflineStatusChange(UUID.randomUUID(), "BSkyBlock" + UUID.randomUUID(), true)
                 .thenAccept(v -> fail("Table creation should of failed exceptionally."))
                 .exceptionally(ex -> {
                     verify(logger).error(any(Component.class));
@@ -168,7 +168,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     public void testRemoveOfflineStatusChange() {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        int status = 1;
+        boolean status = true;
 
         liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
             return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
@@ -220,7 +220,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     public void testGetOfflineStatusChanges() {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        int status = 1;
+        boolean status = true;
 
         liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
             return playerIdsTable.insertPlayerId(playerId).thenCompose(v2 -> {
@@ -298,7 +298,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
                     return new OfflineStatusData(
                             resultSet.getString("player_id"),
                             resultSet.getString("island_id"),
-                            resultSet.getInt("status"));
+                            resultSet.getBoolean("status"));
                 }
 
                 return null;
@@ -317,5 +317,5 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     private record OfflineStatusData(
             @NotNull String playerId,
             @NotNull String islandId,
-            @NotNull Integer status) {}
+            boolean status) {}
 }

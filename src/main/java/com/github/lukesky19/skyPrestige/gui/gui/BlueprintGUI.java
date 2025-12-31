@@ -22,17 +22,16 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.OptInConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.OptOutConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
-import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.data.HashMapDataManager;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
@@ -62,9 +61,10 @@ import java.util.function.Consumer;
 public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull SkyPlugin plugin;
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
+    private final @Nullable OptInConfigManager optInConfigManager;
+    private final @Nullable OptOutConfigManager optOutConfigManager;
     private final @NotNull HookManager hookManager;
     private final @NotNull RewardsProcessor rewardsProcessor;
 
@@ -72,7 +72,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
-    private final @NotNull BlueprintMode blueprintMode;
+    // Config
     private final @Nullable BlueprintGUIConfig blueprintGUIConfig;
 
     // Page info
@@ -84,44 +84,119 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager An {@link GUIManager} instance.
-     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
-     * @param hookManager A {@link HashMapDataManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
      * @param islandResetData An {@link IslandResetData} instance.
      * @param consumer The consumer that will prestige the island once the player confirms it.
-     * @param blueprintMode The {@link BlueprintMode}.
      */
     public BlueprintGUI(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
+            @NotNull LocaleManager localeManager,
+            @NotNull GUIConfigManager guiConfigManager,
             @NotNull HookManager hookManager,
             @NotNull RewardsProcessor rewardsProcessor,
             @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer,
-            @NotNull BlueprintMode blueprintMode) {
+            @NotNull Consumer<IslandResetData> consumer) {
         super(plugin, guiManager, identifier, islandResetData.getPlayer());
 
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
-        this.settingsManager = settingsManager;
+        this.optInConfigManager = null;
+        this.optOutConfigManager = null;
         this.hookManager = hookManager;
         this.rewardsProcessor = rewardsProcessor;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
 
-        blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
+        this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
+    }
 
-        this.blueprintMode = blueprintMode;
+    /**
+     * Constructor
+     * @param plugin A {@link JavaPlugin} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param optInConfigManager An {@link OptInConfigManager} instance.
+     * @param hookManager A {@link HookManager} instance.
+     * @param rewardsProcessor A {@link RewardsProcessor} instance.
+     * @param islandResetData An {@link IslandResetData} instance.
+     * @param consumer The consumer that will prestige the island once the player confirms it.
+     */
+    public BlueprintGUI(
+            @NotNull SkyPlugin plugin,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
+            @NotNull LocaleManager localeManager,
+            @NotNull GUIConfigManager guiConfigManager,
+            @NotNull OptInConfigManager optInConfigManager,
+            @NotNull HookManager hookManager,
+            @NotNull RewardsProcessor rewardsProcessor,
+            @NotNull IslandResetData islandResetData,
+            @NotNull Consumer<IslandResetData> consumer) {
+        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+
+        this.plugin = plugin;
+        this.localeManager = localeManager;
+        this.guiConfigManager = guiConfigManager;
+        this.optInConfigManager = optInConfigManager;
+        this.optOutConfigManager = null;
+        this.hookManager = hookManager;
+        this.rewardsProcessor = rewardsProcessor;
+
+        this.islandResetData = islandResetData;
+        this.consumer = consumer;
+
+        this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
+    }
+
+    /**
+     * Constructor
+     * @param plugin A {@link JavaPlugin} instance.
+     * @param guiManager An {@link IGUIManager} instance.
+     * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param optOutConfigManager An {@link OptOutConfigManager} instance.
+     * @param hookManager A {@link HookManager} instance.
+     * @param rewardsProcessor A {@link RewardsProcessor} instance.
+     * @param islandResetData An {@link IslandResetData} instance.
+     * @param consumer The consumer that will prestige the island once the player confirms it.
+     */
+    public BlueprintGUI(
+            @NotNull SkyPlugin plugin,
+            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NotNull IslandIdUUIDKey identifier,
+            @NotNull LocaleManager localeManager,
+            @NotNull GUIConfigManager guiConfigManager,
+            @NotNull OptOutConfigManager optOutConfigManager,
+            @NotNull HookManager hookManager,
+            @NotNull RewardsProcessor rewardsProcessor,
+            @NotNull IslandResetData islandResetData,
+            @NotNull Consumer<IslandResetData> consumer) {
+        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+
+        this.plugin = plugin;
+        this.localeManager = localeManager;
+        this.guiConfigManager = guiConfigManager;
+        this.optInConfigManager = null;
+        this.optOutConfigManager = optOutConfigManager;
+        this.hookManager = hookManager;
+        this.rewardsProcessor = rewardsProcessor;
+
+        this.islandResetData = islandResetData;
+        this.consumer = consumer;
+
+        this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
     }
 
     /**
@@ -345,31 +420,32 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
                 this.close();
 
-                @NotNull ConfirmGUI confirmGUI = switch(blueprintMode) {
-                    case PRESTIGE -> new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, rewardsProcessor, islandResetData, consumer);
-
-                    case OPT_IN -> new ConfirmOptInGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, rewardsProcessor, islandResetData, consumer);
-
-                    case OPT_OUT -> new ConfirmOptOutGUI(plugin, guiConfigManager, guiManager, identifier, settingsManager, rewardsProcessor, islandResetData, consumer);
-                };
+                @NotNull ConfirmGUI confirmGUI;
+                if(optInConfigManager != null) {
+                    confirmGUI = new ConfirmOptInGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optInConfigManager, rewardsProcessor, islandResetData, consumer);
+                } else if(optOutConfigManager != null) {
+                    confirmGUI = new ConfirmOptOutGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optOutConfigManager, rewardsProcessor, islandResetData, consumer);
+                } else {
+                    confirmGUI = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, rewardsProcessor, islandResetData, consumer);
+                }
 
                 boolean creationResult = confirmGUI.create();
                 if (!creationResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
+                    logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error."));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = confirmGUI.update();
                 if (!updateResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
+                    logger.error(AdventureUtil.deserialize("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error."));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = confirmGUI.open();
                 if (!openResult) {
-                    logger.error(AdventureUtil.deserialize("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error. Blueprint Mode: " + blueprintMode));
+                    logger.error(AdventureUtil.deserialize("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error."));
                     player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
@@ -546,23 +622,5 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             case 27 -> 43;
             default -> throw new RuntimeException("Number of blueprints added exceeds the size of the GUI!");
         };
-    }
-
-    /**
-     * This enum defines blueprint modes. Used to know which confirm GUI to open.
-     */
-    public enum BlueprintMode {
-        /**
-         * This enum defines a blueprint being selected for prestige.
-         */
-        PRESTIGE,
-        /**
-         * This enum defines a blueprint being selected for prestige opt-in.
-         */
-        OPT_IN,
-        /**
-         * This enum defines a blueprint being selected for prestige opt-out.
-         */
-        OPT_OUT
     }
 }

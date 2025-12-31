@@ -17,15 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.listener.points;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
 import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.enchantments.Enchantment;
@@ -53,18 +53,18 @@ public class PlayerRenameItemListener extends PrestigePointsListener<InventoryCl
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerRenameItemListener(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, settingsManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -112,7 +112,7 @@ public class PlayerRenameItemListener extends PrestigePointsListener<InventoryCl
     }
 
     @Override
-    protected void handle(@NotNull Settings settings, @NotNull IslandData islandData, @NotNull InventoryClickEvent inventoryClickEvent, @NotNull EventContext eventContext) {
+    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull InventoryClickEvent inventoryClickEvent, @NotNull EventContext eventContext) {
         @Nullable ItemType itemType = eventContext.getItemType();
         if(itemType == null) return;
         @Nullable PotionType potionType = eventContext.getPotionType();
@@ -122,15 +122,15 @@ public class PlayerRenameItemListener extends PrestigePointsListener<InventoryCl
         if(enchantments != null && !enchantments.isEmpty()) {
             double totalPoints = 0;
             for(Map.Entry<Enchantment, Integer> enchantmentEntry : enchantments.entrySet()) {
-                @Nullable Double points = settings.prestigePointsMapping().getNamePrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
+                @Nullable Double points = prestigePointsConfig.prestigePointsMapping().getNamePrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
                 if(points != null) totalPoints += points;
             }
 
             if(totalPoints > 0) prestigePoints = totalPoints;
         } else if(potionType != null) {
-            prestigePoints = settings.prestigePointsMapping().getNamePrestigePoints(itemType, potionType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getNamePrestigePoints(itemType, potionType);
         } else {
-            prestigePoints = settings.prestigePointsMapping().getNamePrestigePoints(itemType);
+            prestigePoints = prestigePointsConfig.prestigePointsMapping().getNamePrestigePoints(itemType);
         }
 
         if(prestigePoints == null) return;

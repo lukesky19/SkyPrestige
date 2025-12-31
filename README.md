@@ -47,6 +47,10 @@
 * /skyprestige reload - Reloads the plugin.
 * /skyprestige requirements <level> - View the required prestige points for a particular prestige level.
 * /skyprestige rewards - View the rewards for the next prestige level.
+* /skyprestige rewards prestige - View the rewards for the next prestige level.
+* /skyprestige rewards prestige [level] - View the prestige rewards for the provided prestige level.
+* /skyprestige rewards opt-in - View the rewards for opting in to prestige.
+* /skyprestige rewards opt-out - View the rewards for opting out of prestige.
 * /skyprestige unexempt - Mark an island as not exempt from prestige leaderboards.
 * /skyprestige values - Open the values GUI.
 * /skyprestige vault - Open the island vault.

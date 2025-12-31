@@ -34,7 +34,6 @@ import java.util.List;
  */
 public class LocaleManager extends SimpleConfigManager<Locale> {
     private final @NotNull SimpleConfigManager<Settings> settingsManager;
-    private @Nullable Locale locale;
     private @NotNull Locale DEFAULT_LOCALE;
 
     /**
@@ -55,8 +54,8 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
      */
     @Override
     public @NotNull Locale getConfiguration() {
-        if(locale == null) return DEFAULT_LOCALE;
-        return locale;
+        if(configuration == null) return DEFAULT_LOCALE;
+        return configuration;
     }
 
     @Override
@@ -91,94 +90,17 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
      * @param locale The {@link Locale} to migrate.
      * @return The migreated {@link Locale} or null if migration failed.
      */
+    @Override
     public @Nullable Locale migrateConfiguration(@NotNull Locale locale) {
         switch(locale.configVersion()) {
-            case "1.1.0.0" -> {
+            case "2.0.0.0" -> {
                 // latest version, do nothing
                 return locale;
             }
 
-            case "1.0.0.0" -> {
-                List<String> help = locale.help();
-                help.add("<white>/</white><green>skyprestige</green> <yellow>values</yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>info</yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>requirements <level></yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>exempt <island_id></yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>unexempt <island_id></yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>leaderboard</yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier event</yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier <add | remove | set> <amount></yellow>");
-                help.add("<white>/</white><green>skyprestige</green> <yellow>multiplier get [additional | event | total]</yellow>");
-
-                return new Locale(
-                        "1.1.0.0",
-                        locale.prefix(),
-                        help,
-                        locale.reload(),
-                        locale.guiOpenError(),
-                        locale.islandDataNotFound(),
-                        locale.islandPrestigeLevelUpdated(),
-                        locale.prestigePlayerOnly(),
-                        locale.islandPrestigeLevelMax(),
-                        locale.prestigePlayerInWrongWorld(),
-                        locale.prestigePlayerNotOnIsland(),
-                        locale.prestigeIslandNotOwned(),
-                        locale.prestigePlayerNotMemberOrOwner(),
-                        locale.prestigeNotEnoughPrestigePoints(),
-                        "<red>You cannot prestige an island that is opted out of prestige.</red>",
-                        locale.prestigeConfigError(),
-                        locale.prestigeConfigRequirementError(),
-                        locale.progressPlayerNotOnIsland(),
-                        locale.progressMaxPrestigeLevel(),
-                        "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
-                        locale.rewardsPlayerNotOnIsland(),
-                        locale.rewardsMaxPrestigeLevel(),
-                        "<red>Your island is opted out of prestige. Prestige rewards can only be viewed for islands that can prestige.</red>",
-                        locale.exchangePlayerNotOnIsland(),
-                        locale.exchangePrestigeLevelNotMet(),
-                        locale.exchangeNotEnoughPrestigePoints(),
-                        "<red>Your island is opted out of prestige. Only islands that can prestige can exchange prestige points.</red>",
-                        locale.vaultPlayerNotOnIsland(),
-                        locale.vaultItemNotAllowed(),
-                        "<red>Your island is opted out of prestige. The vault can only be used by islands opted into prestige.</red>",
-                        "<red>The level provided is not a prestige level.</red>",
-                        "<red>Unable to view prestige level requirements due to a configuration error.</red>",
-                        "<green>Prestige level <prestige_level> requires <prestige_points> prestige points.</green>",
-                        "<green>Island <yellow><island_id></yellow> is now exempt from top placeholders.</green>",
-                        "<green>Island <yellow><island_id></yellow> is now unexempt from top placeholders.</green>",
-                        "<red>Your island is already opted into prestige.</red>",
-                        "<red>Your island is already opted out of prestige.</red>",
-                        "<green><bold>Top 10 Islands By Prestige Level and Points</bold></green>",
-                        "<gray>[</gray><aqua><position></aqua><gray>]</gray> <yellow><player_name></yellow> <white>Level:</white> <aqua><prestige_level></aqua> <white>Points:</white> <aqua><prestige_points></aqua>",
-                        "<gray>[</gray><aqua><position></aqua><gray>] ----------</gray>",
-                        "<red>This item can not be protected by a protection orb.</red>",
-                        "<red>This item is already protected by a protection orb.</red>",
-                        "<green>This item is now protected and will not be removed on prestige.</green>",
-                        "<green>The current additional multiplier is <aqua><additional_multiplier></aqua>.</green>",
-                        "<green>The current event multiplier is <aqua><event_multiplier></aqua>.</green>",
-                        "<green>The current total multiplier is <aqua><total_multiplier></aqua>.</green>",
-                        "<green>The prestige points multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                        "<green>A <aqua><event_multiplier>x</aqua> prestige points event has now started. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                        "<green>The <aqua><event_multiplier>x</aqua> prestige points event has ended. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                        "<green>There is <time> left until the <aqua><event_multiplier>x</aqua> prestige points event ends. The total multiplier is <aqua><current_multiplier></aqua>.</green>",
-                        "<green>The next <aqua><event_multiplier>x</aqua> prestige points event starts in <time>.</green>",
-                        "<green>There is no prestige points multiplier event active. There is no next event scheduled.</green>",
-                        new Locale.TimeFormat(
-                                "",
-                                "<aqua><years></aqua> year(s)",
-                                "<aqua><months></aqua> month(s)",
-                                "<aqua><weeks></aqua> week(s)",
-                                "<aqua><days></aqua> day(s)",
-                                "<aqua><hours></aqua> hour(s)",
-                                "<aqua><minutes></aqua> minute(s)",
-                                "<aqua><seconds></aqua> second(s)",
-                                ""),
-                        "<red>You must be in an island world to opt in or out of prestige.</red>",
-                        "<red>You must be on your island to opt in or out of prestige.</red>",
-                        "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",
-                        "<red>You must be the island owner or an island member to opt in or out of prestige.</red>",
-                        locale.delimiter(),
-                        locale.finalDelimiter());
+            case "1.1.0.0", "1.0.0.0" -> {
+                logger.warn(AdventureUtil.deserialize("Unable to migrate version 1.0.0.0 or 1.1.0.0 config versions for locale config. Please regenerate or manually migrate your configuration."));
+                return null;
             }
 
             case null, default -> {
@@ -193,62 +115,67 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
      */
     @Override
     public boolean validateConfiguration() {
-        if(locale == null) return false;
+        if(configuration == null) return false;
 
-        if(locale.configVersion()  == null
-                || locale.prefix()  == null
-                || locale.reload()  == null
-                || locale.guiOpenError()  == null
-                || locale.islandDataNotFound()  == null
-                || locale.islandPrestigeLevelUpdated()  == null
-                || locale.prestigePlayerOnly()  == null
-                || locale.islandPrestigeLevelMax()  == null
-                || locale.prestigePlayerInWrongWorld()  == null
-                || locale.prestigePlayerNotOnIsland()  == null
-                || locale.prestigeIslandNotOwned()  == null
-                || locale.prestigePlayerNotMemberOrOwner()  == null
-                || locale.prestigeNotEnoughPrestigePoints()  == null
-                || locale.prestigeIslandOptedOut() == null
-                || locale.prestigeConfigError()  == null
-                || locale.prestigeConfigRequirementError()  == null
-                || locale.progressPlayerNotOnIsland()  == null
-                || locale.progressMaxPrestigeLevel()  == null
-                || locale.progressPrestigeExempt() == null
-                || locale.rewardsPlayerNotOnIsland()  == null
-                || locale.rewardsMaxPrestigeLevel()  == null
-                || locale.vaultItemNotAllowed() == null
-                || locale.vaultPlayerNotOnIsland() == null
-                || locale.vaultPrestigeExempt() == null
-                || locale.requirementsLevelNotFound() == null
-                || locale.requirementsConfigError() == null
-                || locale.requirementsPointsForLevel() == null
-                || locale.islandExempt() == null
-                || locale.islandUnexempt() == null
-                || locale.islandAlreadyOptedIn() == null
-                || locale.islandAlreadyOptedOut() == null
-                || locale.leaderboardTitle() == null
-                || locale.leaderboardPosition() == null
-                || locale.leaderboardPositionEmpty() == null
-                || locale.protectionOrbNotAllowed() == null
-                || locale.protectionOrbAlreadyProtected() == null
-                || locale.protectionOrbProtected() == null
-                || locale.additionalMultiplierGet() == null
-                || locale.eventMultiplierGet() == null
-                || locale.totalMultiplierGet() == null
-                || locale.multiplierChanged() == null
-                || locale.multiplierEventStarted() == null
-                || locale.multiplierEventEnded() == null
-                || locale.multiplierEventRemainingTime() == null
-                || locale.multiplierEventNextTime() == null
-                || locale.multiplierEventDisabled() == null
-                || isTimeFormatInvalid(locale.multiplierTimePlaceholder())
-                || locale.prestigeStatusPlayerInWrongWorld() == null
-                || locale.prestigeStatusPlayerNotOnIsland() == null
-                || locale.prestigeStatusIslandNotOwned() == null
-                || locale.prestigeStatusPlayerNotMemberOrOwner() == null
-                || locale.delimiter() == null
-                || locale.finalDelimiter() == null) {
-            locale = null;
+        if(configuration.configVersion()  == null
+                || configuration.prefix()  == null
+                || configuration.reload()  == null
+                || configuration.guiOpenError()  == null
+                || configuration.islandDataNotFound()  == null
+                || configuration.islandPrestigeLevelUpdated()  == null
+                || configuration.prestigePlayerOnly()  == null
+                || configuration.islandPrestigeLevelMax()  == null
+                || configuration.prestigePlayerInWrongWorld()  == null
+                || configuration.prestigePlayerNotOnIsland()  == null
+                || configuration.prestigeIslandNotOwned()  == null
+                || configuration.prestigePlayerNotMemberOrOwner()  == null
+                || configuration.prestigeNotEnoughPrestigePoints()  == null
+                || configuration.prestigeIslandOptedOut() == null
+                || configuration.prestigeConfigError()  == null
+                || configuration.prestigeConfigRequirementError()  == null
+                || configuration.progressPlayerNotOnIsland()  == null
+                || configuration.progressMaxPrestigeLevel()  == null
+                || configuration.progressPrestigeExempt() == null
+                || configuration.rewardsPlayerNotOnIsland()  == null
+                || configuration.rewardsMaxPrestigeLevel()  == null
+                || configuration.rewardsPrestigeExempt() == null
+                || configuration.exchangePlayerNotOnIsland() == null
+                || configuration.exchangePrestigeLevelNotMet() == null
+                || configuration.exchangeNotEnoughPrestigePoints() == null
+                || configuration.exchangePrestigeExempt() == null
+                || configuration.vaultPlayerNotOnIsland() == null
+                || configuration.vaultItemNotAllowed() == null
+                || configuration.vaultPrestigeExempt() == null
+                || configuration.requirementsLevelNotFound() == null
+                || configuration.requirementsConfigError() == null
+                || configuration.requirementsPointsForLevel() == null
+                || configuration.islandExempt() == null
+                || configuration.islandUnexempt() == null
+                || configuration.islandAlreadyOptedIn() == null
+                || configuration.islandAlreadyOptedOut() == null
+                || configuration.leaderboardTitle() == null
+                || configuration.leaderboardPosition() == null
+                || configuration.leaderboardPositionEmpty() == null
+                || configuration.protectionOrbNotAllowed() == null
+                || configuration.protectionOrbAlreadyProtected() == null
+                || configuration.protectionOrbProtected() == null
+                || configuration.additionalMultiplierGet() == null
+                || configuration.eventMultiplierGet() == null
+                || configuration.totalMultiplierGet() == null
+                || configuration.multiplierChanged() == null
+                || configuration.multiplierEventStarted() == null
+                || configuration.multiplierEventEnded() == null
+                || configuration.multiplierEventRemainingTime() == null
+                || configuration.multiplierEventNextTime() == null
+                || configuration.multiplierEventDisabled() == null
+                || isTimeFormatInvalid(configuration.multiplierTimePlaceholder())
+                || configuration.prestigeStatusPlayerInWrongWorld() == null
+                || configuration.prestigeStatusPlayerNotOnIsland() == null
+                || configuration.prestigeStatusIslandNotOwned() == null
+                || configuration.prestigeStatusPlayerNotMemberOrOwner() == null
+                || configuration.delimiter() == null
+                || configuration.finalDelimiter() == null) {
+            configuration = null;
 
             logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
             logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
@@ -282,7 +209,7 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
      */
     private void createDefaultLocale() {
         DEFAULT_LOCALE = new Locale(
-                "1.1.0.0",
+                "2.0.0.0",
                 "<green><bold>SkyPrestige</bold></green><gray> ▪ </gray>",
                 List.of(
                         "<green>SkyPrestige is developed by <white><bold>lukeskywlker19</bold></white>.</green>",
@@ -323,7 +250,7 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 "<red>You must be on your island to view prestige progress.</red>",
                 "<green>No progress to view because your island is at the max prestige level.</green>",
                 "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
-                "<red>You must be on your island to view prestige rewards.</red>",
+                "<red>You must be on your island to view rewards.</red>",
                 "<green>No rewards to view because your island is at the max prestige level.</green>",
                 "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
                 "<red>You must be on your island to exchange prestige points.</red>",

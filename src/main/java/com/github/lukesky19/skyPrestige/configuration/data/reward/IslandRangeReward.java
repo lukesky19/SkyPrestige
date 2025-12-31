@@ -25,12 +25,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The configuration for the island range to add.
  * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
- * @param rangeToAdd The range to add to the island.
+ * @param setSize Should the island size be set instead of added?
+ * @param islandSize The island size to add or set for island.
  */
 @ConfigSerializable
 public record IslandRangeReward(
         @NotNull ItemStackConfig displayItem,
-        int rangeToAdd) implements IReward {
+        boolean setSize,
+        int islandSize) implements IReward {
     @Override
     public @NotNull ItemStackConfig displayItem() {
         return displayItem;

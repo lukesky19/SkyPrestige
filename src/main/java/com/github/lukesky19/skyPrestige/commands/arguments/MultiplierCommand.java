@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -45,26 +45,26 @@ import java.util.List;
  */
 public class MultiplierCommand {
     private final @NotNull SkyPlugin plugin;
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull MultiplierManager multiplierManager;
+    private final @NotNull MultiplierConfigManager multiplierConfigManager;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public MultiplierCommand(
             @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
+            @NotNull MultiplierConfigManager multiplierConfigManager,
             @NotNull MultiplierManager multiplierManager) {
         this.plugin = plugin;
-        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.multiplierManager = multiplierManager;
+        this.multiplierConfigManager = multiplierConfigManager;
     }
 
     /**
@@ -99,14 +99,14 @@ public class MultiplierCommand {
                             sender.sendMessage(AdventureUtil.deserialize(locale.multiplierEventRemainingTime(), placeholderList));
                         }
                     } else {
-                        @Nullable Settings settings = settingsManager.getConfiguration();
-                        if(settings == null) return 0;
+                        @Nullable MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
+                        if(multiplierConfig == null) return 0;
 
                         if(nextEventSeconds > 0) {
                             Component timePlaceholder = multiplierManager.getTimePlaceholder(locale.multiplierTimePlaceholder(), nextEventSeconds);
                             List<TagResolver.Single> placeholderList = List.of(
                                     Placeholder.component("time", timePlaceholder),
-                                    Placeholder.parsed("event_multiplier", String.valueOf(settings.multiplierEventSettings().multiplier())));
+                                    Placeholder.parsed("event_multiplier", String.valueOf(multiplierConfig.multiplier())));
 
                             if(sender instanceof Player) {
                                 sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventNextTime(), placeholderList));

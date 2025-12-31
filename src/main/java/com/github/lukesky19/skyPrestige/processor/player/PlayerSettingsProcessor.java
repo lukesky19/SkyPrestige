@@ -17,10 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.processor.player;
 
-import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.InventorySettingsInterface;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.PlayTimeSettingsInterface;
-import com.github.lukesky19.skyPrestige.configuration.interfaces.PlayerSettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.inventory.InventorySettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.player.PlayerSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.integration.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.PlayerAuctionsHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * This class manages the processing of {@link PlayerSettingsInterface}.
+ * This class manages the processing of {@link PlayerSettings}.
  */
 public class PlayerSettingsProcessor {
     private final @NotNull HookManager hookManager;
@@ -57,7 +56,7 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettingsInterface} to process.
+     * @param playerSettings The {@link PlayerSettings} to process.
      * @param initiatingPlayer The player that initiated the processing of the player settings.
      * @param onlinePlayerList The list of online players to apply the settings to.
      * @param offlinePlayerIds The list of offline player ids to apply the settings to.
@@ -65,7 +64,7 @@ public class PlayerSettingsProcessor {
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettings(
-            @NotNull PlayerSettingsInterface playerSettings,
+            @NotNull PlayerSettings playerSettings,
             @NotNull Player initiatingPlayer,
             @NotNull List<Player> onlinePlayerList,
             @NotNull List<UUID> offlinePlayerIds,
@@ -80,17 +79,17 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettingsInterface} to process.
+     * @param playerSettings The {@link PlayerSettings} to process.
      * @param player The {@link Player} to apply the settings to.
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettingsOnLogin(
-            @NotNull PlayerSettingsInterface playerSettings,
+            @NotNull PlayerSettings playerSettings,
             @NotNull Player player,
             double startingMoney,
             boolean giveToAll) {
-        processInventorySettings(playerSettings.playerInventorySettings(), playerSettings.playerEnderChestSettings(), player);
+        processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
 
         if(playerSettings.resetExp()) {
             resetExperience(player);
@@ -103,19 +102,19 @@ public class PlayerSettingsProcessor {
 
     /**
      * Process the player settings.
-     * @param playerSettings The {@link PlayerSettingsInterface} to process.
+     * @param playerSettings The {@link PlayerSettings} to process.
      * @param player The {@link Player} to process the settings for.
      * @param isPlayerInitiator Is the player the initiator?
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
     private void processPlayerSettings(
-            @NotNull PlayerSettingsInterface playerSettings,
+            @NotNull PlayerSettings playerSettings,
             @NotNull Player player,
             boolean isPlayerInitiator,
             double startingMoney,
             boolean giveToAll) {
-        processInventorySettings(playerSettings.playerInventorySettings(), playerSettings.playerEnderChestSettings(), player);
+        processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
 
         if(playerSettings.resetExp()) {
             resetExperience(player);
@@ -131,28 +130,28 @@ public class PlayerSettingsProcessor {
     }
 
     /**
-     * Process the {@link InventorySettingsInterface} provided.
-     * @param playerInventorySettings The {@link InventorySettingsInterface} to apply to the player's Inventory.
-     * @param playerEnderChestInventorySettings The {@link InventorySettingsInterface} to apply to the player's Ender Chest.
+     * Process the {@link InventorySettings} provided.
+     * @param playerInventorySettings The {@link InventorySettings} to apply to the player's Inventory.
+     * @param playerEnderChestInventorySettings The {@link InventorySettings} to apply to the player's Ender Chest.
      * @param player The {@link Player} to process settings for.
      */
     private void processInventorySettings(
-            @NotNull InventorySettingsInterface playerInventorySettings,
-            @NotNull InventorySettingsInterface playerEnderChestInventorySettings,
+            @NotNull InventorySettings playerInventorySettings,
+            @NotNull InventorySettings playerEnderChestInventorySettings,
             @NotNull Player player) {
         processInventorySettings(playerInventorySettings, player.getInventory());
         processInventorySettings(playerEnderChestInventorySettings, player.getEnderChest());
     }
 
     /**
-     * Process the {@link InventorySettingsInterface} for the {@link Inventory} provided.
-     * @param inventorySettings The {@link InventorySettingsInterface}.
+     * Process the {@link InventorySettings} for the {@link Inventory} provided.
+     * @param inventorySettings The {@link InventorySettings}.
      * @param inventory The {@link Inventory}.
      */
     private void processInventorySettings(
-            @NotNull InventorySettingsInterface inventorySettings,
+            @NotNull InventorySettings inventorySettings,
             @NotNull Inventory inventory) {
-        if(inventorySettings.clearInventory()) {
+        if(inventorySettings.resetInventory()) {
             SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
             ItemStack emptyStack = ItemType.AIR.createItemStack();
 
@@ -227,7 +226,7 @@ public class PlayerSettingsProcessor {
      * @param player The {@link Player}
      * @param playTimeSettings The {@link PlayTimeSettings}.
      */
-    private void resetPlayTime(@NotNull Player player, @NotNull PlayTimeSettingsInterface playTimeSettings) {
+    private void resetPlayTime(@NotNull Player player, @NotNull PlayTimeSettings playTimeSettings) {
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
 
         if(skyPlayTimeHook.isHooked()) {

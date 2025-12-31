@@ -59,7 +59,7 @@ public class OfflineStatusChangeTable {
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_offline_player_prestige_island_id ON " + tableName + "(island_id)";
 
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
-                .thenCompose(v -> versionsTable.updateVersion(tableName, 2))
+                .thenCompose(v -> versionsTable.updateVersion(tableName, 1))
                 .exceptionally(ex -> {
                     logger.error(AdventureUtil.deserialize("Offline Status Change Table creation failed: " + ex.getMessage()));
                     return null;
@@ -73,12 +73,12 @@ public class OfflineStatusChangeTable {
      * @param status 1 for opt in, 0 for opt out
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> insertOfflineStatusChange(@NotNull UUID playerId, @NotNull String islandId, int status) {
+    public @NotNull CompletableFuture<Void> insertOfflineStatusChange(@NotNull UUID playerId, @NotNull String islandId, boolean status) {
         String insertSql = "INSERT INTO " + tableName + " (player_id, island_id, status) VALUES (?, ?, ?)";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
-        IntegerParameter statusParameter = new IntegerParameter(status);
+        IntegerParameter statusParameter = new IntegerParameter(status ? 1 : 0);
 
         return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, statusParameter))
                 .thenRun(() -> {})
@@ -110,20 +110,20 @@ public class OfflineStatusChangeTable {
      * Get any prestige status changes that occurred while the player was offline in the order they occurred (oldest to newest)
      * @param playerId The {@link UUID} of the player.
      * @return A {@link CompletableFuture} of a {@link List} of non-null {@link Integer}s for the statuses their island was changed to.
-     * 1 refers to an opt-out (exempt from prestige), 0 refers to an opt-in (no longer exempt from prestige).
+     * true refers to an opt-out (exempt from prestige), false refers to an opt-in (no longer exempt from prestige).
      * {@link CompletableFuture}.
      */
-    public @NotNull CompletableFuture<@NotNull List<@NotNull Integer>> getOfflineStatusChanges(@NotNull UUID playerId) {
+    public @NotNull CompletableFuture<@NotNull List<@NotNull Boolean>> getOfflineStatusChanges(@NotNull UUID playerId) {
         String selectSql = "SELECT status FROM " + tableName + " WHERE player_id = ? ORDER BY timestamp ASC";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 
         return queueManager.queueReadTransaction(selectSql, List.of(playerIdParameter), resultSet -> {
-                    List<@NotNull Integer> offlineStatusChanges = new ArrayList<>();
+                    List<@NotNull Boolean> offlineStatusChanges = new ArrayList<>();
 
                     try {
                         while(resultSet.next()) {
-                            offlineStatusChanges.add(resultSet.getInt("status"));
+                            offlineStatusChanges.add(resultSet.getBoolean("status"));
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);

@@ -1,0 +1,98 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+# The settings applied when an island is reset.
+reset-settings:
+    # Island-related settings
+    island-settings:
+        keep-island-size: false
+        keep-generator-upgrades: false
+        keep-island-flags: true
+        reset-prestige-points: true
+        reset-prestige-level: true
+        clear-vault: true
+    # Player-related settings
+    player-settings:
+        inventory-settings:
+            reset-inventory: true
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-inventory: true
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        reset-exp: true
+        reset-money: true
+        reset-auction-items: true
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-yearly: false
+            reset-total: false
+    give-starting-money-to-all-island-members: true
+    starting-money: 2000.0
+# The rewards to be given when an island is reset.
+reward-config:
+    item-rewards:
+        -   display-item:
+                item-type: iron_pickaxe
+                amount: 1
+                lore:
+                    - "<gray>This reward is given to all island members.</gray>"
+            give-to-all-island-members: true
+            reward-item:
+                item-type: iron_pickaxe
+                amount: 1
+    command-rewards:
+        -   display-item:
+                item-type: diamond
+                amount: 1
+                lore:
+                    - "<gray>This reward is only given to the player who opted out the island.</gray>"
+            give-to-all-island-members: false
+            commands:
+                - "give %player_name% diamond 1"
+    permission-rewards:
+        -   display-item:
+                item-type: name_tag
+                item-name: "<white>The example.permission permission.</white>"
+                amount: 1
+                lore:
+                    - "<gray>This reward is given to all island members.</gray>"
+            give-to-all-island-members: true
+            before-island-reset: false
+            remove-permission: false
+            negate-permission: false
+            permission: example.permission
+    group-rewards:
+        -   display-item:
+                item-type: barrel
+                item-name: "<white>The example group.</white>"
+                amount: 1
+                lore:
+                    - "<gray>This reward is given to all island members.</gray>"
+            give-to-all-island-members: true
+            before-island-reset: false
+            remove-group: false
+            group-name: example
+    money-rewards:
+        -   display-item:
+                item-type: gold_ingot
+                item-name: "<white>500 money.</white>"
+                amount: 1
+                lore:
+                    - "<gray>This reward is given to all island members.</gray>"
+            give-to-all-island-members: true
+            money: 500
+    island-size-reward:
+        display-item:
+            item-type: grass_block
+            name: <white>Island Expansion</white>
+            amount: 1
+            lore:
+                - "<gray>Island size set to 100x100.</gray>"
+        # Should the island size be set or added to the existing island size?
+        set-size: true
+        # This is the radius, so 50 means a 100x100 island.
+        island-size: 50

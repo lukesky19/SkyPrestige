@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.gui.gui;
 
-import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmPrestigeGUIConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
@@ -67,7 +67,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
-    private final @Nullable ConfirmPrestigeGUIConfig confirmPrestigeGUIConfig;
+    private final @Nullable ConfirmGUIConfig confirmPrestigeGUIConfig;
 
     /**
      * Constructor
@@ -178,7 +178,9 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         return super.update();
     }
 
-    @Override
+    /**
+     * Cancel the confirmation process.
+     */
     public void cancel() {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
@@ -312,7 +314,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
             if(islandResetData.getPrestigeConfig() == null) return;
 
-            RewardsGUI rewardsGUI = new RewardsGUI(plugin, guiConfigManager, guiManager, identifier, player, islandResetData.getPrestigeConfig(), this);
+            PrestigeRewardsGUI rewardsGUI = new PrestigeRewardsGUI(plugin, guiManager, identifier, player, guiConfigManager, islandResetData.getPrestigeConfig(), this);
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
@@ -342,10 +344,10 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
     private void createConditionalButtons() {
         if(confirmPrestigeGUIConfig == null) return;
         if(islandResetData.getPrestigeConfig() == null) return;
-        PrestigeConfig.PrestigeSettings prestigeSettings = islandResetData.getPrestigeConfig().prestigeSettings();
+        ResetSettings prestigeSettings = islandResetData.getPrestigeConfig().prestigeSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!prestigeSettings.playerSettings().playerInventorySettings().clearInventory()) {
+        if(!prestigeSettings.playerSettings().inventorySettings().resetInventory()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepInventory(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
@@ -357,7 +359,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().enderChestSettings().resetEnderChest()) {
+        if(!prestigeSettings.playerSettings().enderChestSettings().resetInventory()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearEnderChest(), emptyList);

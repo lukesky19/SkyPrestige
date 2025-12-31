@@ -17,12 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.gui.gui;
 
-import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmOptInOutGUIConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.playtime.PlayTimeSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
+import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.data.opt_in_out.OptInOutConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.OptOutConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
@@ -57,42 +60,53 @@ import java.util.function.Consumer;
  * This class is used to create the GUI to confirm opting out of prestige.
  */
 public class ConfirmOptOutGUI extends ConfirmGUI {
-    private final @NotNull SettingsManager settingsManager;
+    private final @NotNull SkyPlugin plugin;
+    private final @NotNull LocaleManager localeManager;
+    private final @NotNull GUIConfigManager guiConfigManager;
+
     private final @NotNull RewardsProcessor rewardsProcessor;
 
     private final @NotNull IslandResetData islandResetData;
     private final @NotNull Consumer<IslandResetData> consumer;
 
-    private final @Nullable ConfirmOptInOutGUIConfig confirmOptOutGUIConfig;
+    private final @Nullable ConfirmGUIConfig confirmOptOutGUIConfig;
+    private final @Nullable OptInOutConfig optOutConfig;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
+     * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
-     * @param settingsManager A {@link SettingsManager} instance.
+     * @param optOutConfigManager A {@link OptOutConfigManager} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
      * @param islandResetData The {@link IslandResetData}
      * @param consumer The consumer that will reset the island once the player confirms it.
      */
     public ConfirmOptOutGUI(
             @NotNull SkyPlugin plugin,
+            @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
             @NotNull IslandIdUUIDKey identifier,
-            @NotNull SettingsManager settingsManager,
+            @NotNull OptOutConfigManager optOutConfigManager,
             @NotNull RewardsProcessor rewardsProcessor,
             @NotNull IslandResetData islandResetData,
             @NotNull Consumer<IslandResetData> consumer) {
         super(plugin, guiManager, identifier, islandResetData.getPlayer());
-        this.settingsManager = settingsManager;
+
+        this.plugin = plugin;
+        this.localeManager = localeManager;
+        this.guiConfigManager = guiConfigManager;
+
         this.rewardsProcessor = rewardsProcessor;
 
         this.islandResetData = islandResetData;
         this.consumer = consumer;
 
-        confirmOptOutGUIConfig = guiConfigManager.getConfirmOptOutGUIConfig();
+        this.confirmOptOutGUIConfig = guiConfigManager.getConfirmOptOutGUIConfig();
+        this.optOutConfig = optOutConfigManager.getConfiguration();
     }
 
     /**
@@ -102,12 +116,17 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
     @Override
     public boolean create() {
         if(islandResetData.isPrestige()) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid island reset data."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-out GUI due to invalid island reset data."));
             return false;
         }
 
         if(confirmOptOutGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-out GUI due to invalid gui configuration."));
+            return false;
+        }
+
+        if(optOutConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-out GUI due to invalid opt out config."));
             return false;
         }
 
@@ -159,6 +178,7 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
         createCancelButton();
 
         createSelectedBlueprintButton();
+        createRewardsButton();
 
         List<TagResolver.Single> emptyList = List.of();
         createDisplayButton(confirmOptOutGUIConfig.keepMembers(), emptyList);
@@ -287,66 +307,105 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
     }
 
     /**
+     * Create the rewards button for the GUI.
+     */
+    private void createRewardsButton() {
+        if(optOutConfig == null || confirmOptOutGUIConfig == null) return;
+        ButtonConfig rewardsConfig = confirmOptOutGUIConfig.rewardsButton();
+
+        if(rewardsConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to add the rewards button to the confirm opt-out GUI due to an invalid slot."));
+            return;
+        }
+
+        createActionButton(rewardsConfig, inventoryClickEvent -> {
+            Locale locale = localeManager.getConfiguration();
+
+            close();
+
+            OptOutRewardsGUI rewardsGUI = new OptOutRewardsGUI(plugin, guiManager, identifier, player, guiConfigManager, optOutConfig, this);
+
+            boolean creationResult = rewardsGUI.create();
+            if(!creationResult) {
+                logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                return;
+            }
+
+            boolean updateResult = rewardsGUI.update();
+            if(!updateResult) {
+                logger.error(AdventureUtil.deserialize("Unable to decorate the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                return;
+            }
+
+            boolean openResult = rewardsGUI.open();
+            if(!openResult) {
+                logger.error(AdventureUtil.deserialize("Unable to open the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            }
+        });
+    }
+
+    /**
      * Create the conditional buttons for the GUI depending on opt out settings.
      */
     private void createConditionalButtons() {
-        if(confirmOptOutGUIConfig == null) return;
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) return;
-        Settings.OptInOutSettings optOutSettings = settings.optOutSettings();
+        if(confirmOptOutGUIConfig == null || optOutConfig == null) return;
+        ResetSettings resetSettings = optOutConfig.resetSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!optOutSettings.playerSettings().playerInventorySettings().clearInventory()) {
+        if(!resetSettings.playerSettings().inventorySettings().resetInventory()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepInventory(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().clearInventory(), emptyList);
         }
 
-        if(optOutSettings.islandSettings().keepGeneratorUpgrades()) {
+        if(resetSettings.islandSettings().keepGeneratorUpgrades()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepGeneratorUpgrades(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
         }
 
-        if(optOutSettings.islandSettings().clearVault()) {
+        if(resetSettings.islandSettings().clearVault()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
         }
 
-        if(!optOutSettings.playerSettings().enderChestSettings().resetEnderChest()) {
+        if(!resetSettings.playerSettings().enderChestSettings().resetInventory()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().clearEnderChest(), emptyList);
         }
 
-        if(!optOutSettings.playerSettings().resetExp()) {
+        if(!resetSettings.playerSettings().resetExp()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepExp(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().resetExp(), emptyList);
         }
 
-        if(!optOutSettings.playerSettings().resetMoney()) {
+        if(!resetSettings.playerSettings().resetMoney()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepMoney(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().resetMoney(), emptyList);
         }
 
-        if(!optOutSettings.playerSettings().resetAuctionItems()) {
+        if(!resetSettings.playerSettings().resetAuctionItems()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
         }
 
-        if(optOutSettings.startingMoney() > 0) {
-            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(optOutSettings.startingMoney())));
+        if(resetSettings.startingMoney() > 0) {
+            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(resetSettings.startingMoney())));
 
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().startingMoney(), placeholders);
         } else {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().noStartingMoney(), emptyList);
         }
 
-        PlayTimeSettings playTimeSettings = optOutSettings.playerSettings().playTimeSettings();
+        PlayTimeSettings playTimeSettings = resetSettings.playerSettings().playTimeSettings();
 
         if(!playTimeSettings.resetSession()) {
             createDisplayButton(confirmOptOutGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);

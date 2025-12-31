@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.processor.island;
 
-import com.github.lukesky19.skyPrestige.configuration.interfaces.IslandSettingsInterface;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
@@ -37,7 +37,7 @@ import world.bentobox.bentobox.managers.IslandsManager;
 import java.util.HashMap;
 
 /**
- * This class manages the processing of {@link IslandSettingsInterface}.
+ * This class manages the processing of {@link IslandSettings}.
  */
 public class IslandSettingsProcessor {
     private final @NotNull ComponentLogger logger;
@@ -65,13 +65,13 @@ public class IslandSettingsProcessor {
 
     /**
      * Process the island settings. This method is used to process general island settings, regardless of source.
-     * @param islandSettings The {@link IslandSettingsInterface} to process.
+     * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
      * @param oldIslandData The {@link IslandData}.
      */
     public void processIslandSettings(
-            @NotNull IslandSettingsInterface islandSettings,
+            @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
             @NotNull IslandData oldIslandData) {
@@ -148,15 +148,15 @@ public class IslandSettingsProcessor {
 
     /**
      * Process the island settings. This method is used to process island settings when an island is opted in or out of prestige.
-     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(IslandSettingsInterface, Island, Island, IslandData)}.
-     * @param islandSettings The {@link IslandSettingsInterface} to process.
+     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(IslandSettings, Island, Island, IslandData)}.
+     * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
      * @param oldIslandData The {@link IslandData}.
      * @param prestigeExempt true for opt out, false of opt in.
      */
     public void processIslandSettings(
-            @NotNull IslandSettingsInterface islandSettings,
+            @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
             @NotNull IslandData oldIslandData,
@@ -172,8 +172,8 @@ public class IslandSettingsProcessor {
 
     /**
      * Process the island settings. This method is used to process island settings when an island is prestiged.
-     * It processes prestige specific settings, then calls {@link #processIslandSettings(IslandSettingsInterface, Island, Island, IslandData)}.
-     * @param islandSettings The {@link IslandSettingsInterface} to process.
+     * It processes prestige specific settings, then calls {@link #processIslandSettings(IslandSettings, Island, Island, IslandData)}.
+     * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
      * @param islandData The {@link IslandData}.
@@ -181,7 +181,7 @@ public class IslandSettingsProcessor {
      * @param prestigeLevel The prestige level to update the island data with.
      */
     public void processIslandSettings(
-            @NotNull IslandSettingsInterface islandSettings,
+            @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
             @NotNull IslandData islandData,
