@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
+import org.mockbukkit.mockbukkit.inventory.ItemStackMock;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import world.bentobox.bentobox.database.objects.Island;
@@ -516,9 +517,9 @@ public class IslandDataTableTest extends AbstractTableTest {
 
         // Create a Map to test
         Map<PageSlotKey, ItemStack> testMap = new HashMap<>();
-        testMap.put(new PageSlotKey(0, 10), new ItemStack(Material.STONE, 3));
-        testMap.put(new PageSlotKey(0, 11), new ItemStack(Material.OAK_LOG, 26));
-        testMap.put(new PageSlotKey(0, 12), new ItemStack(Material.MOSS_BLOCK, 14));
+        testMap.put(new PageSlotKey(0, 10), new ItemStackMock(Material.STONE, 3));
+        testMap.put(new PageSlotKey(0, 11), new ItemStackMock(Material.OAK_LOG, 26));
+        testMap.put(new PageSlotKey(0, 12), new ItemStackMock(Material.MOSS_BLOCK, 14));
 
         // Turn that Map into a byte array
         byte[] testBytes = liveIslandDataTable.serializeItemMap(testMap);

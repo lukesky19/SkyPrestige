@@ -17,7 +17,6 @@
 */
 package com.github.lukesky19.skyPrestige.data.manager;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.TopTen;
@@ -26,7 +25,6 @@ import com.github.lukesky19.skyPrestige.database.table.IslandDataTable;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -36,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class manages obtaining data to display leaderboards and marking whether players are excluded from the leaderboard or not.
@@ -69,10 +68,11 @@ public class LeaderboardManager {
 
     /**
      * Update the cached top ten from the database.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void updateDatabaseTopTen() {
+    public @NotNull CompletableFuture<Void> updateDatabaseTopTen() {
         IslandDataTable islandDataTable = databaseManager.getIslandDataTable();
-        islandDataTable.getTopTenByPrestigeLevelAndPointsNotExempt().thenAccept(topTen -> this.databaseTopTen = topTen);
+        return islandDataTable.getTopTenByPrestigeLevelAndPointsNotExempt().thenAccept(topTen -> this.databaseTopTen = topTen);
     }
 
     /**
@@ -80,7 +80,6 @@ public class LeaderboardManager {
      */
     public void updateTopTen() {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        if(!bentoBoxHook.isHooked()) return;
 
         @NotNull TopTen resultTopTen = new TopTen();
         // Get a list of all non-null database positions.
@@ -119,9 +118,8 @@ public class LeaderboardManager {
         Set<String> seenIslands = new HashSet<>();
         // Add online positions if their position wasn't added already
         onlineTopTenPositions.forEach(position -> {
-            if(seenIslands.add(position.islandId())) {
-                combinedPositions.add(position);
-            }
+            seenIslands.add(position.islandId());
+            combinedPositions.add(position);
         });
         // Add database positions if their position wasn't added already
         databasePositions.forEach(position -> {
@@ -163,43 +161,24 @@ public class LeaderboardManager {
         return topTen.getPosition(positionNumber);
     }
 
-    private @NotNull String getPlayerName(@Nullable UUID playerId) {
-        @NotNull String ownerName = "Unknown Island Owner";
+    /**
+     * Attempt to get the player name for the player id provided.
+     * @param playerId The {@link UUID} of the player.
+     * @return The player's name or a placeholder text.
+     */
+    protected @NotNull String getPlayerName(@NotNull UUID playerId) {
+        @NotNull String playerName = "Unknown Island Owner";
 
-        if(playerId != null) {
-            @Nullable Player player = server.getPlayer(playerId);
-
-            if(player != null && player.isOnline() && player.isConnected()) {
-                ownerName = player.getName();
-            } else {
-                @Nullable PlayerProfile playerProfile = PlayerUtil.getCachedPlayerProfile(playerId);
-                if(playerProfile != null) {
-                    @Nullable String profilePlayerName = playerProfile.getName();
-                    if(profilePlayerName != null) {
-                        ownerName = profilePlayerName;
-                    } else {
-                        @Nullable String offlinePlayerName = getOfflinePlayerName(playerId);
-
-                        if(offlinePlayerName != null) {
-                            ownerName = offlinePlayerName;
-                        }
-                    }
-                } else {
-                    @Nullable String offlinePlayerName = getOfflinePlayerName(playerId);
-
-                    if(offlinePlayerName != null) {
-                        ownerName = offlinePlayerName;
-                    }
-                }
+        @Nullable Player player = server.getPlayer(playerId);
+        if(player != null && player.isOnline() && player.isConnected()) {
+            playerName = player.getName();
+        } else {
+            @NotNull OfflinePlayer offlinePlayer = server.getOfflinePlayer(playerId);
+            if(offlinePlayer.getName() != null) {
+                playerName = offlinePlayer.getName();
             }
         }
 
-        return ownerName;
+        return playerName;
     }
-
-    private @Nullable String getOfflinePlayerName(@NotNull UUID playerId) {
-        OfflinePlayer offlinePlayer = server.getOfflinePlayer(playerId);
-        return offlinePlayer.getName();
-    }
-
 }
