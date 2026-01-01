@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -36,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the {@link PlayerIdsTable} class.
  * All code is tested against a live database.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class PlayerIdsTableTest extends AbstractTableTest {
     // Classes being tested
     private PlayerIdsTable livePlayerIdsTable;

@@ -29,16 +29,17 @@ import java.util.stream.Collectors;
 /**
  * This class contains the data for an island.
  */
-public class IslandData implements Cloneable {
+public class IslandData {
     private @NotNull String islandId;
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
-    private final @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
+    private @Nullable Double requiredPrestigePoints;
     private boolean leaderboardExempt = false;
     private boolean prestigeExempt = false;
+    private @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
 
     /**
-     * Use {@link #IslandData(String)} or {@link #IslandData(String, int, double, boolean, boolean)} instead.
+     * Use {@link #IslandData(String)} or {@link IslandData#IslandData(String, int, double, boolean, boolean, Map)} instead.
      * @throws RuntimeException if used.
      */
     @Deprecated(since = "1.1.0.0")
@@ -61,30 +62,31 @@ public class IslandData implements Cloneable {
      * @param prestigePoints The island's prestige points
      * @param leaderboardExempt Whether the island is exempt from leaderboard reporting or not.
      * @param prestigeExempt Whether the island is exempt from prestige or not.
+     * @param vaultItems The vault items.
      */
     public IslandData(
             @NotNull String islandId,
             int prestigeLevel,
             double prestigePoints,
             boolean leaderboardExempt,
-            boolean prestigeExempt) {
+            boolean prestigeExempt,
+            @NotNull Map<PageSlotKey, ItemStack> vaultItems) {
         this.islandId = islandId;
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
         this.leaderboardExempt = leaderboardExempt;
         this.prestigeExempt = prestigeExempt;
+        this.vaultItems = new HashMap<>(vaultItems);
     }
 
     /**
      * Creates a new {@link IslandData}.
      * @return The cloned {@link IslandData}.
      */
+    @Override
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // A private constructor is used to clone data instead.
     public @NotNull IslandData clone() {
-        try {
-            return (IslandData) super.clone();
-        } catch (CloneNotSupportedException cloneNotSupportedException) {
-            throw new RuntimeException(cloneNotSupportedException);
-        }
+        return new IslandData(islandId, prestigeLevel, prestigePoints, leaderboardExempt, prestigeExempt, vaultItems);
     }
 
     /**
@@ -100,9 +102,9 @@ public class IslandData implements Cloneable {
         return this.getIslandId().equals(compareIslandData.getIslandId())
                 && this.getPrestigeLevel() == compareIslandData.getPrestigeLevel()
                 && this.getPrestigePoints() == compareIslandData.getPrestigePoints()
-                && this.getVaultItems().equals(compareIslandData.getVaultItems())
                 && this.isLeaderboardExempt() == compareIslandData.isLeaderboardExempt()
-                && this.isPrestigeExempt() == compareIslandData.isPrestigeExempt();
+                && this.isPrestigeExempt() == compareIslandData.isPrestigeExempt()
+                && this.getVaultItems().equals(compareIslandData.getVaultItems());
     }
 
     /**
@@ -193,6 +195,38 @@ public class IslandData implements Cloneable {
     }
 
     /**
+     * Is the island exempt from leaderboard reporting?
+     * @return true if exempt, or false if not.
+     */
+    public boolean isLeaderboardExempt() {
+        return leaderboardExempt;
+    }
+
+    /**
+     * Set the island's leaderboard exemption status
+     * @param leaderboardExempt true if exempt, or false if not.
+     */
+    public void setLeaderboardExempt(boolean leaderboardExempt) {
+        this.leaderboardExempt = leaderboardExempt;
+    }
+
+    /**
+     * Is the island exempt from prestige?
+     * @return true if exempt, or false if not.
+     */
+    public boolean isPrestigeExempt() {
+        return prestigeExempt;
+    }
+
+    /**
+     * Set whether the island is exempt from prestige or not.
+     * @param prestigeExempt true if exempt from prestige, or false if not.
+     */
+    public void setPrestigeExempt(boolean prestigeExempt) {
+        this.prestigeExempt = prestigeExempt;
+    }
+
+    /**
      * Add an {@link ItemStack} to the island's vault.
      * @param pageNum The page number to store the item on.
      * @param slot The slot number to store the item at.
@@ -228,7 +262,7 @@ public class IslandData implements Cloneable {
      */
     public @NotNull Map<Integer, ItemStack> getVaultItemsByPageNumber(int pageNum) {
         return vaultItems.entrySet().stream()
-                .filter((entry) -> entry.getKey().page() == pageNum)
+                .filter(entry -> entry.getKey().page() == pageNum)
                 .collect(Collectors.toMap(entry -> entry.getKey().slot(), Map.Entry::getValue));
     }
 
@@ -244,40 +278,6 @@ public class IslandData implements Cloneable {
      * @param vaultItems A {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      */
     public void setVaultItems(@NotNull Map<PageSlotKey, ItemStack> vaultItems) {
-        this.vaultItems.clear();
-
-        this.vaultItems.putAll(vaultItems);
-    }
-
-    /**
-     * Is the island exempt from leaderboard reporting?
-     * @return true if exempt, or false if not.
-     */
-    public boolean isLeaderboardExempt() {
-        return leaderboardExempt;
-    }
-
-    /**
-     * Set the island's leaderboard exemption status
-     * @param leaderboardExempt true if exempt, or false if not.
-     */
-    public void setLeaderboardExempt(boolean leaderboardExempt) {
-        this.leaderboardExempt = leaderboardExempt;
-    }
-
-    /**
-     * Is the island exempt from prestige?
-     * @return true if exempt, or false if not.
-     */
-    public boolean isPrestigeExempt() {
-        return prestigeExempt;
-    }
-
-    /**
-     * Set whether the island is exempt from prestige or not.
-     * @param prestigeExempt true if exempt from prestige, or false if not.
-     */
-    public void setPrestigeExempt(boolean prestigeExempt) {
-        this.prestigeExempt = prestigeExempt;
+        this.vaultItems = new HashMap<>(vaultItems);
     }
 }

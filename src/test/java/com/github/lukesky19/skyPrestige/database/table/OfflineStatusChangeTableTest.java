@@ -26,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -45,6 +47,7 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link OfflineStatusChangeTable} class.
  * Most code is tested against a live database except for errors.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class OfflineStatusChangeTableTest extends AbstractTableTest {
     @Mock
     private ComponentLogger logger;

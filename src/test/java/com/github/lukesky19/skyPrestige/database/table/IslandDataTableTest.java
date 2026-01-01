@@ -32,6 +32,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -60,6 +62,7 @@ import static org.mockito.Mockito.*;
  * {@link IslandDataTable#serializeItemMap(Map)} and {@link IslandDataTable#deserializeItemMap(String, byte[])}
  * errors aren't fully tested as there isn't an easy way to force the errors to occur to my knowledge.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class IslandDataTableTest extends AbstractTableTest {
     @Mock
     private ComponentLogger logger;
@@ -395,11 +398,11 @@ public class IslandDataTableTest extends AbstractTableTest {
         when(island5.getOwner()).thenReturn(null);
 
         // Create the island data to save to the database
-        IslandData islandData1 = new IslandData(islandId1, 10, 150, false, false);
-        IslandData islandData2 = new IslandData(islandId2, 10, 100, false, false);
-        IslandData islandData3 = new IslandData(islandId3, 4, 800, false, false);
-        IslandData islandData4 = new IslandData(islandId4, 7, 345, true, false);
-        IslandData islandData5 = new IslandData(islandId5, 2, 100, false, false);
+        IslandData islandData1 = new IslandData(islandId1, 10, 150, false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId2, 10, 100, false, false, new HashMap<>());
+        IslandData islandData3 = new IslandData(islandId3, 4, 800, false, false, new HashMap<>());
+        IslandData islandData4 = new IslandData(islandId4, 7, 345, true, false, new HashMap<>());
+        IslandData islandData5 = new IslandData(islandId5, 2, 100, false, false, new HashMap<>());
 
         // Create a map of island ids to island data
         Map<String, IslandData> islandDataMap = new HashMap<>();

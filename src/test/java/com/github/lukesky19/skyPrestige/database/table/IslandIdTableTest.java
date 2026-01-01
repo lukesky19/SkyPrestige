@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link IslandIdsTable} class.
  * Most code is tested against a live database except for errors.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class IslandIdTableTest extends AbstractTableTest {
     // Classes being tested
     private IslandIdsTable liveIslandIdsTable;

@@ -22,9 +22,13 @@ import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.internal.ThreadPoolManager;
 import com.github.lukesky19.skylib.plugin.settings.Settings;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockito.Mock;
@@ -39,9 +43,10 @@ import static org.mockito.Mockito.when;
 /**
  * This class can be extended to create a table test class.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 @ExtendWith(MockitoExtension.class)
 public abstract class AbstractTableTest {
-    protected ServerMock server;
+    protected static ServerMock server;
     @Mock
     protected SkyPlugin skyPrestige;
     protected ConnectionManager connectionManager;
@@ -50,13 +55,19 @@ public abstract class AbstractTableTest {
     protected QueueManager mockedQueueManager;
 
     /**
+     * Set up the required data for all tests
+     */
+    @BeforeAll
+    public static void beforeAll() {
+        // Start the mocked server
+        server = MockBukkit.mock();
+    }
+
+    /**
      * Set up the required data for each test
      */
     @BeforeEach
     public void setup() {
-        // Start the mocked server
-        server = MockBukkit.mock();
-
         // Intercept data folder requests
         when(skyPrestige.getDataFolder()).thenReturn(new File("test_data_" +
                 this.getClass().getName().replaceAll("[^a-zA-Z0-9]", "_")));
@@ -106,7 +117,13 @@ public abstract class AbstractTableTest {
         } else {
             ThreadPoolManager.shutdownExecutorService();
         }
+    }
 
+    /**
+     * Clean up after all tests.
+     */
+    @AfterAll
+    public static void afterAll() {
         MockBukkit.unmock();
     }
 }
