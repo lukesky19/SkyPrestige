@@ -37,9 +37,19 @@ public class IslandResetData {
     private final @NotNull GameModeAddon gameModeAddon;
     private @Nullable BlueprintBundle blueprint;
     // Prestige Only
-    private final @Nullable PrestigeConfig prestigeConfig;
-    private final @Nullable Integer prestigeLevel;
-    private final @Nullable Double prestigePoints;
+    private @Nullable PrestigeConfig prestigeConfig;
+    private @Nullable Integer prestigeLevel;
+    private @Nullable Double prestigePoints;
+
+    /**
+     * Use {@link IslandResetData#IslandResetData(Player, User, Island, IslandData, GameModeAddon, PrestigeConfig, int, double)}
+     * or {@link IslandResetData#IslandResetData(Player, User, Island, IslandData, GameModeAddon)}.
+     * @throws RuntimeException if used.
+     */
+    @Deprecated(since = "1.1.0.0")
+    public IslandResetData() {
+        throw new RuntimeException("The default constructor cannot be used.");
+    }
 
     /**
      * Constructor
@@ -100,7 +110,7 @@ public class IslandResetData {
      * @return true if so, or false.
      */
     public boolean isPrestige() {
-        return prestigeConfig != null && prestigeLevel != null && prestigeLevel >= 0;
+        return prestigeConfig != null && prestigeLevel != null && prestigePoints != null;
     }
 
     /**
@@ -168,6 +178,15 @@ public class IslandResetData {
     }
 
     /**
+     * Set the {@link PrestigeConfig}.
+     * @apiNote This should only be used for testing purposes.
+     * @param prestigeConfig The {@link PrestigeConfig} or null.
+     */
+    protected void setPrestigeConfig(@Nullable PrestigeConfig prestigeConfig) {
+        this.prestigeConfig = prestigeConfig;
+    }
+
+    /**
      * Get the prestige level.
      * @return The prestige level or null.
      */
@@ -176,10 +195,28 @@ public class IslandResetData {
     }
 
     /**
+     * Set the prestige level.
+     * @apiNote This should only be used for testing purposes.
+     * @param prestigeLevel The prestige level or null.
+     */
+    protected void setPrestigeLevel(@Nullable Integer prestigeLevel) {
+        this.prestigeLevel = prestigeLevel;
+    }
+
+    /**
      * Get the prestige points required for this island reset.
      * @return The prestige points or null.
      */
     public @Nullable Double getPrestigePoints() {
         return prestigePoints;
+    }
+
+    /**
+     * Set the prestige points.
+     * @apiNote This should only be used for testing purposes.
+     * @param prestigePoints The prestige points or null.
+     */
+    protected void setPrestigePoints(@Nullable Double prestigePoints) {
+        this.prestigePoints = prestigePoints;
     }
 }
