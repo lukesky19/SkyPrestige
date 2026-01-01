@@ -89,6 +89,9 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
     public @NotNull CompletableFuture<Void> loadData(@NotNull String islandId) {
         IslandData islandData = new IslandData(islandId);
 
+        // Insert the island id's into the database if it doesn't exist already
+        databaseManager.getIslandIdsTable().insertIslandId(islandId);
+
         setData(islandId, islandData);
 
         return databaseManager.getIslandDataTable().loadIslandData(islandId, islandData).thenRun(() -> {});
@@ -114,7 +117,7 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
     @Override
-    public @NotNull CompletableFuture<Void> saveData(String islandId, IslandData islandData) {
+    public @NotNull CompletableFuture<Void> saveData(@NotNull String islandId, @NotNull IslandData islandData) {
         return databaseManager.getIslandDataTable().saveIslandData(islandId, islandData);
     }
 
@@ -124,10 +127,6 @@ public class IslandDataManager extends HashMapDataManager<String, IslandData> im
      */
     @Override
     public @NotNull CompletableFuture<Void> saveData() {
-        List<CompletableFuture<Void>> futureList = new ArrayList<>();
-
-        dataMap.keySet().forEach(islandId -> futureList.add(saveData(islandId)));
-
-        return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+        return databaseManager.getIslandDataTable().saveIslandData(dataMap);
     }
 }
