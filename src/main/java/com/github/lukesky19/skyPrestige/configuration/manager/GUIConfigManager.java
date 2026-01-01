@@ -216,7 +216,7 @@ public class GUIConfigManager {
         infoGUIConfig = loadConfiguration(infoPath, InfoGUIConfig.class);
 
         prestigeRewardsGUIConfig = loadConfiguration(prestigeRewardsPath, RewardsGUIConfig.class);
-        optInRewardsGUIConfig = loadConfiguration(confirmOptInPath, RewardsGUIConfig.class);
+        optInRewardsGUIConfig = loadConfiguration(optInRewardsPath, RewardsGUIConfig.class);
         optOutRewardsGUIConfig = loadConfiguration(optOutRewardsPath, RewardsGUIConfig.class);
 
         confirmPrestigeGUIConfig = loadConfiguration(confirmPrestigePath, ConfirmGUIConfig.class);
