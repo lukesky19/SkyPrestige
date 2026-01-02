@@ -368,9 +368,9 @@ public class ConfirmOptInGUI extends ConfirmGUI {
         }
 
         if(resetSettings.islandSettings().clearVault()) {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
-        } else {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
         }
 
         if(!resetSettings.playerSettings().enderChestSettings().resetInventory()) {
