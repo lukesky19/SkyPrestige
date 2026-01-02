@@ -317,6 +317,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
         @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
         // If no island data was found, return 0
         if(islandData == null) return "0";
+        if(islandData.isPrestigeExempt()) return "0";
 
         // Recalculate the required prestige points of not cached already
         if(islandData.getRequiredPrestigePoints() == null) {
