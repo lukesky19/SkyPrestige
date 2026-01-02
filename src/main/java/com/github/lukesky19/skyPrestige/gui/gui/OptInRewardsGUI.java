@@ -408,15 +408,15 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
         ItemStackConfig itemStackConfig = reward.displayItem();
         if(itemStackConfig.itemType() != null) {
             itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-        }
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-        if(optionalItemStack.isPresent()) {
-            createDisplayButton(optionalItemStack.get(), getRewardSlot());
-            numOfRewardsAdded++;
-        } else {
-            logger.warn(AdventureUtil.deserialize("Unable to add a reward display item to the opt-in rewards GUI due to a null ItemStack."));
-            numOfRewardsErrored++;
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            if(optionalItemStack.isPresent()) {
+                createDisplayButton(optionalItemStack.get(), getRewardSlot());
+                numOfRewardsAdded++;
+            } else {
+                logger.warn(AdventureUtil.deserialize("Unable to add a reward display item to the opt-in rewards GUI due to a null ItemStack."));
+                numOfRewardsErrored++;
+            }
         }
     }
 
