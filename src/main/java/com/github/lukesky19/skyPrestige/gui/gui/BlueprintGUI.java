@@ -327,7 +327,10 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     @Override
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        super.handleClose(inventoryCloseEvent);
+        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED)
+                || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
+
+        guiManager.removeOpenGUI(identifier);
 
         // Remove early rewards given
         rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
@@ -418,7 +421,11 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
                 islandResetData.setBlueprint(blueprint);
 
-                this.close();
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+
+                    guiManager.removeOpenGUI(identifier);
+                }, 1L);
 
                 @NotNull ConfirmGUI confirmGUI;
                 if(optInConfigManager != null) {

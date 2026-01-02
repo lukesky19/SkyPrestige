@@ -129,6 +129,12 @@ public class PrestigeExemptionManager {
         @NotNull BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         UUID playerId = player.getUniqueId();
 
+        @Nullable OptInOutConfig optInOutConfig = islandData.isPrestigeExempt() ? optInConfigManager.getConfiguration() : optOutConfigManager.getConfiguration();
+        if(optInOutConfig == null) {
+            logger.error(AdventureUtil.deserialize("Unable to toggle island prestige status due to invalid configuration."));
+            return;
+        }
+
         // Check if the player is in a world managed by a GameModeAddon
         Optional<GameModeAddon> optionalGameModeAddon = bentoBoxHook.getGameModeAddon(player.getWorld());
         if(optionalGameModeAddon.isEmpty()) {
@@ -141,6 +147,23 @@ public class PrestigeExemptionManager {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeStatusPlayerNotMemberOrOwner()));
             return;
         }
+
+        // Get online island member's players
+        List<Player> onlineIslandMembers = island.getMemberSet().stream()
+                .map(plugin.getServer()::getPlayer)
+                .filter(Objects::nonNull)
+                .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
+                .toList();
+        // Get offline island member's unique ids
+        List<UUID> offlineIslandMembers = island.getMemberSet()
+                .stream()
+                .map(memberId -> player.getServer().getOfflinePlayer(memberId))
+                .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
+                .map(OfflinePlayer::getUniqueId)
+                .toList();
+
+        // Process early rewards (will be undone if cancelled)
+        rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembers, optInOutConfig.rewardConfig());
 
         // Open the blueprint GUI
         openBlueprintGUI(
@@ -220,7 +243,7 @@ public class PrestigeExemptionManager {
                 optInOutConfig.resetSettings().startingMoney(),
                 optInOutConfig.resetSettings().giveStartingMoneyToAllIslandMembers());
 
-        // Process prestige rewards
+        // Process rewards
         rewardsProcessor.processPostRewards(player, newIsland, onlineIslandMembers, offlineIslandMembers, optInOutConfig.rewardConfig(), -1);
 
         // Clear any offline prestiges queued if opting out
