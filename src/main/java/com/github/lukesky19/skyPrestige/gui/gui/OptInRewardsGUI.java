@@ -117,7 +117,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
             @Nullable ConfirmOptInGUI confirmOptInGUI) {
         super(plugin, guiManager, identifier, player);
 
-        this.rewardsGUIConfig = guiConfigManager.getOptOutRewardsGUIConfig();
+        this.rewardsGUIConfig = guiConfigManager.getOptInRewardsGUIConfig();
 
         this.confirmOptInGUI = confirmOptInGUI;
         this.optInConfig = optInConfig;
