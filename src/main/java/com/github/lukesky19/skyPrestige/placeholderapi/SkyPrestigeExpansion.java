@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.placeholderapi;
 
+import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
@@ -41,6 +42,7 @@ import java.util.concurrent.ExecutionException;
  * This class supplies placeholders that other plugins can access using PlaceholderAPI.
  */
 public class SkyPrestigeExpansion extends PlaceholderExpansion {
+    private final @NotNull SettingsManager settingsManager;
     private final @NotNull PrestigePointsManager prestigePointsManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
@@ -48,16 +50,19 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
 
     /**
      * Constructor
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager A {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public SkyPrestigeExpansion(
+            @NotNull SettingsManager settingsManager,
             @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
             @NotNull HookManager hookManager) {
+        this.settingsManager = settingsManager;
         this.prestigePointsManager = prestigePointsManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
@@ -142,6 +147,8 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "progress_bar_minimessage" -> {
+                int progressBarSize = settingsManager.getConfiguration() != null ?
+                        settingsManager.getConfiguration().progressBarSize() : 10;
                 StringBuilder bar = new StringBuilder();
 
                 @Nullable Island island = getIsland(bentoBoxHook, player);
@@ -154,15 +161,14 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 }
 
                 // Calculate current progress percentage
-                double currentPercentage;
-                if(islandData.getRequiredPrestigePoints() > 0) {
-                    currentPercentage = Math.min(islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints() * 100, 100);
-                } else {
-                    currentPercentage = 0.0;
-                }
+                double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
+                        Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
 
-                for(int i = 1; i <= 10; i++) {
-                    if(currentPercentage >= i * 10) {
+                // Calculate the number of pipe symbols to color green
+                int greenBars = (int) (currentPercentage / (100.0 / progressBarSize));
+
+                for (int i = 0; i < progressBarSize; i++) {
+                    if (i < greenBars) {
                         bar.append("<green>|");
                     } else {
                         bar.append("<red>|");
@@ -172,7 +178,10 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return bar.toString();
             }
 
+
             case "progress_bar_legacy" -> {
+                int progressBarSize = settingsManager.getConfiguration() != null ?
+                        settingsManager.getConfiguration().progressBarSize() : 10;
                 StringBuilder bar = new StringBuilder();
 
                 @Nullable Island island = getIsland(bentoBoxHook, player);
@@ -185,15 +194,14 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 }
 
                 // Calculate current progress percentage
-                double currentPercentage;
-                if(islandData.getRequiredPrestigePoints() > 0) {
-                    currentPercentage = Math.min(islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints() * 100, 100);
-                } else {
-                    currentPercentage = 0.0;
-                }
+                double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
+                        Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
 
-                for(int i = 1; i <= 10; i++) {
-                    if(currentPercentage >= i * 10) {
+                // Calculate the number of pipe symbols to color green
+                int greenBars = (int) (currentPercentage / (100.0 / progressBarSize));
+
+                for (int i = 0; i < progressBarSize; i++) {
+                    if (i < greenBars) {
                         bar.append("&a|");
                     } else {
                         bar.append("&c|");

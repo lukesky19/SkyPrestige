@@ -6,6 +6,8 @@ locale: en_US
 save-frequency-seconds: 900
 # The required prestige level necessary to exchange prestige points.
 exchange-prestige-level: 0
+# The number of pipe symbols (|) to use in the progress bar placeholders.
+progress-bar-size: 10
 # These settings apply when an island is reset outside of prestige, opt-in, or opt-out.
 island-reset-settings:
     keep-island-size: true

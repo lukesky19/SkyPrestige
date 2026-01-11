@@ -125,7 +125,7 @@ public class SkyPrestige extends SkyPlugin {
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, prestigePointsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, localeManager, guiConfigManager, optInConfigManager, optOutConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
-        placeholderManager = new PlaceholderManager(this, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
+        placeholderManager = new PlaceholderManager(this, settingsManager, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
 
         // Register Commands
         SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, multiplierConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);

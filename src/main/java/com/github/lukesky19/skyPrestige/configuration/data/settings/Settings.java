@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
  * @param locale The locale to use.
  * @param saveFrequencySeconds How frequently island data is periodically saved.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
+ * @param progressBarSize The number of pipe symbols (|) to use in the progress bar placeholders.
  * @param islandResetSettings The {@link ResetSettings} for normal island resets.
  */
 @ConfigSerializable
@@ -37,4 +38,5 @@ public record Settings(
         @Nullable String locale,
         @Nullable Integer saveFrequencySeconds,
         int exchangePrestigeLevel,
+        int progressBarSize,
         @NotNull IslandSettings islandResetSettings) {}

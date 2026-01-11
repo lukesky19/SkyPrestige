@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.placeholderapi;
 
+import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class PlaceholderManager {
     private final @NotNull SkyPlugin plugin;
+    private final @NotNull SettingsManager settingsManager;
     private final @NotNull PrestigePointsManager prestigePointsManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
@@ -40,6 +42,7 @@ public class PlaceholderManager {
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin} instance.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
@@ -47,11 +50,13 @@ public class PlaceholderManager {
      */
     public PlaceholderManager(
             @NotNull SkyPlugin plugin,
+            @NotNull SettingsManager settingsManager,
             @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
             @NotNull HookManager hookManager) {
         this.plugin = plugin;
+        this.settingsManager = settingsManager;
         this.prestigePointsManager = prestigePointsManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
@@ -73,7 +78,7 @@ public class PlaceholderManager {
     public void registerExpansion() {
         if(plugin.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion == null) {
-                skyPrestigeExpansion = new SkyPrestigeExpansion(prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
+                skyPrestigeExpansion = new SkyPrestigeExpansion(settingsManager, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
             }
 
             skyPrestigeExpansion.register();
