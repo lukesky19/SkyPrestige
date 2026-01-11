@@ -141,6 +141,68 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return getIslandRequiredPrestigePoints(island);
             }
 
+            case "progress_bar_minimessage" -> {
+                StringBuilder bar = new StringBuilder();
+
+                @Nullable Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return "";
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return "";
+
+                if(islandData.getRequiredPrestigePoints() == null) {
+                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
+                }
+
+                // Calculate current progress percentage
+                double currentPercentage;
+                if(islandData.getRequiredPrestigePoints() > 0) {
+                    currentPercentage = Math.min(islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints() * 100, 100);
+                } else {
+                    currentPercentage = 0.0;
+                }
+
+                for(int i = 1; i <= 10; i++) {
+                    if(currentPercentage >= i * 10) {
+                        bar.append("<green>|");
+                    } else {
+                        bar.append("<red>|");
+                    }
+                }
+
+                return bar.toString();
+            }
+
+            case "progress_bar_legacy" -> {
+                StringBuilder bar = new StringBuilder();
+
+                @Nullable Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return "";
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return "";
+
+                if(islandData.getRequiredPrestigePoints() == null) {
+                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
+                }
+
+                // Calculate current progress percentage
+                double currentPercentage;
+                if(islandData.getRequiredPrestigePoints() > 0) {
+                    currentPercentage = Math.min(islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints() * 100, 100);
+                } else {
+                    currentPercentage = 0.0;
+                }
+
+                for(int i = 1; i <= 10; i++) {
+                    if(currentPercentage >= i * 10) {
+                        bar.append("&a|");
+                    } else {
+                        bar.append("&c|");
+                    }
+                }
+
+                return bar.toString();
+            }
+
             default -> {
                 if(placeholder.startsWith("top_name")) {
                     String[] split = placeholder.split("_");
