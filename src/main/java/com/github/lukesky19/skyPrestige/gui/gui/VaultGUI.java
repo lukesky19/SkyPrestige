@@ -319,6 +319,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
                 }
             } else {
                 ItemStack clonedStack = itemStack.clone();
+                clonedStack.setAmount(remainingAmount);
                 createVaultButton(clonedStack, slotConfig.unlockedItem(), slot);
                 remainingAmount = 0;
                 islandData.addVaultItem(pageNum, slot, clonedStack);
