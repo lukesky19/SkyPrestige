@@ -17,20 +17,17 @@
 */
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
+import com.github.lukesky19.skyPrestige.commands.util.IslandArgumentType;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.mojang.brigadier.Message;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,10 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class creates the exempt command argument for the skyprestige command.
@@ -78,34 +72,12 @@ public class ExemptCommand {
     public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("exempt")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.exempt"))
-                .then(Commands.argument("island_id", StringArgumentType.word())
-                        .suggests((ctx, suggestionsBuilder) -> {
-                            BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-                            Map<String, Message> suggestionsMap = new HashMap<>();
-
-                            plugin.getServer().getOnlinePlayers().forEach(player -> {
-                                @NotNull List<Island> islands = bentoBoxHook.getIslands(player.getUniqueId());
-                                islands.forEach(island -> {
-                                    String islandId = island.getUniqueId();
-                                    if (!suggestionsMap.containsKey(islandId)) {
-                                        String islandMembersNames = island.getMemberSet().stream().map(memberId ->
-                                                        plugin.getServer().getOfflinePlayer(memberId).getName())
-                                                .collect(Collectors.joining(","));
-                                        Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
-
-                                        suggestionsMap.put(islandId, toolTip);
-                                    }
-                                });
-                            });
-
-                            suggestionsMap.forEach(suggestionsBuilder::suggest);
-
-                            return suggestionsBuilder.buildFuture();
-                        })
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
                         .executes(ctx -> {
                             Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
-                            String islandId = ctx.getArgument("island_id", String.class);
+                            Island island = ctx.getArgument("island_id", Island.class);
+                            String islandId = island.getUniqueId();
                             @Nullable IslandData islandData = islandDataManager.getData(islandId);
                             if(islandData == null) {
                                 if(sender instanceof Player) {

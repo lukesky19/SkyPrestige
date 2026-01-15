@@ -49,6 +49,7 @@ import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
 
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,6 @@ public class SkyPrestige extends SkyPlugin {
     // Plugin Classes
     private GUIConfigManager guiConfigManager;
     private LocaleManager localeManager;
-    private MultiplierConfigManager multiplierConfigManager;
     private OptInConfigManager optInConfigManager;
     private OptOutConfigManager optOutConfigManager;
     private PrestigeConfigManager prestigeConfigManager;
@@ -76,7 +76,6 @@ public class SkyPrestige extends SkyPlugin {
     private LeaderboardManager leaderboardManager;
     private TaskManager taskManager;
     private ProtectionOrbManager protectionOrbManager;
-    private MultiplierManager multiplierManager;
     private PlaceholderManager placeholderManager;
 
     /**
@@ -110,13 +109,12 @@ public class SkyPrestige extends SkyPlugin {
         prestigePointsConfigManager = new PrestigePointsConfigManager(this);
         protectionOrbConfigManager = new ProtectionOrbConfigManager(this);
         vaultConfigManager = new VaultConfigManager(this);
-        multiplierConfigManager = new MultiplierConfigManager(this);
 
         guiManager = new GUIManager();
         islandDataManager = new IslandDataManager(databaseManager, hookManager);
         leaderboardManager = new LeaderboardManager(this, islandDataManager, databaseManager, hookManager);
-        multiplierManager = new MultiplierManager(this, localeManager, multiplierConfigManager);
-        taskManager = new TaskManager(this, settingsManager, multiplierConfigManager, islandDataManager, leaderboardManager, multiplierManager);
+        MultiplierManager multiplierManager = new MultiplierManager(this, localeManager, islandDataManager);
+        taskManager = new TaskManager(this, settingsManager, localeManager, islandDataManager, leaderboardManager, multiplierManager, hookManager);
         protectionOrbManager = new ProtectionOrbManager(this, protectionOrbConfigManager);
         IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
@@ -128,12 +126,16 @@ public class SkyPrestige extends SkyPlugin {
         placeholderManager = new PlaceholderManager(this, settingsManager, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, multiplierConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
                                 "Command to manage and use the SkyPrestige plugin.",
                                 List.of("prestige")));
+
+        // Create and register the SkyPrestigeAPI
+        SkyPrestigeAPI skyPrestigeAPI = new SkyPrestigeAPI(multiplierManager);
+        this.getServer().getServicesManager().register(SkyPrestigeAPI.class, skyPrestigeAPI, this, ServicePriority.Lowest);
 
         // Listeners
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -279,11 +281,9 @@ public class SkyPrestige extends SkyPlugin {
         vaultConfigManager.loadConfiguration();
         prestigeConfigManager.loadConfigurations();
         guiConfigManager.reload();
-        multiplierConfigManager.loadConfiguration();
 
         leaderboardManager.updateDatabaseTopTen();
         protectionOrbManager.reload();
-        multiplierManager.reload();
 
         // (Re-)start the plugin's task
         taskManager.startTasks();

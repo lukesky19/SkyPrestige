@@ -55,8 +55,8 @@ public class OptInConfigManager extends SimpleConfigManager<OptInOutConfig> {
     }
 
     @Override
-    public boolean validateConfiguration() {
-        return getConfiguration() != null;
+    public boolean validateConfiguration(@Nullable OptInOutConfig configuration) {
+        return configuration != null;
     }
 
     @Override

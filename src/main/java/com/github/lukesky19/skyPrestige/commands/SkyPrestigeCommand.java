@@ -54,7 +54,6 @@ public class SkyPrestigeCommand {
     private final @NotNull OptInConfigManager optInConfigManager;
     private final @NotNull OptOutConfigManager optOutConfigManager;
     private final @NotNull VaultConfigManager vaultConfigManager;
-    private final @NotNull MultiplierConfigManager multiplierConfigManager;
 
     private final @NotNull PrestigeManager prestigeManager;
     private final @NotNull PrestigeExemptionManager prestigeExemptionManager;
@@ -76,7 +75,6 @@ public class SkyPrestigeCommand {
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param optInConfigManager An {@link OptInConfigManager} instance.
      * @param optOutConfigManager An {@link OptOutConfigManager} instance.
-     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
      * @param prestigeManager A {@link PrestigeManager} instance.
      * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
      * @param prestigePointsManager A {@link PrestigePointsManager} instance.
@@ -97,7 +95,6 @@ public class SkyPrestigeCommand {
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull OptInConfigManager optInConfigManager,
             @NotNull OptOutConfigManager optOutConfigManager,
-            @NotNull MultiplierConfigManager multiplierConfigManager,
             @NotNull PrestigeManager prestigeManager,
             @NotNull PrestigeExemptionManager prestigeExemptionManager,
             @NotNull PrestigePointsManager prestigePointsManager,
@@ -116,7 +113,6 @@ public class SkyPrestigeCommand {
         this.prestigeConfigManager = prestigeConfigManager;
         this.optInConfigManager = optInConfigManager;
         this.optOutConfigManager = optOutConfigManager;
-        this.multiplierConfigManager = multiplierConfigManager;
         this.prestigeManager = prestigeManager;
         this.prestigeExemptionManager = prestigeExemptionManager;
         this.prestigePointsManager = prestigePointsManager;
@@ -157,17 +153,17 @@ public class SkyPrestigeCommand {
         HelpCommand helpCommand = new HelpCommand(logger, localeManager);
         InfoCommand infoCommand = new InfoCommand(plugin, localeManager, guiConfigManager, guiManager);
         LeaderboardCommand leaderboardCommand = new LeaderboardCommand(localeManager, leaderboardManager);
-        MultiplierCommand multiplierCommand = new MultiplierCommand(plugin, localeManager, multiplierConfigManager, multiplayerManager);
+        MultiplierCommand multiplierCommand = new MultiplierCommand(plugin, localeManager, multiplayerManager, hookManager);
         OptInCommand optInCommand = new OptInCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
         OptOutCommand optOutCommand = new OptOutCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
-        PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(plugin, localeManager, islandDataManager);
+        PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(plugin, localeManager, islandDataManager, hookManager);
         ReloadCommand reloadCommand = new ReloadCommand(plugin, localeManager);
         ProgressCommand progressCommand = new ProgressCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsManager, guiManager, islandDataManager, hookManager);
         ProtectionOrbCommand protectionOrbCommand = new ProtectionOrbCommand(localeManager, protectionOrbManager);
         RequirementsCommand requirementsCommand = new RequirementsCommand(plugin, localeManager, prestigeConfigManager, prestigePointsManager, islandDataManager, hookManager);
         RewardsCommand rewardsCommand = new RewardsCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, guiManager, islandDataManager, hookManager);
         UnExemptCommand unExemptCommand = new UnExemptCommand(plugin, localeManager, islandDataManager);
-        PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(plugin, localeManager, islandDataManager);
+        PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(plugin, localeManager, islandDataManager, hookManager);
         ValuesCommand valuesCommand = new ValuesCommand(plugin, localeManager, guiConfigManager, guiManager);
         VaultCommand vaultCommand = new VaultCommand(plugin, localeManager, guiConfigManager, vaultConfigManager, guiManager, islandDataManager, databaseManager);
 

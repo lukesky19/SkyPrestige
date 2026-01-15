@@ -17,12 +17,14 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
+import com.github.lukesky19.skyPrestige.common.MockBukkitExtension;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.TopTen;
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -32,9 +34,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -81,11 +83,11 @@ public class IslandDataTableTest extends AbstractTableTest {
 
     /**
      * Set up the required data for the tests.
+     * @param testInfo The {@link TestInfo}.
      */
-    @Override
     @BeforeEach
-    public void setup() {
-        super.setup();
+    public void setup(@NotNull TestInfo testInfo) {
+        super.setup(testInfo);
 
         when(skyPrestige.getComponentLogger()).thenReturn(logger);
 
@@ -376,11 +378,7 @@ public class IslandDataTableTest extends AbstractTableTest {
         UUID island1Owner = UUID.randomUUID();
 
         // When the server is requested, return the mocked server
-        when(skyPrestige.getServer()).thenReturn(server);
-
-        // Set up a mocked player
-        PlayerMock playerMock = new PlayerMock(server, "lukeskywlker19", island1Owner);
-        server.addPlayer(playerMock);
+        when(skyPrestige.getServer()).thenReturn(MockBukkitExtension.getServer());
 
         // When any hook is requested return the mocked bentobox hook
         when(hookManager.getHook(any())).thenReturn(bentoBoxHook);
@@ -399,11 +397,11 @@ public class IslandDataTableTest extends AbstractTableTest {
         when(island5.getOwner()).thenReturn(null);
 
         // Create the island data to save to the database
-        IslandData islandData1 = new IslandData(islandId1, 10, 150, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId2, 10, 100, false, false, new HashMap<>());
-        IslandData islandData3 = new IslandData(islandId3, 4, 800, false, false, new HashMap<>());
-        IslandData islandData4 = new IslandData(islandId4, 7, 345, true, false, new HashMap<>());
-        IslandData islandData5 = new IslandData(islandId5, 2, 100, false, false, new HashMap<>());
+        IslandData islandData1 = new IslandData(islandId1, 10, 150, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId2, 10, 100, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData3 = new IslandData(islandId3, 4, 800, new Multiplier(),false, false, new HashMap<>());
+        IslandData islandData4 = new IslandData(islandId4, 7, 345, new Multiplier(), true, false, new HashMap<>());
+        IslandData islandData5 = new IslandData(islandId5, 2, 100, new Multiplier(), false, false, new HashMap<>());
 
         // Create a map of island ids to island data
         Map<String, IslandData> islandDataMap = new HashMap<>();

@@ -17,19 +17,18 @@
 */
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
+import com.github.lukesky19.skyPrestige.commands.util.IslandArgumentType;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -37,13 +36,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class creates the level command argument for the skyprestige command.
@@ -53,21 +48,25 @@ public class PrestigeLevelCommand {
     private final @NotNull ComponentLogger logger;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull IslandDataManager islandDataManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public PrestigeLevelCommand(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
         this.islandDataManager = islandDataManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -78,34 +77,13 @@ public class PrestigeLevelCommand {
         return Commands.literal("level")
             .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.level"))
             .then(Commands.literal("set")
-                .then(Commands.argument("island_id", StringArgumentType.word())
-                    .suggests((ctx, suggestionsBuilder) -> {
-                        Map<String, Message> suggestionsMap = new HashMap<>();
-                        plugin.getServer().getOnlinePlayers().forEach(player -> {
-                            List<Island> islands = BentoBox.getInstance().getIslandsManager().getIslands(player.getUniqueId());
-
-                            for(Island island : islands) {
-                                String islandId = island.getUniqueId();
-                                if(suggestionsMap.containsKey(islandId)) continue;
-
-                                String islandMembersNames = island.getMemberSet().stream().map(memberId ->
-                                                plugin.getServer().getOfflinePlayer(memberId).getName())
-                                        .collect(Collectors.joining(","));
-                                Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
-
-                                suggestionsMap.put(islandId, toolTip);
-                            }
-                        });
-
-                        suggestionsMap.forEach(suggestionsBuilder::suggest);
-
-                        return suggestionsBuilder.buildFuture();
-                    })
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
                     .then(Commands.argument("level", IntegerArgumentType.integer())
                         .executes(ctx -> {
                             Locale locale = localeManager.getConfiguration();
                             CommandSender sender = ctx.getSource().getSender();
-                            String islandId = ctx.getArgument("island_id", String.class);
+                            Island island = ctx.getArgument("island_id", Island.class);
+                            String islandId = island.getUniqueId();
                             int prestigeLevel = ctx.getArgument("level", int.class);
 
                             IslandData islandData = islandDataManager.getData(islandId);

@@ -17,12 +17,12 @@
 */
 package com.github.lukesky19.skyPrestige.task;
 
-import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
@@ -41,11 +41,12 @@ import org.jetbrains.annotations.Nullable;
 public class TaskManager {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull SettingsManager settingsManager;
-    private final @NotNull MultiplierConfigManager multiplierConfigManager;
+    private final @NotNull LocaleManager localeManager;
 
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
     private final @NotNull MultiplierManager multiplierManager;
+    private final @NotNull HookManager hookManager;
 
     private @Nullable BukkitTask saveTask;
     private @Nullable BukkitTask cacheTopTenTask;
@@ -56,24 +57,27 @@ public class TaskManager {
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param settingsManager A {@link SettingsManager} instance.
-     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
+     * @param localeManager A {@link LocaleManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param leaderboardManager  A {@link LeaderboardManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public TaskManager(
             @NotNull SkyPlugin plugin,
             @NotNull SettingsManager settingsManager,
-            @NotNull MultiplierConfigManager multiplierConfigManager,
+            @NotNull LocaleManager localeManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NotNull MultiplierManager multiplierManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.settingsManager = settingsManager;
-        this.multiplierConfigManager = multiplierConfigManager;
+        this.localeManager = localeManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.multiplierManager = multiplierManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -135,12 +139,9 @@ public class TaskManager {
      * Starts the {@link CalculateTopTenTask}.
      */
     private void startMultiplierTask() {
-        @Nullable MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
-        if(multiplierConfig == null || !multiplierConfig.enabled()) return;
-
         long ticks = 20L;
 
-        multiplierTask = new MultiplierTask(multiplierManager).runTaskTimer(plugin, ticks, ticks);
+        multiplierTask = new MultiplierTask(plugin, localeManager, islandDataManager, multiplierManager, hookManager).runTaskTimer(plugin, ticks, ticks);
     }
 
     /**

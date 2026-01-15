@@ -55,8 +55,8 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
     }
 
     @Override
-    public boolean validateConfiguration() {
-        return getConfiguration() != null;
+    public boolean validateConfiguration(@Nullable PrestigePointsConfig configuration) {
+        return configuration != null;
     }
 
     @Override

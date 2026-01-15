@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.data.data.island;
 
+import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ public class IslandDataTest {
      */
     @Test
     public void testFullIslandDataConstructor() {
-        assertDoesNotThrow(() -> new IslandData("BSkyBlock" + UUID.randomUUID(), 0, 0, false, false, new HashMap<>()));
+        assertDoesNotThrow(() -> new IslandData("BSkyBlock" + UUID.randomUUID(), 0, 0, new Multiplier(), false, false, new HashMap<>()));
     }
 
     /**
@@ -112,8 +113,8 @@ public class IslandDataTest {
     @Test
     public void testEqualsNotEqualByPrestigeLevel() {
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        IslandData islandData1 = new IslandData(islandId, 0, 0, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId, 1, 0, false, false, new HashMap<>());
+        IslandData islandData1 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 1, 0, new Multiplier(), false, false, new HashMap<>());
 
         assertNotEquals(islandData1, islandData2);
     }
@@ -124,8 +125,34 @@ public class IslandDataTest {
     @Test
     public void testEqualsNotEqualByPrestigePoints() {
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        IslandData islandData1 = new IslandData(islandId, 0, 0, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId, 0, 100, false, false, new HashMap<>());
+        IslandData islandData1 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 0, 100, new Multiplier(), false, false, new HashMap<>());
+
+        assertNotEquals(islandData1, islandData2);
+    }
+
+    /**
+     * Tests if two island data objects are not equal because of required prestige points.
+     */
+    @Test
+    public void testEqualsNotEqualByRequiredPrestigePoints() {
+        String islandId = "BSkyBlock" + UUID.randomUUID();
+        IslandData islandData1 = new IslandData(islandId, 0, 100, new Multiplier(), false, false, new HashMap<>());
+        islandData1.setRequiredPrestigePoints(100.0);
+        IslandData islandData2 = new IslandData(islandId, 0, 100, new Multiplier(), false, false, new HashMap<>());
+        islandData2.setRequiredPrestigePoints(200.0);
+
+        assertNotEquals(islandData1, islandData2);
+    }
+
+    /**
+     * Tests if two island data objects are not equal because of the multiplier.
+     */
+    @Test
+    public void testEqualsNotEqualByMultiplier() {
+        String islandId = "BSkyBlock" + UUID.randomUUID();
+        IslandData islandData1 = new IslandData(islandId, 0, 100, new Multiplier(1, 100), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 0, 100, new Multiplier(2, 200), false, false, new HashMap<>());
 
         assertNotEquals(islandData1, islandData2);
     }
@@ -136,8 +163,8 @@ public class IslandDataTest {
     @Test
     public void testEqualsNotEqualByLeaderboardExemption() {
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        IslandData islandData1 = new IslandData(islandId, 0, 0, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId, 0, 0, true, false, new HashMap<>());
+        IslandData islandData1 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 0, 0, new Multiplier(), true, false, new HashMap<>());
 
         assertNotEquals(islandData1, islandData2);
     }
@@ -148,8 +175,8 @@ public class IslandDataTest {
     @Test
     public void testEqualsNotEqualByPrestigeExemption() {
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        IslandData islandData1 = new IslandData(islandId, 0, 0, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId, 0, 0, false, true, new HashMap<>());
+        IslandData islandData1 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 0, 0, new Multiplier(), false, true, new HashMap<>());
 
         assertNotEquals(islandData1, islandData2);
     }
@@ -162,8 +189,8 @@ public class IslandDataTest {
         String islandId = "BSkyBlock" + UUID.randomUUID();
         ItemStack itemStack = mock(ItemStack.class);
 
-        IslandData islandData1 = new IslandData(islandId, 0, 0, false, false, new HashMap<>());
-        IslandData islandData2 = new IslandData(islandId, 0, 0, false, false, Map.of(new PageSlotKey(0, 10), itemStack));
+        IslandData islandData1 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, new HashMap<>());
+        IslandData islandData2 = new IslandData(islandId, 0, 0, new Multiplier(), false, false, Map.of(new PageSlotKey(0, 10), itemStack));
 
         assertNotEquals(islandData1, islandData2);
     }

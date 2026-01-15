@@ -178,7 +178,6 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return bar.toString();
             }
 
-
             case "progress_bar_legacy" -> {
                 int progressBarSize = settingsManager.getConfiguration() != null ?
                         settingsManager.getConfiguration().progressBarSize() : 10;

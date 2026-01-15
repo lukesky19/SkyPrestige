@@ -60,8 +60,8 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
     }
 
     @Override
-    public boolean validateConfiguration() {
-        return getConfiguration() != null;
+    public boolean validateConfiguration(@Nullable Settings configuration) {
+        return configuration != null;
     }
 
     @Override

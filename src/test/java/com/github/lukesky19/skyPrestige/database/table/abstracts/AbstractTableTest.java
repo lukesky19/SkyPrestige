@@ -17,20 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.database.table.abstracts;
 
+import com.github.lukesky19.skyPrestige.common.DatabaseTestExtension;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.internal.ThreadPoolManager;
-import com.github.lukesky19.skylib.plugin.settings.Settings;
-import org.junit.jupiter.api.AfterAll;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,10 +38,8 @@ import static org.mockito.Mockito.when;
 /**
  * This class can be extended to create a table test class.
  */
-@Execution(ExecutionMode.SAME_THREAD)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({DatabaseTestExtension.class, MockitoExtension.class})
 public abstract class AbstractTableTest {
-    protected static ServerMock server;
     @Mock
     protected SkyPlugin skyPrestige;
     protected ConnectionManager connectionManager;
@@ -55,22 +48,19 @@ public abstract class AbstractTableTest {
     protected QueueManager mockedQueueManager;
 
     /**
-     * Set up the required data for all tests
-     */
-    @BeforeAll
-    public static void beforeAll() {
-        // Start the mocked server
-        server = MockBukkit.mock();
-    }
-
-    /**
      * Set up the required data for each test
+     * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup() {
+    public void setup(@NotNull TestInfo testInfo) {
+        // Get the name of the test method and create a unique folder for it
+        String displayName = testInfo.getDisplayName();
+        displayName = displayName.replace("(", "");
+        displayName = displayName.replace(")", "");
+        displayName = displayName.replaceAll("[^a-zA-Z0-9]", "_");
+
         // Intercept data folder requests
-        when(skyPrestige.getDataFolder()).thenReturn(new File("test_data_" +
-                this.getClass().getName().replaceAll("[^a-zA-Z0-9]", "_")));
+        when(skyPrestige.getDataFolder()).thenReturn(new File("test_data_" + this.getClass().getName() + "_" + displayName));
 
         // Set up the mocked queue manager
         mockedQueueManager = Mockito.mock(QueueManager.class);
@@ -82,9 +72,6 @@ public abstract class AbstractTableTest {
         assertNotNull(connectionManager, "ConnectionManager failed to initialize");
         assertNotNull(connectionManager.getConnection(), "Failed to retrieve a connection from the ConnectionManager.");
 
-        // Initialize the thread pool for the queue manager
-        ThreadPoolManager.initializeThreadPool(new Settings(1, 4, 30));
-
         // Setup queue manager
         liveQueueManager = new QueueManager(connectionManager);
 
@@ -94,12 +81,16 @@ public abstract class AbstractTableTest {
 
     /**
      * Clean up after each test.
+     * @param testInfo The {@link TestInfo}.
      */
     @AfterEach
-    public void cleanup() {
-        // Delete created database file and directory as part of the tests
-        File directory = new File("test_data_" +
-                this.getClass().getName().replaceAll("[^a-zA-Z0-9]", "_"));
+    public void cleanup(@NotNull TestInfo testInfo) {
+        String displayName = testInfo.getDisplayName();
+        displayName = displayName.replace("(", "");
+        displayName = displayName.replace(")", "");
+        displayName = displayName.replaceAll("[^a-zA-Z0-9]", "_");
+
+        File directory = new File("test_data_" + this.getClass().getName() + "_" + displayName);
         File[] files = directory.listFiles();
         if(files != null) {
             for(File file : files) {
@@ -113,17 +104,7 @@ public abstract class AbstractTableTest {
         }
 
         if(liveQueueManager != null) {
-            liveQueueManager.shutdownQueue().thenAccept(v -> ThreadPoolManager.shutdownExecutorService());
-        } else {
-            ThreadPoolManager.shutdownExecutorService();
+            liveQueueManager.shutdownQueue().join();
         }
-    }
-
-    /**
-     * Clean up after all tests.
-     */
-    @AfterAll
-    public static void afterAll() {
-        MockBukkit.unmock();
     }
 }

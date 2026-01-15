@@ -165,6 +165,6 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      * @param amount The amount to multiply the base prestige points to.
      */
     protected void addPrestigePoints(@NotNull IslandData islandData, double basePrestigePoints, int amount) {
-        islandData.addPrestigePoints((basePrestigePoints * amount) * multiplierManager.getMultiplier());
+        islandData.addPrestigePoints((basePrestigePoints * amount) * multiplierManager.getMultiplier(islandData));
     }
 }

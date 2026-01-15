@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.multiplier;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
+import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
+import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.time.Time;
@@ -28,15 +28,15 @@ import com.github.lukesky19.skylib.api.time.TimeUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
 
-import java.time.DayOfWeek;
-import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class manages the multiplier that is applied to prestige points earned.
@@ -44,118 +44,336 @@ import java.util.List;
 public class MultiplierManager {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull MultiplierConfigManager multiplierConfigManager;
+    private final @NotNull IslandDataManager islandDataManager;
 
-    private double eventMultiplier = 0.0;
-    private double additionalMultiplier = 0.0;
-    private long eventDuration = -1;
-    private long timeUntilNextEvent = -1;
+    private final @NotNull Multiplier serverMultiplier = new Multiplier();
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
-     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
+     * @param islandDataManager An {@link IslandDataManager} instance.
      */
     public MultiplierManager(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
-            @NotNull MultiplierConfigManager multiplierConfigManager) {
+            @NotNull IslandDataManager islandDataManager) {
         this.plugin = plugin;
-        this.multiplierConfigManager = multiplierConfigManager;
+        this.islandDataManager = islandDataManager;
         this.localeManager = localeManager;
     }
 
     /**
-     * Re-calculate the cooldown time in seconds
+     * Get the effective multiplier.
+     * Adds the server multiplier to the island multiplier.
+     * @apiNote 1.0 (Base) + (Server Multiplier) + (Island Multiplier) = value returned
+     * @param island The {@link Island} to get the island multiplier for.
+     * @return The total multiplier.
      */
-    public void reload() {
-        eventMultiplier = 0.0;
-        additionalMultiplier = 0.0;
-        eventDuration = -1;
-        timeUntilNextEvent = -1;
-
-        startEvent(false);
+    public double getMultiplier(@NotNull Island island) {
+        return 1.0 + getServerMultiplier() + getIslandMultiplier(island);
     }
 
     /**
-     * Get the current multiplier.
-     * @return The current multiplier.
+     * Get the effective multiplier.
+     * Adds the server multiplier to the island multiplier.
+     * @apiNote 1.0 (Base) + (Server Multiplier) + (Island Multiplier) = value returned
+     * @param islandData The {@link IslandData} to get the island multiplier for.
+     * @return The total multiplier.
      */
-    public double getMultiplier() {
-        return 1.0 + eventMultiplier + additionalMultiplier;
+    public double getMultiplier(@NotNull IslandData islandData) {
+        return 1.0 + getServerMultiplier() + getIslandMultiplier(islandData);
     }
 
     /**
-     * Add the multiplier to the additional multiplier.
-     * @param multiplier The multiplier to add.
+     * Set the multiplier for the server.
+     * @apiNote This multiplier is added to the base and island multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the online players be told about the change?
+     * @return true if successful, false if not.
      */
-    public void addAdditionalMultiplier(double multiplier) {
-        additionalMultiplier += multiplier;
+    public boolean setServerMultiplier(@Nullable Player player, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null) {
+            serverMultiplier.setMultiplier(multiplier);
+        }
+
+        if(time != null) {
+            serverMultiplier.setTime(time);
+        }
+
+        // Send relevant messages
+        sendServerMultiplierChangedNotice(player, serverMultiplier.getMultiplier(), serverMultiplier.getTime(), notice);
+
+        return true;
     }
 
     /**
-     * Remove the multiplier from the additional multiplier.
-     * @param multiplier The multiplier to remove.
+     * Add to the multiplier for the server.
+     * @apiNote This multiplier is added to the base and island multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the online players be told about the change?
+     * @return true if successful, false if not.
      */
-    public void removeAdditionalMultiplier(double multiplier) {
-        additionalMultiplier -= multiplier;
+    public boolean addServerMultiplier(@Nullable Player player, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null && multiplier > 0.0) {
+            serverMultiplier.addMultiplier(multiplier);
+        }
+
+        if(time != null && time > 0) {
+            serverMultiplier.addTime(time);
+        }
+
+        // Send relevant messages
+        sendServerMultiplierChangedNotice(player, serverMultiplier.getMultiplier(), serverMultiplier.getTime(), notice);
+
+        return true;
     }
 
     /**
-     * Set the additional multiplier to the multiplier provided.
-     * @param multiplier The seconds to set.
+     * Remove from the multiplier for the server.
+     * @apiNote This multiplier is added to the base and island multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the online players be told about the change?
+     * @return true if successful, false if not.
      */
-    public void setAdditionalMultiplier(double multiplier) {
-        additionalMultiplier = multiplier;
+    public boolean removeServerMultiplier(@Nullable Player player, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null && multiplier > 0.0) {
+            serverMultiplier.removeMultiplier(multiplier);
+        }
+
+        if(time != null && time > 0) {
+            serverMultiplier.removeTime(time);
+        }
+
+        // Send relevant messages
+        sendServerMultiplierChangedNotice(player, serverMultiplier.getMultiplier(), serverMultiplier.getTime(), notice);
+
+        return true;
     }
 
     /**
-     * Get the current additional multiplier.
-     * @return The current additional multiplier.
+     * Clear the server's multiplier and multiplier time.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param notice Should the online player's be told about the change?
+     * @return true if successful, false if not.
      */
-    public double getAdditionalMultiplier() {
-        return additionalMultiplier;
+    public boolean clearServerMultiplier(@Nullable Player player, boolean notice) {
+        // Update the multiplier
+        serverMultiplier.setMultiplier(0);
+        // Update the multiplier time
+        serverMultiplier.setTime(0);
+
+        // Send relevant messages
+        sendServerMultiplierClearedNotice(player, notice);
+
+        return true;
     }
 
     /**
-     * Get the current scheduled multiplier.
-     * @return The current scheduled multiplier.
+     * Get the current multiplier for the server.
+     * @apiNote This is not the effective multiplier due to islands also having their own multiplier.<br>
+     * See {@link #getIslandMultiplier(Island)} {@link #getMultiplier(Island)} {@link #getMultiplier(IslandData)}.
+     * @return The multiplier. 0.0 means the server has no multiplier.
      */
-    public double getEventMultiplier() {
-        return eventMultiplier;
+    public double getServerMultiplier() {
+        return serverMultiplier.getMultiplier();
     }
 
     /**
-     * Remove the seconds from the event duration.
-     * @param seconds The seconds to remove.
+     * Get the time in seconds the server multiplier lasts for.
+     * @return The time in seconds or -1 if no time limit.
      */
-    public void removeEventDurationSeconds(int seconds) {
-        eventDuration -= seconds;
+    public long getServerMultiplierTime() {
+        return serverMultiplier.getTime();
     }
 
     /**
-     * Get the event duration in seconds until the scheduled multiplier is reset.
-     * @return The event duration in seconds.
+     * Get the multiplier for the island.
+     * @param island The {@link Island}.
+     * @return The island's multiplier.
      */
-    public long getEventDuration() {
-        return eventDuration;
+    public double getIslandMultiplier(@NotNull Island island) {
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        if(islandData == null) return 0;
+
+        return islandData.getMultiplier();
     }
 
     /**
-     * Remove the seconds from the time until next event.
-     * @param seconds The seconds to remove.
+     * Get the multiplier for the island.
+     * @param islandData The {@link IslandData}.
+     * @return The island's multiplier.
      */
-    public void removeTimeUntilNextEvent(int seconds) {
-        timeUntilNextEvent -= seconds;
+    public double getIslandMultiplier(@NotNull IslandData islandData) {
+        return islandData.getMultiplier();
     }
 
     /**
-     * Get the time in seconds until the event starts.
-     * @return The time in seconds until the event starts.
+     * Get the time in seconds the island multiplier lasts for.
+     * @param island The {@link Island}.
+     * @return The time in seconds or -1 if no time limit.
      */
-    public long getTimeUntilNextEvent() {
-        return timeUntilNextEvent;
+    public long getIslandMultiplierTime(@NotNull Island island) {
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        if(islandData == null) return 0;
+
+        return islandData.getMultiplierTime();
+    }
+
+    /**
+     * Set the multiplier for the island.
+     * @apiNote This multiplier is added to the base and server multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param island The {@link Island}.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the island member's be told about the change?
+     * @return true if successful, false if not.
+     */
+    public boolean setIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // Get the Island's IslandData
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        // If the IslandData is null, return false
+        if(islandData == null) return false;
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null) {
+            islandData.setMultiplier(multiplier);
+        }
+
+        // Update the multiplier time
+        if(time != null) {
+            islandData.setMultiplierTime(time);
+        }
+
+        // Send relevant messages
+        sendIslandMultiplierChangedNotice(player, island, islandData.getMultiplier(), islandData.getMultiplierTime(), notice);
+
+        return true;
+    }
+
+    /**
+     * Add to the multiplier for the island.
+     * @apiNote This multiplier is added to the base and server multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param island The {@link Island}.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the island member's be told about the change?
+     * @return true if successful, false if not.
+     */
+    public boolean addIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // Get the Island's IslandData
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        // If the IslandData is null, return false
+        if(islandData == null) return false;
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null) {
+            islandData.addMultiplier(multiplier);
+        }
+
+        // Update the multiplier time
+        if(time != null) {
+            islandData.addMultiplierTime(time);
+        }
+
+        // Send relevant messages
+        sendIslandMultiplierChangedNotice(player, island, islandData.getMultiplier(), islandData.getMultiplierTime(), notice);
+
+        return true;
+    }
+
+    /**
+     * Remove from the multiplier for the island.
+     * @apiNote This multiplier is added to the base and server multiplier.<br>
+     * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
+     * Example: 1.0 (Base) + 1.0 (Server) + 1.0 (Island) is a 3.0 multiplier.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param island The {@link Island}.
+     * @param multiplier The multiplier or null.
+     * @param time The multiplier time or null.
+     * @param notice Should the island member's be told about the change?
+     * @return true if successful, false if not.
+     */
+    public boolean removeIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+        // Get the Island's IslandData
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        // If the IslandData is null, return false
+        if(islandData == null) return false;
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null) {
+            islandData.removeMultiplier(multiplier);
+        }
+
+        // Update the multiplier time
+        if(time != null) {
+            islandData.removeMultiplierTime(time);
+        }
+
+        // Send relevant messages
+        sendIslandMultiplierChangedNotice(player, island, islandData.getMultiplier(), islandData.getMultiplierTime(), notice);
+
+        return true;
+    }
+
+    /**
+     * Clear the island's multiplier and multiplier time.
+     * @param player The {@link Player} that initiated the change or null.
+     * @param island The {@link Island}.
+     * @param notice Should the island member's be told about the change?
+     * @return true if successful, false if not.
+     */
+    public boolean clearIslandMultiplier(@Nullable Player player, @NotNull Island island, boolean notice) {
+        // Get the Island's IslandData
+        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        // If the IslandData is null, return false
+        if(islandData == null) return false;
+
+        // Update the multiplier
+        islandData.setMultiplier(0);
+        // Update the multiplier time
+        islandData.setMultiplierTime(0);
+
+        // Send relevant messages
+        sendIslandMultiplierClearedNotice(player, island, notice);
+
+        return true;
     }
 
     /**
@@ -164,7 +382,8 @@ public class MultiplierManager {
      * @param timeInSeconds The time in seconds to format.
      * @return A {@link Component}.
      */
-    public @NotNull Component getTimePlaceholder(@NotNull Locale.TimeFormat timeMessage, long timeInSeconds) {
+    @NotNull
+    public Component getTimePlaceholder(@NotNull Locale.TimeFormat timeMessage, long timeInSeconds) {
         boolean firstUnit = true;
         Time timeRecord = TimeUtil.millisToTime(timeInSeconds * 1000L);
         StringBuilder messageBuilder = new StringBuilder();
@@ -225,7 +444,7 @@ public class MultiplierManager {
         }
 
         if(firstUnit) {
-            messageBuilder.append("0 ").append(timeMessage.seconds());
+            messageBuilder.append(timeMessage.seconds());
         }
 
         if(!timeMessage.suffix().isEmpty()) messageBuilder.append(timeMessage.suffix());
@@ -243,121 +462,134 @@ public class MultiplierManager {
     }
 
     /**
-     * Start the scheduled multiplier event if at or after the event time.
-     * @param broadcast Should the event start be broadcasted to the players?
+     * Send the relevant notices to online players and feedback to the command player.
+     * @param player The {@link Player}.
+     * @param multiplier The multiplier.
+     * @param time The time.
+     * @param notice If online players should be informed of the change.
      */
-    public void startEvent(boolean broadcast) {
-        @NotNull Locale locale = localeManager.getConfiguration();
-
-        if(eventDuration > 0) {
-            plugin.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start event because one is already running."));
-            return;
-        }
-
-        calculateEventDuration();
-        calculateNextEventSeconds();
-
-        if(eventDuration <= 0 || eventMultiplier <= 0) return;
-
-        if(broadcast) {
-            List<TagResolver.Single> placeholders = List.of(
-                    Placeholder.parsed("event_multiplier", String.valueOf(eventMultiplier + 1)),
-                    Placeholder.parsed("current_multiplier", String.valueOf(getMultiplier())));
-            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventStarted(), placeholders);
-
-            plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(message));
-        }
-    }
-
-    /**
-     * End the scheduled multiplier event.
-     * @param broadcast Should the event end be broadcasted to the players?
-     */
-    public void endEvent(boolean broadcast) {
-        @NotNull Locale locale = localeManager.getConfiguration();
-
-        if(eventDuration < 0) return;
-
+    private void sendServerMultiplierChangedNotice(
+            @Nullable Player player,
+            double multiplier,
+            long time,
+            boolean notice) {
+        Locale locale = localeManager.getConfiguration();
         List<TagResolver.Single> placeholders = new ArrayList<>();
-        placeholders.add(Placeholder.parsed("event_multiplier", String.valueOf(eventMultiplier + 1)));
+        placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
 
-        eventDuration = -1;
-        eventMultiplier = 0;
+        // Send notice to online players
+        if(notice) {
+            Component message = time != -1 ?
+                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierChangedNoTimeLimit(), placeholders);
 
-        placeholders.add(Placeholder.parsed("current_multiplier", String.valueOf(getMultiplier())));
-
-        calculateNextEventSeconds();
-
-        if(broadcast) {
-            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventEnded(), placeholders);
-
-            plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(message));
+            plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
+
+        // If no Player, return
+        if(player == null) return;
+
+        // Send feedback to Player
+        Component message = time != -1 ?
+                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
+                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
+        player.sendMessage(message);
     }
 
     /**
-     * Calculate the number of seconds left in the event.
-     * Also updates the scheduled multiplier if the calculated event duration is > 0.
+     * Send the relevant notices to online players and feedback to the command player.
+     * @param player The {@link Player}.
+     * @param notice If online players should be informed of the change.
      */
-    private void calculateEventDuration() {
-        MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
-        if(multiplierConfig == null) {
-            timeUntilNextEvent = -1;
-            return;
+    private void sendServerMultiplierClearedNotice(
+            @Nullable Player player,
+            boolean notice) {
+        Locale locale = localeManager.getConfiguration();
+
+        // Send notice to online players
+        if(notice) {
+            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierClearedNotice());
+
+            plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
 
-        if(!multiplierConfig.enabled() || multiplierConfig.timezone() == null || multiplierConfig.day() == null || multiplierConfig.durationSeconds() <= 0) {
-            timeUntilNextEvent = -1;
-            return;
-        }
+        // If no Player, return
+        if(player == null) return;
 
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierConfig.timezone()));
-
-        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierConfig.day().toUpperCase());
-        int eventHour = multiplierConfig.hour();
-
-        // Create ZonedDateTime for the event hour on the current day
-        ZonedDateTime eventTimeToday = now.with(eventDay).withHour(eventHour).withMinute(0).withSecond(0);
-
-        if(now.isEqual(eventTimeToday) || now.isAfter(eventTimeToday)) {
-            Duration durationSinceEvent = Duration.between(now, eventTimeToday);
-            long secondsPassed = durationSinceEvent.getSeconds();
-            long calculatedDuration = multiplierConfig.durationSeconds() - secondsPassed;
-
-            if(calculatedDuration > 0) {
-                eventDuration = calculatedDuration;
-                eventMultiplier = multiplierConfig.multiplier() - 1;
-            }
-        }
+        // Send feedback to Player
+        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierCleared());
+        player.sendMessage(message);
     }
 
     /**
-     * Calculate the number of seconds until the next event.
+     * Send the relevant notices to island members and feedback to the command player.
+     * @param player The {@link Player}.
+     * @param island The {@link Island} whose multiplier was updated.
+     * @param multiplier The multiplier.
+     * @param time The time.
+     * @param notice If island members should be informed of the change.
      */
-    private void calculateNextEventSeconds() {
-        MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
-        if(multiplierConfig == null) {
-            timeUntilNextEvent = -1;
-            return;
+    private void sendIslandMultiplierChangedNotice(
+            @Nullable Player player,
+            @NotNull Island island,
+            double multiplier,
+            long time,
+            boolean notice) {
+        Locale locale = localeManager.getConfiguration();
+        List<TagResolver.Single> placeholders = new ArrayList<>();
+        placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+
+        // Send notice to island members
+        if(notice) {
+            Component message = time != -1 ?
+                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierChangedNoTimeLimit(), placeholders);
+
+            island.getMemberSet().stream()
+                    .map(memberId -> plugin.getServer().getPlayer(memberId))
+                    .filter(Objects::nonNull)
+                    .forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
 
-        if(!multiplierConfig.enabled() || multiplierConfig.timezone() == null || multiplierConfig.day() == null || multiplierConfig.durationSeconds() <= 0) {
-            timeUntilNextEvent = -1;
-            return;
+        // If no Player, return
+        if(player == null) return;
+
+        // Send feedback to Player
+        Component message = time != -1 ?
+                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
+                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
+        player.sendMessage(message);
+    }
+
+    /**
+     * Send the relevant notices to island members and feedback to the command player.
+     * @param player The {@link Player}.
+     * @param island The {@link Island} whose multiplier was updated.
+     * @param notice If island members should be informed of the change.
+     */
+    private void sendIslandMultiplierClearedNotice(
+            @Nullable Player player,
+            @NotNull Island island,
+            boolean notice) {
+        Locale locale = localeManager.getConfiguration();
+
+        // Send notice to island members
+        if(notice) {
+            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierClearedNotice());
+
+            island.getMemberSet().stream()
+                    .map(memberId -> plugin.getServer().getPlayer(memberId))
+                    .filter(Objects::nonNull)
+                    .forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
 
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(multiplierConfig.timezone()));
+        // If no Player, return
+        if(player == null) return;
 
-        DayOfWeek eventDay = DayOfWeek.valueOf(multiplierConfig.day().toUpperCase());
-        int eventHour = multiplierConfig.hour();
-
-        ZonedDateTime nextEvent = now.with(eventDay).withHour(eventHour).withMinute(0).withSecond(0);
-
-        if(nextEvent.isBefore(now) || (nextEvent.isEqual(now))) {
-            nextEvent = nextEvent.plusWeeks(1);
-        }
-
-        // Calculate the remaining seconds until the next event
-        timeUntilNextEvent = Duration.between(now, nextEvent).getSeconds();
+        // Send feedback to Player
+        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierCleared());
+        player.sendMessage(message);
     }
 }

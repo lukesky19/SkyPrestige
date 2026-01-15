@@ -86,6 +86,8 @@ public class IslandDataTable {
                         "island_id TEXT UNIQUE NOT NULL, " +
                         "level INTEGER NOT NULL DEFAULT 0, " +
                         "points DOUBLE NOT NULL, " +
+                        "multiplier DOUBLE NOT NULL, " +
+                        "multiplier_time LONG NOT NULL, " +
                         "vault_data BLOB NOT NULL, " +
                         "leaderboard_exempt INTEGER NOT NULL DEFAULT 0, " +
                         "prestige_exempt INTEGER NOT NULL DEFAULT 0, " +
@@ -108,7 +110,7 @@ public class IslandDataTable {
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
     public @NotNull CompletableFuture<IslandData> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
-        String selectSql = "SELECT level, points, vault_data, leaderboard_exempt, prestige_exempt FROM " + tableName + " WHERE island_id = ?";
+        String selectSql = "SELECT level, points, multiplier, multiplier_time, vault_data, leaderboard_exempt, prestige_exempt FROM " + tableName + " WHERE island_id = ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
@@ -117,6 +119,8 @@ public class IslandDataTable {
                 if(resultSet.next()) {
                     int level = resultSet.getInt("level");
                     double points = resultSet.getDouble("points");
+                    double multiplier = resultSet.getDouble("multiplier");
+                    long multiplierTime = resultSet.getLong("multiplier_time");
                     boolean leaderboardExempt = resultSet.getBoolean("leaderboard_exempt");
                     boolean prestigeExempt = resultSet.getBoolean("prestige_exempt");
                     byte[] rawVaultData = resultSet.getBytes("vault_data");
@@ -124,6 +128,8 @@ public class IslandDataTable {
 
                     islandData.setPrestigeLevel(level);
                     islandData.setPrestigePoints(points);
+                    islandData.setMultiplier(multiplier);
+                    islandData.setMultiplierTime(multiplierTime);
                     islandData.setLeaderboardExempt(leaderboardExempt);
                     islandData.setPrestigeExempt(prestigeExempt);
                     islandData.setVaultItems(vaultData);
@@ -147,15 +153,19 @@ public class IslandDataTable {
                 "island_id, " +
                 "level, " +
                 "points, " +
+                "multiplier, " +
+                "multiplier_time, " +
                 "vault_data, " +
                 "leaderboard_exempt, " +
                 "prestige_exempt, " +
                 "last_updated) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (island_id) " +
                 "DO UPDATE SET " +
                 "level = ?, " +
                 "points = ?, " +
+                "multiplier = ?, " +
+                "multiplier_time = ?, " +
                 "vault_data = ?, " +
                 "leaderboard_exempt = ?, " +
                 "prestige_exempt = ?, " +
@@ -165,6 +175,8 @@ public class IslandDataTable {
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
         IntegerParameter prestigeLevelParameter = new IntegerParameter(islandData.getPrestigeLevel());
         DoubleParameter prestigePointsParameter = new DoubleParameter(islandData.getPrestigePoints());
+        DoubleParameter multiplierParameter = new DoubleParameter(islandData.getMultiplier());
+        LongParameter multiplierTimeParameter = new LongParameter(islandData.getMultiplierTime());
         ByteArrayParameter vaultDataParameter = new ByteArrayParameter(serializeItemMap(islandData.getVaultItems()));
         IntegerParameter leaderboardExemptParameter = new IntegerParameter(islandData.isLeaderboardExempt() ? 1 : 0);
         IntegerParameter prestigeExemptParameter = new IntegerParameter(islandData.isPrestigeExempt() ? 1 : 0);
@@ -174,12 +186,16 @@ public class IslandDataTable {
                 islandIdParameter,
                 prestigeLevelParameter,
                 prestigePointsParameter,
+                multiplierParameter,
+                multiplierTimeParameter,
                 vaultDataParameter,
                 leaderboardExemptParameter,
                 prestigeExemptParameter,
                 lastUpdatedParameter,
                 prestigeLevelParameter,
                 prestigePointsParameter,
+                multiplierParameter,
+                multiplierTimeParameter,
                 vaultDataParameter,
                 leaderboardExemptParameter,
                 prestigeExemptParameter,
@@ -193,19 +209,23 @@ public class IslandDataTable {
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
     public @NotNull CompletableFuture<Void> saveIslandData(@NotNull Map<String, IslandData> islandDataMap) {
-        String sql = "INSERT INTO " + tableName + " (" +
+        String updateSql = "INSERT INTO " + tableName + " (" +
                 "island_id, " +
                 "level, " +
                 "points, " +
+                "multiplier, " +
+                "multiplier_time, " +
                 "vault_data, " +
                 "leaderboard_exempt, " +
                 "prestige_exempt, " +
                 "last_updated) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (island_id) " +
                 "DO UPDATE SET " +
                 "level = ?, " +
                 "points = ?, " +
+                "multiplier = ?, " +
+                "multiplier_time = ?, " +
                 "vault_data = ?, " +
                 "leaderboard_exempt = ?, " +
                 "prestige_exempt = ?, " +
@@ -217,6 +237,8 @@ public class IslandDataTable {
             CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
             IntegerParameter prestigeLevelParameter = new IntegerParameter(islandData.getPrestigeLevel());
             DoubleParameter prestigePointsParameter = new DoubleParameter(islandData.getPrestigePoints());
+            DoubleParameter multiplierParameter = new DoubleParameter(islandData.getMultiplier());
+            LongParameter multiplierTimeParameter = new LongParameter(islandData.getMultiplierTime());
             ByteArrayParameter vaultDataParameter = new ByteArrayParameter(serializeItemMap(islandData.getVaultItems()));
             IntegerParameter leaderboardExemptParameter = new IntegerParameter(islandData.isLeaderboardExempt() ? 1 : 0);
             IntegerParameter prestigeExemptParameter = new IntegerParameter(islandData.isPrestigeExempt() ? 1 : 0);
@@ -226,12 +248,16 @@ public class IslandDataTable {
                     islandIdParameter,
                     prestigeLevelParameter,
                     prestigePointsParameter,
+                    multiplierParameter,
+                    multiplierTimeParameter,
                     vaultDataParameter,
                     leaderboardExemptParameter,
                     prestigeExemptParameter,
                     lastUpdatedParameter,
                     prestigeLevelParameter,
                     prestigePointsParameter,
+                    multiplierParameter,
+                    multiplierTimeParameter,
                     vaultDataParameter,
                     leaderboardExemptParameter,
                     prestigeExemptParameter,
@@ -239,7 +265,7 @@ public class IslandDataTable {
                     lastUpdatedParameter));
         });
 
-        return queueManager.queueBulkWriteTransaction(sql, listOfParameterLists).thenRun(() -> {});
+        return queueManager.queueBulkWriteTransaction(updateSql, listOfParameterLists).thenRun(() -> {});
     }
 
     /**

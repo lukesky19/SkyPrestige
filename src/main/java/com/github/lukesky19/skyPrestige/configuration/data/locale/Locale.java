@@ -68,16 +68,7 @@ import java.util.List;
  * @param protectionOrbAlreadyProtected The message sent when an item is already protected.
  * @param protectionOrbNotAllowed The message sent when an item is not allowed to be protected.
  * @param protectionOrbProtected The message sent when an item is protected.
- * @param additionalMultiplierGet The message sent to the player displaying the current additional multiplier.
- * @param eventMultiplierGet The message sent to the player displaying the current event multiplier.
- * @param totalMultiplierGet The message sent to the player displaying the current total multiplier.
- * @param multiplierChanged The message sent to all players that changes the multiplier.
- * @param multiplierEventStarted The message sent to all players when thea multiplier event has started.
- * @param multiplierEventEnded The message sent to all players when the multiplier event ends.
- * @param multiplierEventRemainingTime The message sent to the player to display the remaining event time.
- * @param multiplierEventNextTime The message sent to the player to display the remaining time until the next event.
- * @param multiplierEventDisabled The message sent to the player when the multiplier event is disabled.
- * @param multiplierTimePlaceholder The {@link TimeFormat} to use for {@literal <time>} placeholders.
+ * @param multiplier The messages related to multipliers.
  * @param prestigeStatusPlayerInWrongWorld The message sent when a player tries to opt in or out of prestige in a non-BentoBox world.
  * @param prestigeStatusPlayerNotOnIsland The message sent when a player tries to opt in or out of prestige while not on an Island.
  * @param prestigeStatusIslandNotOwned The message sent when a player tries to opt in or out of prestige and that island is not owned.
@@ -130,22 +121,52 @@ public record Locale(
         String protectionOrbNotAllowed,
         String protectionOrbAlreadyProtected,
         String protectionOrbProtected,
-        String additionalMultiplierGet,
-        String eventMultiplierGet,
-        String totalMultiplierGet,
-        String multiplierChanged,
-        String multiplierEventStarted,
-        String multiplierEventEnded,
-        String multiplierEventRemainingTime,
-        String multiplierEventNextTime,
-        String multiplierEventDisabled,
-        TimeFormat multiplierTimePlaceholder,
+        MultiplierMessages multiplier,
         String prestigeStatusPlayerInWrongWorld,
         String prestigeStatusPlayerNotOnIsland,
         String prestigeStatusIslandNotOwned,
         String prestigeStatusPlayerNotMemberOrOwner,
         String delimiter,
         String finalDelimiter) {
+    /**
+     * This record contains the messages related to the multiplier.
+     * @param serverMultiplierChangedTimeLimit The message sent when the server multiplier is updated with a time limit.
+     * @param serverMultiplierChangedNoTimeLimit The message sent when the server multiplier is updated with no time limit.
+     * @param islandMultiplierChangedTimeLimit The message sent when the island multiplier is updated with a time limit.
+     * @param islandMultiplierChangedNoTimeLimit The message sent when the island multiplier is updated with no time limit.
+     * @param serverMultiplierExpiredNotice The message sent when the server's multiplier has expired.
+     * @param islandMultiplierExpiredNotice The message sent when an island's multiplier has expired.
+     * @param serverMultiplierClearedNotice The message sent when the server's multiplier is cleared.
+     * @param islandMultiplierClearedNotice The message sent when the island's multiplier is cleared.
+     * @param serverMultiplierTimeLimit The message sent to the command sender that updated the server multiplier with a time limit.
+     * @param serverMultiplierNoTimeLimit The message sent to the command sender that updated the server multiplier with no time limit.
+     * @param islandMultiplierTimeLimit The message sent to the command sender that updated an island multiplier with a time limit.
+     * @param islandMultiplierNoTimeLimit The message sent to the command sender that updated an island multiplier with no time limit.
+     * @param serverMultiplierCleared The message sent to the command sender that cleared the server multiplier.
+     * @param islandMultiplierCleared The message sent to the command sender that cleared the island multiplier.
+     * @param effectiveMultiplier The message sent to a player viewing their effective multiplier.
+     * @param multiplierNotOnIsland The message sent to a player when not on an island when trying to view the island multiplier.
+     * @param multiplierTimePlaceholder The {@link TimeFormat} to use for {@literal <time>} placeholders.
+     */
+    @ConfigSerializable
+    public record MultiplierMessages(
+            String serverMultiplierChangedTimeLimit,
+            String serverMultiplierChangedNoTimeLimit,
+            String islandMultiplierChangedTimeLimit,
+            String islandMultiplierChangedNoTimeLimit,
+            String serverMultiplierExpiredNotice,
+            String islandMultiplierExpiredNotice,
+            String serverMultiplierClearedNotice,
+            String islandMultiplierClearedNotice,
+            String serverMultiplierTimeLimit,
+            String serverMultiplierNoTimeLimit,
+            String islandMultiplierTimeLimit,
+            String islandMultiplierNoTimeLimit,
+            String serverMultiplierCleared,
+            String islandMultiplierCleared,
+            String effectiveMultiplier,
+            String multiplierNotOnIsland,
+            TimeFormat multiplierTimePlaceholder) {}
     /**
      * The record containing the data necessary to format a {@literal <time>} placeholder.
      * @param prefix The text to display before the first time unit.

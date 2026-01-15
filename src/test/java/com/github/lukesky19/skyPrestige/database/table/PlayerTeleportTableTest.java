@@ -18,9 +18,11 @@
 package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
@@ -53,13 +55,11 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
 
     /**
      * Set up the required data for the tests.
+     * @param testInfo The {@link TestInfo}.
      */
-    @Override
     @BeforeEach
-    public void setup() {
-        super.setup();
-
-        server.addSimpleWorld("world");
+    public void setup(@NotNull TestInfo testInfo) {
+        super.setup(testInfo);
 
         // Setup table classes
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);

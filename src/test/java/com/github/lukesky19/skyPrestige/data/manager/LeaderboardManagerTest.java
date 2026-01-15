@@ -24,6 +24,7 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.database.table.IslandDataTable;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -150,10 +151,10 @@ public class LeaderboardManagerTest {
 
         when(islandDataManager.getAllData()).thenReturn(
                 Map.of(
-                        islandId1, new IslandData(islandId1, 25, 150.0, false, false, new HashMap<>()),
-                        islandId2, new IslandData(islandId2, 20, 125.0, true, false, new HashMap<>()),
-                        islandId3, new IslandData(islandId3, 15, 100.0, false, false, new HashMap<>()),
-                        islandId4, new IslandData(islandId4, 20, 125.0, false, false, new HashMap<>())
+                        islandId1, new IslandData(islandId1, 25, 150.0, new Multiplier(), false, false, new HashMap<>()),
+                        islandId2, new IslandData(islandId2, 20, 125.0, new Multiplier(), true, false, new HashMap<>()),
+                        islandId3, new IslandData(islandId3, 15, 100.0, new Multiplier(), false, false, new HashMap<>()),
+                        islandId4, new IslandData(islandId4, 20, 125.0, new Multiplier(), false, false, new HashMap<>())
                 ));
 
         leaderboardManager.updateDatabaseTopTen().join();

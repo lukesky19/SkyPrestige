@@ -114,7 +114,7 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
      * Validates if the locale is missing any strings.
      */
     @Override
-    public boolean validateConfiguration() {
+    public boolean validateConfiguration(@Nullable Locale configuration) {
         if(configuration == null) return false;
 
         if(configuration.configVersion()  == null
@@ -159,23 +159,30 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || configuration.protectionOrbNotAllowed() == null
                 || configuration.protectionOrbAlreadyProtected() == null
                 || configuration.protectionOrbProtected() == null
-                || configuration.additionalMultiplierGet() == null
-                || configuration.eventMultiplierGet() == null
-                || configuration.totalMultiplierGet() == null
-                || configuration.multiplierChanged() == null
-                || configuration.multiplierEventStarted() == null
-                || configuration.multiplierEventEnded() == null
-                || configuration.multiplierEventRemainingTime() == null
-                || configuration.multiplierEventNextTime() == null
-                || configuration.multiplierEventDisabled() == null
-                || isTimeFormatInvalid(configuration.multiplierTimePlaceholder())
+                || configuration.multiplier().serverMultiplierChangedTimeLimit() == null
+                || configuration.multiplier().serverMultiplierChangedNoTimeLimit() == null
+                || configuration.multiplier().islandMultiplierChangedTimeLimit() == null
+                || configuration.multiplier().islandMultiplierChangedNoTimeLimit() == null
+                || configuration.multiplier().serverMultiplierExpiredNotice() == null
+                || configuration.multiplier().islandMultiplierExpiredNotice() == null
+                || configuration.multiplier().serverMultiplierClearedNotice() == null
+                || configuration.multiplier().islandMultiplierClearedNotice() == null
+                || configuration.multiplier().serverMultiplierTimeLimit() == null
+                || configuration.multiplier().serverMultiplierNoTimeLimit() == null
+                || configuration.multiplier().islandMultiplierTimeLimit() == null
+                || configuration.multiplier().islandMultiplierNoTimeLimit() == null
+                || configuration.multiplier().serverMultiplierCleared() == null
+                || configuration.multiplier().islandMultiplierCleared() == null
+                || configuration.multiplier().effectiveMultiplier() == null
+                || configuration.multiplier().multiplierNotOnIsland() == null
+                || isTimeFormatInvalid(configuration.multiplier().multiplierTimePlaceholder())
                 || configuration.prestigeStatusPlayerInWrongWorld() == null
                 || configuration.prestigeStatusPlayerNotOnIsland() == null
                 || configuration.prestigeStatusIslandNotOwned() == null
                 || configuration.prestigeStatusPlayerNotMemberOrOwner() == null
                 || configuration.delimiter() == null
                 || configuration.finalDelimiter() == null) {
-            configuration = null;
+            this.configuration = null;
 
             logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
             logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
@@ -273,25 +280,34 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 "<red>This item can not be protected by a protection orb.</red>",
                 "<red>This item is already protected by a protection orb.</red>",
                 "<green>This item is now protected and will not be removed on prestige.</green>",
-                "<green>The current additional multiplier is <aqua><additional_multiplier></aqua>.</green>",
-                "<green>The current event multiplier is <aqua><event_multiplier></aqua>.</green>",
-                "<green>The current total multiplier is <aqua><total_multiplier></aqua>.</green>",
-                "<green>The prestige points multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                "<green>A <aqua><event_multiplier>x</aqua> prestige points event has now started. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                "<green>The <aqua><event_multiplier>x</aqua> prestige points event has ended. The total multiplier is now <aqua><current_multiplier></aqua>.</green>",
-                "<green>There is <time> left until the <aqua><event_multiplier>x</aqua> prestige points event ends. The total multiplier is <aqua><current_multiplier></aqua>.</green>",
-                "<green>The next <aqua><event_multiplier>x</aqua> prestige points event starts in <time>.</green>",
-                "<green>There is no prestige points multiplier event active. There is no next event scheduled.</green>",
-                new Locale.TimeFormat(
-                        "",
-                        "<aqua><years></aqua> year(s)",
-                        "<aqua><months></aqua> month(s)",
-                        "<aqua><weeks></aqua> week(s)",
-                        "<aqua><days></aqua> day(s)",
-                        "<aqua><hours></aqua> hour(s)",
-                        "<aqua><minutes></aqua> minute(s)",
-                        "<aqua><seconds></aqua> second(s)",
-                        ""),
+                new Locale.MultiplierMessages(
+                        "<green>The prestige points server multiplier is now <aqua><multiplier></aqua> with <time> remaining.</green>",
+                        "<green>The prestige points server multiplier is now <aqua><multiplier></aqua> with no time limit.</green>",
+                        "<green>Your island's prestige points multiplier is now <aqua><multiplier></aqua> with <time> remaining.</green>",
+                        "<green>Your island's prestige points multiplier is now <aqua><multiplier></aqua> with no time limit.</green>",
+                        "<green>The server's prestige points multiplier has expired.</green>",
+                        "<green>Your island's prestige points multiplier has expired.</green>",
+                        "<green>The server's prestige points multiplier has been cleared.</green>",
+                        "<green>Your island's prestige points multiplier has been cleared.</green>",
+                        "<green>The prestige points server multiplier is <aqua><multiplier></aqua> with <time> remaining.</green>",
+                        "<green>The prestige points server multiplier is <aqua><multiplier></aqua> with no time limit.</green>",
+                        "<green>The prestige points island multiplier is <aqua><multiplier></aqua> with <time> remaining.</green>",
+                        "<green>The prestige points island multiplier is <aqua><multiplier></aqua> with no time limit.</green>",
+                        "<green>The server's prestige points multiplier has been cleared.</green>",
+                        "<green>The island's prestige points multiplier has been cleared.</green>",
+                        "<green>Your prestige points effective multiplier is <aqua><multiplier></aqua>.</green>",
+                        "<red>You must be on an island to view the multiplier.</red>",
+                        new Locale.TimeFormat(
+                                "",
+                                "<aqua><years></aqua> year(s)",
+                                "<aqua><months></aqua> month(s)",
+                                "<aqua><weeks></aqua> week(s)",
+                                "<aqua><days></aqua> day(s)",
+                                "<aqua><hours></aqua> hour(s)",
+                                "<aqua><minutes></aqua> minute(s)",
+                                "<aqua><seconds></aqua> second(s)",
+                                "")
+                ),
                 "<red>You must be in an island world to opt in or out of prestige.</red>",
                 "<red>You must be on your island to opt in or out of prestige.</red>",
                 "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",

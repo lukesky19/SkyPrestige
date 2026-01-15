@@ -55,8 +55,8 @@ public class ProtectionOrbConfigManager extends SimpleConfigManager<ProtectionOr
     }
 
     @Override
-    public boolean validateConfiguration() {
-        return getConfiguration() != null;
+    public boolean validateConfiguration(@Nullable ProtectionOrbConfig configuration) {
+        return configuration != null;
     }
 
     @Override

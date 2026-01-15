@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.data.data.island;
 
+import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -34,12 +35,13 @@ public class IslandData {
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
     private @Nullable Double requiredPrestigePoints;
+    private @NotNull Multiplier multiplier = new Multiplier();
     private boolean leaderboardExempt = false;
     private boolean prestigeExempt = false;
     private @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
 
     /**
-     * Use {@link #IslandData(String)} or {@link IslandData#IslandData(String, int, double, boolean, boolean, Map)} instead.
+     * Use {@link #IslandData(String)} or {@link IslandData#IslandData(String, int, double, Multiplier, boolean, boolean, Map)} instead.
      * @throws RuntimeException if used.
      */
     @Deprecated(since = "1.1.0.0")
@@ -60,6 +62,7 @@ public class IslandData {
      * @param islandId The unique id of the island.
      * @param prestigeLevel The island's prestige level.
      * @param prestigePoints The island's prestige points
+     * @param multiplier The {@link Multiplier}.
      * @param leaderboardExempt Whether the island is exempt from leaderboard reporting or not.
      * @param prestigeExempt Whether the island is exempt from prestige or not.
      * @param vaultItems The vault items.
@@ -68,12 +71,14 @@ public class IslandData {
             @NotNull String islandId,
             int prestigeLevel,
             double prestigePoints,
+            @NotNull Multiplier multiplier,
             boolean leaderboardExempt,
             boolean prestigeExempt,
             @NotNull Map<PageSlotKey, ItemStack> vaultItems) {
         this.islandId = islandId;
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
+        this.multiplier = multiplier.clone();
         this.leaderboardExempt = leaderboardExempt;
         this.prestigeExempt = prestigeExempt;
         this.vaultItems = new HashMap<>(vaultItems);
@@ -84,9 +89,9 @@ public class IslandData {
      * @return The cloned {@link IslandData}.
      */
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // A private constructor is used to clone data instead.
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // A constructor is used to clone data instead.
     public @NotNull IslandData clone() {
-        return new IslandData(islandId, prestigeLevel, prestigePoints, leaderboardExempt, prestigeExempt, vaultItems);
+        return new IslandData(islandId, prestigeLevel, prestigePoints, multiplier, leaderboardExempt, prestigeExempt, vaultItems);
     }
 
     /**
@@ -102,6 +107,11 @@ public class IslandData {
         return this.getIslandId().equals(compareIslandData.getIslandId())
                 && this.getPrestigeLevel() == compareIslandData.getPrestigeLevel()
                 && this.getPrestigePoints() == compareIslandData.getPrestigePoints()
+                && ((this.getRequiredPrestigePoints() == null && compareIslandData.getRequiredPrestigePoints() == null)
+                    || (this.getRequiredPrestigePoints() != null && compareIslandData.getRequiredPrestigePoints() != null
+                        && this.getRequiredPrestigePoints().equals(compareIslandData.getRequiredPrestigePoints())))
+                && this.multiplier.getMultiplier() == compareIslandData.getMultiplier()
+                && this.multiplier.getTime() == compareIslandData.getMultiplierTime()
                 && this.isLeaderboardExempt() == compareIslandData.isLeaderboardExempt()
                 && this.isPrestigeExempt() == compareIslandData.isPrestigeExempt()
                 && this.getVaultItems().equals(compareIslandData.getVaultItems());
@@ -192,6 +202,70 @@ public class IslandData {
      */
     public @Nullable Double getRequiredPrestigePoints() {
         return requiredPrestigePoints;
+    }
+
+    /**
+     * Set the multiplier for the island.
+     * @param multiplier The multiplier.
+     */
+    public void setMultiplier(double multiplier) {
+        this.multiplier.setMultiplier(multiplier);
+    }
+
+    /**
+     * Add to the multiplier for the island.
+     * @param multiplier The multiplier to add.
+     */
+    public void addMultiplier(double multiplier) {
+        this.multiplier.addMultiplier(multiplier);
+    }
+
+    /**
+     * Remove from the multiplier for the island.
+     * @param multiplier The multiplier to remove.
+     */
+    public void removeMultiplier(double multiplier) {
+        this.multiplier.removeMultiplier(multiplier);
+    }
+
+    /**
+     * Get the current multiplier for the island.
+     * @return The multiplier. 0.0 means the island has no multiplier.
+     */
+    public double getMultiplier() {
+        return multiplier.getMultiplier();
+    }
+
+    /**
+     * Set how long the island's multiplier should last for.
+     * @param time The time in seconds.
+     */
+    public void setMultiplierTime(long time) {
+        multiplier.setTime(time);
+    }
+
+    /**
+     * Add time to the multiplier time.
+     * @param time The time in seconds to add.
+     */
+    public void addMultiplierTime(long time) {
+        multiplier.addTime(time);
+    }
+
+    /**
+     * Remove time from the multiplier time.
+     * @param time The time in seconds to remove.
+     */
+    public void removeMultiplierTime(long time) {
+        multiplier.removeTime(time);
+    }
+
+    /**
+     * Get the time in seconds the island multiplier lasts for.
+     * @return The time in seconds.
+     */
+    public long getMultiplierTime() {
+        return multiplier.getTime();
     }
 
     /**

@@ -17,43 +17,104 @@
 */
 package com.github.lukesky19.skyPrestige.task.tasks;
 
+import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.Objects;
 
 /**
- * This task updates the multiplier cooldown seconds and either applies or removes the scheduled multiplier.
+ * This task decrements multiplier time and removes any multipliers if necessary.
  */
 public class MultiplierTask extends BukkitRunnable {
+    private final @NotNull SkyPlugin plugin;
+    private final @NotNull LocaleManager localeManager;
+    private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull MultiplierManager multiplierManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
+     * @param plugin A {@link SkyPlugin} instance.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param islandDataManager An {@link IslandDataManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
-    public MultiplierTask(@NotNull MultiplierManager multiplierManager) {
+    public MultiplierTask(
+            @NotNull SkyPlugin plugin,
+            @NotNull LocaleManager localeManager,
+            @NotNull IslandDataManager islandDataManager,
+            @NotNull MultiplierManager multiplierManager,
+            @NotNull HookManager hookManager) {
+        this.plugin = plugin;
+        this.localeManager = localeManager;
+        this.islandDataManager = islandDataManager;
         this.multiplierManager = multiplierManager;
+        this.hookManager = hookManager;
     }
 
     /**
-     * Removes 1 from the cooldown seconds and either applies or removes the scheduled multiplier when the cooldown reaches 0.
+     * Removes 1 second from all multiplier cooldowns and removes any cooldowns if the time has expired.
      */
     @Override
     public void run() {
-        if(multiplierManager.getEventDuration() > 0) {
-            multiplierManager.removeEventDurationSeconds(1);
+        if(multiplierManager.getServerMultiplierTime() > 0) {
+            multiplierManager.removeServerMultiplier(null, null, 1L, false);
 
-            if(multiplierManager.getEventDuration() == 0) {
-                multiplierManager.endEvent(true);
+            if(multiplierManager.getServerMultiplierTime() == 0) {
+                sendServerMultiplierExpiredNotice();
             }
         }
 
-        if(multiplierManager.getTimeUntilNextEvent() > 0) {
-            multiplierManager.removeTimeUntilNextEvent(1);
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        islandDataManager.getAllData()
+                .values()
+                .stream()
+                .filter(islandData -> islandData.getMultiplier() > 0.0 && islandData.getMultiplierTime() > 0)
+                .forEach(islandData -> {
+                    islandData.removeMultiplierTime(1);
 
-            if(multiplierManager.getTimeUntilNextEvent() == 0) {
-                multiplierManager.startEvent(true);
-            }
-        }
+                    if(islandData.getMultiplierTime() == 0) {
+                        islandData.setMultiplier(0);
+
+                        bentoBoxHook.getIslandById(islandData.getIslandId()).ifPresent(this::sendIslandMultiplierExpiredNotice);
+                    }
+                });
+    }
+
+    /**
+     * Send a message to all online players that the server multiplier expired.
+     */
+    private void sendServerMultiplierExpiredNotice() {
+        Locale locale = localeManager.getConfiguration();
+
+        // Send notice to online players
+        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierExpiredNotice());
+        plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(message));
+    }
+
+    /**
+     * Send a message to all island members that the island multiplier expired.
+     * @param island The {@link Island} whose multiplier has expired.
+     */
+    private void sendIslandMultiplierExpiredNotice(@NotNull Island island) {
+        Locale locale = localeManager.getConfiguration();
+
+        // Send notice to island members
+        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierExpiredNotice());
+        island.getMemberSet().stream()
+                .map(memberId -> plugin.getServer().getPlayer(memberId))
+                .filter(Objects::nonNull)
+                .forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
     }
 }

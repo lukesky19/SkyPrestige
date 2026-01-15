@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
+import com.github.lukesky19.skyPrestige.common.MockBukkitExtension;
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import org.bukkit.Location;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
@@ -57,13 +59,11 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
 
     /**
      * Set up the required data for the tests.
+     * @param testInfo The {@link TestInfo}.
      */
-    @Override
     @BeforeEach
-    public void setup() {
-        super.setup();
-
-        server.addSimpleWorld("world");
+    public void setup(@NotNull TestInfo testInfo) {
+        super.setup(testInfo);
 
         // Setup table classes
         VersionsTable versionsTable = new VersionsTable(liveQueueManager);
@@ -99,7 +99,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
     public void testSetPlayerLogoutLocation() {
-        @Nullable World world = server.getWorld("world");
+        @Nullable World world = MockBukkitExtension.getServer().getWorld("world");
         if(world == null) {
             fail("The server does not have a world setup!");
             return;
@@ -126,7 +126,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
     public void testGetPlayerIdsWithinByBounds() {
-        @Nullable World world = server.getWorld("world");
+        @Nullable World world = MockBukkitExtension.getServer().getWorld("world");
         if(world == null) {
             fail("The server does not have a world setup!");
             return;
@@ -193,7 +193,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
             try {
                 if(resultSet.next()) {
                     String worldName = resultSet.getString("world");
-                    @Nullable World world = server.getWorld(worldName);
+                    @Nullable World world = MockBukkitExtension.getServer().getWorld(worldName);
                     if(world == null) return null;
                     int x = resultSet.getInt("x");
                     int z = resultSet.getInt("z");

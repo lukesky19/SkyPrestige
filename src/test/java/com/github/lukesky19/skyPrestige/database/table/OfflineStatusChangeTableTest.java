@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
@@ -61,11 +62,11 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
 
     /**
      * Set up the required data for the tests.
+     * @param testInfo The {@link TestInfo}.
      */
-    @Override
     @BeforeEach
-    public void setup() {
-        super.setup();
+    public void setup(@NotNull TestInfo testInfo) {
+        super.setup(testInfo);
 
         // Setup table classes
         // Other Tables

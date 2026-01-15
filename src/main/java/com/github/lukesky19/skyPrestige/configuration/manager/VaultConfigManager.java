@@ -56,8 +56,8 @@ public class VaultConfigManager extends SimpleConfigManager<VaultConfig> {
     }
 
     @Override
-    public boolean validateConfiguration() {
-        return getConfiguration() != null;
+    public boolean validateConfiguration(@Nullable VaultConfig configuration) {
+        return configuration != null;
     }
 
     @Override

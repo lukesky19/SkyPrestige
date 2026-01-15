@@ -17,14 +17,17 @@
 */
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
+import com.github.lukesky19.skyPrestige.commands.util.IslandArgumentType;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.multiplier.MultiplierConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.configuration.manager.MultiplierConfigManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -32,12 +35,12 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,24 +50,24 @@ public class MultiplierCommand {
     private final @NotNull SkyPlugin plugin;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull MultiplierManager multiplierManager;
-    private final @NotNull MultiplierConfigManager multiplierConfigManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
+     * @param plugin A {@link SkyPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
-     * @param multiplierConfigManager A {@link MultiplierConfigManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public MultiplierCommand(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
-            @NotNull MultiplierConfigManager multiplierConfigManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NotNull MultiplierManager multiplierManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.multiplierManager = multiplierManager;
-        this.multiplierConfigManager = multiplierConfigManager;
+        this.hookManager = hookManager;
     }
 
     /**
@@ -73,202 +76,264 @@ public class MultiplierCommand {
      */
     public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("multiplier");
-        builder.requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier"));
+        builder.requires(ctx -> ctx.getSender() instanceof Player && ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier"));
+        
+        builder.executes(ctx -> {
+            Locale locale = localeManager.getConfiguration();
+            Player player = (Player) ctx.getSource().getSender();
+            BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+            @Nullable Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
+            if(island == null) {
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().multiplierNotOnIsland()));
+                return 0;
+            }
 
-        builder.then(Commands.literal("event")
-                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.event"))
+            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("multiplier", String.valueOf(multiplierManager.getMultiplier(island))));
+            
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().effectiveMultiplier(), placeholders));
+            
+            return 1;
+        });
+        
+        builder.then(Commands.literal("server")
+            .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server"))
+            .then(Commands.literal("add")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.add"))
+                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                    .then(Commands.argument("time", LongArgumentType.longArg(0))
+                        .then(Commands.argument("notice", BoolArgumentType.bool())
+                            .executes(ctx -> {
+                                Player initiator = (Player) ctx.getSource().getSender();
+                                double multiplier = ctx.getArgument("multiplier", double.class);
+                                long time = ctx.getArgument("time", long.class);
+                                boolean notice = ctx.getArgument("notice", boolean.class);
+
+                                return multiplierManager.addServerMultiplier(initiator, multiplier, time, notice) ? 1 : 0;
+                            })
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("remove")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.remove"))
+                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                    .then(Commands.argument("time", LongArgumentType.longArg(0))
+                        .then(Commands.argument("notice", BoolArgumentType.bool())
+                            .executes(ctx -> {
+                                Player initiator = (Player) ctx.getSource().getSender();
+                                double multiplier = ctx.getArgument("multiplier", double.class);
+                                long time = ctx.getArgument("time", long.class);
+                                boolean notice = ctx.getArgument("notice", boolean.class);
+
+                                return multiplierManager.removeServerMultiplier(initiator, multiplier, time, notice) ? 1 : 0;
+                            })
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("set")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.set"))
+                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                    .then(Commands.argument("time", LongArgumentType.longArg(0))
+                        .then(Commands.argument("notice", BoolArgumentType.bool())
+                            .executes(ctx -> {
+                                Player initiator = (Player) ctx.getSource().getSender();
+                                double multiplier = ctx.getArgument("multiplier", double.class);
+                                long time = ctx.getArgument("time", long.class);
+                                boolean notice = ctx.getArgument("notice", boolean.class);
+
+                                return multiplierManager.setServerMultiplier(initiator, multiplier, time, notice) ? 1 : 0;
+                            })
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("clear")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.clear"))
+                .then(Commands.argument("notice", BoolArgumentType.bool())
+                    .executes(ctx -> {
+                        Player initiator = (Player) ctx.getSource().getSender();
+                        boolean notice = ctx.getArgument("notice", boolean.class);
+
+                        return multiplierManager.clearServerMultiplier(initiator, notice) ? 1 : 0;
+                    })
+                )
+            )
+                
+            .then(Commands.literal("get")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.get"))
                 .executes(ctx -> {
                     Locale locale = localeManager.getConfiguration();
-                    CommandSender sender = ctx.getSource().getSender();
+                    Player initiator = (Player) ctx.getSource().getSender();
+                    double multiplier = multiplierManager.getServerMultiplier();
+                    long time = multiplierManager.getServerMultiplierTime();
 
-                    long eventDurationSeconds = multiplierManager.getEventDuration();
-                    long nextEventSeconds = multiplierManager.getTimeUntilNextEvent();
-                    double eventMultiplier = multiplierManager.getEventMultiplier() + 1;
-                    double currentMultiplier = multiplierManager.getMultiplier();
+                    List<TagResolver.Single> placeholders = new ArrayList<>();
+                    placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+                    if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
 
-                    if(eventDurationSeconds > 0) {
-                        Component timePlaceholder = multiplierManager.getTimePlaceholder(locale.multiplierTimePlaceholder(), eventDurationSeconds);
-                        List<TagResolver.Single> placeholderList = List.of(
-                                Placeholder.component("time", timePlaceholder),
-                                Placeholder.parsed("event_multiplier", String.valueOf(eventMultiplier)),
-                                Placeholder.parsed("current_multiplier", String.valueOf(currentMultiplier)));
+                    Component message = time != -1 ?
+                            AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
+                            AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
 
-                        if(sender instanceof Player) {
-                            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventRemainingTime(), placeholderList));
-                        } else {
-                            sender.sendMessage(AdventureUtil.deserialize(locale.multiplierEventRemainingTime(), placeholderList));
-                        }
-                    } else {
-                        @Nullable MultiplierConfig multiplierConfig = multiplierConfigManager.getConfiguration();
-                        if(multiplierConfig == null) return 0;
-
-                        if(nextEventSeconds > 0) {
-                            Component timePlaceholder = multiplierManager.getTimePlaceholder(locale.multiplierTimePlaceholder(), nextEventSeconds);
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.component("time", timePlaceholder),
-                                    Placeholder.parsed("event_multiplier", String.valueOf(multiplierConfig.multiplier())));
-
-                            if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventNextTime(), placeholderList));
-                            } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.multiplierEventNextTime(), placeholderList));
-                            }
-                        } else {
-                            if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplierEventDisabled()));
-                            } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.multiplierEventDisabled()));
-                            }
-                        }
-                    }
+                    initiator.sendMessage(message);
 
                     return 1;
-                }));
+                })
+            )
 
-        builder.then(Commands.literal("add")
-                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.add"))
-                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double multiplier = ctx.getArgument("multiplier", double.class);
+            .executes(ctx -> {
+                Locale locale = localeManager.getConfiguration();
+                Player initiator = (Player) ctx.getSource().getSender();
+                double multiplier = multiplierManager.getServerMultiplier();
+                long time = multiplierManager.getServerMultiplierTime();
 
-                            multiplierManager.addAdditionalMultiplier(multiplier);
-                            double updatedMultiplier = multiplierManager.getMultiplier();
+                List<TagResolver.Single> placeholders = new ArrayList<>();
+                placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
 
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("current_multiplier", String.valueOf(updatedMultiplier)));
+                Component message = time != -1 ?
+                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
+                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
 
-                            if(!(sender instanceof Player)) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.multiplierChanged(), placeholderList));
-                            }
+                initiator.sendMessage(message);
 
-                            Component playerMessage = AdventureUtil.deserialize(locale.prefix() + locale.multiplierChanged(), placeholderList);
-                            plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(playerMessage));
+                return 1;
+            })
+        );
 
-                            return 1;
-                        })));
+        builder.then(Commands.literal("island")
+            .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island"))
+            .then(Commands.literal("add")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island.add"))
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
+                    .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                        .then(Commands.argument("time", LongArgumentType.longArg(0))
+                            .then(Commands.argument("notice", BoolArgumentType.bool())
+                                .executes(ctx -> {
+                                    Player initiator = (Player) ctx.getSource().getSender();
+                                    Island island = ctx.getArgument("island_id", Island.class);
+                                    double multiplier = ctx.getArgument("multiplier", double.class);
+                                    long time = ctx.getArgument("time", long.class);
+                                    boolean notice = ctx.getArgument("notice", boolean.class);
+        
+                                    return multiplierManager.addIslandMultiplier(initiator, island, multiplier, time, notice) ? 1 : 0;
+                                })
+                            )
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("remove")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island.remove"))
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
+                    .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                        .then(Commands.argument("time", LongArgumentType.longArg(0))
+                            .then(Commands.argument("notice", BoolArgumentType.bool())
+                                .executes(ctx -> {
+                                    Player initiator = (Player) ctx.getSource().getSender();
+                                    Island island = ctx.getArgument("island_id", Island.class);
+                                    double multiplier = ctx.getArgument("multiplier", double.class);
+                                    long time = ctx.getArgument("time", long.class);
+                                    boolean notice = ctx.getArgument("notice", boolean.class);
+        
+                                    return multiplierManager.removeIslandMultiplier(initiator, island, multiplier, time, notice) ? 1 : 0;
+                                })
+                            )
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("set")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island.set"))
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
+                    .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg(0.0))
+                        .then(Commands.argument("time", LongArgumentType.longArg(0))
+                            .then(Commands.argument("notice", BoolArgumentType.bool())
+                                .executes(ctx -> {
+                                    Player initiator = (Player) ctx.getSource().getSender();
+                                    Island island = ctx.getArgument("island_id", Island.class);
+                                    double multiplier = ctx.getArgument("multiplier", double.class);
+                                    long time = ctx.getArgument("time", long.class);
+                                    boolean notice = ctx.getArgument("notice", boolean.class);
+        
+                                    return multiplierManager.setIslandMultiplier(initiator, island, multiplier, time, notice) ? 1 : 0;
+                                })
+                            )
+                        )
+                    )
+                )
+            )
+                
+            .then(Commands.literal("clear")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island.clear"))
+                .then(Commands.argument("notice", BoolArgumentType.bool())
+                    .executes(ctx -> {
+                        Player initiator = (Player) ctx.getSource().getSender();
+                        Island island = ctx.getArgument("island_id", Island.class);
+                        boolean notice = ctx.getArgument("notice", boolean.class);
 
-        builder.then(Commands.literal("remove")
-                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.remove"))
-                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double multiplier = ctx.getArgument("multiplier", double.class);
+                        return multiplierManager.clearIslandMultiplier(initiator, island, notice) ? 1 : 0;
+                    })
+                )
+            )
+                
+            .then(Commands.literal("get")
+                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.island.get"))
+                .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
+                    .executes(ctx -> {
+                        Locale locale = localeManager.getConfiguration();
+                        Player initiator = (Player) ctx.getSource().getSender();
+                        Island island = ctx.getArgument("island_id", Island.class);
+                        double multiplier = multiplierManager.getIslandMultiplier(island);
+                        long time = multiplierManager.getIslandMultiplierTime(island);
 
-                            multiplierManager.removeAdditionalMultiplier(multiplier);
-                            double updatedMultiplier = multiplierManager.getMultiplier();
+                        List<TagResolver.Single> placeholders = new ArrayList<>();
+                        placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+                        if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
 
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("current_multiplier", String.valueOf(updatedMultiplier)));
+                        Component message = time != -1 ?
+                                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
+                                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
 
-                            if(!(sender instanceof Player)) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.multiplierChanged(), placeholderList));
-                            }
+                        initiator.sendMessage(message);
 
-                            Component playerMessage = AdventureUtil.deserialize(locale.prefix() + locale.multiplierChanged(), placeholderList);
-                            plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(playerMessage));
+                        return 1;
+                    })
+                )
+            )
 
-                            return 1;
-                        })));
+            .executes(ctx -> {
+                Locale locale = localeManager.getConfiguration();
+                Player initiator = (Player) ctx.getSource().getSender();
 
-        builder.then(Commands.literal("set")
-                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.set"))
-                .then(Commands.argument("multiplier", DoubleArgumentType.doubleArg())
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double multiplier = ctx.getArgument("multiplier", double.class);
+                BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+                @Nullable Island island = bentoBoxHook.getIslandAtLocation(initiator.getLocation()).orElse(null);
+                if(island == null) {
+                    initiator.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().multiplierNotOnIsland()));
+                    return 0;
+                }
+                double multiplier = multiplierManager.getIslandMultiplier(island);
+                long time = multiplierManager.getIslandMultiplierTime(island);
 
-                            multiplierManager.setAdditionalMultiplier(multiplier);
-                            double updatedMultiplier = multiplierManager.getMultiplier();
+                List<TagResolver.Single> placeholders = new ArrayList<>();
+                placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
+                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
 
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("current_multiplier", String.valueOf(updatedMultiplier)));
+                Component message = time != -1 ?
+                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
+                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
 
-                            if(!(sender instanceof Player)) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.multiplierChanged(), placeholderList));
-                            }
+                initiator.sendMessage(message);
 
-                            Component playerMessage = AdventureUtil.deserialize(locale.prefix() + locale.multiplierChanged(), placeholderList);
-                            plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(playerMessage));
-
-                            return 1;
-                        })));
-
-        builder.then(Commands.literal("get")
-                .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.get"))
-                .then(Commands.literal("additional")
-                        .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.get.additional"))
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double additionalMultiplier = multiplierManager.getAdditionalMultiplier();
-
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("additional_multiplier", String.valueOf(additionalMultiplier)));
-
-                            if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.additionalMultiplierGet(), placeholderList));
-                            } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.additionalMultiplierGet(), placeholderList));
-                            }
-
-                            return 1;
-                        }))
-                .then(Commands.literal("event")
-                        .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.event"))
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double eventMultiplier = multiplierManager.getEventMultiplier();
-
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("event_multiplier", String.valueOf(eventMultiplier)));
-
-                            if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.eventMultiplierGet(), placeholderList));
-                            } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.eventMultiplierGet(), placeholderList));
-                            }
-
-                            return 1;
-                        }))
-                .then(Commands.literal("total")
-                        .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.get.total"))
-                        .executes(ctx -> {
-                            Locale locale = localeManager.getConfiguration();
-                            CommandSender sender = ctx.getSource().getSender();
-                            double totalMultiplier = multiplierManager.getMultiplier();
-
-                            List<TagResolver.Single> placeholderList = List.of(
-                                    Placeholder.parsed("total_multiplier", String.valueOf(totalMultiplier)));
-
-                            if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.totalMultiplierGet(), placeholderList));
-                            } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.totalMultiplierGet(), placeholderList));
-                            }
-
-                            return 1;
-                        }))
-                .executes(ctx -> {
-                    Locale locale = localeManager.getConfiguration();
-                    CommandSender sender = ctx.getSource().getSender();
-                    double totalMultiplier = multiplierManager.getMultiplier();
-
-                    List<TagResolver.Single> placeholderList = List.of(
-                            Placeholder.parsed("total_multiplier", String.valueOf(totalMultiplier)));
-
-                    if(sender instanceof Player) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.totalMultiplierGet(), placeholderList));
-                    } else {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.totalMultiplierGet(), placeholderList));
-                    }
-
-                    return 1;
-                }));
+                return 1;
+            })
+        );
 
         return builder.build();
     }

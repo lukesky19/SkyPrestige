@@ -109,8 +109,55 @@ A: Only Paper is supported. There are no plans to support any other server softw
 
 ## Building
 * Go to [SkyLib](https://github.com/lukesky19/SkyLib) and follow the "For Developers" instructions.
+* Go to [SkyPlayTime](https://github.com/lukesky19/SkyPlayTime) and follow the "For Developers" instructions.
+* Go to [SkySellWands](https://github.com/lukesky19/SkySellWands) and follow the "For Developers" instructions.
 * Then run:
   ```./gradlew build```
+
+## For Developers
+```./gradlew build```
+
+```koitlin
+repositories {
+  mavenLocal()
+}
+```
+
+```koitlin
+dependencies {
+  compileOnly("com.github.lukesky19:SkyShop:2.1.0.0")
+}
+```
+
+## How To Access The API
+Follow the "For Developers" section above and then add this code to your plugin.
+Then follow the code example below:
+
+```java
+private SkyPrestigeAPI api;
+
+public SkyPrestigeAPI getSkyPrestigeAPI() {
+  return api;
+}
+
+@Override
+public void onEnable() {
+  loadSkyShopAPI();
+  if(api == null) {
+      this.getServer().getPluginManager().disablePlugin(this);
+      return;
+  }
+  
+  // The rest of your plugin's onEnable code.
+}
+
+private void loadSkyPrestigeAPI() {
+  @Nullable RegisteredServiceProvider<SkyPrestigeAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyPrestigeAPI.class);
+  if(rsp != null) {
+    api = rsp.getProvider();
+  }
+}
+```
 
 ### Why AGPL3?
 I wanted a license that will keep my code open source. I believe in open source software and in-case this project goes unmaintained by me, I want it to live on through the work of others. And I want that work to remain open source to prevent a time when a fork can never be continued (i.e., closed-sourced and abandoned).
