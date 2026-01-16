@@ -1,5 +1,6 @@
 plugins {
     java
+    `maven-publish`
     jacoco
 }
 
@@ -119,5 +120,14 @@ tasks {
 
     build {
         dependsOn(javadoc)
+        dependsOn(publishToMavenLocal)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
     }
 }

@@ -96,7 +96,6 @@ public class Multiplier {
      */
     public void setTime(long time) {
         this.time = Math.max(0, time);
-        if(this.time == 0) multiplier = 0;
     }
 
     /**
@@ -112,8 +111,6 @@ public class Multiplier {
      * @param time The multiplier time to add.
      */
     public void addTime(long time) {
-        if(time <= 0) return;
-
         this.time += time;
     }
 
