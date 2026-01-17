@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
+import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -194,11 +195,11 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
     }
 
     /**
-     * Checks if all {@link String}s in a {@link Locale.TimeFormat} are null.
-     * @param timeFormat The {@link Locale.TimeFormat} to check.
+     * Checks if all {@link String}s in a {@link TimeFormat} are null.
+     * @param timeFormat The {@link TimeFormat} to check.
      * @return true if invalid, false if not.
      */
-    private boolean isTimeFormatInvalid(@NotNull Locale.TimeFormat timeFormat) {
+    private boolean isTimeFormatInvalid(@NotNull TimeFormat timeFormat) {
         return timeFormat.prefix() == null
                 || timeFormat.years() == null
                 || timeFormat.months() == null
@@ -297,7 +298,7 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                         "<green>The island's prestige points multiplier has been cleared.</green>",
                         "<green>Your prestige points effective multiplier is <aqua><multiplier></aqua>.</green>",
                         "<red>You must be on an island to view the multiplier.</red>",
-                        new Locale.TimeFormat(
+                        new TimeFormat(
                                 "",
                                 "<aqua><years></aqua> year(s)",
                                 "<aqua><months></aqua> month(s)",

@@ -15,8 +15,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.placeholderapi;
+package com.github.lukesky19.skyPrestige.integration.placeholderapi;
 
+import com.github.lukesky19.skyPrestige.configuration.data.placeholder.PlaceholderConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.PlaceholderConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
@@ -24,8 +26,10 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -46,26 +50,34 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
     private final @NotNull PrestigePointsManager prestigePointsManager;
     private final @NotNull IslandDataManager islandDataManager;
     private final @NotNull LeaderboardManager leaderboardManager;
+    private final @NotNull MultiplierManager multiplierManager;
+    private final @NotNull PlaceholderConfigManager placeholderConfigManager;
     private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
      * @param settingsManager A {@link SettingsManager} instance.
+     * @param placeholderConfigManager A {@link PlaceholderConfigManager} instance.
      * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager A {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
+     * @param multiplierManager A {@link MultiplierManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public SkyPrestigeExpansion(
             @NotNull SettingsManager settingsManager,
+            @NotNull PlaceholderConfigManager placeholderConfigManager,
             @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull LeaderboardManager leaderboardManager,
+            @NotNull MultiplierManager multiplierManager,
             @NotNull HookManager hookManager) {
         this.settingsManager = settingsManager;
         this.prestigePointsManager = prestigePointsManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
+        this.multiplierManager = multiplierManager;
+        this.placeholderConfigManager = placeholderConfigManager;
         this.hookManager = hookManager;
     }
 
@@ -115,6 +127,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
     @Override
     public @Nullable String onPlaceholderRequest(@NotNull Player player, @NotNull String params) {
         String placeholder = params.toLowerCase();
+        @NotNull PlaceholderConfig placeholderConfig = placeholderConfigManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(!bentoBoxHook.isHooked()) return null;
 
@@ -122,56 +135,74 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             case "prestige_level" -> {
                 // Get the player's island
                 @Nullable Island island = getIsland(bentoBoxHook, player);
-                if(island == null) return "0";
+                if(island == null) return placeholderConfig.prestigeLevel().noIslandText();
+                // Get the IslandData
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.prestigeLevel().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.prestigeLevel().optedOutText();
 
-                // Return the island's level
-                return getIslandPrestigeLevel(island);
+                // Return the island's prestige level
+                return String.valueOf(islandData.getPrestigeLevel());
             }
 
             case "prestige_points" -> {
                 // Get the player's island
                 @Nullable Island island = getIsland(bentoBoxHook, player);
-                if(island == null) return "0";
+                if(island == null) return placeholderConfig.prestigePoints().noIslandText();
+                // Get the IslandData
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.prestigePoints().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.prestigePoints().optedOutText();
 
                 // Return the island's prestige points
-                return getIslandPrestigePoints(island);
+                return NumberUtils.formatDecimal(islandData.getPrestigePoints());
             }
 
             case "required_prestige_points" -> {
                 // Get the player's island
                 @Nullable Island island = getIsland(bentoBoxHook, player);
-                if(island == null) return "0";
+                if(island == null) return placeholderConfig.requiredPrestigePoints().noIslandText();
+                // Get the IslandData
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.requiredPrestigePoints().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.requiredPrestigePoints().optedOutText();
+
+                // Recalculate the required prestige points of not cached already
+                if(islandData.getRequiredPrestigePoints() == null) {
+                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
+                }
 
                 // Return the prestige points required to prestige
-                return getIslandRequiredPrestigePoints(island);
+                return NumberUtils.formatDecimal(islandData.getRequiredPrestigePoints());
             }
 
-            case "progress_bar_minimessage" -> {
-                int progressBarSize = settingsManager.getConfiguration() != null ?
-                        settingsManager.getConfiguration().progressBarSize() : 10;
-                StringBuilder bar = new StringBuilder();
-
+            case "progress_bar" -> {
                 @Nullable Island island = getIsland(bentoBoxHook, player);
-                if(island == null) return "";
+                if(island == null) return placeholderConfig.progressBar().noIslandText();
                 @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-                if(islandData == null) return "";
+                if(islandData == null) return placeholderConfig.progressBar().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.progressBar().optedOutText();
 
                 if(islandData.getRequiredPrestigePoints() == null) {
                     prestigePointsManager.recalculateRequiredPrestigePoints(island);
                 }
 
+                int progressBarSize = settingsManager.getConfiguration() != null ?
+                        settingsManager.getConfiguration().progressBarSize() : 10;
+                StringBuilder bar = new StringBuilder();
+
                 // Calculate current progress percentage
                 double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
                         Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
 
-                // Calculate the number of pipe symbols to color green
-                int greenBars = (int) (currentPercentage / (100.0 / progressBarSize));
+                // Calculate the number of filled bars
+                int filledBars = (int) (currentPercentage / (100.0 / progressBarSize));
 
                 for (int i = 0; i < progressBarSize; i++) {
-                    if (i < greenBars) {
-                        bar.append("<green>|");
+                    if(i < filledBars) {
+                        bar.append(placeholderConfig.progressBar().filledBarText());
                     } else {
-                        bar.append("<red>|");
+                        bar.append(placeholderConfig.progressBar().emptyBarText());
                     }
                 }
 
@@ -179,35 +210,71 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "progress_bar_legacy" -> {
-                int progressBarSize = settingsManager.getConfiguration() != null ?
-                        settingsManager.getConfiguration().progressBarSize() : 10;
-                StringBuilder bar = new StringBuilder();
-
                 @Nullable Island island = getIsland(bentoBoxHook, player);
-                if(island == null) return "";
+                if(island == null) return placeholderConfig.legacyProgressBar().noIslandText();
                 @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-                if(islandData == null) return "";
+                if(islandData == null) return placeholderConfig.legacyProgressBar().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.legacyProgressBar().optedOutText();
 
                 if(islandData.getRequiredPrestigePoints() == null) {
                     prestigePointsManager.recalculateRequiredPrestigePoints(island);
                 }
 
+                int progressBarSize = settingsManager.getConfiguration() != null ?
+                        settingsManager.getConfiguration().progressBarSize() : 10;
+                StringBuilder bar = new StringBuilder();
+
                 // Calculate current progress percentage
                 double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
                         Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
 
-                // Calculate the number of pipe symbols to color green
-                int greenBars = (int) (currentPercentage / (100.0 / progressBarSize));
+                // Calculate the number of filled bars
+                int filledBars = (int) (currentPercentage / (100.0 / progressBarSize));
 
                 for (int i = 0; i < progressBarSize; i++) {
-                    if (i < greenBars) {
-                        bar.append("&a|");
+                    if(i < filledBars) {
+                        bar.append(placeholderConfig.legacyProgressBar().filledBarText());
                     } else {
-                        bar.append("&c|");
+                        bar.append(placeholderConfig.legacyProgressBar().emptyBarText());
                     }
                 }
 
                 return bar.toString();
+            }
+
+            case "multiplier" -> {
+                @Nullable Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return placeholderConfig.multiplier().noIslandText();
+                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.multiplier().noIslandText();
+
+                return String.valueOf(multiplierManager.getMultiplier(island));
+            }
+
+            case "server_multiplier" -> {
+                return String.valueOf(multiplierManager.getServerMultiplier());
+            }
+
+            case "server_multiplier_time" -> {
+                return AdventureUtil.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
+            }
+
+            case "server_multiplier_time_raw" -> {
+                return String.valueOf(multiplierManager.getServerMultiplierTime());
+            }
+
+            case "island_multiplier" -> {
+                @Nullable Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return "0.0";
+
+                return String.valueOf(multiplierManager.getIslandMultiplier(island));
+            }
+
+            case "island_multiplier_time" -> {
+                @Nullable Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return "0";
+
+                return AdventureUtil.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
             }
 
             default -> {
@@ -341,60 +408,6 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 .findFirst();
 
         return ownedIsland.orElseGet(() -> memberIsland.orElse(null));
-    }
-
-    /**
-     * Get the prestige level for the island provided.<br>
-     * This will return 0 if the island has no IslandData.
-     * @param island The {@link Island}.
-     * @return The island's prestige level or 0.
-     */
-    private @NotNull String getIslandPrestigeLevel(@NotNull Island island) {
-        // Get the IslandData for the island
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-        // If no island data was found, return 0
-        if(islandData == null) return "0";
-
-        // return the prestige level
-        return String.valueOf(islandData.getPrestigeLevel());
-    }
-
-    /**
-     * Get the prestige points for the island provided.<br>
-     * This will return 0 if the island has no IslandData.
-     * @param island The {@link Island}.
-     * @return The island's prestige points or 0.
-     */
-    private @NotNull String getIslandPrestigePoints(@NotNull Island island) {
-        // Get the IslandData for the island
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-        // If no island data was found, return 0
-        if(islandData == null) return "0";
-
-        // return the prestige points
-        return NumberUtils.formatDecimal(islandData.getPrestigePoints());
-    }
-
-    /**
-     * Get the prestige points required for the island to prestige.<br>
-     * This will return 0 if any errors occur.
-     * @param island The {@link Island}.
-     * @return The player's primary island's prestige points or 0.
-     */
-    private @NotNull String getIslandRequiredPrestigePoints(@NotNull Island island) {
-        // Get the IslandData for the island
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-        // If no island data was found, return 0
-        if(islandData == null) return "0";
-        if(islandData.isPrestigeExempt()) return "0";
-
-        // Recalculate the required prestige points of not cached already
-        if(islandData.getRequiredPrestigePoints() == null) {
-            prestigePointsManager.recalculateRequiredPrestigePoints(island);
-        }
-
-        // return the goal prestige points
-        return NumberUtils.formatDecimal(islandData.getRequiredPrestigePoints());
     }
 
     /**

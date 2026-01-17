@@ -26,6 +26,7 @@ import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.integration.placeholderapi.SkyPrestigeExpansion;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerJoinListener;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerQuitListener;
 import com.github.lukesky19.skyPrestige.listener.gui.GUIListener;
@@ -34,7 +35,6 @@ import com.github.lukesky19.skyPrestige.listener.points.*;
 import com.github.lukesky19.skyPrestige.listener.points.brewing.FreshBrewListener;
 import com.github.lukesky19.skyPrestige.listener.protection.ProtectionOrbListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import com.github.lukesky19.skyPrestige.placeholderapi.PlaceholderManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
@@ -50,6 +50,8 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -62,6 +64,7 @@ public class SkyPrestige extends SkyPlugin {
     // Plugin Classes
     private GUIConfigManager guiConfigManager;
     private LocaleManager localeManager;
+    private PlaceholderConfigManager placeholderConfigManager;
     private OptInConfigManager optInConfigManager;
     private OptOutConfigManager optOutConfigManager;
     private PrestigeConfigManager prestigeConfigManager;
@@ -76,7 +79,8 @@ public class SkyPrestige extends SkyPlugin {
     private LeaderboardManager leaderboardManager;
     private TaskManager taskManager;
     private ProtectionOrbManager protectionOrbManager;
-    private PlaceholderManager placeholderManager;
+
+    private @Nullable SkyPrestigeExpansion skyPrestigeExpansion;
 
     /**
      * Default Constructor
@@ -102,6 +106,7 @@ public class SkyPrestige extends SkyPlugin {
         // Config managers
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
+        placeholderConfigManager = new PlaceholderConfigManager(this);
         guiConfigManager = new GUIConfigManager(this);
         prestigeConfigManager = new PrestigeConfigManager(this);
         optInConfigManager = new OptInConfigManager(this);
@@ -123,7 +128,6 @@ public class SkyPrestige extends SkyPlugin {
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, prestigePointsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, localeManager, guiConfigManager, optInConfigManager, optOutConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
-        placeholderManager = new PlaceholderManager(this, settingsManager, prestigePointsManager, islandDataManager, leaderboardManager, hookManager);
 
         // Register Commands
         SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
@@ -136,6 +140,9 @@ public class SkyPrestige extends SkyPlugin {
         // Create and register the SkyPrestigeAPI
         SkyPrestigeAPI skyPrestigeAPI = new SkyPrestigeAPI(multiplierManager);
         this.getServer().getServicesManager().register(SkyPrestigeAPI.class, skyPrestigeAPI, this, ServicePriority.Lowest);
+
+        // Register PlaceholderAPI Expansion
+        registerExpansion(prestigePointsManager, multiplierManager, hookManager);
 
         // Listeners
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -238,7 +245,7 @@ public class SkyPrestige extends SkyPlugin {
     @Override
     public void onDisable() {
         // Unregister the PlaceholderAPI Expansion
-        if(placeholderManager != null) placeholderManager.unregisterExpansion();
+        unregisterExpansion();
 
         // Close any open GUIs
         if(guiManager != null) guiManager.closeOpenGUIs(true);
@@ -265,15 +272,13 @@ public class SkyPrestige extends SkyPlugin {
      */
     @Override
     public void reload() {
-        // Reload the PlaceholderAPI Expansion
-        placeholderManager.reload();
-
         // Close any open GUIs
         guiManager.closeOpenGUIs(false);
 
         // Reload plugin configurations
         settingsManager.loadConfiguration();
         localeManager.loadConfiguration();
+        placeholderConfigManager.loadConfiguration();
         optInConfigManager.loadConfiguration();
         optOutConfigManager.loadConfiguration();
         prestigePointsConfigManager.loadConfiguration();
@@ -309,5 +314,39 @@ public class SkyPrestige extends SkyPlugin {
         this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
+    }
+
+    /**
+     * This method registers the PlaceholderAPI expansion if PlaceholderAPI is enabled.
+     */
+    private void registerExpansion(
+            @NotNull PrestigePointsManager prestigePointsManager,
+            @NotNull MultiplierManager multiplierManager,
+            @NotNull HookManager hookManager) {
+        if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            if(skyPrestigeExpansion == null) {
+                skyPrestigeExpansion = new SkyPrestigeExpansion(
+                        settingsManager,
+                        placeholderConfigManager,
+                        prestigePointsManager,
+                        islandDataManager,
+                        leaderboardManager,
+                        multiplierManager,
+                        hookManager);
+            }
+
+            skyPrestigeExpansion.register();
+        }
+    }
+
+    /**
+     * This method unregisters the PlaceholderAPI expansion if PlaceholderAPI is enabled.
+     */
+    private void unregisterExpansion() {
+        if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            if(skyPrestigeExpansion != null) {
+                skyPrestigeExpansion.unregister();
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.multiplier;
 
+import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
@@ -378,12 +379,12 @@ public class MultiplierManager {
 
     /**
      * Get the {@link Component} for the time placeholder.
-     * @param timeMessage The {@link Locale.TimeFormat} to use.
+     * @param timeMessage The {@link TimeFormat} to use.
      * @param timeInSeconds The time in seconds to format.
      * @return A {@link Component}.
      */
     @NotNull
-    public Component getTimePlaceholder(@NotNull Locale.TimeFormat timeMessage, long timeInSeconds) {
+    public Component getTimePlaceholder(@NotNull TimeFormat timeMessage, long timeInSeconds) {
         boolean firstUnit = true;
         Time timeRecord = TimeUtil.millisToTime(timeInSeconds * 1000L);
         StringBuilder messageBuilder = new StringBuilder();

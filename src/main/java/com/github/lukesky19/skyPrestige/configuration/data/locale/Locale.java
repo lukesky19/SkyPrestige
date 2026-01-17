@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.locale;
 
+import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -167,27 +168,4 @@ public record Locale(
             String effectiveMultiplier,
             String multiplierNotOnIsland,
             TimeFormat multiplierTimePlaceholder) {}
-    /**
-     * The record containing the data necessary to format a {@literal <time>} placeholder.
-     * @param prefix The text to display before the first time unit.
-     * @param years The text to display when the player's time enters years.
-     * @param months The text to display when the player's time enters months.
-     * @param weeks The text to display when the player's time enters weeks.
-     * @param days The text to display when the player's time enters days.
-     * @param hours The text to display when the player's time enters hours.
-     * @param minutes The text to display when the player's time enters minutes.
-     * @param seconds The text to display when the player's time enters seconds.
-     * @param suffix The text to display after the last time unit.
-     */
-    @ConfigSerializable
-    public record TimeFormat(
-            String prefix,
-            String years,
-            String months,
-            String weeks,
-            String days,
-            String hours,
-            String minutes,
-            String seconds,
-            String suffix) {}
 }
