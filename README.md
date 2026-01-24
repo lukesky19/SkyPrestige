@@ -23,6 +23,7 @@
 * PlaceholderAPI
 * PlayerAuctions
 * RoseStacker
+* SkyShop
 * SkyPlayTime
 * SkySellWands
 * Vault
@@ -109,6 +110,7 @@ A: Only Paper is supported. There are no plans to support any other server softw
 
 ## Building
 * Go to [SkyLib](https://github.com/lukesky19/SkyLib) and follow the "For Developers" instructions.
+* Go to [SkyShop](https://github.com/lukesky19/SkyShop) and follow the "For Developers" instructions.
 * Go to [SkyPlayTime](https://github.com/lukesky19/SkyPlayTime) and follow the "For Developers" instructions.
 * Go to [SkySellWands](https://github.com/lukesky19/SkySellWands) and follow the "For Developers" instructions.
 * Then run:

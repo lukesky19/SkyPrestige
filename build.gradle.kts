@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("com.github.lukesky19:SkyLib:1.4.0.0")
 
     // Hooks
@@ -49,6 +49,7 @@ dependencies {
     }
     compileOnly("dev.rosewood:rosestacker:1.5.32")
     compileOnly("com.github.lukesky19:SkyPlayTime:1.0.0.0")
+    compileOnly("com.github.lukesky19:SkyShop:3.0.0.0")
     compileOnly("com.github.lukesky19:SkySellWands:1.4.0.0")
     compileOnly("com.olziedev:playerauctions-api:1.32.1")
     compileOnly("net.luckperms:api:5.4")

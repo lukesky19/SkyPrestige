@@ -27,6 +27,8 @@ import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.integration.placeholderapi.SkyPrestigeExpansion;
+import com.github.lukesky19.skyPrestige.integration.skyshop.MultiplierConfigurationProcessor;
+import com.github.lukesky19.skyPrestige.integration.skyshop.MultiplierConfigurationSerializer;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerJoinListener;
 import com.github.lukesky19.skyPrestige.listener.connection.PlayerQuitListener;
 import com.github.lukesky19.skyPrestige.listener.gui.GUIListener;
@@ -46,9 +48,11 @@ import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skyshop.api.SkyShopAPI;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -216,6 +220,18 @@ public class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new SmeltItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
         pluginManager.registerEvents(new WaterLogListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
 
+        @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
+        if(plugin != null && plugin.isEnabled()) {
+            @Nullable RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
+            if(rsp != null) {
+                // Register SkyShop integration if the api is already registered
+                rsp.getProvider().register(
+                        "skyprestige:multiplier",
+                        new MultiplierConfigurationSerializer(),
+                        new MultiplierConfigurationProcessor(localeManager, hookManager, multiplierManager));
+            }
+        }
+
         // Reload the plugin
         reload();
 
@@ -246,6 +262,18 @@ public class SkyPrestige extends SkyPlugin {
     public void onDisable() {
         // Unregister the PlaceholderAPI Expansion
         unregisterExpansion();
+
+        // Unregister SkyShop integration
+        @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
+        if(plugin != null && plugin.isEnabled()) {
+            @Nullable RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
+            if(rsp != null) {
+                SkyShopAPI skyShopAPI = rsp.getProvider();
+
+                // Unregister integration with SkyShop
+                skyShopAPI.unregisterProcessor("skyprestige:multiplier");
+            }
+        }
 
         // Close any open GUIs
         if(guiManager != null) guiManager.closeOpenGUIs(true);

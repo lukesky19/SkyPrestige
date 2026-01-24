@@ -148,6 +148,7 @@ public record Locale(
      * @param effectiveMultiplier The message sent to a player viewing their effective multiplier.
      * @param multiplierNotOnIsland The message sent to a player when not on an island when trying to view the island multiplier.
      * @param multiplierTimePlaceholder The {@link TimeFormat} to use for {@literal <time>} placeholders.
+     * @param shopMultiplierMessages The {@link ShopMultiplierMessages}.
      */
     @ConfigSerializable
     public record MultiplierMessages(
@@ -167,5 +168,20 @@ public record Locale(
             String islandMultiplierCleared,
             String effectiveMultiplier,
             String multiplierNotOnIsland,
-            TimeFormat multiplierTimePlaceholder) {}
+            TimeFormat multiplierTimePlaceholder,
+            ShopMultiplierMessages shopMultiplierMessages) {
+        /**
+         * This record contains messages related to buying a prestige point multiplier.
+         * @param notOnIsland The message sent to a player when they are not on their island.
+         * @param multiplierActive The message sent to a player when a multiplier is active and the player isn't allowed to buy another because of it.
+         * @param higherMultiplierActive The message sent to a player when a higher multiplier is active and the player isn't allowed to buy another because of it.
+         * @param multiplierTimeMax The message sent to a player when a multiplier is at the maximum time allowed.
+         */
+        @ConfigSerializable
+        public record ShopMultiplierMessages(
+                String notOnIsland,
+                String multiplierActive,
+                String higherMultiplierActive,
+                String multiplierTimeMax) {}
+    }
 }

@@ -177,6 +177,10 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || configuration.multiplier().effectiveMultiplier() == null
                 || configuration.multiplier().multiplierNotOnIsland() == null
                 || isTimeFormatInvalid(configuration.multiplier().multiplierTimePlaceholder())
+                || configuration.multiplier().shopMultiplierMessages().notOnIsland() == null
+                || configuration.multiplier().shopMultiplierMessages().multiplierActive() == null
+                || configuration.multiplier().shopMultiplierMessages().higherMultiplierActive() == null
+                || configuration.multiplier().shopMultiplierMessages().multiplierTimeMax() == null
                 || configuration.prestigeStatusPlayerInWrongWorld() == null
                 || configuration.prestigeStatusPlayerNotOnIsland() == null
                 || configuration.prestigeStatusIslandNotOwned() == null
@@ -307,8 +311,12 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                                 "<aqua><hours></aqua> hour(s)",
                                 "<aqua><minutes></aqua> minute(s)",
                                 "<aqua><seconds></aqua> second(s)",
-                                "")
-                ),
+                                ""),
+                        new Locale.MultiplierMessages.ShopMultiplierMessages(
+                                "<red>You must be on your island to purchase an island multiplier.</red>",
+                                "<red>You cannot purchase this multiplier as one is already active.</red>",
+                                "<red>You cannot purchase this multiplier as a higher one is already active.</red>",
+                                "<red>The multiplier is already at or higher than this multiplier.</red>")),
                 "<red>You must be in an island world to opt in or out of prestige.</red>",
                 "<red>You must be on your island to opt in or out of prestige.</red>",
                 "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",
