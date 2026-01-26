@@ -21,6 +21,7 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
 
 /**
  * Settings related to keeping or resetting island data on island reset.
+ * @param keepIsland Whether to keep the player's island or not.
  * @param keepIslandSize Whether to keep island size on island reset or not.
  * @param keepGeneratorUpgrades Whether to keep generator upgrades on island reset or not.
  * @param keepIslandFlags Whether to keep island flags on island reset or not.
@@ -31,6 +32,7 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
  */
 @ConfigSerializable
 public record IslandSettings(
+        boolean keepIsland,
         boolean keepIslandSize,
         boolean keepGeneratorUpgrades,
         boolean keepIslandFlags,

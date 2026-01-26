@@ -21,6 +21,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.reward.CommandReward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.ItemReward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.MoneyReward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.EconomyHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -173,10 +174,14 @@ public class RewardsProcessor {
 
         // Island Range Reward
         if(rewardConfig.islandSizeReward().islandSize() > 0) {
+            BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+
             if(rewardConfig.islandSizeReward().setSize()) {
-                island.setProtectionRange(rewardConfig.islandSizeReward().islandSize());
+                bentoBoxHook.setIslandSize(initiatingPlayer.getUniqueId(), island, island.getProtectionRange(),
+                        rewardConfig.islandSizeReward().islandSize());
             } else {
-                island.setProtectionRange(island.getProtectionRange() + rewardConfig.islandSizeReward().islandSize());
+                bentoBoxHook.setIslandSize(initiatingPlayer.getUniqueId(), island, island.getProtectionRange(),
+                        island.getProtectionRange() + rewardConfig.islandSizeReward().islandSize());
             }
         }
     }

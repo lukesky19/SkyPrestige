@@ -73,6 +73,7 @@ public class IslandResetDataTest {
                 100.0,
                 new ResetSettings(
                         new IslandSettings(
+                                false,
                                 true,
                                 true,
                                 true,

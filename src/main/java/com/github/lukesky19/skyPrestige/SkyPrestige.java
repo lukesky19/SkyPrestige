@@ -159,7 +159,7 @@ public class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager, hookManager), this);
 
         // Prestige-related Listeners
-        pluginManager.registerEvents(new IslandListener(this, settingsManager, prestigePointsManager, databaseManager, islandDataManager, islandSettingsProcessor), this);
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, optInConfigManager, optOutConfigManager, prestigePointsManager, databaseManager, islandDataManager, islandSettingsProcessor, rewardsProcessor), this);
 
         // Protection Orb Listener
         pluginManager.registerEvents(new ProtectionOrbListener(localeManager, protectionOrbManager), this);

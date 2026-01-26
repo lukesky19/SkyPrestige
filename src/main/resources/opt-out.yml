@@ -4,6 +4,7 @@ config-version: 1.0.0.0
 reset-settings:
     # Island-related settings
     island-settings:
+        keep-island: false
         keep-island-size: false
         keep-generator-upgrades: false
         keep-island-flags: true

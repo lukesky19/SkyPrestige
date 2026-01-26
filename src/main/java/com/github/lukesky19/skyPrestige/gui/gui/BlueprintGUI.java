@@ -201,7 +201,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create the {@link InventoryView} for this GUI.
-     *
      * @return true if created successfully, otherwise false.
      */
     public boolean create() {
@@ -238,7 +237,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create all the buttons and decorate the GUI.
-     *
      * @return true if updated successfully, otherwise false.
      */
     @Override
@@ -300,7 +298,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Refresh all the buttons in the GUI.
-     *
      * @return true if successful, otherwise false.
      */
     @Override
@@ -370,7 +367,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create the filler buttons for the GUI.
-     *
      * @param guiSize The size of the GUI.
      */
     private void createFillerButtons(int guiSize) {
@@ -393,7 +389,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Create buttons to display the blueprints that the player can select for their island.
-     *
      * @param blueprintList A {@link List} of {@link Map.Entry} mapping a blueprint name/id as a {@link String} to a {@link BlueprintBundle}.
      */
     private void createBlueprintButtons(@NotNull List<Map.Entry<String, BlueprintBundle>> blueprintList) {

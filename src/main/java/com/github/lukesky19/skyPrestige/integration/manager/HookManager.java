@@ -45,7 +45,7 @@ public class HookManager {
         LuckPermsHook luckPermsHook = new LuckPermsHook(plugin);
         registerHook(LuckPermsHook.class, luckPermsHook);
 
-        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook(plugin.getComponentLogger());
+        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook(plugin);
         registerHook(MagicCobblestoneGeneratorHook.class, magicCobblestoneGeneratorHook);
 
         RoseStackerHook roseStackerHook = new RoseStackerHook(plugin);

@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
+import world.bentobox.bentobox.api.events.island.IslandEvent;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintBundle;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.*;
@@ -159,5 +160,38 @@ public class BentoBoxHook implements Hook {
         return addonsManager.getGameModeAddons().stream()
                 .filter(gameModeAddon -> gameModeAddon.inWorld(world))
                 .findFirst();
+    }
+
+    /**
+     * Get the default island protection range for the world.
+     * @param world The {@link World}.
+     * @return The default island protection range.
+     * @throws RuntimeException If the world is not managed by a {@link GameModeAddon}.
+     */
+    public int getDefaultProtectionRange(@NotNull World world) {
+        return getGameModeAddon(world).map(gameModeAddon ->
+                gameModeAddon.getWorldSettings().getIslandProtectionRange())
+                .orElseThrow(() -> new RuntimeException("No default island size found."));
+    }
+
+    /**
+     * Set the provided island's protection range to the provided size.
+     * @param playerId The {@link UUID} of the player changing the island size.
+     * @param island The island to set the island size for.
+     * @param oldSize The old island's size.
+     * @param newSize The new island's size to set.
+     */
+    public void setIslandSize(@NotNull UUID playerId, @NotNull Island island, int oldSize, int newSize) {
+        // Set the island range
+        island.setProtectionRange(newSize);
+
+        // Call an island range change event
+        IslandEvent.builder()
+                .island(island).location(island.getCenter())
+                .reason(IslandEvent.Reason.RANGE_CHANGE)
+                .involvedPlayer(playerId)
+                .admin(true)
+                .protectionRange(newSize, oldSize)
+                .build();
     }
 }

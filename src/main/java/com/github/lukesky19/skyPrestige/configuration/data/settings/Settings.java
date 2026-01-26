@@ -30,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
  * @param saveFrequencySeconds How frequently island data is periodically saved.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
  * @param progressBarSize The number of pipe symbols (|) to use in the progress bar placeholders.
+ * @param startOptedOut Whether islands should start opted out or not.
+ * @param applyOptInRewardsForInitialIslands Whether the opt-in reward settings should be run on initial (first) island creation.
+ * @param applyOptOutRewardsForInitialIslands Whether the opt-out reward settings should be run on initial (first) island creation.
  * @param islandResetSettings The {@link ResetSettings} for normal island resets.
  */
 @ConfigSerializable
@@ -39,4 +42,7 @@ public record Settings(
         @Nullable Integer saveFrequencySeconds,
         int exchangePrestigeLevel,
         int progressBarSize,
+        boolean startOptedOut,
+        boolean applyOptInRewardsForInitialIslands,
+        boolean applyOptOutRewardsForInitialIslands,
         @NotNull IslandSettings islandResetSettings) {}

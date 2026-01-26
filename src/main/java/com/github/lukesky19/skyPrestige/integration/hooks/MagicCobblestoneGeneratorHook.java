@@ -19,7 +19,9 @@ package com.github.lukesky19.skyPrestige.integration.hooks;
 
 import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
@@ -27,25 +29,30 @@ import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.magiccobblestonegenerator.StoneGeneratorAddon;
 import world.bentobox.magiccobblestonegenerator.database.objects.GeneratorDataObject;
+import world.bentobox.magiccobblestonegenerator.database.objects.GeneratorTierObject;
 import world.bentobox.magiccobblestonegenerator.managers.StoneGeneratorManager;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This class manages interfacing with the MagicCobblestoneGenerator addon.
  */
 public class MagicCobblestoneGeneratorHook implements Hook {
+    private final @NotNull SkyPlugin plugin;
     private final @NotNull ComponentLogger logger;
     private StoneGeneratorAddon stoneGeneratorAddon;
     private StoneGeneratorManager stoneGeneratorManager;
 
     /**
      * Constructor
-     * @param logger The plugin's {@link ComponentLogger}.
+     * @param plugin A {@link SkyPlugin} instance.
      */
-    public MagicCobblestoneGeneratorHook(@NotNull ComponentLogger logger) {
-        this.logger = logger;
+    public MagicCobblestoneGeneratorHook(@NotNull SkyPlugin plugin) {
+        this.plugin = plugin;
+        this.logger = plugin.getComponentLogger();
     }
 
     /**
@@ -86,6 +93,7 @@ public class MagicCobblestoneGeneratorHook implements Hook {
             logger.warn(AdventureUtil.deserialize("MagicCobblestoneGenerator not hooked into."));
             return;
         }
+        if(oldIsland.getUniqueId().equals(newIsland.getUniqueId())) return;
 
         @Nullable GeneratorDataObject oldIslandGeneratorData = stoneGeneratorManager.validateIslandData(oldIsland);
         if(oldIslandGeneratorData == null) {
@@ -127,5 +135,72 @@ public class MagicCobblestoneGeneratorHook implements Hook {
 
         // Delete old data
         stoneGeneratorManager.wipeGeneratorData(oldIslandGeneratorData);
+    }
+
+    /**
+     * Reset the generator data for the island.
+     * @apiNote If the addon isn't hooked into or any island data is null, no copying will occur.
+     * @param island The {@link Island}.
+     */
+    public void resetGeneratorData(@NotNull Island island) {
+        if(!isHooked()) {
+            logger.warn(AdventureUtil.deserialize("MagicCobblestoneGenerator not hooked into."));
+            return;
+        }
+
+        @Nullable GeneratorDataObject generatorData = stoneGeneratorManager.validateIslandData(island);
+        if(generatorData == null) {
+            logger.error(AdventureUtil.deserialize("Failed to reset generator data due to invalid island generator data for the island."));
+            return;
+        }
+
+        // Reset Unlocked Tiers
+        Set<Player> onlineIslandMembers = island.getMemberSet()
+                .stream()
+                .map(memberId -> plugin.getServer().getPlayer(memberId))
+                .filter(member -> member != null && member.isOnline() && member.isConnected())
+                .collect(Collectors.toSet());
+        Set<String> unlockedTiers = new HashSet<>();
+        stoneGeneratorManager.getAllGeneratorTiers(island.getWorld())
+                .stream()
+                .filter(GeneratorTierObject::isDeployed)
+                .forEach(tier -> {
+                    Set<String> permissions = tier.getRequiredPermissions();
+
+                    if(permissions.isEmpty()) {
+                        unlockedTiers.add(tier.getUniqueId());
+                    } else {
+                        boolean tierUnlocked = true;
+                        for(String permission : permissions) {
+                            if(onlineIslandMembers.stream().noneMatch(member -> member.hasPermission(permission))) {
+                                tierUnlocked = false;
+                                break;
+                            }
+                        }
+
+                        if(tierUnlocked) {
+                            unlockedTiers.add(tier.getUniqueId());
+                        }
+                    }
+                });
+
+        generatorData.setUnlockedTiers(unlockedTiers);
+
+        // Reset Purchased Tiers
+        generatorData.setPurchasedTiers(new HashSet<>());
+
+        // Reset Active Tiers
+        generatorData.setActiveGeneratorList(new HashSet<>());
+
+        // Reset active generator count
+        generatorData.setIslandActiveGeneratorCount(0);
+        generatorData.setOwnerActiveGeneratorCount(0);
+
+        // Reset Bundles
+        generatorData.setIslandBundle(null);
+        generatorData.setOwnerBundle(null);
+
+        // Save updated data
+        stoneGeneratorManager.saveGeneratorData(generatorData);
     }
 }

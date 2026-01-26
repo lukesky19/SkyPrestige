@@ -5,6 +5,7 @@ scale-factor: 2.5
 required-prestige-points: 100
 prestige-settings:
     island-settings:
+        keep-island: false
         keep-island-size: false
         keep-generator-upgrades: false
         keep-island-flags: true

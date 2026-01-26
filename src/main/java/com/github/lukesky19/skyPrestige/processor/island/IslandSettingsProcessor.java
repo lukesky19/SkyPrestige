@@ -27,6 +27,7 @@ import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.user.User;
@@ -65,12 +66,14 @@ public class IslandSettingsProcessor {
 
     /**
      * Process the island settings. This method is used to process general island settings, regardless of source.
+     * @param player The {@link Player} who initiated the settings being applied.
      * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
      * @param oldIslandData The {@link IslandData}.
      */
     public void processIslandSettings(
+            @NotNull Player player,
             @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
@@ -82,7 +85,9 @@ public class IslandSettingsProcessor {
 
         // Copy island size if configured to do so
         if(islandSettings.keepIslandSize()) {
-            newIsland.setProtectionRange(oldIsland.getProtectionRange());
+            bentoBoxHook.setIslandSize(player.getUniqueId(), newIsland, newIsland.getProtectionRange(), oldIsland.getProtectionRange());
+        } else {
+            bentoBoxHook.setIslandSize(player.getUniqueId(), newIsland, newIsland.getProtectionRange(), bentoBoxHook.getDefaultProtectionRange(newIsland.getWorld()));
         }
 
         // If an island member has a higher protection range permission, update the island's protection range.
@@ -96,13 +101,17 @@ public class IslandSettingsProcessor {
                     newIsland.getProtectionRange());
 
             if(permissionValue > islandValue) {
-                newIsland.setProtectionRange(permissionValue);
+                bentoBoxHook.setIslandSize(player.getUniqueId(), newIsland, islandValue, permissionValue);
             }
         });
 
         // Copy island generator upgrades if configured to do so
-        if(islandSettings.keepGeneratorUpgrades() && magicCobblestoneGeneratorHook.isHooked()) {
-            magicCobblestoneGeneratorHook.copyGeneratorData(oldIsland, newIsland);
+        if(magicCobblestoneGeneratorHook.isHooked()) {
+            if(islandSettings.keepGeneratorUpgrades()) {
+                magicCobblestoneGeneratorHook.copyGeneratorData(oldIsland, newIsland);
+            } else {
+                magicCobblestoneGeneratorHook.resetGeneratorData(newIsland);
+            }
         }
 
         // Copy Island Flags if configured to do so
@@ -148,7 +157,8 @@ public class IslandSettingsProcessor {
 
     /**
      * Process the island settings. This method is used to process island settings when an island is opted in or out of prestige.
-     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(IslandSettings, Island, Island, IslandData)}.
+     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(Player, IslandSettings, Island, Island, IslandData)}.
+     * @param player The {@link Player} who initiated the settings being applied.
      * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
@@ -156,6 +166,7 @@ public class IslandSettingsProcessor {
      * @param prestigeExempt true for opt out, false of opt in.
      */
     public void processIslandSettings(
+            @NotNull Player player,
             @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
@@ -167,12 +178,13 @@ public class IslandSettingsProcessor {
 
         newIslandData.setLeaderboardExempt(prestigeExempt);
 
-        processIslandSettings(islandSettings, oldIsland, newIsland, newIslandData);
+        processIslandSettings(player, islandSettings, oldIsland, newIsland, newIslandData);
     }
 
     /**
      * Process the island settings. This method is used to process island settings when an island is prestiged.
-     * It processes prestige specific settings, then calls {@link #processIslandSettings(IslandSettings, Island, Island, IslandData)}.
+     * It processes prestige specific settings, then calls {@link #processIslandSettings(Player, IslandSettings, Island, Island, IslandData)}.
+     * @param player The {@link Player} who initiated the settings being applied.
      * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
@@ -181,6 +193,7 @@ public class IslandSettingsProcessor {
      * @param prestigeLevel The prestige level to update the island data with.
      */
     public void processIslandSettings(
+            @NotNull Player player,
             @NotNull IslandSettings islandSettings,
             @NotNull Island oldIsland,
             @NotNull Island newIsland,
@@ -197,6 +210,6 @@ public class IslandSettingsProcessor {
             newIslandData.removePrestigePoints(requiredPrestigePoints);
         }
 
-        processIslandSettings(islandSettings, oldIsland, newIsland, newIslandData);
+        processIslandSettings(player, islandSettings, oldIsland, newIsland, newIslandData);
     }
 }

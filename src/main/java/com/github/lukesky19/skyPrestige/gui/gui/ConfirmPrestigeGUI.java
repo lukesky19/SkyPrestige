@@ -21,6 +21,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
@@ -169,7 +170,6 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
         List<TagResolver.Single> emptyList = List.of();
         createDisplayButton(confirmPrestigeGUIConfig.keepMembers(), emptyList);
-        createDisplayButton(confirmPrestigeGUIConfig.keepFlags(), emptyList);
         createDisplayButton(confirmPrestigeGUIConfig.keepCommandRanks(), emptyList);
 
         // Conditional Buttons
@@ -292,7 +292,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         itemStack.setItemMeta(itemMeta);
 
         builder.setItemStack(itemStack);
-        setButton(confirmPrestigeGUIConfig.blueprintBundleSlot(), builder.build());
+        setButton(confirmPrestigeGUIConfig.blueprintButtonSlot(), builder.build());
     }
 
     /**
@@ -344,54 +344,78 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
     private void createConditionalButtons() {
         if(confirmPrestigeGUIConfig == null) return;
         if(islandResetData.getPrestigeConfig() == null) return;
-        ResetSettings prestigeSettings = islandResetData.getPrestigeConfig().prestigeSettings();
+        ResetSettings resetSettings = islandResetData.getPrestigeConfig().prestigeSettings();
+        IslandSettings islandSettings = resetSettings.islandSettings();
+        PlayTimeSettings playTimeSettings = resetSettings.playerSettings().playTimeSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!prestigeSettings.playerSettings().inventorySettings().resetInventory()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepInventory(), emptyList);
+        if(islandSettings.keepIsland()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepIsland(), emptyList);
         } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetIsland(), emptyList);
         }
 
-        if(prestigeSettings.islandSettings().keepGeneratorUpgrades()) {
+        if(islandSettings.keepIslandSize()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepIslandSize(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetIslandSize(), emptyList);
+        }
+
+        if(islandSettings.keepIslandFlags()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepFlags(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetFlags(), emptyList);
+        }
+
+        if(islandSettings.clearVault()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
+        }
+
+        if(resetSettings.islandSettings().keepGeneratorUpgrades()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepGeneratorUpgrades(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().enderChestSettings().resetInventory()) {
+        if(!resetSettings.playerSettings().inventorySettings().resetInventory()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepInventory(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearInventory(), emptyList);
+        }
+
+        if(!resetSettings.playerSettings().enderChestSettings().resetInventory()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepEnderChest(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().clearEnderChest(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetExp()) {
+        if(!resetSettings.playerSettings().resetExp()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepExp(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetExp(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetMoney()) {
+        if(!resetSettings.playerSettings().resetMoney()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepMoney(), emptyList);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetMoney(), emptyList);
         }
 
-        if(!prestigeSettings.playerSettings().resetAuctionItems()) {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
-        } else {
-            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
-        }
-
-        if(prestigeSettings.startingMoney() > 0) {
-            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(prestigeSettings.startingMoney())));
+        if(resetSettings.startingMoney() > 0) {
+            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(resetSettings.startingMoney())));
 
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().startingMoney(), placeholders);
         } else {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().noStartingMoney(), emptyList);
         }
 
-        PlayTimeSettings playTimeSettings = prestigeSettings.playerSettings().playTimeSettings();
+        if(!resetSettings.playerSettings().resetAuctionItems()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
+        }
 
         if(!playTimeSettings.resetSession()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);

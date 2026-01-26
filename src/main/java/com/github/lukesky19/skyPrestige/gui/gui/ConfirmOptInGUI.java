@@ -22,6 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.opt_in_out.OptInOutConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
@@ -182,7 +183,6 @@ public class ConfirmOptInGUI extends ConfirmGUI {
 
         List<TagResolver.Single> emptyList = List.of();
         createDisplayButton(confirmOptInGUIConfig.keepMembers(), emptyList);
-        createDisplayButton(confirmOptInGUIConfig.keepFlags(), emptyList);
         createDisplayButton(confirmOptInGUIConfig.keepCommandRanks(), emptyList);
 
         // Conditional Buttons
@@ -303,7 +303,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
         itemStack.setItemMeta(itemMeta);
 
         builder.setItemStack(itemStack);
-        setButton(confirmOptInGUIConfig.blueprintBundleSlot(), builder.build());
+        setButton(confirmOptInGUIConfig.blueprintButtonSlot(), builder.build());
     }
 
     /**
@@ -353,12 +353,32 @@ public class ConfirmOptInGUI extends ConfirmGUI {
     private void createConditionalButtons() {
         if(confirmOptInGUIConfig == null || optInConfig == null) return;
         ResetSettings resetSettings = optInConfig.resetSettings();
+        IslandSettings islandSettings = resetSettings.islandSettings();
+        PlayTimeSettings playTimeSettings = resetSettings.playerSettings().playTimeSettings();
         List<TagResolver.Single> emptyList = List.of();
 
-        if(!resetSettings.playerSettings().inventorySettings().resetInventory()) {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepInventory(), emptyList);
+        if(islandSettings.keepIsland()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepIsland(), emptyList);
         } else {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearInventory(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetIsland(), emptyList);
+        }
+
+        if(islandSettings.keepIslandSize()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepIslandSize(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetIslandSize(), emptyList);
+        }
+
+        if(islandSettings.keepIslandFlags()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepFlags(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetFlags(), emptyList);
+        }
+
+        if(islandSettings.clearVault()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
         }
 
         if(resetSettings.islandSettings().keepGeneratorUpgrades()) {
@@ -367,10 +387,10 @@ public class ConfirmOptInGUI extends ConfirmGUI {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetGeneratorUpgrades(), emptyList);
         }
 
-        if(resetSettings.islandSettings().clearVault()) {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearVaultItems(), emptyList);
+        if(!resetSettings.playerSettings().inventorySettings().resetInventory()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepInventory(), emptyList);
         } else {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepVaultItems(), emptyList);
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().clearInventory(), emptyList);
         }
 
         if(!resetSettings.playerSettings().enderChestSettings().resetInventory()) {
@@ -391,12 +411,6 @@ public class ConfirmOptInGUI extends ConfirmGUI {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetMoney(), emptyList);
         }
 
-        if(!resetSettings.playerSettings().resetAuctionItems()) {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
-        } else {
-            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
-        }
-
         if(resetSettings.startingMoney() > 0) {
             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(resetSettings.startingMoney())));
 
@@ -405,7 +419,11 @@ public class ConfirmOptInGUI extends ConfirmGUI {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().noStartingMoney(), emptyList);
         }
 
-        PlayTimeSettings playTimeSettings = resetSettings.playerSettings().playTimeSettings();
+        if(!resetSettings.playerSettings().resetAuctionItems()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepAuctionItems(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
+        }
 
         if(!playTimeSettings.resetSession()) {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);

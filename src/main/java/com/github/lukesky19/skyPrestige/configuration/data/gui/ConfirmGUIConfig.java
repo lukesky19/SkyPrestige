@@ -27,18 +27,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * This record contains the configuration for a confirm gui.
+ * This record contains the configuration for a confirmation gui.
  * @param configVersion The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
- * @param blueprintBundleSlot The slot to place the blueprint bundle that was selected in.
+ * @param blueprintButtonSlot The slot to place the blueprint bundle that was selected in.
  * @param filler The {@link ItemStackConfig} to fill the GUI with.
  * @param confirmButton The {@link ButtonConfig} for the confirm button.
  * @param cancelButton The {@link ButtonConfig} for the cancel button.
  * @param rewardsButton The {@link ButtonConfig} to open the rewards GUI.
- * @param keepMembers The {@link ButtonConfig} for the button that says island members are carried over on island reset.
- * @param keepCommandRanks The {@link ButtonConfig} for the button that says command ranks are carried over on island reset.
- * @param keepFlags The {@link ButtonConfig} for the button that says island flags are carried over on island reset.
+ * @param keepMembers The {@link ButtonConfig} for the button that says island members are carried over on prestige/opt-in/opt-out.
+ * @param keepCommandRanks The {@link ButtonConfig} for the button that says command ranks are carried over on prestige/opt-in/opt-out.
  * @param conditionalButtons The {@link ConditionalButtons} config for the GUI.
  * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
  */
@@ -47,49 +46,60 @@ public record ConfirmGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        int blueprintBundleSlot,
+        int blueprintButtonSlot,
         @NotNull ItemStackConfig filler,
         @NotNull ButtonConfig confirmButton,
         @NotNull ButtonConfig cancelButton,
         @NotNull ButtonConfig rewardsButton,
         @NotNull ButtonConfig keepMembers,
-        @NotNull ButtonConfig keepFlags,
         @NotNull ButtonConfig keepCommandRanks,
         @NotNull ConditionalButtons conditionalButtons,
         @NotNull List<ButtonConfig> dummyButtons) {
     /**
      * This record contains the configuration for the buttons displayed depending on the prestige level config.
-     * @param keepInventory The {@link ButtonConfig} for the button shown when island member's inventories are carried over on island reset.
-     * @param clearInventory The {@link ButtonConfig} for the button shown when island member's inventories are reset on island reset.
+     * @param keepIsland The {@link ButtonConfig} for the button that says the island isn't reset on prestige/opt-in/opt-out.
+     * @param resetIsland The {@link ButtonConfig} for the button that says the island is reset on prestige/opt-in/opt-out.
+     * @param keepIslandSize The {@link ButtonConfig} for the button that says the island size is carried over on prestige/opt-in/opt-out.
+     * @param resetIslandSize The {@link ButtonConfig} for the button that says the island size is reset to the default on prestige/opt-in/opt-out.
+     * @param keepFlags The {@link ButtonConfig} for the button that says island flags are carried over on prestige/opt-in/opt-out.
+     * @param resetFlags The {@link ButtonConfig} for the button that says island flags are carried reset on prestige/opt-in/opt-out.
+     * @param keepInventory The {@link ButtonConfig} for the button shown when island member's inventories are carried over on prestige/opt-in/opt-out.
+     * @param clearInventory The {@link ButtonConfig} for the button shown when island member's inventories are reset on prestige/opt-in/opt-out.
      * @param keepEnderChest The {@link ButtonConfig} for the button shown when island member's ender chests are carried over prestige.
-     * @param clearEnderChest The {@link ButtonConfig} for the button shown when island member's ender chests are reset on island reset.
-     * @param keepExp The {@link ButtonConfig} for the button shown when island member's ender chests is carried over on island reset.
-     * @param resetExp The {@link ButtonConfig} for the button shown when island member's experience is reset on island reset.
-     * @param keepMoney The {@link ButtonConfig} for the button shown when island member's balance is carried over on island reset.
-     * @param resetMoney The {@link ButtonConfig} for the button shown when island member's balance is reset on island reset.
-     * @param keepAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are carried over on island reset.
-     * @param resetAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are reset on island reset.
-     * @param keepGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades carry over on island reset.
-     * @param resetGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades are reset on island reset.
-     * @param keepVaultItems The {@link ButtonConfig} for the button shown when the island's vault is carried over on island reset.
-     * @param clearVaultItems The {@link ButtonConfig} for the button shown when the island's vault is reset on island reset.
-     * @param startingMoney The {@link ButtonConfig} for the button shown when one or more island members receive starting money on island reset.
-     * @param noStartingMoney The {@link ButtonConfig} for the button shown when no starting money is given on island reset.
-     * @param keepSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is carried over on island reset.
-     * @param resetSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is reset on island reset.
-     * @param keepDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is carried over on island reset.
-     * @param resetDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is reset on island reset.
-     * @param keepWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is carried over on island reset.
-     * @param resetWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is reset on island reset.
-     * @param keepMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is carried over on island reset.
-     * @param resetMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is reset on island reset.
-     * @param keepYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is carried over on island reset.
-     * @param resetYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is reset on island reset.
-     * @param keepTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is carried over on island reset.
-     * @param resetTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is reset on island reset.
+     * @param clearEnderChest The {@link ButtonConfig} for the button shown when island member's ender chests are reset on prestige/opt-in/opt-out.
+     * @param keepExp The {@link ButtonConfig} for the button shown when island member's ender chests is carried over on prestige/opt-in/opt-out.
+     * @param resetExp The {@link ButtonConfig} for the button shown when island member's experience is reset on prestige/opt-in/opt-out.
+     * @param keepMoney The {@link ButtonConfig} for the button shown when island member's balance is carried over on prestige/opt-in/opt-out.
+     * @param resetMoney The {@link ButtonConfig} for the button shown when island member's balance is reset on prestige/opt-in/opt-out.
+     * @param keepAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are carried over on prestige/opt-in/opt-out.
+     * @param resetAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are reset on prestige/opt-in/opt-out.
+     * @param keepGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades carry over on prestige/opt-in/opt-out.
+     * @param resetGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades are reset on prestige/opt-in/opt-out.
+     * @param keepVaultItems The {@link ButtonConfig} for the button shown when the island's vault is carried over on prestige/opt-in/opt-out.
+     * @param clearVaultItems The {@link ButtonConfig} for the button shown when the island's vault is reset on prestige/opt-in/opt-out.
+     * @param startingMoney The {@link ButtonConfig} for the button shown when one or more island members receive starting money on prestige/opt-in/opt-out.
+     * @param noStartingMoney The {@link ButtonConfig} for the button shown when no starting money is given on prestige/opt-in/opt-out.
+     * @param keepSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is carried over on prestige/opt-in/opt-out.
+     * @param resetSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is reset on prestige/opt-in/opt-out.
+     * @param keepDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is carried over on prestige/opt-in/opt-out.
+     * @param resetDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is reset on prestige/opt-in/opt-out.
+     * @param keepWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is reset on prestige/opt-in/opt-out.
+     * @param keepMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is reset on prestige/opt-in/opt-out.
+     * @param keepYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is reset on prestige/opt-in/opt-out.
+     * @param keepTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is carried over on prestige/opt-in/opt-out.
+     * @param resetTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is reset on prestige/opt-in/opt-out.
      */
     @ConfigSerializable
     public record ConditionalButtons(
+            @NotNull ButtonConfig keepIsland,
+            @NotNull ButtonConfig resetIsland,
+            @NotNull ButtonConfig keepIslandSize,
+            @NotNull ButtonConfig resetIslandSize,
+            @NotNull ButtonConfig keepFlags,
+            @NotNull ButtonConfig resetFlags,
             @NotNull ButtonConfig keepInventory,
             @NotNull ButtonConfig clearInventory,
             @NotNull ButtonConfig keepEnderChest,

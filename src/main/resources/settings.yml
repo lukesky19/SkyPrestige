@@ -8,6 +8,12 @@ save-frequency-seconds: 900
 exchange-prestige-level: 0
 # The number of pipe symbols (|) to use in the progress bar placeholders.
 progress-bar-size: 10
+# Whether islands should start opted out of prestige or not.
+start-opted-out: false
+# Whether to apply opt-in rewards for initial (first) islands.
+apply-opt-in-rewards-for-initial-islands: false
+# Whether to apply opt-out rewards for initial (first) islands.
+apply-opt-out-rewards-for-initial-islands: false
 # These settings apply when an island is reset outside of prestige, opt-in, or opt-out.
 island-reset-settings:
     keep-island-size: true

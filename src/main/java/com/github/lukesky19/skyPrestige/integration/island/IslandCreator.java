@@ -61,6 +61,7 @@ public class IslandCreator {
     private final @NotNull IslandsManager islandsManager;
     private final @NotNull BlueprintsManager blueprintsManager;
 
+    private final @Nullable Player player;
     private final @Nullable User user;
     private final @Nullable World world;
     private final @Nullable GameModeAddon gameModeAddon;
@@ -100,6 +101,7 @@ public class IslandCreator {
         this.blueprintsManager = bentoBoxHook.getBlueprintsManager();
 
         this.oldIsland = builder.oldIsland;
+        this.player = builder.player;
         this.user = builder.user;
         this.world = builder.world;
         this.gameModeAddon = builder.gameModeAddon;
@@ -133,7 +135,7 @@ public class IslandCreator {
      * Create the new island.
      */
     public void createIsland() {
-        if(user == null || oldIsland == null || islandData == null || islandSettings == null) return;
+        if(player == null || user == null || oldIsland == null || islandData == null || islandSettings == null) return;
 
         @Nullable Location newIslandLocation = getReservedIslandCenter();
         if(newIslandLocation == null) {
@@ -163,11 +165,11 @@ public class IslandCreator {
 
         // Process IslandSettings
         if(requiredPrestigePoints != null && prestigeLevel != null) {
-            islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData, requiredPrestigePoints, prestigeLevel);
+            islandSettingsProcessor.processIslandSettings(player, islandSettings, oldIsland, newIsland, islandData, requiredPrestigePoints, prestigeLevel);
         } else if(prestigeExempt != null) {
-            islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData, prestigeExempt);
+            islandSettingsProcessor.processIslandSettings(player, islandSettings, oldIsland, newIsland, islandData, prestigeExempt);
         } else {
-            islandSettingsProcessor.processIslandSettings(islandSettings, oldIsland, newIsland, islandData);
+            islandSettingsProcessor.processIslandSettings(player, islandSettings, oldIsland, newIsland, islandData);
         }
 
         // Should NMS be used to paste the island's blueprint?
@@ -336,6 +338,7 @@ public class IslandCreator {
 
         private @Nullable Island oldIsland;
         private @Nullable IslandData oldIslandData;
+        private @Nullable Player player;
         private @Nullable User user;
         private @Nullable World world;
         private @NotNull String blueprintName = BlueprintsManager.DEFAULT_BUNDLE_NAME;
@@ -381,6 +384,16 @@ public class IslandCreator {
          */
         public @NotNull Builder islandData(@NotNull IslandData oldIslandData) {
             this.oldIslandData = oldIslandData;
+            return this;
+        }
+
+        /**
+         * Set the player creating the island.
+         * @param player The {@link Player}.
+         * @return The {@link IslandCreator.Builder}.
+         */
+        public @NotNull Builder player(@NotNull Player player) {
+            this.player = player;
             return this;
         }
 
