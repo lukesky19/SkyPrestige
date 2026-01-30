@@ -259,6 +259,8 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 "<red>You cannot prestige an island that is opted out of prestige.</red>",
                 "<red>Unable to prestige your island due to a configuration error.</red>",
                 "<red>Unable to check the required prestige points due to a configuration error.</red>",
+                "<green>Player <#0055ff><player></#0055ff> has reached prestige level <#0055ff><prestige_level></#0055ff>.</green>",
+                "<green>Player <#0055ff><player></#0055ff> has prestiged the island you are a member of.</green>",
                 "<red>You must be on your island to view prestige progress.</red>",
                 "<green>No progress to view because your island is at the max prestige level.</green>",
                 "<red>Your island is opted out of prestige. Prestige progress can only be viewed for islands that can prestige.</red>",
@@ -321,6 +323,8 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 "<red>You must be on your island to opt in or out of prestige.</red>",
                 "<red>You cannot opt in our out of prestige for an island that is not owned.</red>",
                 "<red>You must be the island owner or an island member to opt in or out of prestige.</red>",
+                "<green>Player <#0055ff><player></#0055ff> has opted into prestige for the island you are a member.</green>",
+                "<green>Player <#0055ff><player></#0055ff> has opted out of prestige for the island you are a member.</green>",
                 ", ",
                 ", and ");
     }

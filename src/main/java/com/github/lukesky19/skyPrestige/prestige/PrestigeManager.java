@@ -43,7 +43,10 @@ import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -449,7 +452,7 @@ public class PrestigeManager {
         // Get offline island member's unique ids
         List<UUID> offlineIslandMembers = island.getMemberSet()
                 .stream()
-                .map(memberId -> player.getServer().getOfflinePlayer(memberId))
+                .map(memberId -> plugin.getServer().getOfflinePlayer(memberId))
                 .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
                 .map(OfflinePlayer::getUniqueId)
                 .toList();
@@ -469,6 +472,17 @@ public class PrestigeManager {
 
         // Process prestige rewards
         rewardsProcessor.processPostRewards(player, island, onlineIslandMembers, offlineIslandMembers, prestigeConfig.rewardConfig(), prestigeLevel);
+
+        // Send announcement messages
+        List<TagResolver.Single> placeholders = new ArrayList<>();
+        placeholders.add(Placeholder.parsed("player", player.getName()));
+        placeholders.add(Placeholder.parsed("prestige_level", String.valueOf(prestigeLevel)));
+
+        Component announcementMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeAnnouncement(), placeholders);
+        plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(announcementMessage));
+
+        Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeIslandMemberMessage(), placeholders);
+        onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
     }
 
     /**

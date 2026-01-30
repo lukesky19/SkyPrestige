@@ -43,6 +43,8 @@ import java.util.List;
  * @param prestigeIslandOptedOut The message sent when the island is opted out of prestige, but a player tries to prestige.
  * @param prestigeConfigError The message sent when a player tries to prestige their island, but it fails due to a config error.
  * @param prestigeConfigRequirementError The message sent when a player tries to prestige their island, but it fails due to a requirement config error.
+ * @param prestigeAnnouncement The message sent to the server when a player prestiges their island.
+ * @param prestigeIslandMemberMessage The message sent to online island members when their island is prestiged.
  * @param progressPlayerNotOnIsland The message sent when a player tries to view their progress towards the next prestige level while not on an island.
  * @param progressMaxPrestigeLevel The message sent when a player tries to view their progress towards the next prestige level, but their island is at the max prestige level.
  * @param progressPrestigeExempt The message sent when a player tries to view their progress towards the next prestige level, but their island is opted out of prestige.
@@ -74,6 +76,8 @@ import java.util.List;
  * @param prestigeStatusPlayerNotOnIsland The message sent when a player tries to opt in or out of prestige while not on an Island.
  * @param prestigeStatusIslandNotOwned The message sent when a player tries to opt in or out of prestige and that island is not owned.
  * @param prestigeStatusPlayerNotMemberOrOwner The message sent when a player tries to opt in or out of prestige an island they are not the owner or a member of.
+ * @param prestigeOptInIslandMemberMessage The message sent to online island members when their island is opted into prestige.
+ * @param prestigeOptOutIslandMemberMessage The message sent to online island members when their island is opted out of prestige.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -96,6 +100,8 @@ public record Locale(
         String prestigeIslandOptedOut,
         String prestigeConfigError,
         String prestigeConfigRequirementError,
+        String prestigeAnnouncement,
+        String prestigeIslandMemberMessage,
         String progressPlayerNotOnIsland,
         String progressMaxPrestigeLevel,
         String progressPrestigeExempt,
@@ -127,6 +133,8 @@ public record Locale(
         String prestigeStatusPlayerNotOnIsland,
         String prestigeStatusIslandNotOwned,
         String prestigeStatusPlayerNotMemberOrOwner,
+        String prestigeOptInIslandMemberMessage,
+        String prestigeOptOutIslandMemberMessage,
         String delimiter,
         String finalDelimiter) {
     /**

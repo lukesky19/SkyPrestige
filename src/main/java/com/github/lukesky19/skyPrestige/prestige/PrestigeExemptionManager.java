@@ -42,7 +42,10 @@ import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,10 +55,7 @@ import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -272,10 +272,22 @@ public class PrestigeExemptionManager {
         // Process rewards
         rewardsProcessor.processPostRewards(player, island, onlineIslandMembers, offlineIslandMembers, optInOutConfig.rewardConfig(), -1);
 
-        // Clear any offline prestiges queued if opting out
+        Locale locale = localeManager.getConfiguration();
+        List<TagResolver.Single> placeholders = new ArrayList<>();
+        placeholders.add(Placeholder.parsed("player", player.getName()));
+
         if(newStatus) {
+            // Clear any offline prestiges queued if opting out
             OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
             island.getMemberSet().forEach((offlinePrestigeTable::removeOfflinePrestige));
+
+            // Send island member messages
+            Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeOptOutIslandMemberMessage(), placeholders);
+            onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
+        } else {
+            // Send island member messages
+            Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeOptInIslandMemberMessage(), placeholders);
+            onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
         }
     }
 
