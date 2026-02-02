@@ -96,7 +96,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
             // Store the configuration
             setData(migratedConfiguration.prestigeLevel(), migratedConfiguration);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the configuration. Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load the configuration file at " + configurationPath + ". Error: " + configurateException.getMessage()));
         }
     }
 
