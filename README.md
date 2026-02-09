@@ -23,6 +23,7 @@
 * PlaceholderAPI
 * PlayerAuctions
 * RoseStacker
+* SkyEnchants
 * SkyShop
 * SkyPlayTime
 * SkySellWands

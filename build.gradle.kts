@@ -53,6 +53,7 @@ dependencies {
     compileOnly("com.github.lukesky19:SkySellWands:1.5.1.0")
     compileOnly("com.olziedev:playerauctions-api:1.32.1")
     compileOnly("net.luckperms:api:5.4")
+    compileOnly("com.github.lukesky19:SkyEnchants:0.2.0.0")
 
     // Test Dependencies
     testImplementation("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")

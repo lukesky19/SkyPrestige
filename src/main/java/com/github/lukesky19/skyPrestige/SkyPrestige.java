@@ -218,6 +218,9 @@ public class SkyPrestige extends SkyPlugin {
             pluginManager.registerEvents(new SkyPlayTimeListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
         }
         pluginManager.registerEvents(new SmeltItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+        if(pluginManager.isPluginEnabled("SkyEnchants")) {
+            pluginManager.registerEvents(new MultiBlockBreakListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+        }
         pluginManager.registerEvents(new WaterLogListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
 
         @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
@@ -283,15 +286,22 @@ public class SkyPrestige extends SkyPlugin {
 
         // Save any loaded island data and clean up the database.
         if(islandDataManager != null) {
-            islandDataManager.saveData().thenAccept(v -> {
-                if(databaseManager != null) {
-                    databaseManager.cleanUp();
-                }
-            });
-        } else {
-            if(databaseManager != null) {
-                databaseManager.cleanUp();
-            }
+            CompletableFuture<Void> saveFuture = islandDataManager.saveData();
+            saveFuture.join();
+
+            saveFuture
+                    .thenAccept(v -> this.getComponentLogger().info(
+                            AdventureUtil.deserialize("Successfully saved island data on plugin disable.")))
+                    .exceptionally(ex -> {
+                        this.getComponentLogger().error(
+                                AdventureUtil.deserialize("Failed to save island data on plugin disable. " +
+                                        "Data loss will occur. Error: " + ex.getMessage()));
+                        return null;
+                    });
+        }
+
+        if(databaseManager != null) {
+            databaseManager.cleanUp();
         }
     }
 
