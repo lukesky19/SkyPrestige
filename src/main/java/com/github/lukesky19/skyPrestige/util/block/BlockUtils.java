@@ -15,21 +15,32 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.util.type;
+package com.github.lukesky19.skyPrestige.util.block;
 
+import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Registry;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.BlockType;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.Ageable;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Waterlogged;
+import org.bukkit.entity.EntityType;
+import org.bukkit.spawner.Spawner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+// TODO Add method to convert BlockTypes to similar ItemTypes
 /**
- * This class is used to check {@link BlockType}s.
+ * This class is used to validate and extract data from {@link Block}s.
  */
-public class BlockTypeUtils {
+public class BlockUtils {
     private static final @NotNull Set<BlockType> STRIPPED_LOGS = new LinkedHashSet<>();
     private static final @NotNull Set<BlockType> WAXED_BLOCKS = new LinkedHashSet<>();
 
@@ -52,7 +63,7 @@ public class BlockTypeUtils {
      * @throws RuntimeException if this method is used.
      */
     @Deprecated
-    public BlockTypeUtils() {
+    public BlockUtils() {
         throw new RuntimeException("The use of the default constructor is not allowed.");
     }
 
@@ -72,5 +83,62 @@ public class BlockTypeUtils {
      */
     public static boolean isBlockTypeWaxed(@NotNull BlockType blockType) {
         return WAXED_BLOCKS.contains(blockType);
+    }
+
+    /**
+     * Checks if a {@link Block} is waxed.
+     * @param block The {@link Block} to check.
+     * @param blockType The {@link BlockType} of the block to check.
+     * @return true if waxed, otherwise false.
+     */
+    public static boolean isBlockWaxed(@NotNull Block block, @NotNull BlockType blockType) {
+        if(isBlockTypeWaxed(blockType)) {
+            return true;
+        } else if(block.getState(false) instanceof Sign sign) {
+            return sign.isWaxed();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get the age of the block.
+     * @param blockData The {@link BlockData}.
+     * @return The age or null.
+     */
+    public static @Nullable Integer getAge(@NotNull BlockData blockData) {
+        return blockData instanceof Ageable ageable ? ageable.getAge() : null;
+    }
+
+    /**
+     * Get the water logged status of the block.
+     * @param blockData The {@link BlockData}.
+     * @return The water logged status or null.
+     */
+    public static @Nullable Boolean getWaterLogged(@NotNull org.bukkit.block.data.BlockData blockData) {
+        return blockData instanceof Waterlogged waterlogged ? waterlogged.isWaterlogged() : null;
+    }
+
+    /**
+     * Get the {@link EntityType} associated with the block.
+     * @param roseStackerHook A {@link RoseStackerHook} instance.
+     * @param block The {@link Block}
+     * @return The {@link EntityType}.
+     */
+    public static @Nullable EntityType getEntityType(@NotNull RoseStackerHook roseStackerHook, @NotNull Block block) {
+        BlockState blockState = block.getState(false);
+        if(roseStackerHook.isHooked()) {
+            if(!roseStackerHook.isBlockNotStacked(block)) return null;
+
+            if(blockState instanceof Spawner spawner) {
+                return spawner.getSpawnedType();
+            }
+        } else {
+            if(blockState instanceof Spawner spawner) {
+                return spawner.getSpawnedType();
+            }
+        }
+
+        return null;
     }
 }

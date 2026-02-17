@@ -23,31 +23,37 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.block.BlockUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.spawner.Spawner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player places a block on an island and increments prestige points.
  */
-public class BlockPlaceListener extends PrestigePointsListener<BlockPlaceEvent> {
+public class BlockPlaceListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -55,10 +61,11 @@ public class BlockPlaceListener extends PrestigePointsListener<BlockPlaceEvent> 
     public BlockPlaceListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -67,67 +74,44 @@ public class BlockPlaceListener extends PrestigePointsListener<BlockPlaceEvent> 
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> process(blockPlaceEvent), 1L);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<BlockPlaceEvent> extractor() {
-        return blockPlaceEvent -> {
-            Player player = blockPlaceEvent.getPlayer();
-            if(!player.isOnline() || !player.isConnected()) return null;
-            Block block = blockPlaceEvent.getBlock();
-            BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
-
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
-
-            RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
-            if(roseStackerHook.isHooked()) {
-                if(!roseStackerHook.isBlockNotStacked(block)) return null;
-
-                if(block.getState(false) instanceof Spawner spawner) {
-                    if(spawner.getSpawnedType() != null) {
-                        @Nullable EntityType entityType = spawner.getSpawnedType();
-
-                        if(entityType != null) {
-                            eventContext.setEntityType(entityType);
-                        }
-                    }
-                }
-            } else {
-                if(block.getState(false) instanceof Spawner spawner) {
-                    if(spawner.getSpawnedType() != null) {
-                        @Nullable EntityType entityType = spawner.getSpawnedType();
-
-                        if(entityType != null) {
-                            eventContext.setEntityType(entityType);
-                        }
-                    }
-                }
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            // Config
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) {
+                logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+                return;
             }
 
-            return eventContext;
-        };
-    }
+            // Player
+            Player player = blockPlaceEvent.getPlayer();
+            @NotNull UUID playerId = player.getUniqueId();
+            if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull BlockPlaceEvent blockPlaceEvent, @NotNull EventContext eventContext) {
-        @Nullable BlockType blockType = eventContext.getBlockType();
-        if(blockType == null) return;
-        @Nullable EntityType entityType = eventContext.getEntityType();
+            // Island Check
+            @Nullable Island island = checkIsland(player, playerId);
+            if(island == null) return;
 
-        @Nullable Double prestigePoints;
-        if(entityType != null) {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBlockPlacePrestigePoints(blockType, entityType);
-        } else {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBlockPlacePrestigePoints(blockType);
-        }
+            // IslandData check.
+            @Nullable IslandData islandData = checkIslandData(island);
+            if(islandData == null) return;
 
-        if(prestigePoints == null) return;
+            // Block
+            Block block = blockPlaceEvent.getBlock();
+            BlockType blockType = block.getType().asBlockType();
+            if(blockType == null) return;
+            BlockData blockData = block.getBlockData();
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+            // Block Data
+            @Nullable EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
+            @Nullable Integer age = BlockUtils.getAge(blockData);
+            @Nullable Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
+
+            // Points
+            double points = prestigePointsManager.getBlockPoints(ActionType.BLOCK_PLACE, prestigePointsConfig.prestigePointsMapping().blockPlace(), blockType, entityType, age, waterLogged);
+            if(points <= 0) return;
+
+            // Add points
+            islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
+        }, 1L);
     }
 }

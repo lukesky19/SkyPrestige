@@ -22,15 +22,15 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import com.github.lukesky19.skyPrestige.util.type.BlockTypeUtils;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.block.BlockUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -41,15 +41,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player waxes a block on an island and increments prestige points.
  */
-public class PlayerWaxBlockListener extends PrestigePointsListener<PlayerInteractEvent> {
+public class PlayerWaxBlockListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -57,10 +61,11 @@ public class PlayerWaxBlockListener extends PrestigePointsListener<PlayerInterac
     public PlayerWaxBlockListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -69,61 +74,53 @@ public class PlayerWaxBlockListener extends PrestigePointsListener<PlayerInterac
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerWaxBlock(PlayerInteractEvent playerInteractEvent) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> process(playerInteractEvent), 1L);
-    }
+        // Process 1 tick later to let the block be waxed first (if waxed at all)
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            // Config
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) {
+                logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+                return;
+            }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerInteractEvent> extractor() {
-        return playerInteractEvent -> {
-            Player player = playerInteractEvent.getPlayer();
-            if(!player.isOnline() || !player.isConnected()) return null;
+            // Action
             Action action = playerInteractEvent.getAction();
-            if(action != Action.RIGHT_CLICK_BLOCK) return null;
+            if(action != Action.RIGHT_CLICK_BLOCK) return;
+
+            // Player
+            @NotNull Player player = playerInteractEvent.getPlayer();
+            if(!player.isOnline() || !player.isConnected()) return;
+            @NotNull UUID playerId = player.getUniqueId();
+            if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+
+            // Island Check
+            @Nullable Island island = checkIsland(player, playerId);
+            if(island == null) return;
+
+            // IslandData check.
+            @Nullable IslandData islandData = checkIslandData(island);
+            if(islandData == null) return;
+
+            // Block
             Block block = playerInteractEvent.getClickedBlock();
-            if(block == null) return null;
+            if(block == null) return;
             BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
+            if(blockType == null) return;
+            if(!BlockUtils.isBlockWaxed(block, blockType)) return;
+
+            // Item (Checks for honeycomb)
             ItemStack itemStack = playerInteractEvent.getItem();
-            if(itemStack == null) return null;
+            if(itemStack == null) return;
             ItemType itemType = itemStack.getType().asItemType();
-            if(itemType == null) return null;
-            if(!itemType.equals(ItemType.HONEYCOMB)) return null;
-            if(isBlockNotWaxed(block, blockType)) return null;
+            if(itemType == null) return;
+            if(!itemType.equals(ItemType.HONEYCOMB)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemType);
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
+            // Points
+            double points = prestigePointsManager.getBlockPoints(ActionType.WAX_BLOCK, prestigePointsConfig.prestigePointsMapping().waxBlock(), blockType, null, null, null);
+            if(points <= 0) return;
 
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerInteractEvent playerInteractEvent, @NotNull EventContext eventContext) {
-        @Nullable BlockType blockType = eventContext.getBlockType();
-        if(blockType == null) return;
-
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getWaxPrestigePoints(blockType);
-        if(prestigePoints == null) return;
-
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
-    }
-
-    /**
-     * Checks if a {@link Block} is not waxed.
-     * @param block The {@link Block} to check.
-     * @param blockType The {@link BlockType} of the block to check.
-     * @return true if not waxed, otherwise false.
-     */
-    private boolean isBlockNotWaxed(@NotNull Block block, @NotNull BlockType blockType) {
-        if(BlockTypeUtils.isBlockTypeWaxed(blockType)) {
-            return false;
-        } else if(block.getState(false) instanceof Sign sign) {
-            return !sign.isWaxed();
-        } else {
-            return true;
-        }
+            // Add points
+            islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
+        }, 1L);
     }
 }

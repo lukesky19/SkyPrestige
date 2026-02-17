@@ -22,11 +22,13 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,15 +38,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player milks a cow on an island and increments prestige points.
  */
-public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteractEntityEvent> {
+public class PlayerMilkCowListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -52,10 +58,11 @@ public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteract
     public PlayerMilkCowListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -64,55 +71,48 @@ public class PlayerMilkCowListener extends PrestigePointsListener<PlayerInteract
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onCowMilked(PlayerInteractEntityEvent playerInteractEntityEvent) {
-        process(playerInteractEntityEvent);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<PlayerInteractEntityEvent> extractor() {
-        return playerInteractEntityEvent -> {
-            Player player = playerInteractEntityEvent.getPlayer();
-            EntityType entityType = playerInteractEntityEvent.getRightClicked().getType();
-            if(!entityType.equals(EntityType.COW) && !entityType.equals(EntityType.MOOSHROOM)) return null;
-            ItemType itemTypeUsed = player.getInventory().getItemInMainHand().getType().asItemType();
-            if(itemTypeUsed == null) return null;
-            if(!itemTypeUsed.equals(ItemType.BUCKET) && !itemTypeUsed.equals(ItemType.BOWL)) return null;
-
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemTypeUsed);
-            eventContext.setEntityType(entityType);
-            eventContext.setAmount(1);
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerInteractEntityEvent playerInteractEntityEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
-        if(itemType == null) return;
-        @Nullable EntityType entityType = eventContext.getEntityType();
-        if(entityType == null) return;
-
-        double prestigePoints = 0;
-        if(itemType.equals(ItemType.BUCKET)) {
-            if(entityType.equals(EntityType.COW)) {
-                @Nullable Double entityPrestigePoints = prestigePointsConfig.prestigePointsMapping().getMilkPrestigePoints(entityType);
-
-                if(entityPrestigePoints != null) prestigePoints += entityPrestigePoints;
-            }
-        } else if(itemType.equals(ItemType.BOWL)) {
-            if(entityType.equals(EntityType.MOOSHROOM)) {
-                @Nullable Double entityPrestigePoints = prestigePointsConfig.prestigePointsMapping().getMilkPrestigePoints(entityType);
-                if(entityPrestigePoints != null) prestigePoints += entityPrestigePoints;
-
-                @Nullable Double itemPrestigePoints = prestigePointsConfig.prestigePointsMapping().getFillPrestigePoints(ItemType.MUSHROOM_STEW);
-                if(itemPrestigePoints != null) prestigePoints += itemPrestigePoints;
-            }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
         }
 
-        if(prestigePoints <= 0) return;
+        // Player
+        @NotNull Player player = playerInteractEntityEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
+
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
+
+        // Entity
+        Entity entity = playerInteractEntityEvent.getRightClicked();
+        EntityType entityType = entity.getType();
+        if(!entityType.equals(EntityType.COW) && !entityType.equals(EntityType.MOOSHROOM)) return;
+
+        // Item
+        ItemType itemTypeUsed = player.getInventory().getItemInMainHand().getType().asItemType();
+        if(itemTypeUsed == null) return;
+        if(!itemTypeUsed.equals(ItemType.BUCKET) && !itemTypeUsed.equals(ItemType.BOWL)) return;
+
+        // Points
+        double points = 0;
+        if(itemTypeUsed.equals(ItemType.BUCKET) && entityType.equals(EntityType.COW)) {
+            points += prestigePointsManager.getEntityPoints(ActionType.MILK, prestigePointsConfig.prestigePointsMapping().milk(), entityType);
+        } else if(itemTypeUsed.equals(ItemType.BOWL) && entityType.equals(EntityType.MOOSHROOM)) {
+            points += prestigePointsManager.getEntityPoints(ActionType.MILK, prestigePointsConfig.prestigePointsMapping().milk(), entityType);
+
+            points += prestigePointsManager.getItemPoints(ActionType.FILL, prestigePointsConfig.prestigePointsMapping().fill(), ItemType.MUSHROOM_STEW, null, null, null);
+        }
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

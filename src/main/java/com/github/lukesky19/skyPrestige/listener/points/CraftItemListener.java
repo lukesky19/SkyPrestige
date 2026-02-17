@@ -25,11 +25,12 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.crafting.CraftingUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,15 +41,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player crafts an item on an island and increments prestige points.
  */
-public class CraftItemListener extends PrestigePointsListener<CraftItemEvent> {
+public class CraftItemListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -56,10 +61,11 @@ public class CraftItemListener extends PrestigePointsListener<CraftItemEvent> {
     public CraftItemListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -68,37 +74,41 @@ public class CraftItemListener extends PrestigePointsListener<CraftItemEvent> {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCraft(CraftItemEvent craftItemEvent) {
-        process(craftItemEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<CraftItemEvent> extractor() {
-        return craftItemEvent -> {
-            if(!(craftItemEvent.getWhoClicked() instanceof Player player)) return null;
-            ItemStack itemStack = craftItemEvent.getCurrentItem();
-            if(itemStack == null) return null;
-            ItemType itemType = itemStack.getType().asItemType();
-            if(itemType == null) return null;
-            int amount = CraftingUtils.calculateCraftedAmount(craftItemEvent);
-            if(amount == 0) return null;
+        // Player
+        if(!(craftItemEvent.getWhoClicked() instanceof Player player)) return;
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemType);
-            eventContext.setAmount(amount);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            return eventContext;
-        };
-    }
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull CraftItemEvent craftItemEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
+        // Item
+        ItemStack itemStack = craftItemEvent.getCurrentItem();
+        if(itemStack == null) return;
+        ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) return;
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getCraftPrestigePoints(itemType);
-        if(prestigePoints == null) return;
+        // Amount
+        int amount = CraftingUtils.calculateCraftedAmount(craftItemEvent);
+        if(amount <= 0) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.CRAFT, prestigePointsConfig.prestigePointsMapping().craft(), itemType, null, null, null);
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 }

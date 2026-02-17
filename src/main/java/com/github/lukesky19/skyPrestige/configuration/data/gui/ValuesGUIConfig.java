@@ -31,27 +31,20 @@ import java.util.List;
  * @param configVersion The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
- * @param pages The {@link List} of {@link PageConfig}s for the GUI.
+ * @param filler The {@link ItemStackConfig} to fill the GUI with.
+ * @param prevPage The {@link ButtonConfig} for the previous page.
+ * @param nextPage The {@link ButtonConfig} for the next page.
+ * @param exit The {@link ButtonConfig} for the exit button.
+ * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
  */
 @ConfigSerializable
 public record ValuesGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull List<PageConfig> pages) {
-    /**
-     * The configuration for a specific page.
-     * @param filler The {@link ItemStackConfig} to fill the GUI with.
-     * @param prevPage The {@link ButtonConfig} for the previous page.
-     * @param nextPage The {@link ButtonConfig} for the next page.
-     * @param exit The {@link ButtonConfig} for the exit button.
-     * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
-     */
-    @ConfigSerializable
-    public record PageConfig(
-            @NotNull ItemStackConfig filler,
-            @NotNull ButtonConfig prevPage,
-            @NotNull ButtonConfig nextPage,
-            @NotNull ButtonConfig exit,
-            @NotNull List<ButtonConfig> dummyButtons) {}
+        @NotNull ItemStackConfig filler,
+        @NotNull ButtonConfig prevPage,
+        @NotNull ButtonConfig nextPage,
+        @NotNull ButtonConfig exit,
+        @NotNull List<ButtonConfig> dummyButtons) {
 }

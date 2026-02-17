@@ -20,6 +20,7 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.ValuesGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -36,7 +37,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -51,17 +51,20 @@ import java.util.function.Consumer;
 public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
     private final @NotNull GUIManager guiManager;
+    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
     // Config
     private final @Nullable ValuesGUIConfig valuesGUIConfig;
     // Page info
     private int pageNum = 0;
-    private @Nullable ValuesGUIConfig.PageConfig pageConfig;
+    private int currentIndex = 0;
+    private final int amountPerPage = 27;
 
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
+     * @param plugin A {@link SkyPlugin} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param player The {@link Player} viewing the GUI.
      */
@@ -69,11 +72,13 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
             @NotNull SkyPlugin plugin,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull GUIManager guiManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull IslandIdUUIDKey identifier,
             @NotNull Player player) {
         super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
 
         valuesGUIConfig = guiConfigManager.getValuesGUIConfig();
     }
@@ -135,12 +140,6 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
             return false;
         }
 
-        pageConfig = valuesGUIConfig.pages().get(pageNum);
-        if(pageConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the page configuration is invalid."));
-            return false;
-        }
-
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
@@ -156,6 +155,8 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
         createDummyButtons();
 
         createExitButton();
+
+        createValueButtons();
 
         createNextPageButton();
 
@@ -198,9 +199,8 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createFillerButtons(int guiSize) {
         if(valuesGUIConfig == null) return;
-        if(pageConfig == null) return;
 
-        ItemStackConfig fillerConfig = pageConfig.filler();
+        ItemStackConfig fillerConfig = valuesGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
         itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
 
@@ -220,28 +220,21 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createNextPageButton() {
         if(valuesGUIConfig == null) return;
-        if(pageConfig == null) return;
-        ButtonConfig nextPageButtonConfig = pageConfig.nextPage();
+        ButtonConfig nextPageButtonConfig = valuesGUIConfig.nextPage();
 
         if(nextPageButtonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the values GUI due to an invalid slot."));
             return;
         }
 
-        int nextPageNum = pageNum + 1;
-        if(nextPageNum >= valuesGUIConfig.pages().size()) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the values GUI due to no next page configured."));
-            return;
-        }
-
-        @Nullable ValuesGUIConfig.PageConfig nextPageConfig = valuesGUIConfig.pages().get(nextPageNum);
-        if(nextPageConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the values GUI due to no next page configured."));
+        if(currentIndex >= prestigePointsConfigManager.getDisplayItemStackCount()) {
             return;
         }
 
         createActionButton(nextPageButtonConfig, inventoryClickEvent -> {
             pageNum++;
+
+            currentIndex = pageNum * amountPerPage;
 
             this.update();
         });
@@ -253,26 +246,40 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
     private void createPrevPageButton() {
         if(pageNum <= 0) return;
         if(valuesGUIConfig == null) return;
-        if(pageConfig == null) return;
-        ButtonConfig prevPageButtonConfig = pageConfig.prevPage();
+        ButtonConfig prevPageButtonConfig = valuesGUIConfig.prevPage();
 
         if(prevPageButtonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the values GUI due to an invalid slot."));
             return;
         }
 
-        int previousPageNum = pageNum - 1;
-        @Nullable ValuesGUIConfig.PageConfig previousPageConfig = valuesGUIConfig.pages().get(previousPageNum);
-        if(previousPageConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the values GUI due to no previous page configured."));
-            return;
-        }
-
         createActionButton(prevPageButtonConfig, inventoryClickEvent -> {
             pageNum--;
 
+            currentIndex = pageNum * amountPerPage;
+
             this.update();
         });
+    }
+
+    /**
+     * Create the buttons to display prestige point values.
+     */
+    private void createValueButtons() {
+        int num = 0;
+        int total = prestigePointsConfigManager.getDisplayItemStackCount();
+        while(currentIndex < total && num <= amountPerPage) {
+            @Nullable ItemStack itemStack = prestigePointsConfigManager.getItemStackAtIndex(currentIndex);
+            if(itemStack == null) break;
+
+            int slot = getSlot(num);
+            if(slot == -1) break;
+
+            createDisplayButton(itemStack, slot);
+
+            currentIndex++;
+            num++;
+        }
     }
 
     /**
@@ -280,8 +287,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createExitButton() {
         if(valuesGUIConfig == null) return;
-        if(pageConfig == null) return;
-        ButtonConfig exitConfig = pageConfig.exit();
+        ButtonConfig exitConfig = valuesGUIConfig.exit();
 
         if(exitConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the values GUI due to an invalid slot."));
@@ -296,9 +302,8 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createDummyButtons() {
         if(valuesGUIConfig == null) return;
-        if(pageConfig == null) return;
 
-        pageConfig.dummyButtons().forEach(buttonConfig -> {
+        valuesGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the values GUI due to an invalid slot."));
                 return;
@@ -364,5 +369,44 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
         builder.setItemStack(itemStack);
 
         setButton(slot, builder.build());
+    }
+
+    /**
+     * Get the slot to place a value button at based on the current number of values displayed.
+     * @return A slot number as an int.
+     * @throws RuntimeException If the number provided would exceed the size of the GUI.
+     */
+    private int getSlot(int num) {
+        return switch(num) {
+            case 0 -> 10;
+            case 1 -> 11;
+            case 2 -> 12;
+            case 3 -> 13;
+            case 4 -> 14;
+            case 5 -> 15;
+            case 6 -> 16;
+            case 7 -> 19;
+            case 8 -> 20;
+            case 9 -> 21;
+            case 10 -> 22;
+            case 11 -> 23;
+            case 12 -> 24;
+            case 13 -> 25;
+            case 14 -> 28;
+            case 15 -> 29;
+            case 16 -> 30;
+            case 17 -> 31;
+            case 18 -> 32;
+            case 19 -> 33;
+            case 20 -> 34;
+            case 21 -> 37;
+            case 22 -> 38;
+            case 23 -> 39;
+            case 24 -> 40;
+            case 25 -> 41;
+            case 26 -> 42;
+            case 27 -> 43;
+            default -> -1;
+        };
     }
 }

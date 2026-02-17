@@ -22,10 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
@@ -40,15 +41,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player uses a cauldron on an island and increments prestige points.
  */
-public class CauldronListener extends PrestigePointsListener<CauldronLevelChangeEvent> {
+public class CauldronListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -56,10 +61,11 @@ public class CauldronListener extends PrestigePointsListener<CauldronLevelChange
     public CauldronListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -68,64 +74,60 @@ public class CauldronListener extends PrestigePointsListener<CauldronLevelChange
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onCauldronLevelChange(CauldronLevelChangeEvent cauldronLevelChangeEvent) {
-        process(cauldronLevelChangeEvent);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<CauldronLevelChangeEvent> extractor() {
-        return cauldronLevelChangeEvent -> {
-            Entity entity = cauldronLevelChangeEvent.getEntity();
-            if(!(entity instanceof Player player)) return null;
-            Block block = cauldronLevelChangeEvent.getBlock();
-            BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
-
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
-
-            switch (cauldronLevelChangeEvent.getReason()) {
-                case BOTTLE_FILL -> {
-                    eventContext.setItemType(ItemType.POTION);
-                    eventContext.setPotionType(PotionType.WATER);
-                }
-
-                case BUCKET_FILL, BUCKET_EMPTY -> {
-                    if(cauldronLevelChangeEvent.getBlock().getBlockData() instanceof Levelled levelled) {
-                        ItemType itemType = levelled.getMaterial().asItemType();
-                        if(itemType == null) return null;
-
-                        eventContext.setItemType(itemType);
-                    }
-                }
-            }
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull CauldronLevelChangeEvent cauldronLevelChangeEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
-        if(itemType == null) return;
-        @Nullable PotionType potionType = eventContext.getPotionType();
-
-        @Nullable Double prestigePoints = null;
-        switch(cauldronLevelChangeEvent.getReason()) {
-            case BOTTLE_FILL -> {
-                if(potionType != null) {
-                    prestigePoints = prestigePointsConfig.prestigePointsMapping().getBottlePrestigePoints(itemType, potionType);
-                }
-            }
-
-            case BUCKET_FILL -> prestigePoints = prestigePointsConfig.prestigePointsMapping().getFillPrestigePoints(itemType);
-
-            case BUCKET_EMPTY -> prestigePoints = prestigePointsConfig.prestigePointsMapping().getEmptyPrestigePoints(itemType);
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
         }
 
-        if(prestigePoints == null) return;
+        // Player
+        Entity entity = cauldronLevelChangeEvent.getEntity();
+        if(!(entity instanceof Player player)) return;
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
+
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
+
+        // Block
+        Block block = cauldronLevelChangeEvent.getBlock();
+        BlockType blockType = block.getType().asBlockType();
+        if(blockType == null) return;
+
+        // Item / Points
+        double points = 0;
+        switch(cauldronLevelChangeEvent.getReason()) {
+            case BOTTLE_FILL -> {
+                points = prestigePointsManager.getItemPoints(ActionType.BOTTLE, prestigePointsConfig.prestigePointsMapping().bottle(), ItemType.POTION, null, PotionType.WATER, null);
+            }
+
+            case BUCKET_FILL -> {
+                if(cauldronLevelChangeEvent.getBlock().getBlockData() instanceof Levelled levelled) {
+                    ItemType itemType = levelled.getMaterial().asItemType();
+                    if(itemType == null) return;
+
+                    points = prestigePointsManager.getItemPoints(ActionType.FILL, prestigePointsConfig.prestigePointsMapping().fill(), itemType, null, null, null);
+                }
+            }
+
+            case BUCKET_EMPTY -> {
+                if(cauldronLevelChangeEvent.getBlock().getBlockData() instanceof Levelled levelled) {
+                    ItemType itemType = levelled.getMaterial().asItemType();
+                    if(itemType == null) return;
+
+                    points = prestigePointsManager.getItemPoints(ActionType.EMPTY, prestigePointsConfig.prestigePointsMapping().empty(), itemType, null, null, null);
+                }
+            }
+        }
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

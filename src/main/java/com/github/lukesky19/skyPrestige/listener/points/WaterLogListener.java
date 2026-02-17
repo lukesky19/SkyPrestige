@@ -21,15 +21,19 @@ import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePoints
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.block.BlockUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
-import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,15 +41,19 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player water logs a b lock on an island and increments prestige points.
  */
-public class WaterLogListener extends PrestigePointsListener<PlayerBucketEmptyEvent> {
+public class WaterLogListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -53,10 +61,11 @@ public class WaterLogListener extends PrestigePointsListener<PlayerBucketEmptyEv
     public WaterLogListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -65,36 +74,47 @@ public class WaterLogListener extends PrestigePointsListener<PlayerBucketEmptyEv
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockWaterLogged(PlayerBucketEmptyEvent playerBucketEmptyEvent) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> process(playerBucketEmptyEvent), 1L);
-    }
+        // Process 1 tick later to let the block be water logged first (if water logged at all)
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            // Config
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) {
+                logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+                return;
+            }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerBucketEmptyEvent> extractor() {
-        return playerBucketEmptyEvent -> {
-            Player player = playerBucketEmptyEvent.getPlayer();
+            // Player
+            @NotNull Player player = playerBucketEmptyEvent.getPlayer();
+            if(!player.isOnline() || !player.isConnected()) return;
+            @NotNull UUID playerId = player.getUniqueId();
+            if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+
+            // Island Check
+            @Nullable Island island = checkIsland(player, playerId);
+            if(island == null) return;
+
+            // IslandData check.
+            @Nullable IslandData islandData = checkIslandData(island);
+            if(islandData == null) return;
+
+            // Block
             Block block = playerBucketEmptyEvent.getBlock();
             BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
-            if(!(block.getBlockData() instanceof Waterlogged waterlogged)) return null;
-            if(waterlogged.isWaterlogged()) return null;
+            if(blockType == null) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
+            // Block Data
+            BlockData blockData = block.getBlockData();
+            @Nullable Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
+            if(waterLogged == null || !waterLogged) return;
+            @Nullable EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
+            @Nullable Integer age = BlockUtils.getAge(blockData);
 
-            return eventContext;
-        };
-    }
+            // Points
+            double points = prestigePointsManager.getBlockPoints(ActionType.WATER_LOG, prestigePointsConfig.prestigePointsMapping().waterLog(), blockType, entityType, age, true);
+            if(points <= 0) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerBucketEmptyEvent playerBucketEmptyEvent, @NotNull EventContext eventContext) {
-        @Nullable BlockType blockType = eventContext.getBlockType();
-        if(blockType == null) return;
-
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getWaterLogPrestigePoints(blockType);
-        if(prestigePoints == null) return;
-
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+            // Add points
+            islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
+        }, 1L);
     }
 }

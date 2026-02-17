@@ -20,6 +20,7 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.gui.gui.ValuesGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
@@ -42,6 +43,7 @@ public class ValuesCommand {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull GUIManager guiManager;
+    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
 
     /**
      * Constructor
@@ -49,17 +51,20 @@ public class ValuesCommand {
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link GUIManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      */
     public ValuesCommand(
             @NotNull SkyPlugin plugin,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager) {
+            @NotNull GUIManager guiManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.guiManager = guiManager;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
     }
 
     /**
@@ -76,7 +81,7 @@ public class ValuesCommand {
                     IslandIdUUIDKey identifier = new IslandIdUUIDKey(null, player.getUniqueId());
 
                     // Create the ValuesGUI
-                    ValuesGUI gui = new ValuesGUI(plugin, guiConfigManager, guiManager, identifier, player);
+                    ValuesGUI gui = new ValuesGUI(plugin, guiConfigManager, guiManager, prestigePointsConfigManager, identifier, player);
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {

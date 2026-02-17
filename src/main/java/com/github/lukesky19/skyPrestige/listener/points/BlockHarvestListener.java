@@ -21,29 +21,39 @@ import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePoints
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.block.BlockUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerHarvestBlockEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player harvests a block on an island and increments prestige points.
  */
-public class BlockHarvestListener extends PrestigePointsListener<PlayerHarvestBlockEvent> {
+public class BlockHarvestListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -51,10 +61,11 @@ public class BlockHarvestListener extends PrestigePointsListener<PlayerHarvestBl
     public BlockHarvestListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -63,33 +74,41 @@ public class BlockHarvestListener extends PrestigePointsListener<PlayerHarvestBl
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockHarvest(PlayerHarvestBlockEvent playerHarvestBlockEvent) {
-        process(playerHarvestBlockEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerHarvestBlockEvent> extractor() {
-        return playerHarvestBlockEvent -> {
-            Block block = playerHarvestBlockEvent.getHarvestedBlock();
-            BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
+        // Player
+        Player player = playerHarvestBlockEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(playerHarvestBlockEvent.getPlayer());
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            return eventContext;
-        };
-    }
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerHarvestBlockEvent playerHarvestBlockEvent, @NotNull EventContext eventContext) {
-        @Nullable BlockType blockType = eventContext.getBlockType();
+        // Block
+        Block block = playerHarvestBlockEvent.getHarvestedBlock();
+        BlockType blockType = block.getType().asBlockType();
         if(blockType == null) return;
+        BlockData blockData = block.getBlockData();
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getHarvestPrestigePoints(blockType);
-        if(prestigePoints == null) return;
+        // Block Data
+        @Nullable EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
+        @Nullable Integer age = BlockUtils.getAge(blockData);
+        @Nullable Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Points
+        double points = prestigePointsManager.getBlockPoints(ActionType.HARVEST, prestigePointsConfig.prestigePointsMapping().harvest(), blockType, entityType, age, waterLogged);
+        if(points <= 0) return;
+
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

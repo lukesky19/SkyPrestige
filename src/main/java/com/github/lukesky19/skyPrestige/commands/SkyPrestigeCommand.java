@@ -50,6 +50,7 @@ public class SkyPrestigeCommand {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
     private final @NotNull PrestigeConfigManager prestigeConfigManager;
     private final @NotNull OptInConfigManager optInConfigManager;
     private final @NotNull OptOutConfigManager optOutConfigManager;
@@ -72,6 +73,7 @@ public class SkyPrestigeCommand {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param optInConfigManager An {@link OptInConfigManager} instance.
      * @param optOutConfigManager An {@link OptOutConfigManager} instance.
@@ -92,6 +94,7 @@ public class SkyPrestigeCommand {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
+            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
             @NotNull PrestigeConfigManager prestigeConfigManager,
             @NotNull OptInConfigManager optInConfigManager,
             @NotNull OptOutConfigManager optOutConfigManager,
@@ -110,6 +113,7 @@ public class SkyPrestigeCommand {
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
+        this.prestigePointsConfigManager = prestigePointsConfigManager;
         this.prestigeConfigManager = prestigeConfigManager;
         this.optInConfigManager = optInConfigManager;
         this.optOutConfigManager = optOutConfigManager;
@@ -164,7 +168,7 @@ public class SkyPrestigeCommand {
         RewardsCommand rewardsCommand = new RewardsCommand(plugin, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, guiManager, islandDataManager, hookManager);
         UnExemptCommand unExemptCommand = new UnExemptCommand(plugin, localeManager, islandDataManager);
         PrestigePointsCommand prestigePointsCommand = new PrestigePointsCommand(plugin, localeManager, islandDataManager, hookManager);
-        ValuesCommand valuesCommand = new ValuesCommand(plugin, localeManager, guiConfigManager, guiManager);
+        ValuesCommand valuesCommand = new ValuesCommand(plugin, localeManager, guiConfigManager, guiManager, prestigePointsConfigManager);
         VaultCommand vaultCommand = new VaultCommand(plugin, localeManager, guiConfigManager, vaultConfigManager, guiManager, islandDataManager, databaseManager);
 
         builder.then(exchangeCommand.createCommand());

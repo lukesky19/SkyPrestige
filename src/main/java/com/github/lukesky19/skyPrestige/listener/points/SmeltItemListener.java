@@ -22,10 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,15 +36,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player smelts an item on an island and increments prestige points.
  */
-public class SmeltItemListener extends PrestigePointsListener<FurnaceExtractEvent> {
+public class SmeltItemListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -51,10 +56,11 @@ public class SmeltItemListener extends PrestigePointsListener<FurnaceExtractEven
     public SmeltItemListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -63,34 +69,38 @@ public class SmeltItemListener extends PrestigePointsListener<FurnaceExtractEven
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerSmelt(FurnaceExtractEvent furnaceExtractEvent) {
-        process(furnaceExtractEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<FurnaceExtractEvent> extractor() {
-        return furnaceExtractEvent -> {
-            Player player = furnaceExtractEvent.getPlayer();
-            ItemType itemType = furnaceExtractEvent.getItemType().asItemType();
-            if(itemType == null) return null;
-            int amount = furnaceExtractEvent.getItemAmount();
+        // Player
+        @NotNull Player player = furnaceExtractEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemType);
-            eventContext.setAmount(amount);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            return eventContext;
-        };
-    }
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull FurnaceExtractEvent furnaceExtractEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
+        // Item
+        @Nullable ItemType itemType = furnaceExtractEvent.getItemType().asItemType();
         if(itemType == null) return;
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getSmeltPrestigePoints(itemType);
-        if(prestigePoints == null) return;
+        // Amount
+        int amount = furnaceExtractEvent.getItemAmount();
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.SMELT, prestigePointsConfig.prestigePointsMapping().smelt(), itemType, null, null, null);
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 }

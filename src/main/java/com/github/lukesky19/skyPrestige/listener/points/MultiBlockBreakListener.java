@@ -22,41 +22,39 @@ import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePoints
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
-import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.block.BlockUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.bukkit.GameMode;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BlockType;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
  * This class listens for when a multiple blocks have been broken by a custom enchantment from SkyEnchants and increments prestige points.
  */
-public class MultiBlockBreakListener implements Listener {
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull MultiplierManager multiplierManager;
-
+public class MultiBlockBreakListener extends PointsListener {
     /**
      * Constructor
-     * @param plugin A {@link SkyPlugin} instance.
+     * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -64,14 +62,11 @@ public class MultiBlockBreakListener implements Listener {
     public MultiBlockBreakListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        this.logger = plugin.getComponentLogger();
-        this.prestigePointsConfigManager = prestigePointsConfigManager;
-        this.islandDataManager = islandDataManager;
-        this.hookManager = hookManager;
-        this.multiplierManager = multiplierManager;
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -80,52 +75,47 @@ public class MultiBlockBreakListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMultiBlockBreak(MultiBlockBreakEvent multiBlockBreakEvent) {
+        // Config
         @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
         }
 
-        Player player = multiBlockBreakEvent.getPlayer();
-        if(player.getGameMode().equals(GameMode.CREATIVE)) return;
-        UUID playerId = player.getUniqueId();
+        // If SkyEnchants custom enchantments that break multiple blocks should be ignored, return
+        if(!prestigePointsConfig.skyEnchantsMultiBreak()) return;
 
-        // AFK check
-        SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
-        if(skyPlayTimeHook.isHooked()
-                && !prestigePointsConfig.awardPointsWhileAfk()
-                && skyPlayTimeHook.isPlayerAFK(playerId)) return;
+        // Player
+        Player player = multiBlockBreakEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Island Check
-        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
-        if(optionalIsland.isEmpty()) return;
-        Island island = optionalIsland.get();
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-        // Island Member Check
-        if(!island.getMemberSet().contains(playerId)) return;
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-        // Island Data check.
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
-        if(islandData == null) {
-            logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
-            return;
-        }
-
-        // Check for prestige exemption
-        if(islandData.isPrestigeExempt()) return;
-
-        // Calculate prestige points to add
-        double prestigePoints = 0;
+        // Points
+        double points = 0;
         for(BlockState blockState : multiBlockBreakEvent.getBlocks()) {
+            Block block = blockState.getBlock();
+            BlockData blockData = blockState.getBlockData();
             @Nullable BlockType blockType = blockState.getType().asBlockType();
             if(blockType == null) continue;
-            @Nullable Double points = prestigePointsConfig.prestigePointsMapping().getBlockBreakPrestigePoints(blockType);
-            if(points == null) continue;
 
-            prestigePoints += points;
+            // Block Data
+            @Nullable EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
+            @Nullable Integer age = BlockUtils.getAge(blockData);
+            @Nullable Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
+
+            points += prestigePointsManager.getBlockPoints(ActionType.BLOCK_BREAK, prestigePointsConfig.prestigePointsMapping().blockBreak(), blockType, entityType, age, waterLogged);
         }
+        if(points <= 0) return;
 
-        islandData.addPrestigePoints(prestigePoints * multiplierManager.getMultiplier(islandData));
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

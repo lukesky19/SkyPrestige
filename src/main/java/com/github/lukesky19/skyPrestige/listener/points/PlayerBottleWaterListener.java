@@ -22,10 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.block.Block;
@@ -42,15 +43,19 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player produces a bottle of water on an island and increments prestige points.
  */
-public class PlayerBottleWaterListener extends PrestigePointsListener<PlayerInteractEvent> {
+public class PlayerBottleWaterListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -58,10 +63,11 @@ public class PlayerBottleWaterListener extends PrestigePointsListener<PlayerInte
     public PlayerBottleWaterListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -70,51 +76,51 @@ public class PlayerBottleWaterListener extends PrestigePointsListener<PlayerInte
      */
     @EventHandler(priority = EventPriority.MONITOR) // Cancelled events are purposely not ignored here.
     public void onPlayerBottleWater(PlayerInteractEvent playerInteractEvent) {
-        process(playerInteractEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerInteractEvent> extractor() {
-        return playerInteractEvent -> {
-            Player player = playerInteractEvent.getPlayer();
+        // Action
+        Action action = playerInteractEvent.getAction();
+        if(!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.equals(Action.RIGHT_CLICK_AIR)) return;
 
-            Action action = playerInteractEvent.getAction();
-            if(!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.equals(Action.RIGHT_CLICK_AIR)) return null;
+        // Player
+        @NotNull Player player = playerInteractEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            @Nullable ItemStack itemStack = playerInteractEvent.getItem();
-            if(itemStack == null || itemStack.isEmpty()) return null;
-            ItemType itemType = itemStack.getType().asItemType();
-            if(itemType == null) return null;
-            if(!itemType.equals(ItemType.GLASS_BOTTLE)) return null;
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            @Nullable RayTraceResult rayTraceResult = player.rayTraceBlocks(5, FluidCollisionMode.SOURCE_ONLY);
-            if(rayTraceResult == null) return null;
-            @Nullable Block block = rayTraceResult.getHitBlock();
-            if(block == null) return null;
-            @Nullable BlockType blockType = block.getType().asBlockType();
-            if(blockType == null) return null;
-            if(!blockType.equals(BlockType.WATER)) return null;
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemType);
-            eventContext.setPotionType(PotionType.WATER);
-            eventContext.setAmount(1);
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerInteractEvent playerInteractEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
+        // Item
+        @Nullable ItemStack itemStack = playerInteractEvent.getItem();
+        if(itemStack == null || itemStack.isEmpty()) return;
+        ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) return;
-        @Nullable PotionType potionType = eventContext.getPotionType();
-        if(potionType == null) return;
+        if(!itemType.equals(ItemType.GLASS_BOTTLE)) return;
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getBottlePrestigePoints(itemType, potionType);
-        if(prestigePoints == null) return;
+        // Block
+        @Nullable RayTraceResult rayTraceResult = player.rayTraceBlocks(5, FluidCollisionMode.SOURCE_ONLY);
+        if(rayTraceResult == null) return;
+        @Nullable Block block = rayTraceResult.getHitBlock();
+        if(block == null) return;
+        @Nullable BlockType blockType = block.getType().asBlockType();
+        if(blockType == null) return;
+        if(!blockType.equals(BlockType.WATER)) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.BOTTLE, prestigePointsConfig.prestigePointsMapping().bottle(), itemType, null, PotionType.WATER, null);
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

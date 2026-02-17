@@ -22,11 +22,13 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -34,15 +36,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player empties a bucket on an island and increments prestige points.
  */
-public class PlayerBucketEmptyListener extends PrestigePointsListener<PlayerBucketEmptyEvent> {
+public class PlayerBucketEmptyListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -50,10 +56,11 @@ public class PlayerBucketEmptyListener extends PrestigePointsListener<PlayerBuck
     public PlayerBucketEmptyListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -62,32 +69,35 @@ public class PlayerBucketEmptyListener extends PrestigePointsListener<PlayerBuck
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketFill(PlayerBucketEmptyEvent playerBucketEmptyEvent) {
-        process(playerBucketEmptyEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerBucketEmptyEvent> extractor() {
-        return playerBucketEmptyEvent -> {
-            @Nullable ItemType itemType = playerBucketEmptyEvent.getBucket().asItemType();
-            if(itemType == null) return null;
+        // Player
+        @NotNull Player player = playerBucketEmptyEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(playerBucketEmptyEvent.getPlayer());
-            eventContext.setItemType(itemType);
-            eventContext.setAmount(1);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            return eventContext;
-        };
-    }
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerBucketEmptyEvent playerBucketEmptyEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
+        // Item
+        @Nullable ItemType itemType = playerBucketEmptyEvent.getBucket().asItemType();
         if(itemType == null) return;
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getEmptyPrestigePoints(itemType);
-        if(prestigePoints == null) return;
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.EMPTY, prestigePointsConfig.prestigePointsMapping().empty(), itemType, null, null, null);
+        if(points <= 0) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

@@ -15,50 +15,34 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.util.type;
+package com.github.lukesky19.skyPrestige.util.entity;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
-import org.bukkit.Registry;
-import org.bukkit.inventory.ItemType;
+import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /**
- * This class is used to check {@link ItemType}s.
+ * This class is used to validate and extract data from {@link Entity}.
  */
-public class ItemTypeUtils {
-    private static final @NotNull Set<ItemType> AXES = new LinkedHashSet<>();
-
-    static {
-        Registry<@NotNull ItemType> itemTypeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM);
-        itemTypeRegistry.forEach(itemType -> {
-            String name = itemType.getKey().toString().toLowerCase();
-
-            if(name.endsWith("_axe")) {
-                AXES.add(itemType);
-            }
-        });
-    }
-
+public class EntityUtils {
     /**
      * Default Constructor. All methods in this class are static.
      * @deprecated All methods in this class are static.
      * @throws RuntimeException if this method is used.
      */
     @Deprecated
-    public ItemTypeUtils() {
+    public EntityUtils() {
         throw new RuntimeException("The use of the default constructor is not allowed.");
     }
 
     /**
-     * Checks if the {@link ItemType} is an axe.
-     * @param itemType The {@link ItemType} to check.
-     * @return true if an axe, otherwise false.
+     * Get the stack size of the entities.
+     * @param roseStackerHook A {@link RoseStackerHook} instance.
+     * @param entity The {@link LivingEntity}.
+     * @return The amount of entities in the stack. Defaults to 1 if RoseStacker isn't hooked into.
      */
-    public static boolean isItemTypeAxe(@NotNull ItemType itemType) {
-        return AXES.contains(itemType);
+    public static int getAmount(@NotNull RoseStackerHook roseStackerHook, @NotNull LivingEntity entity) {
+        return roseStackerHook.getStackSize(entity);
     }
 }

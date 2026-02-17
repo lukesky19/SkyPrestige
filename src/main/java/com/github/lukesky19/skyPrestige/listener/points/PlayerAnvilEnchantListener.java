@@ -22,10 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -38,18 +39,21 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Listens for when a player enchants an item using an anvil on an island and increments prestige points.
  */
-public class PlayerAnvilEnchantListener extends PrestigePointsListener<InventoryClickEvent> {
+public class PlayerAnvilEnchantListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -57,10 +61,11 @@ public class PlayerAnvilEnchantListener extends PrestigePointsListener<Inventory
     public PlayerAnvilEnchantListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -69,57 +74,49 @@ public class PlayerAnvilEnchantListener extends PrestigePointsListener<Inventory
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerAnvilEnchant(InventoryClickEvent inventoryClickEvent) {
-        process(inventoryClickEvent);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<InventoryClickEvent> extractor() {
-        return inventoryClickEvent -> {
-            if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return null;
-            if(!(inventoryClickEvent.getClickedInventory() instanceof AnvilInventory anvil)) return null;
-            @Nullable ItemStack firstItem = anvil.getFirstItem();
-            @Nullable ItemStack resultItem = anvil.getResult();
-            if(firstItem == null || firstItem.isEmpty() || resultItem == null || resultItem.isEmpty()) return null;
-            if(!firstItem.hasItemMeta() || !resultItem.hasItemMeta()) return null;
-            @Nullable ItemType firstItemItemType = firstItem.getType().asItemType();
-            if(firstItemItemType == null) return null;
-            int amount = resultItem.getAmount();
-
-            Map<Enchantment, Integer> firstItemEnchantments = firstItem.getItemMeta().getEnchants();
-            Map<Enchantment, Integer> resultItemEnchantments = resultItem.getItemMeta().getEnchants();
-            Map<Enchantment, Integer> uniqueEnchantments = getUniqueEnchantments(firstItemEnchantments, resultItemEnchantments);
-            if(uniqueEnchantments.isEmpty()) return null;
-
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(firstItemItemType);
-            eventContext.setEnchantments(uniqueEnchantments);
-            eventContext.setAmount(amount);
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull InventoryClickEvent inventoryClickEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
-        if(itemType == null) return;
-        @Nullable Map<Enchantment, Integer> enchantments = eventContext.getEnchantments();
-
-        @Nullable Double prestigePoints = null;
-        if(enchantments != null && !enchantments.isEmpty()) {
-            double totalPoints = 0;
-            for(Map.Entry<Enchantment, Integer> enchantmentEntry : enchantments.entrySet()) {
-                @Nullable Double points = prestigePointsConfig.prestigePointsMapping().getEnchantmentPrestigePoints(itemType, enchantmentEntry.getKey(), enchantmentEntry.getValue());
-                if(points != null) totalPoints += points;
-            }
-
-            if(totalPoints > 0) prestigePoints = totalPoints;
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
         }
 
-        if(prestigePoints == null) return;
+        // Anvil Check
+        if(!(inventoryClickEvent.getClickedInventory() instanceof AnvilInventory anvil)) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Player
+        if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
+
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
+
+        // Item
+        @Nullable ItemStack firstItem = anvil.getFirstItem();
+        @Nullable ItemStack resultItem = anvil.getResult();
+        if(firstItem == null || firstItem.isEmpty() || resultItem == null || resultItem.isEmpty()) return;
+        if(!firstItem.hasItemMeta() || !resultItem.hasItemMeta()) return;
+        @Nullable ItemType firstItemItemType = firstItem.getType().asItemType();
+        if(firstItemItemType == null) return;
+        int amount = resultItem.getAmount();
+
+        Map<Enchantment, Integer> firstItemEnchantments = firstItem.getItemMeta().getEnchants();
+        Map<Enchantment, Integer> resultItemEnchantments = resultItem.getItemMeta().getEnchants();
+        Map<Enchantment, Integer> uniqueEnchantments = getUniqueEnchantments(firstItemEnchantments, resultItemEnchantments);
+        if(uniqueEnchantments.isEmpty()) return;
+
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.ENCHANT, prestigePointsConfig.prestigePointsMapping().enchant(), firstItemItemType, null, null, uniqueEnchantments);
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 
     /**

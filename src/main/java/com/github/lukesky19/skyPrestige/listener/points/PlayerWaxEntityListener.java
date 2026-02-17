@@ -22,10 +22,11 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.version.VersionUtil;
 import org.bukkit.entity.CopperGolem;
@@ -39,15 +40,19 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player waxes an entity on an island and increments prestige points.
  */
-public class PlayerWaxEntityListener extends PrestigePointsListener<PlayerInteractEntityEvent> {
+public class PlayerWaxEntityListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -55,10 +60,11 @@ public class PlayerWaxEntityListener extends PrestigePointsListener<PlayerIntera
     public PlayerWaxEntityListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -67,44 +73,50 @@ public class PlayerWaxEntityListener extends PrestigePointsListener<PlayerIntera
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerWaxEntity(PlayerInteractEntityEvent playerInteractEntityEvent) {
-        // Don't listen to waxing entities if on a version without Copper Golems (< 1.21.9)
-        if(VersionUtil.getMajorVersion() < 21 || (VersionUtil.getMajorVersion() == 21 && VersionUtil.getMinorVersion() < 9)) return;
+        // Copper Golems were added in 1.21.9 so we ignore older versions.
+        if(VersionUtil.getMajorVersion() < 21
+                || (VersionUtil.getMajorVersion() == 21 && VersionUtil.getMinorVersion() < 9)) return;
 
-        process(playerInteractEntityEvent);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<PlayerInteractEntityEvent> extractor() {
-        return playerInteractEntityEvent -> {
-            Player player = playerInteractEntityEvent.getPlayer();
-            Entity entity = playerInteractEntityEvent.getRightClicked();
-            if(VersionUtil.getMajorVersion() > 21 || (VersionUtil.getMajorVersion() == 21 && VersionUtil.getMinorVersion() >= 9)) {
-                if(!(entity instanceof CopperGolem copperGolem)) return null;
-                if(copperGolem.getOxidizing().equals(CopperGolem.Oxidizing.waxed())) return null;
+        // Process 1 tick later to let the entity be waxed first (if waxed at all)
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            // Config
+            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+            if(prestigePointsConfig == null) {
+                logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+                return;
             }
+
+            // Player
+            @NotNull Player player = playerInteractEntityEvent.getPlayer();
+            if(!player.isOnline() || !player.isConnected()) return;
+            @NotNull UUID playerId = player.getUniqueId();
+            if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+
+            // Island Check
+            @Nullable Island island = checkIsland(player, playerId);
+            if(island == null) return;
+
+            // IslandData check.
+            @Nullable IslandData islandData = checkIslandData(island);
+            if(islandData == null) return;
+
+            // Entity
+            Entity entity = playerInteractEntityEvent.getRightClicked();
             EntityType entityType = entity.getType();
+            if(!(entity instanceof CopperGolem copperGolem)) return;
+            if(!(copperGolem.getOxidizing().equals(CopperGolem.Oxidizing.waxed()))) return;
+
+            // Item
             ItemType itemTypeUsed = player.getInventory().getItemInMainHand().getType().asItemType();
-            if(itemTypeUsed == null) return null;
-            if(!itemTypeUsed.equals(ItemType.HONEYCOMB)) return null;
+            if(itemTypeUsed == null) return;
+            if(!itemTypeUsed.equals(ItemType.HONEYCOMB)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemTypeUsed);
-            eventContext.setEntityType(entityType);
-            eventContext.setAmount(1);
+            // Points
+            double points = prestigePointsManager.getEntityPoints(ActionType.WAX_ENTITY, prestigePointsConfig.prestigePointsMapping().waxEntity(), entityType);
+            if(points <= 0) return;
 
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerInteractEntityEvent playerInteractEntityEvent, @NotNull EventContext eventContext) {
-        @Nullable EntityType entityType = eventContext.getEntityType();
-        if(entityType == null) return;
-
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getWaxPrestigePoints(entityType);
-        if(prestigePoints == null) return;
-
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+            // Add points
+            islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
+        }, 1L);
     }
 }

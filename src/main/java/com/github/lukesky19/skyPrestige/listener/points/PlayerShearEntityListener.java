@@ -23,10 +23,12 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.entity.EntityUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -38,15 +40,19 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player shears an entity on an island and increments prestige points.
  */
-public class PlayerShearEntityListener extends PrestigePointsListener<PlayerShearEntityEvent> {
+public class PlayerShearEntityListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -54,10 +60,11 @@ public class PlayerShearEntityListener extends PrestigePointsListener<PlayerShea
     public PlayerShearEntityListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -66,45 +73,41 @@ public class PlayerShearEntityListener extends PrestigePointsListener<PlayerShea
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityShear(PlayerShearEntityEvent playerShearEntityEvent) {
-        process(playerShearEntityEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<PlayerShearEntityEvent> extractor() {
-        return playerShearEntityEvent -> {
-            @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
-            if(prestigePointsConfig == null) return null;
-            Player player = playerShearEntityEvent.getPlayer();
-            Entity entity = playerShearEntityEvent.getEntity();
-            EntityType entityType = entity.getType();
-            int amount = 1;
+        // Player
+        @NotNull Player player = playerShearEntityEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            if(prestigePointsConfig.accurateRoseStacker()) {
-                RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
-                if(roseStackerHook.isHooked()) {
-                    if(entity instanceof LivingEntity livingEntity) {
-                        amount = roseStackerHook.getStackSize(livingEntity);
-                    }
-                }
-            }
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setEntityType(entityType);
-            eventContext.setAmount(amount);
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-            return eventContext;
-        };
-    }
+        // Entity
+        @NotNull Entity entity = playerShearEntityEvent.getEntity();
+        EntityType entityType = entity.getType();
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerShearEntityEvent playerShearEntityEvent, @NotNull EventContext eventContext) {
-        @Nullable EntityType entityType = eventContext.getEntityType();
-        if(entityType == null) return;
+        // Amount
+        int amount = 1;
+        if(entity instanceof LivingEntity livingEntity) {
+            EntityUtils.getAmount(hookManager.getHook(RoseStackerHook.class), livingEntity);
+        }
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getShearPrestigePoints(entityType);
-        if(prestigePoints == null) return;
+        // Points
+        double points = prestigePointsManager.getEntityPoints(ActionType.SHEAR_ENTITY, prestigePointsConfig.prestigePointsMapping().shearEntity(), entityType);
+        if(points <= 0) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 }

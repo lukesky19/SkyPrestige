@@ -588,7 +588,6 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
     /**
      * Get the slot to place a blueprint button at based on the current number of blueprints added.
-     *
      * @return A slot number as an int.
      * @throws RuntimeException If the number of blueprints would exceed the size of the GUI.
      */

@@ -23,10 +23,12 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.entity.EntityUtils;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -37,15 +39,19 @@ import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player breeds two entities on an island and increments prestige points.
  */
-public class PlayerBreedListener extends PrestigePointsListener<EntityBreedEvent> {
+public class PlayerBreedListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -53,10 +59,11 @@ public class PlayerBreedListener extends PrestigePointsListener<EntityBreedEvent
     public PlayerBreedListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -65,44 +72,40 @@ public class PlayerBreedListener extends PrestigePointsListener<EntityBreedEvent
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBreed(EntityBreedEvent entityBreedEvent) {
-        process(entityBreedEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<EntityBreedEvent> extractor() {
-        return entityBreedEvent -> {
-            LivingEntity breeder = entityBreedEvent.getBreeder();
-            if(!(breeder instanceof Player player)) return null;
-            LivingEntity bredEntity = entityBreedEvent.getEntity();
-            EntityType entityType = bredEntity.getType();
+        // Player
+        if(!(entityBreedEvent.getBreeder() instanceof Player player)) return;
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            int amount = 1;
-            RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
-            if(roseStackerHook.isHooked()) {
-                int stackSize = roseStackerHook.getStackSize(bredEntity);
-                if(stackSize > 1) {
-                    amount = getBredAmount(stackSize);
-                }
-            }
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setEntityType(entityType);
-            eventContext.setAmount(amount);
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-            return eventContext;
-        };
-    }
+        // Entity
+        LivingEntity bredEntity = entityBreedEvent.getEntity();
+        EntityType entityType = bredEntity.getType();
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull EntityBreedEvent entityBreedEvent, @NotNull EventContext eventContext) {
-        @Nullable EntityType entityType = eventContext.getEntityType();
-        if(entityType == null) return;
+        // Amount
+        int amount = EntityUtils.getAmount(hookManager.getHook(RoseStackerHook.class), bredEntity);
+        if(amount > 1) amount = getBredAmount(amount);
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getBreedPrestigePoints(entityType);
-        if(prestigePoints == null) return;
+        // Points
+        double points = prestigePointsManager.getEntityPoints(ActionType.BREED, prestigePointsConfig.prestigePointsMapping().breed(), entityType);
+        if(points <= 0) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 
     /**

@@ -22,15 +22,15 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
 import com.github.lukesky19.skyPrestige.util.enums.SkyPrestigeNamespacedKeys;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BrewingStand;
-import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -46,15 +46,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player brews a potion on an island and increments prestige points.
  */
-public class PlayerBrewListener extends PrestigePointsListener<InventoryClickEvent> {
+public class PlayerBrewListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -62,10 +66,11 @@ public class PlayerBrewListener extends PrestigePointsListener<InventoryClickEve
     public PlayerBrewListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -74,91 +79,70 @@ public class PlayerBrewListener extends PrestigePointsListener<InventoryClickEve
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerRemoveBrewedPotions(InventoryClickEvent inventoryClickEvent) {
-        process(inventoryClickEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<InventoryClickEvent> extractor() {
-        return inventoryClickEvent -> {
-            EventContext eventContext = new EventContext();
+        // Player
+        if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            // Player Check
-            if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return null;
-            eventContext.setPlayer(player);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            // Brewing Stand Check
-            Inventory inventory = inventoryClickEvent.getClickedInventory();
-            if(inventory == null) return null;
-            if(!inventory.getType().equals(InventoryType.BREWING)) return null;
-            if(!(inventory.getHolder(false) instanceof BrewingStand brewingStand)) return null;
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-            // Slot Number Check
-            int clickedSlot = inventoryClickEvent.getSlot();
-            if(clickedSlot != 0 && clickedSlot != 1 && clickedSlot != 2) return null;
+        // Brewing Stand
+        Inventory inventory = inventoryClickEvent.getClickedInventory();
+        if(inventory == null) return;
+        if(!inventory.getType().equals(InventoryType.BREWING)) return;
+        if(!(inventory.getHolder(false) instanceof BrewingStand brewingStand)) return;
 
-            // Container / PersistentDataContainer
-            eventContext.setContainer(brewingStand);
+        // Slot Number Check
+        int clickedSlot = inventoryClickEvent.getSlot();
+        if(clickedSlot != 0 && clickedSlot != 1 && clickedSlot != 2) return;
 
-            // Namespaced Key
-            @Nullable NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(clickedSlot);
-            if(key == null) return null;
-            eventContext.setNamespacedKey(key);
+        // Namespaced Key
+        @Nullable NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(clickedSlot);
+        if(key == null) return;
 
-            // Freshly Brewed Check
-            PersistentDataContainer pdc = brewingStand.getPersistentDataContainer();
-            Boolean freshlyBrewed = pdc.get(key, PersistentDataType.BOOLEAN);
-            if(freshlyBrewed == null) return null;
-            if(!freshlyBrewed) return null;
+        // Freshly Brewed Check
+        PersistentDataContainer pdc = brewingStand.getPersistentDataContainer();
+        Boolean freshlyBrewed = pdc.get(key, PersistentDataType.BOOLEAN);
+        if(freshlyBrewed == null) return;
+        if(!freshlyBrewed) return;
 
-            // ItemStack and ItemType
-            ItemStack itemStack = inventoryClickEvent.getCurrentItem();
-            if(itemStack == null) {
-                pdc.set(key, PersistentDataType.BOOLEAN, false);
-                brewingStand.update();
-
-                return null;
-            }
-            ItemType itemType = itemStack.getType().asItemType();
-            if(itemType == null) return null;
-            eventContext.setItemType(itemType);
-
-            // Amount
-            int amount = itemStack.getAmount();
-            eventContext.setAmount(amount);
-
-            // PotionType
-            if(itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
-                eventContext.setPotionType(potionMeta.getBasePotionType());
-            }
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull InventoryClickEvent inventoryClickEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
+        // Item
+        ItemStack itemStack = inventoryClickEvent.getCurrentItem();
+        if(itemStack == null) {
+            pdc.set(key, PersistentDataType.BOOLEAN, false);
+            brewingStand.update();
+            return;
+        }
+        ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) return;
-        @Nullable PotionType potionType = eventContext.getPotionType();
 
-        @Nullable Double prestigePoints;
-        if(potionType != null) {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBrewPrestigePoints(itemType, potionType);
-        } else {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getBrewPrestigePoints(itemType);
+        // Potion
+        @Nullable PotionType potionType = null;
+        if(itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
+            potionType = potionMeta.getBasePotionType();
         }
 
-        if(prestigePoints == null) return;
+        // Amount
+        int amount = itemStack.getAmount();
 
-        @Nullable Container container = eventContext.getContainer();
-        @Nullable PersistentDataContainer pdc = eventContext.getPersistentDataContainer();
-        @Nullable NamespacedKey namespacedKey = eventContext.getNamespacedKey();
-        if(container != null && pdc != null && namespacedKey != null) {
-            pdc.set(namespacedKey, PersistentDataType.BOOLEAN, false);
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.BREW, prestigePointsConfig.prestigePointsMapping().brew(), itemType, null, potionType, null);
+        if(points <= 0) return;
 
-            container.update();
-        }
-
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Add points
+        islandData.addPrestigePoints((points * amount) * multiplierManager.getMultiplier(islandData));
     }
 }

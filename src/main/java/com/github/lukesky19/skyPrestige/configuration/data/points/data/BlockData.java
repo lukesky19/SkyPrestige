@@ -15,21 +15,23 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.listener.points.context;
+package com.github.lukesky19.skyPrestige.configuration.data.points.data;
 
-import org.bukkit.event.Event;
+import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.bukkit.block.BlockType;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This interface is used to define the function to extract data from an {@link E}
- * @param <E> An {@link Event}.
+ * This record holds the configuration to represent block data.
+ * @param blockType The {@link BlockType}.
+ * @param entityType The optional {@link EntityType}, such as for spawners.
+ * @param age The optional age of the block, such as for crops.
+ * @param waterLogged The optional water logged state of the block.
  */
-@FunctionalInterface
-public interface EventContextExtractor<E extends Event> {
-    /**
-     * Get the {@link EventContext} from the event.
-     * @param event The event to extract data from.
-     * @return An {@link EventContext}. May be null.
-     */
-    @Nullable EventContext extract(E event);
-}
+@ConfigSerializable
+public record BlockData(
+        @Nullable BlockType blockType,
+        @Nullable EntityType entityType,
+        @Nullable Integer age,
+        @Nullable Boolean waterLogged) {}

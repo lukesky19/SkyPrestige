@@ -22,28 +22,34 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player brushes a block on an island and increments prestige points.
  */
-public class PlayerBrushBlockListener extends PrestigePointsListener<BlockDropItemEvent> {
+public class PlayerBrushBlockListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -51,10 +57,11 @@ public class PlayerBrushBlockListener extends PrestigePointsListener<BlockDropIt
     public PlayerBrushBlockListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -63,34 +70,37 @@ public class PlayerBrushBlockListener extends PrestigePointsListener<BlockDropIt
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerBrushBlock(BlockDropItemEvent blockDropItemEvent) {
-        process(blockDropItemEvent);
-    }
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
+        }
 
-    @Override
-    protected @NotNull EventContextExtractor<BlockDropItemEvent> extractor() {
-        return blockDropItemEvent -> {
-            BlockState blockState = blockDropItemEvent.getBlockState();
-            BlockType blockType = blockState.getType().asBlockType();
-            if(blockType == null) return null;
-            if(!blockType.equals(BlockType.SUSPICIOUS_SAND) && !blockType.equals(BlockType.SUSPICIOUS_GRAVEL)) return null;
+        // Player
+        @NotNull Player player = blockDropItemEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(blockDropItemEvent.getPlayer());
-            eventContext.setBlockType(blockType);
-            eventContext.setAmount(1);
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
 
-            return eventContext;
-        };
-    }
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
 
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull BlockDropItemEvent blockDropItemEvent, @NotNull EventContext eventContext) {
-        @Nullable BlockType blockType = eventContext.getBlockType();
+        // Block
+        Block block = blockDropItemEvent.getBlock();
+        BlockType blockType = block.getType().asBlockType();
         if(blockType == null) return;
+        if(!blockType.equals(BlockType.SUSPICIOUS_SAND) && !blockType.equals(BlockType.SUSPICIOUS_GRAVEL)) return;
 
-        @Nullable Double prestigePoints = prestigePointsConfig.prestigePointsMapping().getBrushPrestigePoints(blockType);
-        if(prestigePoints == null) return;
+        // Points
+        double points = prestigePointsManager.getBlockPoints(ActionType.BRUSH, prestigePointsConfig.prestigePointsMapping().brush(), blockType, null, null, null);
+        if(points <= 0) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

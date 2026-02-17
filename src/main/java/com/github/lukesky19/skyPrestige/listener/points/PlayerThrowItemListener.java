@@ -23,31 +23,35 @@ import com.github.lukesky19.skyPrestige.configuration.manager.PrestigePointsConf
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.abstracts.PrestigePointsListener;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
+import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.util.enums.ActionType;
+import com.github.lukesky19.skyPrestige.util.item.ItemUtils;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.UUID;
 
 /**
  * Listens for when a player throws an item (which becomes an entity) on an island and increments prestige points.
  */
-public class PlayerThrowItemListener extends PrestigePointsListener<PlayerLaunchProjectileEvent> {
+public class PlayerThrowItemListener extends PointsListener {
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
@@ -55,10 +59,11 @@ public class PlayerThrowItemListener extends PrestigePointsListener<PlayerLaunch
     public PlayerThrowItemListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
-        super(plugin, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager);
+        super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
     /**
@@ -67,47 +72,37 @@ public class PlayerThrowItemListener extends PrestigePointsListener<PlayerLaunch
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerThrownEntity(PlayerLaunchProjectileEvent playerLaunchProjectileEvent) {
-        process(playerLaunchProjectileEvent);
-    }
-
-    @Override
-    protected @NotNull EventContextExtractor<PlayerLaunchProjectileEvent> extractor() {
-        return playerLaunchProjectileEvent -> {
-            Player player = playerLaunchProjectileEvent.getPlayer();
-            ItemStack itemStack = playerLaunchProjectileEvent.getItemStack();
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            ItemType itemType = itemStack.getType().asItemType();
-            if(itemType == null) return null;
-
-            EventContext eventContext = new EventContext();
-            eventContext.setPlayer(player);
-            eventContext.setItemType(itemType);
-            eventContext.setEnchantments(itemStack.getEnchantments());
-            eventContext.setAmount(1);
-
-            if(itemMeta instanceof PotionMeta potionMeta) {
-                eventContext.setPotionType(potionMeta.getBasePotionType());
-            }
-
-            return eventContext;
-        };
-    }
-
-    @Override
-    protected void handle(@NotNull PrestigePointsConfig prestigePointsConfig, @NotNull IslandData islandData, @NotNull PlayerLaunchProjectileEvent playerLaunchProjectileEvent, @NotNull EventContext eventContext) {
-        @Nullable ItemType itemType = eventContext.getItemType();
-        if(itemType == null) return;
-        @Nullable PotionType potionType = eventContext.getPotionType();
-
-        @Nullable Double prestigePoints;
-        if(potionType != null) {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getThrownPrestigePoints(itemType, potionType);
-        } else {
-            prestigePoints = prestigePointsConfig.prestigePointsMapping().getThrownPrestigePoints(itemType);
+        // Config
+        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        if(prestigePointsConfig == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            return;
         }
 
-        if(prestigePoints == null) return;
+        // Player
+        @NotNull Player player = playerLaunchProjectileEvent.getPlayer();
+        @NotNull UUID playerId = player.getUniqueId();
+        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
-        addPrestigePoints(islandData, prestigePoints, eventContext.getAmount());
+        // Island Check
+        @Nullable Island island = checkIsland(player, playerId);
+        if(island == null) return;
+
+        // IslandData check.
+        @Nullable IslandData islandData = checkIslandData(island);
+        if(islandData == null) return;
+
+        // Item
+        @NotNull ItemStack itemStack = playerLaunchProjectileEvent.getItemStack();
+        @Nullable ItemType itemType = itemStack.getType().asItemType();
+        if(itemType == null) return;
+        @Nullable PotionType potionType = ItemUtils.getPotionType(itemStack);
+
+        // Points
+        double points = prestigePointsManager.getItemPoints(ActionType.THROW, prestigePointsConfig.prestigePointsMapping().thrown(), itemType, null, potionType, null);
+        if(points <= 0) return;
+
+        // Add points
+        islandData.addPrestigePoints((points * 1) * multiplierManager.getMultiplier(islandData));
     }
 }

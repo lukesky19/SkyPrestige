@@ -6,132 +6,1341 @@ scale-formula: r*(1+((p-1)/(k)))
 award-points-while-afk: false
 # Should stacked blocks and entities be considered when rewarding prestige points?
 accurate-rosestacker: true
-# The mapping of prestige points earned for the following actions. Some actions are specific to blocks.
+# Should custom enchantments from SkyEnchants that break multiple blocks increment prestige points?
+sky-enchants-multi-break: true
+# The mapping of prestige points earned for the following actions.
 prestige-points-mapping:
-    play-time: 0.0014
+    play-time:
+        points: 0.2498
     block-break:
-        block:
-            default: 0.1
-        spawner:
-            default:
-                default: 0.3
+        default:
+            points: 4.8
+        overrides:
+            - points: 3.6
+              block-data:
+                  block-type: "minecraft:spawner"
+            - points: 2.5
+              block-data:
+                  block-type: "minecraft:wheat"
+                  age: 7
+            - points: 2.5
+              block-data:
+                  block-type: "minecraft:cocoa"
+                  age: 2
+            - points: 2.5
+              block-data:
+                  block-type: "minecraft:beetroots"
+                  age: 3
+            - points: 1.5
+              block-data:
+                  block-type: "minecraft:potatoes"
+                  age: 7
+            - points: 1.5
+              block-data:
+                  block-type: "minecraft:carrots"
+                  age: 7
+            - points: 2.5
+              block-data:
+                  block-type: "minecraft:nether_wart"
+                  age: 3
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:spruce_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:birch_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:jungle_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:acacia_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:dark_oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:mangrove_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:cherry_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pale_oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:azalea_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:flowering_azalea_leaves"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:acacia_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:allium"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:azure_bluet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:bamboo_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:big_dripleaf"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:blue_orchid"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:brown_mushroom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cactus_flower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cherry_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:closed_eyeblossom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cornflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:crimson_roots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:crimson_fungus"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dandelion"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dark_oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dead_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:fern"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cave_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cave_vines_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:glow_lichen"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:hanging_roots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:jungle_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:kelp"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:kelp_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:large_fern"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:leaf_litter"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lilac"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lily_of_the_valley"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lily_pad"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:mangrove_propagule"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:nether_wart"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:open_eyeblossom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:orange_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:oxeye_daisy"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_hanging_moss"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:peony"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_petals"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pitcher_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:poppy"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:powder_snow"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:redstone_wire"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_mushroom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:rose_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sea_pickle"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:seagrass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:short_dry_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:short_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:small_dripleaf"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:spruce_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sugar_cane"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sunflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sweet_berry_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:tall_dry_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:tall_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:twisting_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:warped_fungus"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:weeping_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:white_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wildflowers"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wither_rose"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wheat"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pumpkin_stem"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:melon_stem"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:beetroots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower_crop"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:honey_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:honeycomb_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:slime_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:potatoes"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:carrots"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_banner"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:white_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:light_gray_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:gray_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:black_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:brown_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:orange_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:yellow_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lime_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:green_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cyan_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:light_blue_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:blue_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:purple_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:magenta_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:moss_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_moss_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:snow"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:snow_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:vine"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:firefly_bush"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pointed_dripstone"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:nether_sprouts"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:warped_roots"
+            - points: 0.85
+              block-data:
+                  block-type: "minecraft:azalea"
+            - points: 0.85
+              block-data:
+                  block-type: "minecraft:flowering_azalea"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:spore_blossom"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:cobweb"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:sand"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:red_sand"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:gravel"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:grass_block"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:coarse_dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:rooted_dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:dirt_path"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:podzol"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:mycelium"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:farmland"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:mud"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:moss_block"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pale_moss_block"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_concrete_powder"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:hay_block"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:honey_block"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:slime_block"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:packed_ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:blue_ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pumpkin"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:carved_pumpkin"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:jack_o_lantern"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:melon"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:sculk"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower_crop"
+            - points: 1.5
+              block-data:
+                  block-type: "minecraft:torchflower"
     block-place:
-        block:
-            default: 0.25
-        spawner:
-            default:
-                default: 0.4
+        default:
+            points: 6.0
+        overrides:
+            - points: 4.8
+              block-data:
+                  block-type: "minecraft:spawner"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:spruce_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:birch_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:jungle_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:acacia_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:dark_oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:mangrove_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:cherry_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pale_oak_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:azalea_leaves"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:flowering_azalea_leaves"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:acacia_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:allium"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:azure_bluet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:bamboo_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:big_dripleaf"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:blue_orchid"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:brown_mushroom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cactus_flower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cherry_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:closed_eyeblossom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cornflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:crimson_roots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:crimson_fungus"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dandelion"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dark_oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:dead_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:fern"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cave_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cave_vines_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:glow_lichen"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:hanging_roots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:jungle_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:kelp"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:kelp_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:large_fern"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:leaf_litter"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lilac"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lily_of_the_valley"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lily_pad"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:mangrove_propagule"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:nether_wart"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:open_eyeblossom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:orange_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:oxeye_daisy"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_hanging_moss"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_oak_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:peony"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_petals"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pitcher_plant"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:poppy"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:powder_snow"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:redstone_wire"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_mushroom"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:rose_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sea_pickle"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:seagrass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:short_dry_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:short_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:small_dripleaf"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:spruce_sapling"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sugar_cane"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sunflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:sweet_berry_bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:tall_dry_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:tall_grass"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:twisting_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:warped_fungus"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:weeping_vines"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:white_tulip"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wildflowers"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wither_rose"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:wheat"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pumpkin_stem"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:melon_stem"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:beetroots"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower_crop"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:honey_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:honeycomb_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:slime_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:potatoes"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:carrots"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_candle"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_banner"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_banner"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:white_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:light_gray_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:gray_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:black_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:brown_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:red_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:orange_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:yellow_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:lime_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:green_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:cyan_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:light_blue_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:blue_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:purple_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:magenta_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pink_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:moss_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:pale_moss_carpet"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:snow"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:snow_block"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:vine"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:bush"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:firefly_bush"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pointed_dripstone"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:nether_sprouts"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:warped_roots"
+            - points: 0.85
+              block-data:
+                  block-type: "minecraft:azalea"
+            - points: 0.85
+              block-data:
+                  block-type: "minecraft:flowering_azalea"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:spore_blossom"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:cobweb"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:sand"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:red_sand"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:gravel"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:grass_block"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:coarse_dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:rooted_dirt"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:dirt_path"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:podzol"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:mycelium"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:farmland"
+            - points: 2.3
+              block-data:
+                  block-type: "minecraft:mud"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:moss_block"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pale_moss_block"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:white_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_gray_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:gray_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:black_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:brown_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:red_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:orange_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:yellow_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:lime_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:green_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:cyan_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:light_blue_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:blue_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:purple_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:magenta_concrete_powder"
+            - points: 0.65
+              block-data:
+                  block-type: "minecraft:pink_concrete_powder"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:hay_block"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:honey_block"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:slime_block"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:packed_ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:blue_ice"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:pumpkin"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:carved_pumpkin"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:jack_o_lantern"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:melon"
+            - points: 0.1
+              block-data:
+                  block-type: "minecraft:sculk"
+            - points: 0.0
+              block-data:
+                  block-type: "minecraft:torchflower_crop"
+            - points: 1.1
+              block-data:
+                  block-type: "minecraft:torchflower"
     bone-meal:
-        default: 0.05
+        default:
+            points: 1.2
+        overrides: []
     bottle:
-        item:
-            default: 0.2
-        potion:
-            default:
-                default: 0.05
+        default:
+            points: 4.8
+        overrides:
+            - points: 6.0
+              item-data:
+                  item-type: "minecraft:potion"
     breed:
-        default: 0.25
+        default:
+            points: 6.0
+        overrides: []
     brew:
-        item:
-            default: 0.5
-        potion:
-            default:
-                default: 0.5
+        default:
+            points: 6.0
+        overrides: []
     brush:
-        default: 0.2
+        default:
+            points: 4.8
+        overrides: []
     close:
-        default: 0.01
+        default:
+            points: 0.24
+        overrides: []
     compost:
-        default: 0.05
+        default:
+            points: 1.2
+        overrides: []
     consume:
-        item:
-            default: 0.05
-        potion:
-            default:
-                default: 0.25
+        default:
+            points: 1.2
+        overrides:
+            - points: 3.0
+              item-data:
+                  item-type: "minecraft:potion"
+                  potion-type: "minecraft:healing"
+            - points: 6.0
+              item-data:
+                  item-type: "minecraft:potion"
+                  potion-type: "minecraft:strong_healing"
     craft:
-        default: 0.05
+        default:
+            points: 0.0006
+        overrides: []
     empty:
-        default: 0
+        default:
+            points: 0.0
+        overrides: []
     enchant:
         default:
-            default:
-                default: 0.1
+            points: 1.2
+        overrides: []
     fill:
-        default: 0
+        default:
+            points: 0.0
+        overrides: []
     fish:
-        item:
-            default: 0.25
-        potion:
-            default:
-                default: 0.1
-        enchantment:
-            default:
-                default: 0.1
+        default:
+            points: 6.0
+        overrides:
+            - points: 2.4
+              item-data:
+                  item-type: "minecraft:potion"
     harvest:
-        default: 0.3
-    item-pickup:
-        item:
-            default: 0
-        potion:
-            default:
-                default: 0
-        enchantment:
-            default:
-                default:
-                    default: 0
-    item-drop:
-        item:
-            default: 0
-        potion:
-            default:
-                default: 0
-        enchantment:
-            default:
-                default:
-                    default: 0
+        default:
+            points: 1.0
+        overrides: []
+    pickup:
+        default:
+            points: 0.0
+        overrides: []
+    drop:
+        default:
+            points: 0.0
+        overrides: []
     kill:
-        default: 0.5
+        default:
+            points: 6.0
+        overrides: []
     milk:
-        default: 0
+        default:
+            points: 0.0
+        overrides: []
     name:
-        item:
-            default: 0.25
-        potion:
-            default:
-                default: 0.25
-        enchantment:
-            default:
-                default:
-                    default: 0.25
+        default:
+            points: 6.0
+        overrides: []
     open:
-        default: 0.01
-    shear:
-        block:
-            default: 0.5
-        entity:
-            default: 0.25
+        default:
+            points: 0.24
+        overrides: []
+    shear-block:
+        default:
+            points: 6.0
+        overrides: []
+    shear-entity:
+        default:
+            points: 3.0
+        overrides: []
     sleep:
-        default: 0.25
+        default:
+            points: 3.0
+        overrides: []
     smelt:
-        default: 0.05
+        default:
+            points: 1.2
+        overrides: []
     strip:
-        block:
-            default: 0.25
-        entity:
-            default: 0.25
+        default:
+            points: 3.0
+        overrides: []
     tame:
-        default: 2
+        default:
+            points: 6.0
+        overrides: []
     thrown:
-        item:
-            default: 0.05
-        potion:
-            default:
-                default: 0.05
+        default:
+            points: 0.6
+        overrides: []
+    un-wax-block:
+        default:
+            points: 3.0
+        overrides: []
+    un-wax-entity:
+        default:
+            points: 3.0
+        overrides: []
     water-log:
-        default: 0
-    wax:
-        block:
-            default: 0.5
-        entity:
-            default: 0.5
+        default:
+            points: 0.0
+        overrides: []
+    wax-block:
+        default:
+            points: 6.0
+        overrides: []
+    wax-entity:
+        default:
+            points: 3.0
+        overrides: []

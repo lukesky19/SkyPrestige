@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
  * @param scaleFormula The formula to scale prestige points.
  * @param awardPointsWhileAfk Whether to award prestige points if AFK.
  * @param accurateRoseStacker Whether to consider stacked blocks and entities for prestige points.
+ * @param skyEnchantsMultiBreak Whether to listen to SkyEnchant's multibreak events.
  * @param prestigePointsMapping The {@link PrestigePointsMapping}.
  */
 @ConfigSerializable
@@ -35,4 +36,5 @@ public record PrestigePointsConfig(
         @Nullable String scaleFormula,
         boolean awardPointsWhileAfk,
         boolean accurateRoseStacker,
+        boolean skyEnchantsMultiBreak,
         @NotNull PrestigePointsMapping prestigePointsMapping) {}

@@ -24,15 +24,13 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContext;
-import com.github.lukesky19.skyPrestige.listener.points.context.EventContextExtractor;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -43,10 +41,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * This class is used to create listeners that increment prestige points.
- * @param <E> The {@link Event} to listen for and process.
+ * This class can be extended to create a generic prestige points listener.
  */
-public abstract class PrestigePointsListener<E extends Event> implements Listener {
+public abstract class PointsListener implements Listener {
     /**
      * A {@link JavaPlugin} instance.
      */
@@ -60,6 +57,10 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      */
     protected final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
     /**
+     * A {@link PrestigePointsManager} instance.
+     */
+    protected final @NotNull PrestigePointsManager prestigePointsManager;
+    /**
      * An {@link IslandDataManager} instance.
      */
     protected final @NotNull IslandDataManager islandDataManager;
@@ -72,101 +73,86 @@ public abstract class PrestigePointsListener<E extends Event> implements Listene
      */
     protected final @NotNull MultiplierManager multiplierManager;
 
+
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
+     * @param plugin A {@link SkyPlugin} instance.
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
+     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
-    protected PrestigePointsListener(
+    public PointsListener(
             @NotNull SkyPlugin plugin,
             @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NotNull PrestigePointsManager prestigePointsManager,
             @NotNull IslandDataManager islandDataManager,
             @NotNull HookManager hookManager,
             @NotNull MultiplierManager multiplierManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.prestigePointsConfigManager = prestigePointsConfigManager;
+        this.prestigePointsManager = prestigePointsManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
         this.multiplierManager = multiplierManager;
     }
 
     /**
-     * An {@link EventContextExtractor} that extracts the required data and returns an {@link EventContext}.
-     * @return An {@link EventContextExtractor}.
+     * Is the player invalid? This is where points should NOT be awarded.
+     * Checks creative mode and SkyPlayTime AFK status if hooked.
+     * @param player The {@link Player}.
+     * @param playerId The player's {@link UUID}.
+     * @param prestigePointsConfig The {@link PrestigePointsConfig}.
+     * @return true if invalid, false if not.
      */
-    protected abstract @NotNull EventContextExtractor<E> extractor();
+    protected boolean isPlayerInvalid(
+            @NotNull Player player,
+            @NotNull UUID playerId,
+            @NotNull PrestigePointsConfig prestigePointsConfig) {
+        if(player.getGameMode().equals(GameMode.CREATIVE)) return true;
+
+        SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
+        return skyPlayTimeHook.isHooked() && prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(playerId);
+    }
 
     /**
-     * Process the event provided.
-     * @param event The event to process.
+     * Is the island valid?
+     * The island must be non-null and the player must be a member of the island to be valid.
+     * @param player The {@link Player}.
+     * @param playerId The player's {@link UUID}.
+     * @return The {@link Island} if valid, or null if invalid.
      */
-    protected void process(E event) {
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
-        if(prestigePointsConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
-            return;
-        }
-
-        @Nullable EventContext eventContext = extractor().extract(event);
-        if(eventContext == null) return;
-        @Nullable Player player = eventContext.getPlayer();
-        if(player == null) return;
-        if(player.getGameMode().equals(GameMode.CREATIVE)) return;
-        @Nullable UUID playerId = eventContext.getPlayerId();
-        if(playerId == null) return;
-
-        // AFK check
-        SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
-        if(skyPlayTimeHook.isHooked() && !prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(playerId)) return;
-
-        // Island Check
+    protected @Nullable Island checkIsland(@NotNull Player player, @NotNull UUID playerId) {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
-        if(optionalIsland.isEmpty()) return;
+        if(optionalIsland.isEmpty()) return null;
         Island island = optionalIsland.get();
 
         // Island Member Check
-        if(!island.getMemberSet().contains(playerId)) return;
+        if(!island.getMemberSet().contains(playerId)) return null;
 
+        return island;
+    }
+
+    /**
+     * Is the island's data valid?
+     * The {@link IslandData} must be non-null and not exempt from prestige to be valid.
+     * @param island The {@link Island}.
+     * @return The {@link IslandData} or null.
+     */
+    protected @Nullable IslandData checkIslandData(@NotNull Island island) {
         // Island Data check.
         @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
-            return;
+            return null;
         }
 
         // Check for prestige exemption
-        if(islandData.isPrestigeExempt()) return;
+        if(islandData.isPrestigeExempt()) return null;
 
-        // Handle the event and event context
-        handle(prestigePointsConfig, islandData, event, eventContext);
-    }
-
-    /**
-     * Handles the event and event context to increment prestige points.
-     * @param prestigePointsConfig The plugin's {@link PrestigePointsConfig}.
-     * @param islandData The {@link IslandData} to add prestige points to.
-     * @param event The {@link E}. The event the class is handling.
-     * @param eventContext The {@link EventContext}.
-     */
-    protected abstract void handle(
-            @NotNull PrestigePointsConfig prestigePointsConfig,
-            @NotNull IslandData islandData,
-            @NotNull E event,
-            @NotNull EventContext eventContext);
-
-    /**
-     * Adds prestiges points to the island data.
-     * This takes the base prestige points, multiplies it by the amount, and then multiplies it by the modifier.
-     * @param islandData The {@link IslandData} to add prestige points to.
-     * @param basePrestigePoints The base prestige points.
-     * @param amount The amount to multiply the base prestige points to.
-     */
-    protected void addPrestigePoints(@NotNull IslandData islandData, double basePrestigePoints, int amount) {
-        islandData.addPrestigePoints((basePrestigePoints * amount) * multiplierManager.getMultiplier(islandData));
+        return islandData;
     }
 }

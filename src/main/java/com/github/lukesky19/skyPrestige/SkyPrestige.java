@@ -83,6 +83,7 @@ public class SkyPrestige extends SkyPlugin {
     private LeaderboardManager leaderboardManager;
     private TaskManager taskManager;
     private ProtectionOrbManager protectionOrbManager;
+    private PrestigePointsManager prestigePointsManager;
 
     private @Nullable SkyPrestigeExpansion skyPrestigeExpansion;
 
@@ -128,13 +129,13 @@ public class SkyPrestige extends SkyPlugin {
         IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
         RewardsProcessor rewardsProcessor = new RewardsProcessor(this, hookManager);
-        PrestigePointsManager prestigePointsManager = new PrestigePointsManager(this.getComponentLogger(), prestigeConfigManager, prestigePointsConfigManager, islandDataManager);
+        prestigePointsManager = new PrestigePointsManager(this.getComponentLogger(), prestigeConfigManager, prestigePointsConfigManager, islandDataManager);
         PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, prestigePointsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, localeManager, guiConfigManager, optInConfigManager, optOutConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigePointsConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -169,59 +170,59 @@ public class SkyPrestige extends SkyPlugin {
 
         // Prestige Points Listeners
         if(hookManager.getHook(RoseStackerHook.class).isHooked()) {
-            pluginManager.registerEvents(new BlockStackListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-            pluginManager.registerEvents(new BlockUnstackListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-            pluginManager.registerEvents(new SpawnerStackListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-            pluginManager.registerEvents(new SpawnerUnstackListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-            pluginManager.registerEvents(new EntityStackMultipleDeathListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new BlockStackListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new BlockUnstackListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new SpawnerStackListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new SpawnerUnstackListener(this, prestigePointsConfigManager,prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new EntityStackMultipleDeathListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
         }
 
-        pluginManager.registerEvents(new BlockBreakListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new BlockHarvestListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new BlockPlaceListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new CauldronListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new CraftItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new InventoryCloseListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new InventoryOpenListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerAnvilEnchantListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBeeHiveListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBoneMealListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBottleDragonsBreathListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBottleWaterListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBreedListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBrewListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBrushBlockListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBucketEmptyListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerBucketFillListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerCakeConsumeListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerCompostListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerDropItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerEnchantmentTableEnchantListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerFishListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerItemConsumeListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerKillEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerMilkCowListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerNameEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerPickupItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerRenameItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerShearBlockListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerShearEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerSleepListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerStripLogListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerTameEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerThrowItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerUnwaxBlockListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerUnwaxEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerWaxBlockListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
-        pluginManager.registerEvents(new PlayerWaxEntityListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new BlockBreakListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new BlockHarvestListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new BlockPlaceListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new CauldronListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new CraftItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new InventoryCloseListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new InventoryOpenListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerAnvilEnchantListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBeeHiveListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBoneMealListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBottleDragonsBreathListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBottleWaterListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBreedListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBrewListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBrushBlockListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBucketEmptyListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerBucketFillListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerCakeConsumeListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerCompostListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerDropItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerEnchantmentTableEnchantListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerFishListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerItemConsumeListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerKillEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerMilkCowListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerNameEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerPickupItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerRenameItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerShearBlockListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerShearEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerSleepListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerStripLogListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerTameEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerThrowItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerUnwaxBlockListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerUnwaxEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerWaxBlockListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new PlayerWaxEntityListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
         if(hookManager.getHook(SkyPlayTimeHook.class).isHooked()) {
-            pluginManager.registerEvents(new SkyPlayTimeListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new SkyPlayTimeListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
         }
-        pluginManager.registerEvents(new SmeltItemListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new SmeltItemListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
         if(pluginManager.isPluginEnabled("SkyEnchants")) {
-            pluginManager.registerEvents(new MultiBlockBreakListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+            pluginManager.registerEvents(new MultiBlockBreakListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
         }
-        pluginManager.registerEvents(new WaterLogListener(this, prestigePointsConfigManager, islandDataManager, hookManager, multiplierManager), this);
+        pluginManager.registerEvents(new WaterLogListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
 
         @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
         if(plugin != null && plugin.isEnabled()) {
@@ -286,18 +287,20 @@ public class SkyPrestige extends SkyPlugin {
 
         // Save any loaded island data and clean up the database.
         if(islandDataManager != null) {
-            CompletableFuture<Void> saveFuture = islandDataManager.saveData();
-            saveFuture.join();
+            if(!islandDataManager.getAllData().isEmpty()) {
+                CompletableFuture<Void> saveFuture = islandDataManager.saveData();
+                saveFuture.join();
 
-            saveFuture
-                    .thenAccept(v -> this.getComponentLogger().info(
-                            AdventureUtil.deserialize("Successfully saved island data on plugin disable.")))
-                    .exceptionally(ex -> {
-                        this.getComponentLogger().error(
-                                AdventureUtil.deserialize("Failed to save island data on plugin disable. " +
-                                        "Data loss will occur. Error: " + ex.getMessage()));
-                        return null;
-                    });
+                saveFuture
+                        .thenAccept(v -> this.getComponentLogger().info(
+                                AdventureUtil.deserialize("Successfully saved island data on plugin disable.")))
+                        .exceptionally(ex -> {
+                            this.getComponentLogger().error(
+                                    AdventureUtil.deserialize("Failed to save island data on plugin disable. " +
+                                            "Data loss will occur. Error: " + ex.getMessage()));
+                            return null;
+                        });
+            }
         }
 
         if(databaseManager != null) {
@@ -312,6 +315,9 @@ public class SkyPrestige extends SkyPlugin {
     public void reload() {
         // Close any open GUIs
         guiManager.closeOpenGUIs(false);
+
+        // Clear caches
+        prestigePointsManager.clearCaches();
 
         // Reload plugin configurations
         settingsManager.loadConfiguration();
