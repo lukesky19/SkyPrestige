@@ -165,13 +165,5 @@ public enum ActionType {
     /**
      * For waxing entities.
      */
-    WAX_ENTITY;
-
-    /**
-     * Returns the ordinal value of the enum.
-     * @return The ordinal.
-     */
-    public int getIndex() {
-        return this.ordinal();
-    }
+    WAX_ENTITY
 }

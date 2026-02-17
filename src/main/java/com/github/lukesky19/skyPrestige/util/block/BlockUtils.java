@@ -36,7 +36,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-// TODO Add method to convert BlockTypes to similar ItemTypes
 /**
  * This class is used to validate and extract data from {@link Block}s.
  */
