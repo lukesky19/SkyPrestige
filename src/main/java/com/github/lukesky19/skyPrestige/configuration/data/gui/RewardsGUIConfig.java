@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -42,9 +42,9 @@ public record RewardsGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull ItemStackConfig filler,
-        @NotNull ButtonConfig nextPage,
-        @NotNull ButtonConfig prevPage,
-        @NotNull ButtonConfig exit,
-        @NotNull List<ButtonConfig> dummyButtons) {
+        @NonNull ItemStackConfig filler,
+        @NonNull ButtonConfig nextPage,
+        @NonNull ButtonConfig prevPage,
+        @NonNull ButtonConfig exit,
+        @NonNull List<ButtonConfig> dummyButtons) {
 }

@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.configuration.data.points.data;
 
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record holds the configuration to represent an entity.

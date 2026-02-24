@@ -22,8 +22,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
@@ -35,7 +35,7 @@ import java.util.Map;
  * @param enchantments The optional {@link Map} mapping {@link Enchantment}s to levels as {@link Integer}s.
  */
 public record ItemKey(
-        @NotNull ItemType itemType,
+        @NonNull ItemType itemType,
         @Nullable EntityType entityType,
         @Nullable PotionType potionType,
         @Nullable Map<Enchantment, Integer> enchantments) {}

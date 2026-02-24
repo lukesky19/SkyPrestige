@@ -29,8 +29,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,29 +45,29 @@ import java.util.Optional;
 @ConfigSerializable
 public record EntityPoints(
         double points,
-        @NotNull EntityData entityData,
-        @NotNull ItemStackConfig displayItem) implements Points {
+        @NonNull EntityData entityData,
+        @NonNull ItemStackConfig displayItem) implements Points {
     @Override
     public double getPoints() {
         return points;
     }
 
     @Override
-    public @NotNull Object getData() {
+    public @NonNull Object getData() {
         return entityData;
     }
 
     @Override
-    public @NotNull ItemStackConfig getDisplayItemStackConfig() {
+    public @NonNull ItemStackConfig getDisplayItemStackConfig() {
         return displayItem;
     }
 
     @Override
     public @Nullable ItemStack createDisplayItemStack(
-            @NotNull ComponentLogger logger,
-            @NotNull ItemType fallback,
-            @NotNull String name,
-            @NotNull List<String> lore) {
+            @NonNull ComponentLogger logger,
+            @NonNull ItemType fallback,
+            @NonNull String name,
+            @NonNull List<String> lore) {
         if(entityData.entityType() == null) return null;
         lore = new ArrayList<>(lore);
 
@@ -76,14 +76,14 @@ public record EntityPoints(
 
         if(displayItem.itemType() != null) {
             ItemStackBuilder defaultBuilder = new ItemStackBuilder(logger);
-            defaultBuilder.fromItemStackConfig(displayItem, null, null, placeholders);
+            defaultBuilder.fromItemStackConfig(displayItem, null, placeholders);
             Optional<ItemStack> optional = defaultBuilder.buildItemStack();
             if(optional.isPresent()) {
                 return optional.get();
             }
         }
 
-        @Nullable ItemType itemType = ItemUtils.getItemTypeFromEntityType(logger, entityData.entityType());
+        ItemType itemType = ItemUtils.getItemTypeFromEntityType(logger, entityData.entityType());
         if(itemType == null) itemType = fallback;
 
         lore.add("<white>Entity type: <entity_type>");

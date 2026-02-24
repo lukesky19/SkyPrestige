@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.configuration.data.protection_orb;
 
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,6 +34,6 @@ import java.util.List;
 @ConfigSerializable
 public record ProtectionOrbConfig(
         @Nullable String configVersion,
-        @NotNull ItemStackConfig itemStackConfig,
-        @NotNull List<String> disallowedItems,
+        @NonNull ItemStackConfig itemStackConfig,
+        @NonNull List<String> disallowedItems,
         @Nullable String protectedLore) {}

@@ -21,7 +21,7 @@ import com.github.lukesky19.skyPrestige.common.DatabaseTestExtension;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -52,7 +52,7 @@ public abstract class AbstractTableTest {
      * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup(@NotNull TestInfo testInfo) {
+    public void setup(@NonNull TestInfo testInfo) {
         // Get the name of the test method and create a unique folder for it
         String displayName = testInfo.getDisplayName();
         displayName = displayName.replace("(", "");
@@ -84,7 +84,7 @@ public abstract class AbstractTableTest {
      * @param testInfo The {@link TestInfo}.
      */
     @AfterEach
-    public void cleanup(@NotNull TestInfo testInfo) {
+    public void cleanup(@NonNull TestInfo testInfo) {
         String displayName = testInfo.getDisplayName();
         displayName = displayName.replace("(", "");
         displayName = displayName.replace(")", "");

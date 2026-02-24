@@ -27,7 +27,7 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Objects;
@@ -36,11 +36,11 @@ import java.util.Objects;
  * This task decrements multiplier time and removes any multipliers if necessary.
  */
 public class MultiplierTask extends BukkitRunnable {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull MultiplierManager multiplierManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull MultiplierManager multiplierManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -51,11 +51,11 @@ public class MultiplierTask extends BukkitRunnable {
      * @param hookManager A {@link HookManager} instance.
      */
     public MultiplierTask(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull MultiplierManager multiplierManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull MultiplierManager multiplierManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.islandDataManager = islandDataManager;
@@ -97,9 +97,10 @@ public class MultiplierTask extends BukkitRunnable {
      */
     private void sendServerMultiplierExpiredNotice() {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to online players
-        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierExpiredNotice());
+        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierExpiredNotice());
         plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(message));
     }
 
@@ -107,11 +108,12 @@ public class MultiplierTask extends BukkitRunnable {
      * Send a message to all island members that the island multiplier expired.
      * @param island The {@link Island} whose multiplier has expired.
      */
-    private void sendIslandMultiplierExpiredNotice(@NotNull Island island) {
+    private void sendIslandMultiplierExpiredNotice(@NonNull Island island) {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to island members
-        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierExpiredNotice());
+        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierExpiredNotice());
         island.getMemberSet().stream()
                 .map(memberId -> plugin.getServer().getPlayer(memberId))
                 .filter(Objects::nonNull)

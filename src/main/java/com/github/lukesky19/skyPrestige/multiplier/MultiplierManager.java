@@ -31,8 +31,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.ArrayList;
@@ -43,11 +43,11 @@ import java.util.Objects;
  * This class manages the multiplier that is applied to prestige points earned.
  */
 public class MultiplierManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
 
-    private final @NotNull Multiplier serverMultiplier = new Multiplier();
+    private final @NonNull Multiplier serverMultiplier = new Multiplier();
 
     /**
      * Constructor
@@ -56,9 +56,9 @@ public class MultiplierManager {
      * @param islandDataManager An {@link IslandDataManager} instance.
      */
     public MultiplierManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager) {
         this.plugin = plugin;
         this.islandDataManager = islandDataManager;
         this.localeManager = localeManager;
@@ -71,7 +71,7 @@ public class MultiplierManager {
      * @param island The {@link Island} to get the island multiplier for.
      * @return The total multiplier.
      */
-    public double getMultiplier(@NotNull Island island) {
+    public double getMultiplier(@NonNull Island island) {
         return 1.0 + getServerMultiplier() + getIslandMultiplier(island);
     }
 
@@ -82,7 +82,7 @@ public class MultiplierManager {
      * @param islandData The {@link IslandData} to get the island multiplier for.
      * @return The total multiplier.
      */
-    public double getMultiplier(@NotNull IslandData islandData) {
+    public double getMultiplier(@NonNull IslandData islandData) {
         return 1.0 + getServerMultiplier() + getIslandMultiplier(islandData);
     }
 
@@ -180,9 +180,8 @@ public class MultiplierManager {
      * Clear the server's multiplier and multiplier time.
      * @param player The {@link Player} that initiated the change or null.
      * @param notice Should the online player's be told about the change?
-     * @return true if successful, false if not.
      */
-    public boolean clearServerMultiplier(@Nullable Player player, boolean notice) {
+    public void clearServerMultiplier(@Nullable Player player, boolean notice) {
         // Update the multiplier
         serverMultiplier.setMultiplier(0);
         // Update the multiplier time
@@ -190,8 +189,6 @@ public class MultiplierManager {
 
         // Send relevant messages
         sendServerMultiplierClearedNotice(player, notice);
-
-        return true;
     }
 
     /**
@@ -217,8 +214,8 @@ public class MultiplierManager {
      * @param island The {@link Island}.
      * @return The island's multiplier.
      */
-    public double getIslandMultiplier(@NotNull Island island) {
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+    public double getIslandMultiplier(@NonNull Island island) {
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) return 0;
 
         return islandData.getMultiplier();
@@ -229,7 +226,7 @@ public class MultiplierManager {
      * @param islandData The {@link IslandData}.
      * @return The island's multiplier.
      */
-    public double getIslandMultiplier(@NotNull IslandData islandData) {
+    public double getIslandMultiplier(@NonNull IslandData islandData) {
         return islandData.getMultiplier();
     }
 
@@ -238,8 +235,8 @@ public class MultiplierManager {
      * @param island The {@link Island}.
      * @return The time in seconds or -1 if no time limit.
      */
-    public long getIslandMultiplierTime(@NotNull Island island) {
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+    public long getIslandMultiplierTime(@NonNull Island island) {
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) return 0;
 
         return islandData.getMultiplierTime();
@@ -257,9 +254,9 @@ public class MultiplierManager {
      * @param notice Should the island member's be told about the change?
      * @return true if successful, false if not.
      */
-    public boolean setIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+    public boolean setIslandMultiplier(@Nullable Player player, @NonNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
         // Get the Island's IslandData
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         // If the IslandData is null, return false
         if(islandData == null) return false;
         // If no change, return false
@@ -293,9 +290,9 @@ public class MultiplierManager {
      * @param notice Should the island member's be told about the change?
      * @return true if successful, false if not.
      */
-    public boolean addIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+    public boolean addIslandMultiplier(@Nullable Player player, @NonNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
         // Get the Island's IslandData
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         // If the IslandData is null, return false
         if(islandData == null) return false;
         // If no change, return false
@@ -329,9 +326,9 @@ public class MultiplierManager {
      * @param notice Should the island member's be told about the change?
      * @return true if successful, false if not.
      */
-    public boolean removeIslandMultiplier(@Nullable Player player, @NotNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
+    public boolean removeIslandMultiplier(@Nullable Player player, @NonNull Island island, @Nullable Double multiplier, @Nullable Long time, boolean notice) {
         // Get the Island's IslandData
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         // If the IslandData is null, return false
         if(islandData == null) return false;
         // If no change, return false
@@ -360,9 +357,9 @@ public class MultiplierManager {
      * @param notice Should the island member's be told about the change?
      * @return true if successful, false if not.
      */
-    public boolean clearIslandMultiplier(@Nullable Player player, @NotNull Island island, boolean notice) {
+    public boolean clearIslandMultiplier(@Nullable Player player, @NonNull Island island, boolean notice) {
         // Get the Island's IslandData
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         // If the IslandData is null, return false
         if(islandData == null) return false;
 
@@ -383,8 +380,8 @@ public class MultiplierManager {
      * @param timeInSeconds The time in seconds to format.
      * @return A {@link Component}.
      */
-    @NotNull
-    public Component getTimePlaceholder(@NotNull TimeFormat timeMessage, long timeInSeconds) {
+    @NonNull
+    public Component getTimePlaceholder(@NonNull TimeFormat timeMessage, long timeInSeconds) {
         boolean firstUnit = true;
         Time timeRecord = TimeUtil.millisToTime(timeInSeconds * 1000L);
         StringBuilder messageBuilder = new StringBuilder();
@@ -475,15 +472,16 @@ public class MultiplierManager {
             long time,
             boolean notice) {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
         // Send notice to online players
         if(notice) {
             Component message = time != -1 ?
-                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierChangedTimeLimit(), placeholders) :
-                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierChangedNoTimeLimit(), placeholders);
+                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedNoTimeLimit(), placeholders);
 
             plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
@@ -493,8 +491,8 @@ public class MultiplierManager {
 
         // Send feedback to Player
         Component message = time != -1 ?
-                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
-                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
+                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
         player.sendMessage(message);
     }
 
@@ -507,10 +505,11 @@ public class MultiplierManager {
             @Nullable Player player,
             boolean notice) {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to online players
         if(notice) {
-            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierClearedNotice());
+            Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierClearedNotice());
 
             plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
@@ -519,7 +518,7 @@ public class MultiplierManager {
         if(player == null) return;
 
         // Send feedback to Player
-        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierCleared());
+        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierCleared());
         player.sendMessage(message);
     }
 
@@ -533,20 +532,22 @@ public class MultiplierManager {
      */
     private void sendIslandMultiplierChangedNotice(
             @Nullable Player player,
-            @NotNull Island island,
+            @NonNull Island island,
             double multiplier,
             long time,
             boolean notice) {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
+
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+        if(time > -1) placeholders.add(Placeholder.component("time", getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
         // Send notice to island members
         if(notice) {
             Component message = time != -1 ?
-                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierChangedTimeLimit(), placeholders) :
-                    AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierChangedNoTimeLimit(), placeholders);
+                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedNoTimeLimit(), placeholders);
 
             island.getMemberSet().stream()
                     .map(memberId -> plugin.getServer().getPlayer(memberId))
@@ -559,8 +560,8 @@ public class MultiplierManager {
 
         // Send feedback to Player
         Component message = time != -1 ?
-                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
-                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
+                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
         player.sendMessage(message);
     }
 
@@ -572,13 +573,14 @@ public class MultiplierManager {
      */
     private void sendIslandMultiplierClearedNotice(
             @Nullable Player player,
-            @NotNull Island island,
+            @NonNull Island island,
             boolean notice) {
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to island members
         if(notice) {
-            Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierClearedNotice());
+            Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierClearedNotice());
 
             island.getMemberSet().stream()
                     .map(memberId -> plugin.getServer().getPlayer(memberId))
@@ -590,7 +592,7 @@ public class MultiplierManager {
         if(player == null) return;
 
         // Send feedback to Player
-        Component message = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierCleared());
+        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierCleared());
         player.sendMessage(message);
     }
 }

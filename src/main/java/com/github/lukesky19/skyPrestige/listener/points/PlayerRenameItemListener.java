@@ -43,8 +43,7 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Map;
@@ -64,12 +63,12 @@ public class PlayerRenameItemListener extends PointsListener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerRenameItemListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
@@ -80,7 +79,7 @@ public class PlayerRenameItemListener extends PointsListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerRenameItem(InventoryClickEvent inventoryClickEvent) {
         // Config
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
@@ -88,38 +87,38 @@ public class PlayerRenameItemListener extends PointsListener {
 
         // Player
         if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
-        @NotNull UUID playerId = player.getUniqueId();
+        UUID playerId = player.getUniqueId();
         if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Anvil
         if(!(inventoryClickEvent.getClickedInventory() instanceof AnvilInventory anvil)) return;
 
         // Island Check
-        @Nullable Island island = checkIsland(player, playerId);
+        Island island = checkIsland(player, playerId);
         if(island == null) return;
 
         // IslandData check.
-        @Nullable IslandData islandData = checkIslandData(island);
+        IslandData islandData = checkIslandData(island);
         if(islandData == null) return;
 
         // Item
-        @Nullable ItemStack firstItem = anvil.getFirstItem();
-        @Nullable ItemStack resultItem = anvil.getResult();
+        ItemStack firstItem = anvil.getFirstItem();
+        ItemStack resultItem = anvil.getResult();
         if(firstItem == null || firstItem.isEmpty() || resultItem == null || resultItem.isEmpty()) return;
-        @Nullable ItemType resultItemType = resultItem.getType().asItemType();
+        ItemType resultItemType = resultItem.getType().asItemType();
         if(resultItemType == null) return;
 
         if(!firstItem.hasItemMeta() || !resultItem.hasItemMeta()) return;
-        @NotNull ItemMeta firstItemMeta = firstItem.getItemMeta();
-        @NotNull ItemMeta resultItemMeta = resultItem.getItemMeta();
+        ItemMeta firstItemMeta = firstItem.getItemMeta();
+        ItemMeta resultItemMeta = resultItem.getItemMeta();
         if(isItemNameSimilar(firstItemMeta, resultItemMeta)) return;
 
         RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
 
         // Item Data
-        @Nullable EntityType entityType = ItemUtils.getEntityType(roseStackerHook, resultItem);
-        @Nullable PotionType potionType = ItemUtils.getPotionType(resultItem);
-        @Nullable Map<Enchantment, Integer> enchantments = ItemUtils.getEnchantments(resultItem);
+        EntityType entityType = ItemUtils.getEntityType(roseStackerHook, resultItem);
+        PotionType potionType = ItemUtils.getPotionType(resultItem);
+        Map<Enchantment, Integer> enchantments = ItemUtils.getEnchantments(resultItem);
 
         // Amount
         int amount = ItemUtils.getAmount(roseStackerHook, resultItem);
@@ -138,9 +137,9 @@ public class PlayerRenameItemListener extends PointsListener {
      * @param resultItemMeta The second item's {@link ItemMeta}.
      * @return true if the item name is the same, otherwise false.
      */
-    private boolean isItemNameSimilar(@NotNull ItemMeta firstItemMeta, @NotNull ItemMeta resultItemMeta) {
-        @Nullable Component firstItemName = firstItemMeta.customName();
-        @Nullable Component resultItemName = resultItemMeta.customName();
+    private boolean isItemNameSimilar(@NonNull ItemMeta firstItemMeta, @NonNull ItemMeta resultItemMeta) {
+        Component firstItemName = firstItemMeta.customName();
+        Component resultItemName = resultItemMeta.customName();
         // If neither item has a custom name, no item name was updated. Return false.
         if(firstItemName == null && resultItemName == null) return true;
 

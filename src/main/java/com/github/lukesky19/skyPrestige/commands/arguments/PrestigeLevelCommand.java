@@ -35,7 +35,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
@@ -44,11 +44,11 @@ import java.util.List;
  * This class creates the level command argument for the skyprestige command.
  */
 public class PrestigeLevelCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -58,10 +58,10 @@ public class PrestigeLevelCommand {
      * @param hookManager A {@link HookManager} instance.
      */
     public PrestigeLevelCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -73,7 +73,7 @@ public class PrestigeLevelCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the level command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the level command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("level")
             .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.level"))
             .then(Commands.literal("set")
@@ -106,9 +106,9 @@ public class PrestigeLevelCommand {
                                     Placeholder.parsed("prestige_level", String.valueOf(islandData.getPrestigeLevel())));
 
                             if(sender instanceof Player player) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandPrestigeLevelUpdated(), placeholders));
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeLevelUpdated(), placeholders));
                             } else {
-                                logger.error(AdventureUtil.deserialize(locale.islandPrestigeLevelUpdated(), placeholders));
+                                logger.error(AdventureUtil.deserialize(locale.prestigeLevelUpdated(), placeholders));
                             }
 
                             return 1;

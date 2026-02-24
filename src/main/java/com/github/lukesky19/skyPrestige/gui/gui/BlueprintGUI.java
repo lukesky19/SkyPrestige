@@ -20,14 +20,17 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.BlueprintGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.OptInConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.OptOutConfigManager;
-import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
+import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -48,9 +51,11 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintBundle;
+import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,19 +65,25 @@ import java.util.function.Consumer;
  */
 public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
     private final @Nullable OptInConfigManager optInConfigManager;
     private final @Nullable OptOutConfigManager optOutConfigManager;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull RewardsProcessor rewardsProcessor;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull RewardsProcessor rewardsProcessor;
+
+    private final @Nullable PrestigeManager prestigeManager;
+    private final @Nullable PrestigeExemptionManager prestigeExemptionManager;
 
     // Island Reset Data
-    private final @NotNull IslandResetData islandResetData;
-    private final @NotNull Consumer<IslandResetData> consumer;
+    private final @NonNull Island oldIsland;
+    private final @NonNull IslandData oldIslandData;
+    private final @NonNull GameModeAddon gameModeAddon;
+    private final int prestigeLevel;
 
     // Config
+    private final @Nullable PrestigeConfig prestigeConfig;
     private final @Nullable BlueprintGUIConfig blueprintGUIConfig;
 
     // Page info
@@ -90,20 +101,30 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
-     * @param islandResetData An {@link IslandResetData} instance.
-     * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param player The {@link Player}.
+     * @param oldIsland The old {@link Island}.
+     * @param oldIslandData The old {@link IslandData}.
+     * @param gameModeAddon The {@link GameModeAddon}.
+     * @param prestigeConfig The {@link PrestigeConfig}.
+     * @param prestigeLevel The prestige level.
      */
     public BlueprintGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HookManager hookManager,
-            @NotNull RewardsProcessor rewardsProcessor,
-            @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+            @NonNull SkyPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull HookManager hookManager,
+            @NonNull RewardsProcessor rewardsProcessor,
+            @NonNull PrestigeManager prestigeManager,
+            @NonNull Player player,
+            @NonNull Island oldIsland,
+            @NonNull IslandData oldIslandData,
+            @NonNull GameModeAddon gameModeAddon,
+            @NonNull PrestigeConfig prestigeConfig,
+            int prestigeLevel) {
+        super(plugin, guiManager, identifier, player);
 
         this.plugin = plugin;
         this.localeManager = localeManager;
@@ -112,9 +133,14 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
         this.optOutConfigManager = null;
         this.hookManager = hookManager;
         this.rewardsProcessor = rewardsProcessor;
+        this.prestigeManager = prestigeManager;
+        this.prestigeExemptionManager = null;
 
-        this.islandResetData = islandResetData;
-        this.consumer = consumer;
+        this.oldIsland = oldIsland;
+        this.oldIslandData = oldIslandData;
+        this.gameModeAddon = gameModeAddon;
+        this.prestigeConfig = prestigeConfig;
+        this.prestigeLevel = prestigeLevel;
 
         this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
     }
@@ -129,21 +155,27 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param optInConfigManager An {@link OptInConfigManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
-     * @param islandResetData An {@link IslandResetData} instance.
-     * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
+     * @param player The {@link Player}.
+     * @param oldIsland The old {@link Island}.
+     * @param oldIslandData The old {@link IslandData}.
+     * @param gameModeAddon The {@link GameModeAddon}.
      */
     public BlueprintGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull OptInConfigManager optInConfigManager,
-            @NotNull HookManager hookManager,
-            @NotNull RewardsProcessor rewardsProcessor,
-            @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+            @NonNull SkyPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull OptInConfigManager optInConfigManager,
+            @NonNull HookManager hookManager,
+            @NonNull RewardsProcessor rewardsProcessor,
+            @NonNull PrestigeExemptionManager prestigeExemptionManager,
+            @NonNull Player player,
+            @NonNull Island oldIsland,
+            @NonNull IslandData oldIslandData,
+            @NonNull GameModeAddon gameModeAddon) {
+        super(plugin, guiManager, identifier, player);
 
         this.plugin = plugin;
         this.localeManager = localeManager;
@@ -152,9 +184,14 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
         this.optOutConfigManager = null;
         this.hookManager = hookManager;
         this.rewardsProcessor = rewardsProcessor;
+        this.prestigeManager = null;
+        this.prestigeExemptionManager = prestigeExemptionManager;
 
-        this.islandResetData = islandResetData;
-        this.consumer = consumer;
+        this.oldIsland = oldIsland;
+        this.oldIslandData = oldIslandData;
+        this.gameModeAddon = gameModeAddon;
+        this.prestigeConfig = null;
+        this.prestigeLevel = -1;
 
         this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
     }
@@ -169,21 +206,27 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param optOutConfigManager An {@link OptOutConfigManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
-     * @param islandResetData An {@link IslandResetData} instance.
-     * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
+     * @param player The {@link Player}.
+     * @param oldIsland The old {@link Island}.
+     * @param oldIslandData The old {@link IslandData}.
+     * @param gameModeAddon The {@link GameModeAddon}.
      */
     public BlueprintGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull OptOutConfigManager optOutConfigManager,
-            @NotNull HookManager hookManager,
-            @NotNull RewardsProcessor rewardsProcessor,
-            @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+            @NonNull SkyPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull OptOutConfigManager optOutConfigManager,
+            @NonNull HookManager hookManager,
+            @NonNull RewardsProcessor rewardsProcessor,
+            @NonNull PrestigeExemptionManager prestigeExemptionManager,
+            @NonNull Player player,
+            @NonNull Island oldIsland,
+            @NonNull IslandData oldIslandData,
+            @NonNull GameModeAddon gameModeAddon) {
+        super(plugin, guiManager, identifier, player);
 
         this.plugin = plugin;
         this.localeManager = localeManager;
@@ -192,9 +235,14 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
         this.optOutConfigManager = optOutConfigManager;
         this.hookManager = hookManager;
         this.rewardsProcessor = rewardsProcessor;
+        this.prestigeManager = null;
+        this.prestigeExemptionManager = prestigeExemptionManager;
 
-        this.islandResetData = islandResetData;
-        this.consumer = consumer;
+        this.oldIsland = oldIsland;
+        this.oldIslandData = oldIslandData;
+        this.gameModeAddon = gameModeAddon;
+        this.prestigeConfig = null;
+        this.prestigeLevel = -1;
 
         this.blueprintGUIConfig = guiConfigManager.getBlueprintGUIConfig();
     }
@@ -264,7 +312,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(bentoBoxHook.isHooked()) {
-            @NotNull Map<String, BlueprintBundle> blueprints = bentoBoxHook.getBlueprints(islandResetData.getGameModeAddon());
+            Map<String, BlueprintBundle> blueprints = bentoBoxHook.getBlueprints(gameModeAddon);
 
             List<Map.Entry<String, BlueprintBundle>> blueprintList = blueprints.entrySet()
                     .stream()
@@ -272,7 +320,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
                         BlueprintBundle blueprint = entry.getValue();
 
                         if (blueprint.isRequirePermission()) {
-                            String permission = islandResetData.getGameModeAddon().getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
+                            String permission = gameModeAddon.getPermissionPrefix() + "island.create." + blueprint.getUniqueId();
 
                             return player.hasPermission(permission);
                         }
@@ -318,19 +366,31 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             guiManager.removeOpenGUI(identifier);
 
             // Remove early rewards given
-            rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+            rewardsProcessor.revertEarlyRewards(oldIsland.getMemberSet());
+
+            if(prestigeManager != null) {
+                prestigeManager.removePrestige(oldIsland.getUniqueId());
+            }
         }, 1L);
     }
 
     @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+    public void handleClose(@NonNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED)
                 || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
         guiManager.removeOpenGUI(identifier);
 
         // Remove early rewards given
-        rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+        rewardsProcessor.revertEarlyRewards(oldIsland.getMemberSet());
+
+        if(prestigeManager != null) {
+            prestigeManager.removePrestige(oldIsland.getUniqueId());
+        }
+
+        if(prestigeExemptionManager != null) {
+            prestigeExemptionManager.removeExempting(oldIsland.getUniqueId());
+        }
     }
 
     /**
@@ -339,7 +399,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
@@ -347,7 +407,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when the player's inventory is clicked. This method does nothing.
@@ -355,7 +415,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Handles when a click occurs in either inventory. This method does nothing.
@@ -363,7 +423,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -374,9 +434,9 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig fillerConfig = blueprintGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -391,7 +451,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create buttons to display the blueprints that the player can select for their island.
      * @param blueprintList A {@link List} of {@link Map.Entry} mapping a blueprint name/id as a {@link String} to a {@link BlueprintBundle}.
      */
-    private void createBlueprintButtons(@NotNull List<Map.Entry<String, BlueprintBundle>> blueprintList) {
+    private void createBlueprintButtons(@NonNull List<Map.Entry<String, BlueprintBundle>> blueprintList) {
         int blueprintListSize = blueprintList.size();
         while (numOfBlueprintsAdded < blueprintsPerPage) {
             if (currentBlueprintKey >= blueprintListSize) break;
@@ -411,10 +471,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             builder.setItemStack(itemStack);
 
             builder.setAction(inventoryClickEvent -> {
-                @NotNull Locale locale = localeManager.getConfiguration();
-                Player player = (Player) inventoryClickEvent.getWhoClicked();
-
-                islandResetData.setBlueprint(blueprint);
+                Locale locale = localeManager.getConfiguration();
 
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
@@ -422,13 +479,15 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
                     guiManager.removeOpenGUI(identifier);
                 }, 1L);
 
-                @NotNull ConfirmGUI confirmGUI;
-                if(optInConfigManager != null) {
-                    confirmGUI = new ConfirmOptInGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optInConfigManager, rewardsProcessor, islandResetData, consumer);
-                } else if(optOutConfigManager != null) {
-                    confirmGUI = new ConfirmOptOutGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optOutConfigManager, rewardsProcessor, islandResetData, consumer);
+                ConfirmGUI confirmGUI;
+                if(optInConfigManager != null && prestigeExemptionManager != null) {
+                    confirmGUI = new ConfirmOptInGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optInConfigManager, rewardsProcessor, prestigeExemptionManager, player, oldIsland, oldIslandData, gameModeAddon, blueprint);
+                } else if(optOutConfigManager != null && prestigeExemptionManager != null) {
+                    confirmGUI = new ConfirmOptOutGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, optOutConfigManager, rewardsProcessor, prestigeExemptionManager, player, oldIsland, oldIslandData, gameModeAddon, blueprint);
+                } else if(prestigeManager != null && prestigeConfig != null) {
+                    confirmGUI = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, rewardsProcessor, prestigeManager, player, oldIsland, oldIslandData, gameModeAddon, prestigeConfig, prestigeLevel, blueprint);
                 } else {
-                    confirmGUI = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier, rewardsProcessor, islandResetData, consumer);
+                    return;
                 }
 
                 boolean creationResult = confirmGUI.create();
@@ -540,7 +599,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if (buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the blueprints GUI due to an invalid slot."));
             return;
@@ -548,8 +607,8 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -567,7 +626,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
-    private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if (buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the blueprints GUI due to an invalid slot."));
             return;
@@ -575,8 +634,8 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 

@@ -15,24 +15,21 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.configuration.data.reset;
+package com.github.lukesky19.skyPrestige.configuration.data.requirement;
 
-import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.reset.player.PlayerSettings;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
- * The configuration settings to apply when a player resets an island.
- * @param islandSettings The {@link IslandSettings}.
- * @param playerSettings The {@link PlayerSettings}.
- * @param giveStartingMoneyToAllIslandMembers Whether to give starting money to all island members.
- * @param startingMoney The starting money.
+ * This record holds the configuration for a quest requirement.
+ * @param questId The quest id.
+ * @param incompleteStack The {@link ItemStackConfig} to display in the requirements GUI when the requirement isn't met.
+ * @param completedStack The {@link ItemStackConfig} to display in the requirements GUI when the requirement is met.
  */
 @ConfigSerializable
-public record ResetSettings(
-        @NotNull IslandSettings islandSettings,
-        @NotNull PlayerSettings playerSettings,
-        boolean giveStartingMoneyToAllIslandMembers,
-        double startingMoney) {
-}
+public record QuestRequirement(
+        @Nullable String questId,
+        @NonNull ItemStackConfig incompleteStack,
+        @NonNull ItemStackConfig completedStack) {}

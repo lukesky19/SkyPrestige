@@ -42,8 +42,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Map;
@@ -63,12 +62,12 @@ public class PlayerFishListener extends PointsListener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerFishListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
@@ -79,23 +78,23 @@ public class PlayerFishListener extends PointsListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerFish(PlayerFishEvent playerFishEvent) {
         // Config
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
         }
 
         // Player
-        @NotNull Player player = playerFishEvent.getPlayer();
-        @NotNull UUID playerId = player.getUniqueId();
+        Player player = playerFishEvent.getPlayer();
+        UUID playerId = player.getUniqueId();
         if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Island Check
-        @Nullable Island island = checkIsland(player, playerId);
+        Island island = checkIsland(player, playerId);
         if(island == null) return;
 
         // IslandData check.
-        @Nullable IslandData islandData = checkIslandData(island);
+        IslandData islandData = checkIslandData(island);
         if(islandData == null) return;
 
         // Item
@@ -104,15 +103,15 @@ public class PlayerFishListener extends PointsListener {
         ItemStack itemStack = item.getItemStack();
         if(itemStack.isEmpty()) return;
         if(!itemStack.hasItemMeta()) return;
-        @Nullable ItemType itemType = itemStack.getType().asItemType();
+        ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) return;
 
         RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
 
         // Item Data
-        @Nullable EntityType entityType = ItemUtils.getEntityType(roseStackerHook, itemStack);
-        @Nullable PotionType potionType = ItemUtils.getPotionType(itemStack);
-        @Nullable Map<Enchantment, Integer> enchantments = ItemUtils.getEnchantments(itemStack);
+        EntityType entityType = ItemUtils.getEntityType(roseStackerHook, itemStack);
+        PotionType potionType = ItemUtils.getPotionType(itemStack);
+        Map<Enchantment, Integer> enchantments = ItemUtils.getEnchantments(itemStack);
 
         // Amount
         int amount = ItemUtils.getAmount(roseStackerHook, itemStack);

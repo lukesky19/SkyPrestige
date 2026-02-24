@@ -41,8 +41,7 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.RayTraceResult;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -61,12 +60,12 @@ public class PlayerBottleWaterListener extends PointsListener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerBottleWaterListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
@@ -77,7 +76,7 @@ public class PlayerBottleWaterListener extends PointsListener {
     @EventHandler(priority = EventPriority.MONITOR) // Cancelled events are purposely not ignored here.
     public void onPlayerBottleWater(PlayerInteractEvent playerInteractEvent) {
         // Config
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
@@ -88,31 +87,31 @@ public class PlayerBottleWaterListener extends PointsListener {
         if(!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.equals(Action.RIGHT_CLICK_AIR)) return;
 
         // Player
-        @NotNull Player player = playerInteractEvent.getPlayer();
-        @NotNull UUID playerId = player.getUniqueId();
+        Player player = playerInteractEvent.getPlayer();
+        UUID playerId = player.getUniqueId();
         if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Island Check
-        @Nullable Island island = checkIsland(player, playerId);
+        Island island = checkIsland(player, playerId);
         if(island == null) return;
 
         // IslandData check.
-        @Nullable IslandData islandData = checkIslandData(island);
+        IslandData islandData = checkIslandData(island);
         if(islandData == null) return;
 
         // Item
-        @Nullable ItemStack itemStack = playerInteractEvent.getItem();
+        ItemStack itemStack = playerInteractEvent.getItem();
         if(itemStack == null || itemStack.isEmpty()) return;
         ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) return;
         if(!itemType.equals(ItemType.GLASS_BOTTLE)) return;
 
         // Block
-        @Nullable RayTraceResult rayTraceResult = player.rayTraceBlocks(5, FluidCollisionMode.SOURCE_ONLY);
+        RayTraceResult rayTraceResult = player.rayTraceBlocks(5, FluidCollisionMode.SOURCE_ONLY);
         if(rayTraceResult == null) return;
-        @Nullable Block block = rayTraceResult.getHitBlock();
+        Block block = rayTraceResult.getHitBlock();
         if(block == null) return;
-        @Nullable BlockType blockType = block.getType().asBlockType();
+        BlockType blockType = block.getType().asBlockType();
         if(blockType == null) return;
         if(!blockType.equals(BlockType.WATER)) return;
 

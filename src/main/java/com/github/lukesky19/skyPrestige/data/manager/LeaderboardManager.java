@@ -29,8 +29,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.*;
@@ -40,13 +40,13 @@ import java.util.concurrent.CompletableFuture;
  * This class manages obtaining data to display leaderboards and marking whether players are excluded from the leaderboard or not.
  */
 public class LeaderboardManager {
-    private final @NotNull Server server;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull Server server;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull HookManager hookManager;
     // Cached top ten from the database.
-    private @NotNull TopTen databaseTopTen = new TopTen();
-    private @NotNull TopTen topTen = new TopTen();
+    private @NonNull TopTen databaseTopTen = new TopTen();
+    private @NonNull TopTen topTen = new TopTen();
 
     /**
      * Constructor
@@ -56,10 +56,10 @@ public class LeaderboardManager {
      * @param hookManager A {@link HookManager} instance.
      */
     public LeaderboardManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull HookManager hookManager) {
         this.server = plugin.getServer();
         this.islandDataManager = islandDataManager;
         this.databaseManager = databaseManager;
@@ -70,7 +70,7 @@ public class LeaderboardManager {
      * Update the cached top ten from the database.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> updateDatabaseTopTen() {
+    public @NonNull CompletableFuture<Void> updateDatabaseTopTen() {
         IslandDataTable islandDataTable = databaseManager.getIslandDataTable();
         return islandDataTable.getTopTenByPrestigeLevelAndPointsNotExempt().thenAccept(topTen -> this.databaseTopTen = topTen);
     }
@@ -81,14 +81,14 @@ public class LeaderboardManager {
     public void updateTopTen() {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
 
-        @NotNull TopTen resultTopTen = new TopTen();
+        TopTen resultTopTen = new TopTen();
         // Get a list of all non-null database positions.
-        @NotNull List<@NotNull Position> databasePositions = databaseTopTen.getPositions();
+        List<@NonNull Position> databasePositions = databaseTopTen.getPositions();
 
         // Get loaded island data
-        @NotNull Map<String, IslandData> loadedIslandData = islandDataManager.getAllData();
+        Map<String, IslandData> loadedIslandData = islandDataManager.getAllData();
         // Calculate the top ten positions from the online island data.
-        @NotNull List<Position> onlineTopTenPositions = loadedIslandData.entrySet().stream()
+        List<Position> onlineTopTenPositions = loadedIslandData.entrySet().stream()
                 .filter(entry -> !entry.getValue().isLeaderboardExempt())
                 .map(entry -> {
                     String islandId = entry.getKey();
@@ -99,8 +99,9 @@ public class LeaderboardManager {
                         Island island = optionalIsland.get();
 
                         // Attempt to get the island's owner's name
-                        @Nullable UUID ownerId = island.getOwner();
-                        @NotNull String ownerName = getPlayerName(ownerId);
+                        UUID ownerId = island.getOwner();
+                        if(ownerId == null) return null;
+                        String ownerName = getPlayerName(ownerId);
 
                         return new Position(entry.getKey(), ownerName, islandData.getPrestigeLevel(), islandData.getPrestigePoints());
                     }
@@ -145,7 +146,7 @@ public class LeaderboardManager {
      * Get the {@link TopTen} islands by prestige level and points that are not exempt.
      * @return The {@link TopTen}.
      */
-    public @NotNull TopTen getTopTenNotExempt() {
+    public @NonNull TopTen getTopTenNotExempt() {
         return topTen;
     }
 
@@ -166,14 +167,14 @@ public class LeaderboardManager {
      * @param playerId The {@link UUID} of the player.
      * @return The player's name or a placeholder text.
      */
-    protected @NotNull String getPlayerName(@NotNull UUID playerId) {
-        @NotNull String playerName = "Unknown Island Owner";
+    protected @NonNull String getPlayerName(@NonNull UUID playerId) {
+        String playerName = "Unknown Island Owner";
 
-        @Nullable Player player = server.getPlayer(playerId);
+        Player player = server.getPlayer(playerId);
         if(player != null && player.isOnline() && player.isConnected()) {
             playerName = player.getName();
         } else {
-            @NotNull OfflinePlayer offlinePlayer = server.getOfflinePlayer(playerId);
+            OfflinePlayer offlinePlayer = server.getOfflinePlayer(playerId);
             if(offlinePlayer.getName() != null) {
                 playerName = offlinePlayer.getName();
             }

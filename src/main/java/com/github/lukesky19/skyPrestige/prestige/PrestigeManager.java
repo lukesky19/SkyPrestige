@@ -18,69 +18,75 @@
 package com.github.lukesky19.skyPrestige.prestige;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.reset.player.PlayerSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.requirement.QuestRequirement;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.*;
+import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigeConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
-import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.database.table.OfflinePrestigeTable;
+import com.github.lukesky19.skyPrestige.database.table.QueuedSettingsTable;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.gui.gui.BlueprintGUI;
 import com.github.lukesky19.skyPrestige.gui.gui.ConfirmPrestigeGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
-import com.github.lukesky19.skyPrestige.integration.island.IslandCreator;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
+import com.github.lukesky19.skyPrestige.integration.island.AbstractIslandCreator;
+import com.github.lukesky19.skyPrestige.integration.island.PrestigeIslandCreator;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
+import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
+import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.leonardobishop.quests.common.player.QPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
-import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This class manages the prestiging of islands.
  */
 public class PrestigeManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
 
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull PrestigeConfigManager prestigeConfigManager;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
-    private final @NotNull PrestigePointsManager prestigePointsManager;
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull PrestigeConfigManager prestigeConfigManager;
+    private final @NonNull RequirementsManager requirementsManager;
 
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
-    private final @NotNull IslandSettingsProcessor islandSettingsProcessor;
-    private final @NotNull RewardsProcessor rewardsProcessor;
-    private final @NotNull PlayerSettingsProcessor playerSettingsProcessor;
+    private final @NonNull IslandSettingsProcessor islandSettingsProcessor;
+    private final @NonNull RewardsProcessor rewardsProcessor;
+    private final @NonNull PlayerSettingsProcessor playerSettingsProcessor;
+
+    // Used to prevent multiple prestiges being triggered for an island.
+    private final @NonNull Set<String> inProgressPrestiges = new HashSet<>();
 
     /**
      * Constructor
@@ -89,8 +95,7 @@ public class PrestigeManager {
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
-     * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
-     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
+     * @param requirementsManager A {@link RequirementsManager} instance.
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
@@ -100,28 +105,26 @@ public class PrestigeManager {
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
      */
     public PrestigeManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull PrestigeConfigManager prestigeConfigManager,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull PlayerSettingsProcessor playerSettingsProcessor,
-            @NotNull IslandSettingsProcessor islandSettingsProcessor,
-            @NotNull RewardsProcessor rewardsProcessor) {
+            @NonNull SkyPlugin plugin,
+            @NonNull SettingsManager settingsManager,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull PrestigeConfigManager prestigeConfigManager,
+            @NonNull RequirementsManager requirementsManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull GUIManager guiManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull PlayerSettingsProcessor playerSettingsProcessor,
+            @NonNull IslandSettingsProcessor islandSettingsProcessor,
+            @NonNull RewardsProcessor rewardsProcessor) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.prestigeConfigManager = prestigeConfigManager;
-        this.prestigePointsConfigManager = prestigePointsConfigManager;
-        this.prestigePointsManager = prestigePointsManager;
+        this.requirementsManager = requirementsManager;
         this.databaseManager = databaseManager;
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
@@ -133,93 +136,121 @@ public class PrestigeManager {
     }
 
     /**
+     * Is the island in the progress of prestiging?
+     * @apiNote This is if the player has started the process, but hasn't confirmed the process yet.
+     * @param islandId The island id.
+     * @return true or false.
+     */
+    public boolean isIslandPrestiging(@NonNull String islandId) {
+        return inProgressPrestiges.contains(islandId);
+    }
+
+    /**
+     * Remove the island id from the list of islands prestiging.
+     * @param islandId The island id.
+     */
+    public void removePrestige(@NonNull String islandId) {
+        inProgressPrestiges.remove(islandId);
+    }
+
+    /**
      * Checks if the player's island can be prestiged and opens the blueprint selection GUI, the confirmation GUI, or displays an error.
      * @param player The {@link Player}.
      */
-    public void prestigeIsland(@NotNull Player player) {
-        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
-        if(prestigePointsConfig == null || prestigePointsConfig.scaleFormula() == null) {
-            logger.error(AdventureUtil.deserialize("Unable to prestige island for player " + player.getName() + " because of invalid prestige points config."));
-            return;
-        }
-
-        @NotNull Locale locale = localeManager.getConfiguration();
-        @NotNull BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+    public void prestigeIsland(@NonNull Player player) {
+        Locale locale = localeManager.getConfiguration();
+        Locale.PrestigeMessages prestigeMessages = locale.prestigeMessages();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         UUID playerId = player.getUniqueId();
 
         // Check if the player is in a world managed by a GameModeAddon
         Optional<GameModeAddon> optionalGameModeAddon = bentoBoxHook.getGameModeAddon(player.getWorld());
         if(optionalGameModeAddon.isEmpty()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerInWrongWorld()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerInWrongWorld()));
             return;
         }
 
         // Check if the player is on an island
         Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
         if(optionalIsland.isEmpty()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerNotOnIsland()));
             return;
         }
         Island island = optionalIsland.get();
+        String islandId = island.getUniqueId();
+
+        if(inProgressPrestiges.contains(islandId)) {
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeInProgress()));
+            return;
+        }
+
+        inProgressPrestiges.add(islandId);
 
         // Check if the player attempting to toggle the island's prestige status is not the owner or an island member.
         if((island.getOwner() == null || !island.getOwner().equals(playerId)) && !island.getMemberSet().contains(playerId)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigePlayerNotMemberOrOwner()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerNotMemberOrOwner()));
             return;
         }
 
         // Get the island data for the island.
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(islandId);
         if(islandData == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-            logger.error(AdventureUtil.deserialize("No Island data found for player " + player.getName() + "'s island. Island Id: " + island.getUniqueId()));
+            logger.error(AdventureUtil.deserialize("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
             return;
         }
 
         if(islandData.isPrestigeExempt()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeIslandOptedOut()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.islandOptedOut()));
             return;
         }
 
         // Get the next prestige level and the config for that level
         int nextPrestigeLevel = islandData.getPrestigeLevel() + 1;
         // If the prestige config is null, the player is at the max prestige level
-        @Nullable PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextPrestigeLevel);
+        PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextPrestigeLevel);
         if(prestigeConfig == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandPrestigeLevelMax()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.prestigeLevelMax()));
             return;
         }
 
-        // Re-calculate the required prestige points for the prestige level.
-        prestigePointsManager.recalculateRequiredPrestigePoints(island);
-        if(islandData.getRequiredPrestigePoints() == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigRequirementError()));
-            logger.error(AdventureUtil.deserialize("The calculated required prestige points for prestige level " + nextPrestigeLevel + " is invalid."));
-            return;
-        }
+        player.sendMessage(AdventureUtil.deserialize("<red>Gathering necessary data for prestige..."));
 
-        // Check if the player's island has enough prestige points to prestige
-        if(lacksRequiredPrestigePoints(islandData)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
-            return;
-        }
+        // Get a list of QPlayers for all island members
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+        List<QPlayer> qPlayerList = lmbQuestHook.getQPlayerList(island.getMemberSet());
 
+        Server server = player.getServer();
         // Get online island member's players
         List<Player> onlineIslandMembers = island.getMemberSet().stream()
-                .map(plugin.getServer()::getPlayer)
+                .map(server::getPlayer)
                 .filter(Objects::nonNull)
                 .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
                 .toList();
-        // Get offline island member's unique ids
-        List<UUID> offlineIslandMembers = island.getMemberSet()
+        // Get all island member's offline player.
+        List<OfflinePlayer> offlinePlayerList = island.getMemberSet().stream()
+                .map(server::getOfflinePlayer)
+                .toList();
+        // Get offline island member's unique ids that are actually offline
+        List<UUID> offlineIslandMembersIds = offlinePlayerList
                 .stream()
-                .map(memberId -> player.getServer().getOfflinePlayer(memberId))
                 .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
                 .map(OfflinePlayer::getUniqueId)
                 .toList();
 
+        int memberCount = island.getMemberSet().size();
+        Map<ItemStack, Boolean> requiredItems = requirementsManager.calculateRequiredItems(memberCount, islandData, prestigeConfig.inventoryRequirements());
+        double requiredMoney = requirementsManager.calculateRequiredMoney(memberCount, islandData, prestigeConfig.moneyRequirement());
+        double requiredPrestigePoints = requirementsManager.calculateRequiredPrestigePoints(memberCount, islandData, prestigeConfig.prestigePointsRequirement());
+        List<String> requiredQuestIds = prestigeConfig.questRequirements().stream().map(QuestRequirement::questId).filter(Objects::nonNull).toList();
+
+        if(requirementsManager.areRequirementsNotMet(player, onlineIslandMembers, offlinePlayerList, qPlayerList, islandData, requiredItems.keySet(), requiredMoney, requiredPrestigePoints, requiredQuestIds)) {
+            inProgressPrestiges.remove(islandId);
+            return;
+        }
+
         // Process early rewards (will be undone if cancelled)
-        rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembers, prestigeConfig.rewardConfig());
+        rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembersIds, prestigeConfig.rewardConfig());
 
         if(prestigeConfig.prestigeSettings().islandSettings().keepIsland()) {
             // Open the prestige confirmation GUI
@@ -230,8 +261,7 @@ public class PrestigeManager {
                     islandData,
                     optionalGameModeAddon.get(),
                     prestigeConfig,
-                    nextPrestigeLevel,
-                    islandData.getRequiredPrestigePoints());
+                    nextPrestigeLevel);
         } else {
             // Open the blueprint selection GUI
             openBlueprintGUI(
@@ -241,8 +271,7 @@ public class PrestigeManager {
                     islandData,
                     optionalGameModeAddon.get(),
                     prestigeConfig,
-                    nextPrestigeLevel,
-                    islandData.getRequiredPrestigePoints());
+                    nextPrestigeLevel);
         }
     }
 
@@ -255,19 +284,16 @@ public class PrestigeManager {
      * @param gameModeAddon The {@link GameModeAddon}.
      * @param prestigeConfig The {@link PrestigeConfig}.
      * @param prestigeLevel The prestige level.
-     * @param prestigePoints The prestige points required to prestige.
      */
     private void openBlueprintGUI(
-            @NotNull Locale locale,
-            @NotNull Player player,
-            @NotNull Island island,
-            @NotNull IslandData islandData,
-            @NotNull GameModeAddon gameModeAddon,
-            @NotNull PrestigeConfig prestigeConfig,
-            int prestigeLevel,
-            double prestigePoints) {
+            @NonNull Locale locale,
+            @NonNull Player player,
+            @NonNull Island island,
+            @NonNull IslandData islandData,
+            @NonNull GameModeAddon gameModeAddon,
+            @NonNull PrestigeConfig prestigeConfig,
+            int prestigeLevel) {
         IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), player.getUniqueId());
-        IslandResetData islandResetData = new IslandResetData(player, User.getInstance(player), island, islandData, gameModeAddon, prestigeConfig, prestigeLevel, prestigePoints);
 
         // Let the player select a blueprint for the prestige
         BlueprintGUI gui = new BlueprintGUI(
@@ -278,18 +304,13 @@ public class PrestigeManager {
                 guiConfigManager,
                 hookManager,
                 rewardsProcessor,
-                islandResetData,
-                data -> {
-                    if(data.getBlueprint() == null
-                            || data.getPrestigeConfig() == null
-                            || data.getPrestigeLevel() == null
-                            || data.getPrestigeLevel() == -1
-                            || data.getPrestigePoints() == null
-                            || data.getPrestigePoints() == -1) return;
-                    prestigeIsland(data.getPlayer(), data.getUser(), data.getOldIsland(), data.getOldIslandData(),
-                            data.getGameModeAddon(), data.getBlueprint().getUniqueId(), data.getPrestigeConfig(),
-                            data.getPrestigeLevel());
-                });
+                this,
+                player,
+                island,
+                islandData,
+                gameModeAddon,
+                prestigeConfig,
+                prestigeLevel);
 
         // Create the GUI
         boolean creationResult = gui.create();
@@ -324,31 +345,32 @@ public class PrestigeManager {
      * @param gameModeAddon The {@link GameModeAddon}.
      * @param prestigeConfig The {@link PrestigeConfig}.
      * @param prestigeLevel The prestige level.
-     * @param prestigePoints The prestige points required to prestige.
      */
     private void openConfirmationGUI(
-            @NotNull Locale locale,
-            @NotNull Player player,
-            @NotNull Island island,
-            @NotNull IslandData islandData,
-            @NotNull GameModeAddon gameModeAddon,
-            @NotNull PrestigeConfig prestigeConfig,
-            int prestigeLevel,
-            double prestigePoints) {
+            @NonNull Locale locale,
+            @NonNull Player player,
+            @NonNull Island island,
+            @NonNull IslandData islandData,
+            @NonNull GameModeAddon gameModeAddon,
+            @NonNull PrestigeConfig prestigeConfig,
+            int prestigeLevel) {
         IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), player.getUniqueId());
-        IslandResetData islandResetData = new IslandResetData(player, User.getInstance(player), island, islandData, gameModeAddon, prestigeConfig, prestigeLevel, prestigePoints);
 
-        ConfirmGUI confirmGUI = new ConfirmPrestigeGUI(plugin, localeManager, guiConfigManager, guiManager, identifier,
-                rewardsProcessor, islandResetData, data -> {
-            if(data.getPrestigeConfig() == null
-                    || data.getPrestigeLevel() == null
-                    || data.getPrestigeLevel() == -1
-                    || data.getPrestigePoints() == null
-                    || data.getPrestigePoints() == -1) return;
-            prestigeIsland(data.getPlayer(), data.getUser(), data.getOldIsland(), data.getOldIslandData(),
-                    data.getGameModeAddon(), data.getBlueprint() != null ? data.getBlueprint().getUniqueId() : null,
-                    data.getPrestigeConfig(), data.getPrestigeLevel());
-        });
+        ConfirmGUI confirmGUI = new ConfirmPrestigeGUI(
+                plugin,
+                localeManager,
+                guiConfigManager,
+                guiManager,
+                identifier,
+                rewardsProcessor,
+                this,
+                player,
+                island,
+                islandData,
+                gameModeAddon,
+                prestigeConfig,
+                prestigeLevel,
+                null);
 
         boolean creationResult = confirmGUI.create();
         if (!creationResult) {
@@ -375,7 +397,6 @@ public class PrestigeManager {
      * Prestige the player's island.
      * The method {@link #prestigeIsland(Player)} should be run before this method.
      * @param player The {@link Player}.
-     * @param user The {@link User} for the {@link Player}.
      * @param oldIsland The old {@link Island}.
      * @param oldIslandData The old island's {@link IslandData}.
      * @param gameModeAddon The {@link GameModeAddon}.
@@ -384,39 +405,74 @@ public class PrestigeManager {
      * @param prestigeLevel The prestige level the island is moving to.
      */
     public void prestigeIsland(
-            @NotNull Player player,
-            @NotNull User user,
-            @NotNull Island oldIsland,
-            @NotNull IslandData oldIslandData,
-            @NotNull GameModeAddon gameModeAddon,
+            @NonNull Player player,
+            @NonNull Island oldIsland,
+            @NonNull IslandData oldIslandData,
+            @NonNull GameModeAddon gameModeAddon,
             @Nullable String blueprintName,
-            @NotNull PrestigeConfig prestigeConfig,
+            @NonNull PrestigeConfig prestigeConfig,
             int prestigeLevel) {
-        @Nullable Settings settings = settingsManager.getConfiguration();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null) return;
-        @NotNull Locale locale = localeManager.getConfiguration();
+        Locale locale = localeManager.getConfiguration();
+        String islandId = oldIsland.getUniqueId();
 
-        // Re-calculate the required prestige points for the prestige level.
-        prestigePointsManager.recalculateRequiredPrestigePoints(oldIsland);
-        if(oldIslandData.getRequiredPrestigePoints() == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeConfigRequirementError()));
-            logger.error(AdventureUtil.deserialize("The calculated required prestige points for prestige level " + prestigeLevel + " is invalid."));
+        // Get a list of QPlayers for all island members
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+        List<QPlayer> qPlayerList = lmbQuestHook.getQPlayerList(oldIsland.getMemberSet());
+
+        Server server = player.getServer();
+        // Get online island member's players
+        List<Player> onlineIslandMembers = oldIsland.getMemberSet().stream()
+                .map(plugin.getServer()::getPlayer)
+                .filter(Objects::nonNull)
+                .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
+                .toList();
+        // Get all island member's offline player.
+        List<OfflinePlayer> offlinePlayerList = oldIsland.getMemberSet().stream()
+                .map(server::getOfflinePlayer)
+                .toList();
+        // Get offline island member's unique ids that are actually offline
+        List<UUID> offlineIslandMembersIds = offlinePlayerList
+                .stream()
+                .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
+                .map(OfflinePlayer::getUniqueId)
+                .toList();
+
+        int memberCount = oldIsland.getMemberSet().size();
+        Map<ItemStack, Boolean> requiredItems = requirementsManager.calculateRequiredItems(memberCount, oldIslandData, prestigeConfig.inventoryRequirements());
+        double requiredMoney = requirementsManager.calculateRequiredMoney(memberCount, oldIslandData, prestigeConfig.moneyRequirement());
+        double requiredPrestigePoints = requirementsManager.calculateRequiredPrestigePoints(memberCount, oldIslandData, prestigeConfig.prestigePointsRequirement());
+        List<String> requiredQuestIds = prestigeConfig.questRequirements().stream().map(QuestRequirement::questId).filter(Objects::nonNull).toList();
+
+        if(requirementsManager.areRequirementsNotMet(player, onlineIslandMembers, offlinePlayerList, qPlayerList, oldIslandData, requiredItems.keySet(), requiredMoney, requiredPrestigePoints, requiredQuestIds)) {
+            inProgressPrestiges.remove(islandId);
             return;
         }
 
-        // Check if the player's island has enough prestige points to prestige
-        if(lacksRequiredPrestigePoints(oldIslandData)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeNotEnoughPrestigePoints()));
-            return;
-        }
-
-        @Nullable Island island;
+        Island island;
+        IslandData islandData = oldIslandData.clone();
         if(prestigeConfig.prestigeSettings().islandSettings().keepIsland()) {
             // Keep the existing island
             island = oldIsland;
 
+            // Process requirements
+            requirementsManager.removeRequiredItems(onlineIslandMembers, requiredItems);
+            if(prestigeConfig.moneyRequirement().removeMoney()) {
+                requirementsManager.removeRequiredMoney(offlinePlayerList, requiredMoney);
+            }
+            if(prestigeConfig.prestigePointsRequirement().removePrestigePoints()) {
+                requirementsManager.removeRequiredPrestigePoints(oldIslandData, requiredPrestigePoints);
+            }
+
             // Process island settings
-            islandSettingsProcessor.processIslandSettings(player, prestigeConfig.prestigeSettings().islandSettings(), oldIsland, island, oldIslandData, oldIslandData.getRequiredPrestigePoints(), prestigeLevel);
+            islandData.setPrestigeLevel(prestigeLevel);
+            islandSettingsProcessor.processIslandSettings(
+                    player,
+                    prestigeConfig.prestigeSettings().islandSettings(),
+                    oldIsland,
+                    island,
+                    islandData);
         } else {
             if(blueprintName == null) {
                 logger.error(AdventureUtil.deserialize("Unable to prestige island for player " + player.getName() + " because the selected blueprint name is null."));
@@ -424,17 +480,26 @@ public class PrestigeManager {
             }
 
             // Create the new island
-            island = IslandCreator.builder(plugin, databaseManager, hookManager, islandSettingsProcessor)
-                    .player(player)
-                    .user(user)
-                    .gameModeAddon(gameModeAddon)
-                    .oldIsland(oldIsland)
-                    .islandData(oldIslandData)
-                    .islandSettings(prestigeConfig.prestigeSettings().islandSettings())
-                    .name(blueprintName)
-                    .requiredPrestigePoints(oldIslandData.getRequiredPrestigePoints())
-                    .prestigeLevel(prestigeLevel)
-                    .build();
+            AbstractIslandCreator islandCreator = new PrestigeIslandCreator(
+                    plugin,
+                    databaseManager,
+                    hookManager,
+                    islandSettingsProcessor,
+                    requirementsManager,
+                    player,
+                    onlineIslandMembers,
+                    offlinePlayerList,
+                    oldIsland.getWorld(),
+                    gameModeAddon,
+                    blueprintName,
+                    oldIsland,
+                    islandData,
+                    prestigeConfig,
+                    prestigeLevel,
+                    requiredPrestigePoints,
+                    requiredMoney,
+                    requiredItems);
+            island = islandCreator.createIsland();
 
             // If the new island failed to be created, log and error and return
             if(island == null) {
@@ -443,96 +508,33 @@ public class PrestigeManager {
             }
         }
 
-        // Get online island member's players
-        List<Player> onlineIslandMembers = island.getMemberSet().stream()
-                .map(plugin.getServer()::getPlayer)
-                .filter(Objects::nonNull)
-                .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
-                .toList();
-        // Get offline island member's unique ids
-        List<UUID> offlineIslandMembers = island.getMemberSet()
-                .stream()
-                .map(memberId -> plugin.getServer().getOfflinePlayer(memberId))
-                .filter(offlinePlayer -> !offlinePlayer.isOnline() && !offlinePlayer.isConnected())
-                .map(OfflinePlayer::getUniqueId)
-                .toList();
-
         // Insert players that were offline on island prestige to give rewards later.
-        OfflinePrestigeTable offlinePrestigeTable = databaseManager.getOfflinePrestigeTable();
-        offlineIslandMembers.forEach(offlineMemberId -> offlinePrestigeTable.insertOfflinePrestige(offlineMemberId, island.getUniqueId(), prestigeLevel));
+        QueuedSettingsTable queuedSettingsTable = databaseManager.getQueuedSettingsTable();
+        offlineIslandMembersIds.forEach(offlineMemberId -> queuedSettingsTable.queueSettings(offlineMemberId, island.getUniqueId(), SettingsType.PRESTIGE, prestigeLevel));
 
         // Process Player Settings
         playerSettingsProcessor.processPlayerSettings(
                 prestigeConfig.prestigeSettings().playerSettings(),
                 player,
                 onlineIslandMembers,
-                offlineIslandMembers,
+                offlineIslandMembersIds,
                 prestigeConfig.prestigeSettings().startingMoney(),
                 prestigeConfig.prestigeSettings().giveStartingMoneyToAllIslandMembers());
 
         // Process prestige rewards
-        rewardsProcessor.processPostRewards(player, island, onlineIslandMembers, offlineIslandMembers, prestigeConfig.rewardConfig(), prestigeLevel);
+        rewardsProcessor.processPostRewards(player, island, onlineIslandMembers, offlineIslandMembersIds, prestigeConfig.rewardConfig());
 
         // Send announcement messages
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player", player.getName()));
         placeholders.add(Placeholder.parsed("prestige_level", String.valueOf(prestigeLevel)));
 
-        Component announcementMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeAnnouncement(), placeholders);
+        Component announcementMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeAnnouncement(), placeholders);
         plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(announcementMessage));
 
-        Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeIslandMemberMessage(), placeholders);
+        Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeIslandMemberMessage(), placeholders);
         onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
-    }
 
-    /**
-     * Process any offline prestige settings and rewards for the player.
-     * @param player The player who was offline during a prestige.
-     */
-    public void handleOfflinePrestiges(@NotNull Player player) {
-        UUID playerId = player.getUniqueId();
-        CompletableFuture<List<Integer>> future = databaseManager.getOfflinePrestigeTable().getPrestigeLevels(playerId);
-
-        future.thenAccept(prestigeLevels -> {
-            if(prestigeLevels.isEmpty()) return;
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                if(!player.isOnline() || !player.isConnected()) return;
-                @NotNull Map<Integer, PrestigeConfig> prestigeConfigMap = prestigeConfigManager.getPrestigeConfigMapForLevels(prestigeLevels);
-                if (prestigeConfigMap.isEmpty()) return;
-
-                @Nullable Settings settings = settingsManager.getConfiguration();
-                if(settings == null) {
-                    logger.error(AdventureUtil.deserialize("Unable to process offline prestige for player " + player.getName() + " due to invalid plugin settings."));
-                    return;
-                }
-
-                prestigeConfigMap.forEach((prestigeLevel, prestigeConfig) -> {
-                    ResetSettings prestigeSettings = prestigeConfig.prestigeSettings();
-                    PlayerSettings playerSettings = prestigeSettings.playerSettings();
-                    RewardConfig rewardConfig = prestigeConfig.rewardConfig();
-
-                    playerSettingsProcessor.processPlayerSettingsOnLogin(
-                            playerSettings,
-                            player,
-                            prestigeSettings.startingMoney(),
-                            prestigeSettings.giveStartingMoneyToAllIslandMembers());
-
-                    rewardsProcessor.processRewardsOnLogin(player, rewardConfig, prestigeLevel);
-                });
-
-                databaseManager.getOfflinePrestigeTable().removeOfflinePrestige(playerId);
-            }, 1L);
-        });
-    }
-
-    /**
-     * Does the island lack the required prestige points to prestige?
-     * @param islandData The {@link IslandData} for the island prestiging.
-     * @return true if the island lacks the required prestige points, or false.
-     */
-    private boolean lacksRequiredPrestigePoints(@NotNull IslandData islandData) {
-        if(islandData.getRequiredPrestigePoints() == null) return false;
-
-        return islandData.getPrestigePoints() < islandData.getRequiredPrestigePoints();
+        inProgressPrestiges.remove(islandId);
     }
 }

@@ -23,7 +23,7 @@ import com.github.lukesky19.skyPrestige.database.table.*;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +33,24 @@ import java.util.concurrent.CompletableFuture;
  * This class manages the database for the plugin.
  */
 public class DatabaseManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull ConnectionManager connectionManager;
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull ConnectionManager connectionManager;
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull HookManager hookManager;
 
     private IslandIdsTable islandIdsTable;
     private PlayerIdsTable playerIdsTable;
     private IslandDataTable islandDataTable;
-    private OfflinePrestigeTable offlinePrestigeTable;
-    private OfflineStatusChangeTable offlineStatusChangeTable;
     private PlayerLogoutLocationsTable playerLogoutLocationsTables;
     private PlayerTeleportTable playerTeleportTable;
+    private QueuedSettingsTable queuedSettingsTable;
 
     /**
      * Get the {@link IslandIdsTable}.
      * @return The {@link IslandIdsTable}
      */
-    public IslandIdsTable getIslandIdsTable() {
+    public @NonNull IslandIdsTable getIslandIdsTable() {
         return islandIdsTable;
     }
 
@@ -59,7 +58,7 @@ public class DatabaseManager {
      * Get the {@link PlayerIdsTable}.
      * @return The {@link PlayerIdsTable}
      */
-    public PlayerIdsTable getPlayerIdsTable() {
+    public @NonNull PlayerIdsTable getPlayerIdsTable() {
         return playerIdsTable;
     }
 
@@ -67,31 +66,15 @@ public class DatabaseManager {
      * Get the {@link IslandDataTable}.
      * @return The {@link IslandDataTable}
      */
-    public IslandDataTable getIslandDataTable() {
+    public @NonNull IslandDataTable getIslandDataTable() {
         return islandDataTable;
-    }
-
-    /**
-     * Get the {@link OfflinePrestigeTable}.
-     * @return The {@link OfflinePrestigeTable}
-     */
-    public OfflinePrestigeTable getOfflinePrestigeTable() {
-        return offlinePrestigeTable;
-    }
-
-    /**
-     * Get the {@link OfflineStatusChangeTable}.
-     * @return The {@link OfflineStatusChangeTable}
-     */
-    public OfflineStatusChangeTable getOfflineStatusChangeTable() {
-        return offlineStatusChangeTable;
     }
 
     /**
      * Get the {@link PlayerLogoutLocationsTable}.
      * @return The {@link PlayerLogoutLocationsTable}
      */
-    public PlayerLogoutLocationsTable getPlayerLogoutLocationsTables() {
+    public @NonNull PlayerLogoutLocationsTable getPlayerLogoutLocationsTables() {
         return playerLogoutLocationsTables;
     }
 
@@ -99,8 +82,16 @@ public class DatabaseManager {
      * Get the {@link PlayerTeleportTable}.
      * @return The {@link PlayerTeleportTable}
      */
-    public PlayerTeleportTable getPlayerTeleportTable() {
+    public @NonNull PlayerTeleportTable getPlayerTeleportTable() {
         return playerTeleportTable;
+    }
+
+    /**
+     * Get the {@link QueuedSettingsTable}.
+     * @return The {@link QueuedSettingsTable}
+     */
+    public @NonNull QueuedSettingsTable getQueuedSettingsTable() {
+        return queuedSettingsTable;
     }
 
     /**
@@ -109,7 +100,7 @@ public class DatabaseManager {
      * @param plugin A {@link SkyPlugin}.
      * @param hookManager A {@link HookManager} instance.
      */
-    public DatabaseManager(@NotNull SkyPlugin plugin, @NotNull HookManager hookManager) {
+    public DatabaseManager(@NonNull SkyPlugin plugin, @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.hookManager = hookManager;
@@ -121,8 +112,8 @@ public class DatabaseManager {
      * Setup all database tables and run any migration as needed.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> setup() {
-        @NotNull List<CompletableFuture<Void>> futureList = new ArrayList<>();
+    public @NonNull CompletableFuture<Void> setup() {
+        List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
         VersionsTable versionsTable = new VersionsTable(queueManager);
         futureList.add(versionsTable.createTable());
@@ -136,17 +127,14 @@ public class DatabaseManager {
         islandDataTable = new IslandDataTable(plugin, queueManager, hookManager, versionsTable);
         futureList.add(islandDataTable.createTable());
 
-        offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager, versionsTable);
-        futureList.add(offlinePrestigeTable.createTable());
-
-        offlineStatusChangeTable = new OfflineStatusChangeTable(logger, queueManager, versionsTable);
-        futureList.add(offlineStatusChangeTable.createTable());
-
         playerLogoutLocationsTables = new PlayerLogoutLocationsTable(queueManager, versionsTable);
         futureList.add(playerLogoutLocationsTables.createTable());
 
         playerTeleportTable = new PlayerTeleportTable(queueManager, versionsTable);
         futureList.add(playerTeleportTable.createTable());
+
+        queuedSettingsTable = new QueuedSettingsTable(logger, queueManager, versionsTable);
+        futureList.add(queuedSettingsTable.createTable());
 
         return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
     }

@@ -32,8 +32,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -42,15 +41,15 @@ import java.util.UUID;
  * Listens when a GUI is open, clicked, dragged, or closed and runs the appropriate methods for the GUI.
  */
 public class GUIListener implements Listener {
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
      * @param guiManager A {@link GUIManager} instance.
      * @param hookManager A {@link HashMapDataManager} instance.
      */
-    public GUIListener(@NotNull GUIManager guiManager, @NotNull HookManager hookManager) {
+    public GUIListener(@NonNull GUIManager guiManager, @NonNull HookManager hookManager) {
         this.guiManager = guiManager;
         this.hookManager = hookManager;
     }
@@ -66,14 +65,14 @@ public class GUIListener implements Listener {
         UUID uuid = player.getUniqueId();
         Inventory inventory = inventoryClickEvent.getClickedInventory();
 
-        @Nullable String islandId = null;
+        String islandId = null;
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island != null) islandId = island.getUniqueId();
 
         IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
 
-        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
         if(baseGUI == null) return;
 
         baseGUI.handleGlobalClick(inventoryClickEvent);
@@ -96,14 +95,14 @@ public class GUIListener implements Listener {
         UUID uuid = player.getUniqueId();
         Inventory inventory = inventoryDragEvent.getInventory();
 
-        @Nullable String islandId = null;
+        String islandId = null;
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island != null) islandId = island.getUniqueId();
 
         IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
 
-        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
         if(baseGUI == null) return;
 
         baseGUI.handleGlobalDrag(inventoryDragEvent);
@@ -125,14 +124,14 @@ public class GUIListener implements Listener {
         if(!(inventoryCloseEvent.getPlayer() instanceof Player player)) return;
         UUID uuid = player.getUniqueId();
 
-        @Nullable String islandId = null;
+        String islandId = null;
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+        Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island != null) islandId = island.getUniqueId();
 
         IslandIdUUIDKey islandIdUUIDKey = new IslandIdUUIDKey(islandId, uuid);
 
-        @Nullable BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
+        BaseGUI<IslandIdUUIDKey> baseGUI = guiManager.getOpenGUI(islandIdUUIDKey);
         if(baseGUI == null) return;
 
         baseGUI.handleClose(inventoryCloseEvent);

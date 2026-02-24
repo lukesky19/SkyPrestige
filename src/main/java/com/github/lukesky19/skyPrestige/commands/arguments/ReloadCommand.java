@@ -27,15 +27,15 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class creates the reload command argument for the skyprestige command.
  */
 public class ReloadCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
 
     /**
      * Constructor
@@ -43,8 +43,8 @@ public class ReloadCommand {
      * @param localeManager A {@link LocaleManager} instance.
      */
     public ReloadCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -54,7 +54,7 @@ public class ReloadCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the reload command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the reload command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("reload")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.reload"))
                 .executes(ctx -> {

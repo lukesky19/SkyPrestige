@@ -19,19 +19,19 @@ package com.github.lukesky19.skyPrestige.task.tasks;
 
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This task updates the top ten islands from the database.
  */
 public class CacheTopTenTask extends BukkitRunnable {
-    private final @NotNull LeaderboardManager leaderboardManager;
+    private final @NonNull LeaderboardManager leaderboardManager;
 
     /**
      * Constructor
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      */
-    public CacheTopTenTask(@NotNull LeaderboardManager leaderboardManager) {
+    public CacheTopTenTask(@NonNull LeaderboardManager leaderboardManager) {
         this.leaderboardManager = leaderboardManager;
     }
 

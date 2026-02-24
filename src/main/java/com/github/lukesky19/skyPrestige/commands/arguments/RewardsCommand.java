@@ -38,8 +38,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -48,16 +47,16 @@ import java.util.UUID;
  * This class creates the rewards command argument for the skyprestige command.
  */
 public class RewardsCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull PrestigeConfigManager prestigeConfigManager;
-    private final @NotNull OptInConfigManager optInConfigManager;
-    private final @NotNull OptOutConfigManager optOutConfigManager;
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull PrestigeConfigManager prestigeConfigManager;
+    private final @NonNull OptInConfigManager optInConfigManager;
+    private final @NonNull OptOutConfigManager optOutConfigManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -72,15 +71,15 @@ public class RewardsCommand {
      * @param hookManager A {@link HookManager} instance.
      */
     public RewardsCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull PrestigeConfigManager prestigeConfigManager,
-            @NotNull OptInConfigManager optInConfigManager,
-            @NotNull OptOutConfigManager optOutConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull PrestigeConfigManager prestigeConfigManager,
+            @NonNull OptInConfigManager optInConfigManager,
+            @NonNull OptOutConfigManager optOutConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -97,7 +96,7 @@ public class RewardsCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the rewards command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the rewards command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("rewards")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.rewards"))
 
@@ -111,9 +110,9 @@ public class RewardsCommand {
                                 .executes(ctx ->
                                         showPrestigeRewardsGUI(
                                                 (Player) ctx.getSource().getSender(),
-                                                ctx.getArgument("level", int.class)))
+                                                ctx.getArgument("level", int.class))))
                         .executes(ctx ->
-                                showPrestigeRewardsGUI((Player) ctx.getSource().getSender()))))
+                                showPrestigeRewardsGUI((Player) ctx.getSource().getSender())))
 
                 .then(Commands.literal("opt-in")
                         .executes(ctx ->
@@ -132,18 +131,19 @@ public class RewardsCommand {
      * @param player The {@link Player} to open the GUI for.
      * @return 1 if successful, or 0 if not.
      */
-    private int showPrestigeRewardsGUI(@NotNull Player player) {
+    private int showPrestigeRewardsGUI(@NonNull Player player) {
         Locale locale = localeManager.getConfiguration();
+        Locale.RewardMessages rewardMessages = locale.rewardMessages();
         UUID uuid = player.getUniqueId();
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.playerNotOnIsland()));
             return 0;
         }
 
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
             logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
@@ -151,13 +151,19 @@ public class RewardsCommand {
         }
 
         if(islandData.isPrestigeExempt()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPrestigeExempt()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.prestigeExempt()));
             return 0;
         }
 
-        PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
+        int nextLevel = islandData.getPrestigeLevel() + 1;
+        if(nextLevel > prestigeConfigManager.getMaxLevel()) {
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.maxPrestigeLevel()));
+            return 0;
+        }
+
+        PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextLevel);
         if(prestigeConfig == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsMaxPrestigeLevel()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.prestigeConfigError()));
             return 0;
         }
 
@@ -170,18 +176,19 @@ public class RewardsCommand {
      * @param prestigeLevel The prestige level.
      * @return 1 if successful, or 0 if not.
      */
-    private int showPrestigeRewardsGUI(@NotNull Player player, int prestigeLevel) {
+    private int showPrestigeRewardsGUI(@NonNull Player player, int prestigeLevel) {
         Locale locale = localeManager.getConfiguration();
+        Locale.RewardMessages rewardMessages = locale.rewardMessages();
         UUID uuid = player.getUniqueId();
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.playerNotOnIsland()));
             return 0;
         }
 
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
             logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
@@ -189,13 +196,13 @@ public class RewardsCommand {
         }
 
         if(islandData.isPrestigeExempt()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPrestigeExempt()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.prestigeExempt()));
             return 0;
         }
 
         PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(prestigeLevel);
         if(prestigeConfig == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsMaxPrestigeLevel()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.maxPrestigeLevel()));
             return 0;
         }
 
@@ -210,9 +217,9 @@ public class RewardsCommand {
      * @return 1 if successful, or 0 if not.
      */
     private int showPrestigeRewardsGUI(
-            @NotNull Player player,
-            @NotNull Island island,
-            @NotNull PrestigeConfig prestigeConfig) {
+            @NonNull Player player,
+            @NonNull Island island,
+            @NonNull PrestigeConfig prestigeConfig) {
         Locale locale = localeManager.getConfiguration();
         UUID uuid = player.getUniqueId();
 
@@ -250,18 +257,19 @@ public class RewardsCommand {
      * @param player The {@link Player} to open the GUI for.
      * @return 1 if successful, or 0 if not.
      */
-    private int showOptInRewardsGUI(@NotNull Player player) {
+    private int showOptInRewardsGUI(@NonNull Player player) {
         Locale locale = localeManager.getConfiguration();
+        Locale.RewardMessages rewardMessages = locale.rewardMessages();
         UUID uuid = player.getUniqueId();
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.playerNotOnIsland()));
             return 0;
         }
 
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
             logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
@@ -302,18 +310,19 @@ public class RewardsCommand {
      * @param player The {@link Player} to open the GUI for.
      * @return 1 if successful, or 0 if not.
      */
-    private int showOptOutRewardsGUI(@NotNull Player player) {
+    private int showOptOutRewardsGUI(@NonNull Player player) {
         Locale locale = localeManager.getConfiguration();
+        Locale.RewardMessages rewardMessages = locale.rewardMessages();
         UUID uuid = player.getUniqueId();
 
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
         if(island == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.rewardsPlayerNotOnIsland()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + rewardMessages.playerNotOnIsland()));
             return 0;
         }
 
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
             logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));

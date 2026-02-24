@@ -29,8 +29,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Optional;
@@ -41,10 +41,10 @@ import java.util.concurrent.CompletableFuture;
  * This class handles teleporting offline players who logged out on an island that was prestiged.
  */
 public class TeleportationManager {
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -54,10 +54,10 @@ public class TeleportationManager {
      * @param hookManager A {@link HookManager} instance.
      */
     public TeleportationManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull SettingsManager settingsManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull HookManager hookManager) {
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
         this.databaseManager = databaseManager;
@@ -68,13 +68,13 @@ public class TeleportationManager {
      * If the player's UUID is stored for teleportation, teleport them to either their new island or the fallback location.
      * @param player The {@link Player} to teleport.
      */
-    public void handleQueuedTeleports(@NotNull Player player) {
+    public void handleQueuedTeleports(@NonNull Player player) {
         UUID playerId = player.getUniqueId();
-        @NotNull CompletableFuture<@Nullable String> islandIdFuture = databaseManager.getPlayerTeleportTable().getIslandId(playerId);
+        CompletableFuture<@Nullable String> islandIdFuture = databaseManager.getPlayerTeleportTable().getIslandId(playerId);
         islandIdFuture.thenAccept(islandId -> {
             if(!player.isOnline() || !player.isConnected()) return;
             if(islandId == null) return;
-            @Nullable Settings settings = settingsManager.getConfiguration();
+            Settings settings = settingsManager.getConfiguration();
             if(settings == null) {
                 logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
                 return;
@@ -89,7 +89,7 @@ public class TeleportationManager {
             }
 
             Island island = optionalIsland.get();
-            @Nullable Location spawnPoint = island.getSpawnPoint(World.Environment.NORMAL);
+            Location spawnPoint = island.getSpawnPoint(World.Environment.NORMAL);
             if(spawnPoint != null) {
                 player.teleportAsync(spawnPoint);
             } else {

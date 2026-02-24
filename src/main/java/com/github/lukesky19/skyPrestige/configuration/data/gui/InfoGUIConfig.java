@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public record InfoGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull List<PageConfig> pages) {
+        @NonNull List<PageConfig> pages) {
     /**
      * The configuration for a specific page.
      * @param filler The {@link ItemStackConfig} to fill the GUI with.
@@ -49,9 +49,9 @@ public record InfoGUIConfig(
      */
     @ConfigSerializable
     public record PageConfig(
-            @NotNull ItemStackConfig filler,
-            @NotNull ButtonConfig prevPage,
-            @NotNull ButtonConfig nextPage,
-            @NotNull ButtonConfig exit,
-            @NotNull List<ButtonConfig> dummyButtons) {}
+            @NonNull ItemStackConfig filler,
+            @NonNull ButtonConfig prevPage,
+            @NonNull ButtonConfig nextPage,
+            @NonNull ButtonConfig exit,
+            @NonNull List<ButtonConfig> dummyButtons) {}
 }

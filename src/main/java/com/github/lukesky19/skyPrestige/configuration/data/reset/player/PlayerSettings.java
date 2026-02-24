@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.configuration.data.reset.player;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.inventory.InventorySettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Settings related to resetting player data.
@@ -33,9 +33,9 @@ import org.jetbrains.annotations.NotNull;
  */
 @ConfigSerializable
 public record PlayerSettings(
-        @NotNull InventorySettings inventorySettings,
-        @NotNull InventorySettings enderChestSettings,
+        @NonNull InventorySettings inventorySettings,
+        @NonNull InventorySettings enderChestSettings,
         boolean resetExp,
         boolean resetMoney,
         boolean resetAuctionItems,
-        @NotNull PlayTimeSettings playTimeSettings) {}
+        @NonNull PlayTimeSettings playTimeSettings) {}

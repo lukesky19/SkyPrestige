@@ -20,6 +20,7 @@ package com.github.lukesky19.skyPrestige.listener.connection;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.Location;
@@ -29,7 +30,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
@@ -39,10 +40,10 @@ import java.util.UUID;
  * Listens for when a player leaves and then saves and unloads any data necessary for their islands.
  */
 public class PlayerQuitListener implements Listener {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -52,10 +53,10 @@ public class PlayerQuitListener implements Listener {
      * @param hookManager A {@link HookManager} instance.
      */
     public PlayerQuitListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.databaseManager = databaseManager;
         this.islandDataManager = islandDataManager;
@@ -72,6 +73,7 @@ public class PlayerQuitListener implements Listener {
         UUID uuid = player.getUniqueId();
         Location playerLocation = player.getLocation();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
         List<Island> islandList = bentoBoxHook.getIslands(uuid);
 
         islandList.stream()
@@ -80,6 +82,10 @@ public class PlayerQuitListener implements Listener {
                     String islandId = island.getUniqueId();
                     islandDataManager.saveData(islandId)
                             .whenComplete((v, t) -> islandDataManager.removeDataByIdentifier(islandId));
+
+                    if(lmbQuestHook.isHooked()) {
+                        lmbQuestHook.unloadPlayerData(island.getMemberSet());
+                    }
                 });
 
         databaseManager.getPlayerLogoutLocationsTables().setPlayerLogoutLocation(uuid, playerLocation);
@@ -90,7 +96,7 @@ public class PlayerQuitListener implements Listener {
      * @param island The {@link Island} to check.
      * @return true if any island member is online, otherwise false.
      */
-    private boolean isIslandMemberOnline(@NotNull Island island) {
+    private boolean isIslandMemberOnline(@NonNull Island island) {
         return island.getMemberSet().stream()
                 .map(plugin.getServer()::getPlayer)
                 .anyMatch(memberPlayer -> memberPlayer != null && memberPlayer.isOnline() && memberPlayer.isConnected());

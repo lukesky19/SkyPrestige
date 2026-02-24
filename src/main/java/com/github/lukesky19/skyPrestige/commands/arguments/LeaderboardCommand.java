@@ -29,7 +29,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -39,9 +39,9 @@ import java.util.Objects;
  * This class creates the leaderboard command argument for the skyprestige command.
  */
 public class LeaderboardCommand {
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull LeaderboardManager leaderboardManager;
-    private final @NotNull DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull LeaderboardManager leaderboardManager;
+    private final @NonNull DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     /**
      * Constructor
@@ -49,8 +49,8 @@ public class LeaderboardCommand {
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      */
     public LeaderboardCommand(
-            @NotNull LocaleManager localeManager,
-            @NotNull LeaderboardManager leaderboardManager) {
+            @NonNull LocaleManager localeManager,
+            @NonNull LeaderboardManager leaderboardManager) {
         this.localeManager = localeManager;
         this.leaderboardManager = leaderboardManager;
     }
@@ -64,10 +64,11 @@ public class LeaderboardCommand {
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.leaderboard"))
                 .executes(ctx -> {
                     Locale locale = localeManager.getConfiguration();
+                    Locale.LeaderboardMessages leaderboardMessages = locale.leaderboardMessages();
                     CommandSender sender = ctx.getSource().getSender();
-                    @NotNull TopTen topTen = leaderboardManager.getTopTenNotExempt();
+                    TopTen topTen = leaderboardManager.getTopTenNotExempt();
 
-                    sender.sendMessage(AdventureUtil.deserialize(locale.leaderboardTitle()));
+                    sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardTitle()));
 
                     int positionNumber = 1;
                     for(Position position : topTen.getPositions()) {
@@ -77,7 +78,7 @@ public class LeaderboardCommand {
                                 Placeholder.parsed("prestige_level", String.valueOf(position.prestigeLevel())),
                                 Placeholder.parsed("prestige_points", String.valueOf(decimalFormat.format(position.prestigePoints()))));
 
-                        sender.sendMessage(AdventureUtil.deserialize(locale.leaderboardPosition(), placeholders));
+                        sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardPosition(), placeholders));
 
                         positionNumber++;
                     }
@@ -85,7 +86,7 @@ public class LeaderboardCommand {
                     while(positionNumber <= 10) {
                         List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("position", String.valueOf(positionNumber)));
 
-                        sender.sendMessage(AdventureUtil.deserialize(locale.leaderboardPositionEmpty(), placeholders));
+                        sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardPositionEmpty(), placeholders));
 
                         positionNumber++;
                     }

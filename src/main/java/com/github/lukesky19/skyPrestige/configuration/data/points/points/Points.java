@@ -22,8 +22,8 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -58,8 +58,8 @@ public interface Points {
      * @return The {@link ItemStack} or null.
      */
     @Nullable ItemStack createDisplayItemStack(
-            @NotNull ComponentLogger logger,
-            @NotNull ItemType fallback,
-            @NotNull String name,
-            @NotNull List<String> lore);
+            @NonNull ComponentLogger logger,
+            @NonNull ItemType fallback,
+            @NonNull String name,
+            @NonNull List<String> lore);
 }

@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.data.data.leaderboard;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * This class stores the top ten positions.
  */
 public class TopTen {
-    private final @Nullable Position @NotNull [] positions = new Position[10];
+    private final @Nullable Position @NonNull [] positions = new Position[10];
 
     /**
      * Constructor
@@ -40,7 +40,7 @@ public class TopTen {
      * Constructor
      * @param positionList A {@link List} of {@link Position}s that contain the top 10 positions.
      */
-    public TopTen(@NotNull List<Position> positionList) {
+    public TopTen(@NonNull List<Position> positionList) {
         setPositions(positionList);
     }
 
@@ -48,7 +48,7 @@ public class TopTen {
      * Set the top ten positions.
      * @param positionList A {@link List} of {@link Position}s that contain the top 10 positions.
      */
-    public void setPositions(@NotNull List<Position> positionList) {
+    public void setPositions(@NonNull List<Position> positionList) {
         for(int i = 0; i < positionList.size() && i < positions.length; i++) {
             positions[i] = positionList.get(i);
         }
@@ -58,8 +58,11 @@ public class TopTen {
      * Get a {@link List} of all non-null {@link Position}s.
      * @return A {@link List} of all non-null {@link Position}s.
      */
-    public @NotNull List<@NotNull Position> getPositions() {
-        return Arrays.stream(positions).filter(Objects::nonNull).collect(Collectors.toList());
+    public @NonNull List<@NonNull Position> getPositions() {
+        //noinspection NullableProblems
+        return Arrays.stream(positions)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**

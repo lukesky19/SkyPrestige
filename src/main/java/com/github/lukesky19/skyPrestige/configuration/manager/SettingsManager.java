@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public SettingsManager(@NotNull SkyPlugin plugin) {
+    public SettingsManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "settings.yml"), Settings.class);
     }
 
     @Override
-    public @Nullable Settings migrateConfiguration(@NotNull Settings settings) {
+    public @Nullable Settings migrateConfiguration(@NonNull Settings settings) {
         switch(settings.configVersion()) {
             case "2.0.0.0" -> {
                 // latest version, do nothing

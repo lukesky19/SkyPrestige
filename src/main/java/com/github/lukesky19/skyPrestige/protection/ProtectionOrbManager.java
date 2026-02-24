@@ -32,8 +32,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +44,8 @@ import java.util.Optional;
  * This class contains methods related to the protection orb.
  */
 public class ProtectionOrbManager {
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull ProtectionOrbConfigManager protectionOrbConfigManager;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull ProtectionOrbConfigManager protectionOrbConfigManager;
 
     private @Nullable ItemStack protectionOrbStack;
     private @Nullable Component loreComponent;
@@ -56,8 +56,8 @@ public class ProtectionOrbManager {
      * @param protectionOrbConfigManager A {@link ProtectionOrbConfigManager} instance.
      */
     public ProtectionOrbManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull ProtectionOrbConfigManager protectionOrbConfigManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull ProtectionOrbConfigManager protectionOrbConfigManager) {
         this.logger = plugin.getComponentLogger();
         this.protectionOrbConfigManager = protectionOrbConfigManager;
     }
@@ -96,8 +96,8 @@ public class ProtectionOrbManager {
      * @param itemType The {@link ItemType} to check.
      * @return true if disallowed or if settings are null, otherwise false.
      */
-    public boolean isProtectionOrbItemTypeDisallowed(@NotNull ItemType itemType) {
-        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+    public boolean isProtectionOrbItemTypeDisallowed(@NonNull ItemType itemType) {
+        ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
         if(protectionOrbConfig == null) return true;
 
         return protectionOrbConfig.disallowedItems().contains(itemType.getKey().toString());
@@ -108,12 +108,12 @@ public class ProtectionOrbManager {
      * @param itemStack The {@link ItemStack} to check.
      * @return true if a protection orb, or false.
      */
-    public boolean isItemStackProtectionOrb(@NotNull ItemStack itemStack) {
-        @Nullable ItemMeta itemMeta = itemStack.getItemMeta();
+    public boolean isItemStackProtectionOrb(@NonNull ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
         if(itemMeta == null) return false;
 
         PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
-        @NotNull NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTION_ORB.getKey();
+        NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTION_ORB.getKey();
 
         return persistentDataContainer.has(namespacedKey);
     }
@@ -123,12 +123,12 @@ public class ProtectionOrbManager {
      * @param itemStack The {@link ItemStack} to check.
      * @return true if protected, or false.
      */
-    public boolean isItemStackProtected(@NotNull ItemStack itemStack) {
-        @Nullable ItemMeta itemMeta = itemStack.getItemMeta();
+    public boolean isItemStackProtected(@NonNull ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
         if(itemMeta == null) return false;
 
         PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
-        @NotNull NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTED.getKey();
+        NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTED.getKey();
 
         return persistentDataContainer.has(namespacedKey);
     }
@@ -137,17 +137,17 @@ public class ProtectionOrbManager {
      * Mark the {@link ItemStack} as protected.
      * @param itemStack The {@link ItemStack} to protect.
      */
-    public void protectItemStack(@NotNull ItemStack itemStack) {
-        @Nullable ItemMeta itemMeta = itemStack.getItemMeta();
+    public void protectItemStack(@NonNull ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
         if(itemMeta == null) return;
 
         PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
-        @NotNull NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTED.getKey();
+        NamespacedKey namespacedKey = SkyPrestigeNamespacedKeys.PROTECTED.getKey();
 
         persistentDataContainer.set(namespacedKey, PersistentDataType.INTEGER, 1);
 
         // Get the protected lore component
-        @Nullable Component protectedLoreComponent = getLoreComponent();
+        Component protectedLoreComponent = getLoreComponent();
         if(protectedLoreComponent != null) {
             // Get the current lore if any or a new list
             List<Component> lore = Objects.requireNonNullElse(itemMeta.lore(), new ArrayList<>());
@@ -167,13 +167,12 @@ public class ProtectionOrbManager {
      * Create the {@link ItemStack} for the protection orb.
      */
     private void createProtectionOrb() {
-        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+        ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
         if(protectionOrbConfig == null) return;
 
         Optional<ItemStack> optionalItemStack = new ItemStackBuilder(logger)
                 .fromItemStackConfig(
                         protectionOrbConfig.itemStackConfig(),
-                        null,
                         null,
                         List.of()).buildItemStack();
 
@@ -196,10 +195,10 @@ public class ProtectionOrbManager {
      * Create the lore added to items that are protected.
      */
     private void createProtectedLore() {
-        @Nullable ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
+        ProtectionOrbConfig protectionOrbConfig = protectionOrbConfigManager.getConfiguration();
         if(protectionOrbConfig == null) return;
 
-        @Nullable String protectedLoreString = protectionOrbConfig.protectedLore();
+        String protectedLoreString = protectionOrbConfig.protectedLore();
         if(protectedLoreString != null && !protectedLoreString.isEmpty()) {
             loreComponent = AdventureUtil.deserialize(protectedLoreString);
         }

@@ -15,20 +15,38 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.integration.interfaces;
+package com.github.lukesky19.skyPrestige.util.enums;
 
 /**
- * This class is implemented to create hooks into different plugins.
+ * This enum is used to identify which settings to apply to a player on login.
  */
-public interface Hook {
+public enum SettingsType {
     /**
-     * Attempts to initialize the hook into a plugin.
+     * Apply prestige settings.
      */
-    void initialize();
-
+    PRESTIGE,
     /**
-     * Checks if the hook was initialized or not.
-     * @return true if hooked or false.
+     * Apply opt-in settings.
      */
-    boolean isHooked();
+    OPT_IN,
+    /**
+     * Apply opt-out settings
+     */
+    OPT_OUT,
+    /**
+     * Apply island reset settings.
+     */
+    ISLAND_RESET,
+    /**
+     * Apply team join settings
+     */
+    TEAM_JOIN,
+    /**
+     * Apply team leave settings
+     */
+    TEAM_LEAVE,
+    /**
+     * Apply team kick settings
+     */
+    TEAM_KICK
 }

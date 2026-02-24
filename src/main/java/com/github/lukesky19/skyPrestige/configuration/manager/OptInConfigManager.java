@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.opt_in_out.OptInOutCo
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ public class OptInConfigManager extends SimpleConfigManager<OptInOutConfig> {
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public OptInConfigManager(@NotNull SkyPlugin plugin) {
+    public OptInConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "opt-in.yml"), OptInOutConfig.class);
     }
 
     @Override
-    public @Nullable OptInOutConfig migrateConfiguration(@NotNull OptInOutConfig optInOutConfig) {
+    public @Nullable OptInOutConfig migrateConfiguration(@NonNull OptInOutConfig optInOutConfig) {
         switch(optInOutConfig.configVersion()) {
             case "1.0.0.0" -> {
                 // latest version, do nothing

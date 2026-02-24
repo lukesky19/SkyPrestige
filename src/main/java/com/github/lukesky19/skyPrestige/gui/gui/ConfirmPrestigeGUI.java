@@ -20,13 +20,15 @@ package com.github.lukesky19.skyPrestige.gui.gui;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.ConfirmGUIConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
-import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.PrestigeResetSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
 import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skyPrestige.data.data.island.IslandResetData;
+import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -39,6 +41,7 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -46,9 +49,11 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.blueprints.dataobjects.BlueprintBundle;
+import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,13 +65,19 @@ import java.util.function.Consumer;
  */
 public class ConfirmPrestigeGUI extends ConfirmGUI {
     // Plugin Classes
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull RewardsProcessor rewardsProcessor;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull RewardsProcessor rewardsProcessor;
+    private final @NonNull PrestigeManager prestigeManager;
 
-    private final @NotNull IslandResetData islandResetData;
-    private final @NotNull Consumer<IslandResetData> consumer;
+    // Island Reset Data
+    private final @NonNull Island oldIsland;
+    private final @NonNull IslandData oldIslandData;
+    private final @NonNull GameModeAddon gameModeAddon;
+    private final @NonNull PrestigeConfig prestigeConfig;
+    private final int prestigeLevel;
+    private final @Nullable BlueprintBundle blueprint;
 
     private final @Nullable ConfirmGUIConfig confirmPrestigeGUIConfig;
 
@@ -78,27 +89,44 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param guiManager A {@link IGUIManager} instance.
      * @param identifier The {@link IslandIdUUIDKey} this GUI is tied to.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
-     * @param islandResetData The {@link IslandResetData}
-     * @param consumer The consumer that will prestige the island once the player confirms it.
+     * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param player The {@link Player}.
+     * @param oldIsland The old {@link Island}.
+     * @param oldIslandData The old {@link IslandData}.
+     * @param gameModeAddon The {@link GameModeAddon}.
+     * @param prestigeConfig The {@link PrestigeConfig}.
+     * @param prestigeLevel The prestige level.
+     * @param blueprint The selected {@link BlueprintBundle} or null.
      */
     public ConfirmPrestigeGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull RewardsProcessor rewardsProcessor,
-            @NotNull IslandResetData islandResetData,
-            @NotNull Consumer<IslandResetData> consumer) {
-        super(plugin, guiManager, identifier, islandResetData.getPlayer());
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull RewardsProcessor rewardsProcessor,
+            @NonNull PrestigeManager prestigeManager,
+            @NonNull Player player,
+            @NonNull Island oldIsland,
+            @NonNull IslandData oldIslandData,
+            @NonNull GameModeAddon gameModeAddon,
+            @NonNull PrestigeConfig prestigeConfig,
+            int prestigeLevel,
+            @Nullable BlueprintBundle blueprint) {
+        super(plugin, guiManager, identifier, player);
 
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.rewardsProcessor = rewardsProcessor;
+        this.prestigeManager = prestigeManager;
 
-        this.islandResetData = islandResetData;
-        this.consumer = consumer;
+        this.oldIsland = oldIsland;
+        this.oldIslandData = oldIslandData;
+        this.gameModeAddon = gameModeAddon;
+        this.prestigeConfig = prestigeConfig;
+        this.prestigeLevel = prestigeLevel;
+        this.blueprint = blueprint;
 
         confirmPrestigeGUIConfig = guiConfigManager.getConfirmPrestigeGUIConfig();
     }
@@ -108,11 +136,6 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @return true if created successfully, otherwise false.
      */
     public boolean create() {
-        if(!islandResetData.isPrestige()) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid prestige data."));
-            return false;
-        }
-
         if(confirmPrestigeGUIConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm prestige GUI due to invalid gui configuration."));
             return false;
@@ -187,8 +210,23 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
             guiManager.removeOpenGUI(identifier);
 
-            rewardsProcessor.revertEarlyRewards(islandResetData.getOldIsland().getMemberSet());
+            rewardsProcessor.revertEarlyRewards(oldIsland.getMemberSet());
+
+            prestigeManager.removePrestige(oldIsland.getUniqueId());
         }, 1L);
+    }
+
+    @Override
+    public void handleClose(@NonNull InventoryCloseEvent inventoryCloseEvent) {
+        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED)
+                || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
+
+        guiManager.removeOpenGUI(identifier);
+
+        // Remove early rewards given
+        rewardsProcessor.revertEarlyRewards(oldIsland.getMemberSet());
+
+        prestigeManager.removePrestige(oldIsland.getUniqueId());
     }
 
     /**
@@ -196,28 +234,28 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when the player's inventory is clicked. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Handles when a click occurs in either inventory. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -228,9 +266,9 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
         ItemStackConfig fillerConfig = confirmPrestigeGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -254,9 +292,9 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
         }
 
         createActionButton(confirmConfig, inventoryClickEvent -> {
-            consumer.accept(islandResetData);
-
             close();
+
+            prestigeManager.prestigeIsland(player, oldIsland, oldIslandData, gameModeAddon, blueprint != null ? blueprint.getUniqueId() : null, prestigeConfig, prestigeLevel);
         });
     }
 
@@ -280,7 +318,6 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      */
     private void createSelectedBlueprintButton() {
         assert confirmPrestigeGUIConfig != null;
-        @Nullable BlueprintBundle blueprint = islandResetData.getBlueprint();
         if(blueprint == null) return;
         GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -312,9 +349,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
             close();
 
-            if(islandResetData.getPrestigeConfig() == null) return;
-
-            PrestigeRewardsGUI rewardsGUI = new PrestigeRewardsGUI(plugin, guiManager, identifier, player, guiConfigManager, islandResetData.getPrestigeConfig(), this);
+            PrestigeRewardsGUI rewardsGUI = new PrestigeRewardsGUI(plugin, guiManager, identifier, player, guiConfigManager, prestigeConfig, this);
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
@@ -343,8 +378,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      */
     private void createConditionalButtons() {
         if(confirmPrestigeGUIConfig == null) return;
-        if(islandResetData.getPrestigeConfig() == null) return;
-        ResetSettings resetSettings = islandResetData.getPrestigeConfig().prestigeSettings();
+        PrestigeResetSettings resetSettings = prestigeConfig.prestigeSettings();
         IslandSettings islandSettings = resetSettings.islandSettings();
         PlayTimeSettings playTimeSettings = resetSettings.playerSettings().playTimeSettings();
         List<TagResolver.Single> emptyList = List.of();
@@ -475,7 +509,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the confirm prestige GUI due to an invalid slot."));
             return;
@@ -483,8 +517,8 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -501,7 +535,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
-    private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the confirm prestige GUI due to an invalid slot."));
             return;
@@ -509,8 +543,8 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 

@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.protection_orb.Protec
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ public class ProtectionOrbConfigManager extends SimpleConfigManager<ProtectionOr
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public ProtectionOrbConfigManager(@NotNull SkyPlugin plugin) {
+    public ProtectionOrbConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "protection_orb.yml"), ProtectionOrbConfig.class);
     }
 
     @Override
-    public @Nullable ProtectionOrbConfig migrateConfiguration(@NotNull ProtectionOrbConfig protectionOrbConfig) {
+    public @Nullable ProtectionOrbConfig migrateConfiguration(@NonNull ProtectionOrbConfig protectionOrbConfig) {
         switch(protectionOrbConfig.configVersion()) {
             case "1.0.0.0" -> {
                 // latest version, do nothing

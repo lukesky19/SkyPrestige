@@ -30,7 +30,7 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,8 +55,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -86,7 +84,7 @@ public class IslandDataTableTest extends AbstractTableTest {
      * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup(@NotNull TestInfo testInfo) {
+    public void setup(@NonNull TestInfo testInfo) {
         super.setup(testInfo);
 
         when(skyPrestige.getComponentLogger()).thenReturn(logger);
@@ -608,7 +606,7 @@ public class IslandDataTableTest extends AbstractTableTest {
      * @return A byte array
      * @throws RuntimeException on any IOException
      */
-    private byte[] serializeToBytes(@NotNull Object object) {
+    private byte[] serializeToBytes(@NonNull Object object) {
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
             objectOutputStream.writeObject(object);

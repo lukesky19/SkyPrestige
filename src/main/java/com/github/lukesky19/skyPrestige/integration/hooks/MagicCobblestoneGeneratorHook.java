@@ -17,13 +17,12 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.integration.Hook;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.database.objects.Island;
@@ -41,8 +40,8 @@ import java.util.stream.Collectors;
  * This class manages interfacing with the MagicCobblestoneGenerator addon.
  */
 public class MagicCobblestoneGeneratorHook implements Hook {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
     private StoneGeneratorAddon stoneGeneratorAddon;
     private StoneGeneratorManager stoneGeneratorManager;
 
@@ -50,7 +49,7 @@ public class MagicCobblestoneGeneratorHook implements Hook {
      * Constructor
      * @param plugin A {@link SkyPlugin} instance.
      */
-    public MagicCobblestoneGeneratorHook(@NotNull SkyPlugin plugin) {
+    public MagicCobblestoneGeneratorHook(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
     }
@@ -88,19 +87,19 @@ public class MagicCobblestoneGeneratorHook implements Hook {
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
      */
-    public void copyGeneratorData(@NotNull Island oldIsland, @NotNull Island newIsland) {
+    public void copyGeneratorData(@NonNull Island oldIsland, @NonNull Island newIsland) {
         if(!isHooked()) {
             logger.warn(AdventureUtil.deserialize("MagicCobblestoneGenerator not hooked into."));
             return;
         }
         if(oldIsland.getUniqueId().equals(newIsland.getUniqueId())) return;
 
-        @Nullable GeneratorDataObject oldIslandGeneratorData = stoneGeneratorManager.validateIslandData(oldIsland);
+        GeneratorDataObject oldIslandGeneratorData = stoneGeneratorManager.validateIslandData(oldIsland);
         if(oldIslandGeneratorData == null) {
             logger.error(AdventureUtil.deserialize("Failed to copy generator data due to invalid island generator data for the old island."));
             return;
         }
-        @Nullable GeneratorDataObject newIslandGeneratorData = stoneGeneratorManager.validateIslandData(newIsland);
+        GeneratorDataObject newIslandGeneratorData = stoneGeneratorManager.validateIslandData(newIsland);
         if(newIslandGeneratorData == null) {
             logger.error(AdventureUtil.deserialize("Failed to copy generator data due to invalid island generator data for the new island."));
             return;
@@ -142,13 +141,13 @@ public class MagicCobblestoneGeneratorHook implements Hook {
      * @apiNote If the addon isn't hooked into or any island data is null, no copying will occur.
      * @param island The {@link Island}.
      */
-    public void resetGeneratorData(@NotNull Island island) {
+    public void resetGeneratorData(@NonNull Island island) {
         if(!isHooked()) {
             logger.warn(AdventureUtil.deserialize("MagicCobblestoneGenerator not hooked into."));
             return;
         }
 
-        @Nullable GeneratorDataObject generatorData = stoneGeneratorManager.validateIslandData(island);
+        GeneratorDataObject generatorData = stoneGeneratorManager.validateIslandData(island);
         if(generatorData == null) {
             logger.error(AdventureUtil.deserialize("Failed to reset generator data due to invalid island generator data for the island."));
             return;

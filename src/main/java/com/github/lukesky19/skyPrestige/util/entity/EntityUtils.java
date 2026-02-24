@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.util.entity;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class is used to validate and extract data from {@link Entity}.
@@ -42,7 +42,7 @@ public class EntityUtils {
      * @param entity The {@link LivingEntity}.
      * @return The amount of entities in the stack. Defaults to 1 if RoseStacker isn't hooked into.
      */
-    public static int getAmount(@NotNull RoseStackerHook roseStackerHook, @NotNull LivingEntity entity) {
+    public static int getAmount(@NonNull RoseStackerHook roseStackerHook, @NonNull LivingEntity entity) {
         return roseStackerHook.getStackSize(entity);
     }
 }

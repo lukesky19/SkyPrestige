@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.integration.manager;
 
 import com.github.lukesky19.skyPrestige.integration.hooks.*;
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import org.jetbrains.annotations.NotNull;
+import com.github.lukesky19.skylib.api.integration.Hook;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,36 +29,34 @@ import java.util.Map;
  * This class manages hooks into different plugins.
  */
 public class HookManager {
-    private final @NotNull Map<Class<?>, Hook> hooks = new HashMap<>();
+    private final @NonNull Map<Class<?>, Hook> hooks = new HashMap<>();
 
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin} instance.
      */
-    public HookManager(@NotNull SkyPlugin plugin) {
-        BentoBoxHook bentoBoxHook = new BentoBoxHook();
-        registerHook(BentoBoxHook.class, bentoBoxHook);
+    public HookManager(@NonNull SkyPlugin plugin) {
+        registerHook(BentoBoxHook.class, new BentoBoxHook());
 
-        EconomyHook economyHook = new EconomyHook(plugin);
-        registerHook(EconomyHook.class, economyHook);
+        registerHook(EconomyHook.class, new EconomyHook(plugin));
 
-        LuckPermsHook luckPermsHook = new LuckPermsHook(plugin);
-        registerHook(LuckPermsHook.class, luckPermsHook);
+        registerHook(ExcellentCratesHook.class, new ExcellentCratesHook(plugin));
 
-        MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = new MagicCobblestoneGeneratorHook(plugin);
-        registerHook(MagicCobblestoneGeneratorHook.class, magicCobblestoneGeneratorHook);
+        registerHook(LMBQuestHook.class, new LMBQuestHook(plugin));
 
-        RoseStackerHook roseStackerHook = new RoseStackerHook(plugin);
-        registerHook(RoseStackerHook.class, roseStackerHook);
+        registerHook(LuckPermsHook.class, new LuckPermsHook(plugin));
 
-        SkyPlayTimeHook skyPlayTimeHook = new SkyPlayTimeHook(plugin);
-        registerHook(SkyPlayTimeHook.class, skyPlayTimeHook);
+        registerHook(MagicCobblestoneGeneratorHook.class, new MagicCobblestoneGeneratorHook(plugin));
 
-        SkySellWandsHook skySellWandsHook = new SkySellWandsHook(plugin);
-        registerHook(SkySellWandsHook.class, skySellWandsHook);
+        registerHook(PlayerAuctionsHook.class, new PlayerAuctionsHook(plugin));
 
-        PlayerAuctionsHook playerAuctionsHook = new PlayerAuctionsHook(plugin);
-        registerHook(PlayerAuctionsHook.class, playerAuctionsHook);
+        registerHook(RoseStackerHook.class, new RoseStackerHook(plugin));
+
+        registerHook(SkyHoppersHook.class, new SkyHoppersHook(plugin));
+
+        registerHook(SkyPlayTimeHook.class, new SkyPlayTimeHook(plugin));
+
+        registerHook(SkySellWandsHook.class, new SkySellWandsHook(plugin));
     }
 
     /**
@@ -67,7 +65,7 @@ public class HookManager {
      * @param hook The class instance.
      * @param <T> Parameter for any class that extends {@link Hook}.
      */
-    public <T extends Hook> void registerHook(@NotNull Class<T> hookClass, @NotNull Hook hook) {
+    public <T extends Hook> void registerHook(@NonNull Class<T> hookClass, @NonNull Hook hook) {
         hooks.put(hookClass, hook);
         hook.initialize();
     }
@@ -78,7 +76,7 @@ public class HookManager {
      * @return The class instance.
      * @param <T> Parameter for any class that extends {@link Hook}.
      */
-    public @NotNull <T extends Hook> T getHook(@NotNull Class<T> hookClass) {
+    public @NonNull <T extends Hook> T getHook(@NonNull Class<T> hookClass) {
         return hookClass.cast(hooks.get(hookClass));
     }
 }

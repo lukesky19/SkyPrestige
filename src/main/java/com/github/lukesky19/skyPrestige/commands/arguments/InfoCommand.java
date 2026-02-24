@@ -31,17 +31,17 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class creates the info command argument for the skyprestige command.
  */
 public class InfoCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull GUIManager guiManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull GUIManager guiManager;
 
     /**
      * Constructor
@@ -51,10 +51,10 @@ public class InfoCommand {
      * @param guiManager A {@link GUIManager} instance.
      */
     public InfoCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull GUIManager guiManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -66,7 +66,7 @@ public class InfoCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the info command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the info command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("info")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.info") && ctx.getSender() instanceof Player)
                 .executes(ctx -> {

@@ -18,19 +18,19 @@
 package com.github.lukesky19.skyPrestige.util.parameter;
 
 import com.github.lukesky19.skylib.api.database.parameter.Parameter;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Takes a String and stores it as-is for use in a database.
  */
 public class CaseSensitiveStringParameter implements Parameter<String> {
-    private final @NotNull String value;
+    private final @NonNull String value;
 
     /**
      * Stores a {@link String} to later use to replace a parameter with.
      * @param string The {@link String} to store.
      */
-    public CaseSensitiveStringParameter(@NotNull String string) {
+    public CaseSensitiveStringParameter(@NonNull String string) {
         value = string;
     }
 
@@ -39,7 +39,7 @@ public class CaseSensitiveStringParameter implements Parameter<String> {
      * @return A {@link String} to replace a parameter with.
      */
     @Override
-    public @NotNull String getValue() {
+    public @NonNull String getValue() {
         return value;
     }
 }

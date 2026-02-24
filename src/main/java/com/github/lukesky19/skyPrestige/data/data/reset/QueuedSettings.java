@@ -15,33 +15,25 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.util.parameter;
+package com.github.lukesky19.skyPrestige.data.data.reset;
 
-import com.github.lukesky19.skylib.api.database.parameter.Parameter;
-import org.jetbrains.annotations.NotNull;
+import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
+import org.jspecify.annotations.NonNull;
+import world.bentobox.bentobox.database.objects.Island;
 
-import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
- * Takes a {@link Timestamp} and stores it as-is for use in a database.
+ * This record contains the data required to apply queued settings to a player on login.
+ * @param playerId The player's {@link UUID}.
+ * @param islandId The player's {@link Island}'s id.
+ * @param settingsType The {@link SettingsType} to apply.
+ * @param prestigeLevel The prestige level achieved. Only applicable for {@link SettingsType#PRESTIGE}.
+ * @param timestamp The timestamp.
  */
-public class TimestampParameter implements Parameter<Timestamp> {
-    private final @NotNull Timestamp value;
-
-    /**
-     * Stores a {@link Timestamp} to later use to replace a parameter with.
-     * @param value The {@link Timestamp} to store.
-     */
-    public TimestampParameter(@NotNull Timestamp value) {
-        this.value = value;
-    }
-
-    /**
-     * Returns the {@link Timestamp} to use replace the parameter with.
-     * @return A {@link Timestamp} to replace a parameter with.
-     */
-    @Override
-    public @NotNull Timestamp getValue() {
-        return value;
-    }
-}
+public record QueuedSettings(
+        @NonNull UUID playerId,
+        @NonNull String islandId,
+        @NonNull SettingsType settingsType,
+        int prestigeLevel,
+        long timestamp) {}

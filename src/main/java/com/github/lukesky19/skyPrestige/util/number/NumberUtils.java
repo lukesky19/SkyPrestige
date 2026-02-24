@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.util.number;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,7 +42,7 @@ public class NumberUtils {
      * @param value The value to format.
      * @return A {@link String} for the decimal formatted to 2decimal places.
      */
-    public static @NotNull String formatDecimal(double value) {
+    public static @NonNull String formatDecimal(double value) {
         value = round(value);
 
         DecimalFormat decimalFormat = new DecimalFormat("#.##");

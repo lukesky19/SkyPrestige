@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.util.cache;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
      * @return true if successful, false if not.
      */
     @Override
-    protected boolean removeEldestEntry(@NotNull Map.Entry<K, V> eldest) {
+    protected boolean removeEldestEntry(Map.@NonNull Entry<K, V> eldest) {
         return size() > capacity;
     }
 
@@ -59,7 +59,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
      * @param value The value.
      * @return the inserted value.
      */
-    public @Nullable V put(@NotNull K key, @NotNull V value) {
+    public @Nullable V put(@NonNull K key, @NonNull V value) {
         return super.put(key, value);
     }
 
@@ -68,7 +68,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
      * @param key The key.
      * @return The value or null.
      */
-    public @Nullable V get(@NotNull Object key) {
+    public @Nullable V get(@NonNull Object key) {
         return super.get(key);
     }
 }

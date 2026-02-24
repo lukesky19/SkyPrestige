@@ -41,8 +41,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -61,12 +60,12 @@ public class InventoryOpenListener extends PointsListener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public InventoryOpenListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
@@ -77,7 +76,7 @@ public class InventoryOpenListener extends PointsListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryOpened(InventoryOpenEvent inventoryOpenEvent) {
         // Config
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
@@ -85,19 +84,19 @@ public class InventoryOpenListener extends PointsListener {
 
         // Player
         if(!(inventoryOpenEvent.getPlayer() instanceof Player player)) return;
-        @NotNull UUID playerId = player.getUniqueId();
+        UUID playerId = player.getUniqueId();
         if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Island Check
-        @Nullable Island island = checkIsland(player, playerId);
+        Island island = checkIsland(player, playerId);
         if(island == null) return;
 
         // IslandData check.
-        @Nullable IslandData islandData = checkIslandData(island);
+        IslandData islandData = checkIslandData(island);
         if(islandData == null) return;
 
         // Block
-        @Nullable InventoryHolder inventoryHolder = inventoryOpenEvent.getInventory().getHolder(false);
+        InventoryHolder inventoryHolder = inventoryOpenEvent.getInventory().getHolder(false);
         if(inventoryHolder == null) return;
         if(!(inventoryHolder instanceof Container container)) return;
         Block block = container.getBlock();
@@ -106,9 +105,9 @@ public class InventoryOpenListener extends PointsListener {
         BlockData blockData = block.getBlockData();
 
         // Block Data
-        @Nullable EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
-        @Nullable Integer age = BlockUtils.getAge(blockData);
-        @Nullable Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
+        EntityType entityType = BlockUtils.getEntityType(hookManager.getHook(RoseStackerHook.class), block);
+        Integer age = BlockUtils.getAge(blockData);
+        Boolean waterLogged = BlockUtils.getWaterLogged(blockData);
 
         // Points
         double points = prestigePointsManager.getBlockPoints(ActionType.OPEN, prestigePointsConfig.prestigePointsMapping().open(), blockType, entityType, age, waterLogged);

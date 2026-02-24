@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ public class IslandIdTableTest extends AbstractTableTest {
      * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup(@NotNull TestInfo testInfo) {
+    public void setup(@NonNull TestInfo testInfo) {
         super.setup(testInfo);
 
         // Setup versions table
@@ -205,7 +205,7 @@ public class IslandIdTableTest extends AbstractTableTest {
      * @param islandId The island id to get.
      * @return A {@link CompletableFuture} containing the island id as a {@link String} or null.
      */
-    private @NotNull CompletableFuture<@Nullable String> getIslandId(@NotNull String islandId) {
+    private @NonNull CompletableFuture<@Nullable String> getIslandId(@NonNull String islandId) {
         String selectSql = "SELECT island_id FROM skyprestige_island_ids WHERE island_id = ?";
 
         return liveQueueManager.queueReadTransaction(selectSql, List.of(new CaseSensitiveStringParameter(islandId)), resultSet -> {

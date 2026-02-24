@@ -22,8 +22,8 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -36,12 +36,12 @@ public class VaultConfigManager extends SimpleConfigManager<VaultConfig> {
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public VaultConfigManager(@NotNull SkyPlugin plugin) {
+    public VaultConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "vault.yml"), VaultConfig.class);
     }
 
     @Override
-    public @Nullable VaultConfig migrateConfiguration(@NotNull VaultConfig vaultConfig) {
+    public @Nullable VaultConfig migrateConfiguration(@NonNull VaultConfig vaultConfig) {
         switch(vaultConfig.configVersion()) {
             case "1.0.0.0" -> {
                 // latest version, do nothing
@@ -70,7 +70,7 @@ public class VaultConfigManager extends SimpleConfigManager<VaultConfig> {
      * @param itemType The {@link ItemType} to check.
      * @return true if disallowed or if settings are null, otherwise false.
      */
-    public boolean isVaultItemTypeDisallowed(@NotNull ItemType itemType) {
+    public boolean isVaultItemTypeDisallowed(@NonNull ItemType itemType) {
         if(configuration == null) return true;
 
         return configuration.vaultDisallowedItems().contains(itemType.getKey().toString());

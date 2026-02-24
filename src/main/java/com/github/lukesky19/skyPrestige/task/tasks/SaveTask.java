@@ -19,19 +19,19 @@ package com.github.lukesky19.skyPrestige.task.tasks;
 
 import com.github.lukesky19.skylib.api.common.interfaces.data.IPersistentDataManager;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This task saves island data to the database.
  */
 public class SaveTask extends BukkitRunnable {
-    private final @NotNull IPersistentDataManager<?, ?> dataManager;
+    private final @NonNull IPersistentDataManager<?, ?> dataManager;
 
     /**
      * Constructor
      * @param dataManager A {@link IPersistentDataManager} data manager.
      */
-    public SaveTask(@NotNull IPersistentDataManager<?, ?> dataManager) {
+    public SaveTask(@NonNull IPersistentDataManager<?, ?> dataManager) {
         this.dataManager = dataManager;
     }
 

@@ -17,15 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.integration.Hook;
 import com.github.lukesky19.skyplaytime.SkyPlayTimeAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -33,14 +33,14 @@ import java.util.UUID;
  * This class manages interfacing with SkyPlayTime.
  */
 public class SkyPlayTimeHook implements Hook {
-    private final @NotNull SkyPlugin plugin;
+    private final @NonNull SkyPlugin plugin;
     private @Nullable SkyPlayTimeAPI skyPlayTimeAPI;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      */
-    public SkyPlayTimeHook(@NotNull SkyPlugin plugin) {
+    public SkyPlayTimeHook(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -49,9 +49,9 @@ public class SkyPlayTimeHook implements Hook {
      */
     @Override
     public void initialize() {
-        @Nullable Plugin plugin = this.plugin.getServer().getPluginManager().getPlugin("SkyPlayTime");
+        Plugin plugin = this.plugin.getServer().getPluginManager().getPlugin("SkyPlayTime");
         if(plugin != null && plugin.isEnabled()) {
-            @Nullable RegisteredServiceProvider<SkyPlayTimeAPI> rsp = this.plugin.getServer().getServicesManager().getRegistration(SkyPlayTimeAPI.class);
+            RegisteredServiceProvider<SkyPlayTimeAPI> rsp = this.plugin.getServer().getServicesManager().getRegistration(SkyPlayTimeAPI.class);
             if (rsp != null) {
                 skyPlayTimeAPI = rsp.getProvider();
             }
@@ -73,7 +73,7 @@ public class SkyPlayTimeHook implements Hook {
      * @param player The {@link Player} to check.
      * @return true if afk, or false if not afk or SkyPlayTime was not hooked into.
      */
-    public boolean isPlayerAFK(@NotNull Player player) {
+    public boolean isPlayerAFK(@NonNull Player player) {
         if(skyPlayTimeAPI == null) return false;
 
         UUID uuid = player.getUniqueId();
@@ -86,7 +86,7 @@ public class SkyPlayTimeHook implements Hook {
      * @param uuid The {@link UUID} of the player to check.
      * @return true if afk, or false if not afk or SkyPlayTime was not hooked into.
      */
-    public boolean isPlayerAFK(@NotNull UUID uuid) {
+    public boolean isPlayerAFK(@NonNull UUID uuid) {
         if(skyPlayTimeAPI == null) return false;
 
         return skyPlayTimeAPI.isPlayerAfk(uuid);
@@ -104,7 +104,7 @@ public class SkyPlayTimeHook implements Hook {
      * @param yearly Should yearly play time be reset?
      * @param total Should total play time be reset?
      */
-    public void resetPlayTime(@NotNull UUID uuid, boolean session, boolean daily, boolean weekly, boolean monthly, boolean yearly, boolean total) {
+    public void resetPlayTime(@NonNull UUID uuid, boolean session, boolean daily, boolean weekly, boolean monthly, boolean yearly, boolean total) {
         if(skyPlayTimeAPI == null) return;
         if(!session && !daily && !weekly && !monthly && !yearly && !total) return;
 

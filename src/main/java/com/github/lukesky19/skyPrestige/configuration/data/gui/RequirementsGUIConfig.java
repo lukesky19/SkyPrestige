@@ -21,39 +21,30 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
- * This record contains the configuration for the progress gui.
+ * This record contains the configuration for the requirements gui.
  * @param configVersion The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
  * @param filler The {@link ItemStackConfig} to fill the GUI with.
+ * @param nextPage The {@link ButtonConfig} for the next page button.
+ * @param prevPage The {@link ButtonConfig} for the previous page button.
  * @param exit The {@link ButtonConfig} for the exit button.
- * @param progressButtons The {@link ProgressButtons} config to use.
- * @param progressSlots The slots to place the appropriate progress buttons at.
  * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
  */
 @ConfigSerializable
-public record ProgressGUIConfig(
+public record RequirementsGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull ItemStackConfig filler,
-        @NotNull ButtonConfig exit,
-        @NotNull ProgressButtons progressButtons,
-        @NotNull List<Integer> progressSlots,
-        @NotNull List<ButtonConfig> dummyButtons) {
-    /**
-     * This record contains the configuration for the progress buttons.
-     * @param incomplete The {@link ItemStackConfig} for the incomplete progress button.
-     * @param complete The {@link ItemStackConfig} for the complete progress button.
-     */
-    @ConfigSerializable
-    public record ProgressButtons(
-            ItemStackConfig incomplete,
-            ItemStackConfig complete) {}
+        @NonNull ItemStackConfig filler,
+        @NonNull ButtonConfig nextPage,
+        @NonNull ButtonConfig prevPage,
+        @NonNull ButtonConfig exit,
+        @NonNull List<ButtonConfig> dummyButtons) {
 }

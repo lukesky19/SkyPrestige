@@ -24,17 +24,15 @@ import com.github.lukesky19.skylib.api.common.abstracts.config.KeyValueConfigMan
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,7 +44,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public PrestigeConfigManager(@NotNull SkyPlugin plugin) {
+    public PrestigeConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin);
     }
 
@@ -54,10 +52,21 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
      * Get a {@link List} of {@link Integer}s for the currently configured prestige levels.
      * @return A {@link List} of {@link Integer}s for the currently configured prestige levels.
      */
-    public @NotNull List<@NotNull Integer> getPrestigeLevels() {
+    public @NonNull List<@NonNull Integer> getPrestigeLevels() {
         return dataMap.keySet().stream()
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Get the max prestige level.
+     * @return The max prestige level.
+     */
+    public int getMaxLevel() {
+        return dataMap.keySet().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
     }
 
     @Override
@@ -75,15 +84,15 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
     }
 
     @Override
-    public void loadConfiguration(@NotNull Integer identifier, @NotNull Class<PrestigeConfig> configClass, @NotNull Path configurationPath) {
-        @Nullable PrestigeConfig configuration;
+    public void loadConfiguration(@NonNull Integer identifier, @NonNull Class<PrestigeConfig> configClass, @NonNull Path configurationPath) {
+        PrestigeConfig configuration;
 
         YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(configurationPath);
         try {
             configuration = yamlConfigurationLoader.load().get(configClass);
             if(configuration == null) return;
 
-            @Nullable PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
+            PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
             if(migratedConfiguration == null) return;
 
             if(!validateConfiguration(migratedConfiguration)) return;
@@ -98,28 +107,6 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
         } catch (ConfigurateException configurateException) {
             logger.error(AdventureUtil.deserialize("Failed to load the configuration file at " + configurationPath + ". Error: " + configurateException.getMessage()));
         }
-    }
-
-    /**
-     * Get a {@link Map} mapping prestige levels to {@link PrestigeConfig}.
-     * The {@link Map} will be empty if no {@link PrestigeConfig} was found for any prestige levels.
-     * @param prestigeLevels The {@link List} of prestige levels.
-     * @return A {@link Map} mapping prestige levels to {@link PrestigeConfig}.
-     */
-    public @NotNull Map<Integer, PrestigeConfig> getPrestigeConfigMapForLevels(@NotNull List<Integer> prestigeLevels) {
-        Map<Integer, PrestigeConfig> prestigeConfigMap = new HashMap<>();
-
-        for(Integer prestigeLevel : prestigeLevels) {
-            PrestigeConfig prestigeConfig = getData(prestigeLevel);
-            if(prestigeConfig == null) {
-                logger.warn(AdventureUtil.deserialize("No prestige config found for prestige level: " + prestigeLevel));
-                continue;
-            }
-
-            prestigeConfigMap.put(prestigeLevel, prestigeConfig);
-        }
-
-        return prestigeConfigMap;
     }
 
     /**
@@ -139,7 +126,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
      * @return The updated {@link PrestigeConfig}.
      */
     @Override
-    protected @Nullable PrestigeConfig migrateConfiguration(@NotNull PrestigeConfig configuration) {
+    protected @Nullable PrestigeConfig migrateConfiguration(@NonNull PrestigeConfig configuration) {
         switch(configuration.configVersion()) {
             case "2.0.0.0" -> {
                 // Current version, do nothing
@@ -163,7 +150,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
     }
 
     @Override
-    protected boolean validateConfiguration(@NotNull PrestigeConfig configuration) {
+    protected boolean validateConfiguration(@NonNull PrestigeConfig configuration) {
         return true;
     }
 }

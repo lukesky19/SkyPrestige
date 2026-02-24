@@ -19,10 +19,10 @@ package com.github.lukesky19.skyPrestige.util.key;
 
 import com.github.lukesky19.skyPrestige.util.cache.EntityPointsCache;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This record is used as a key in the {@link EntityPointsCache} to cache frequently retrieved prestige point values.
  * @param entityType The {@link EntityType}.
  */
-public record EntityKey(@NotNull EntityType entityType) {}
+public record EntityKey(@NonNull EntityType entityType) {}

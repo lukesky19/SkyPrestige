@@ -32,18 +32,18 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class creates the values command argument for the skyprestige command.
  */
 public class ValuesCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull PrestigePointsConfigManager prestigePointsConfigManager;
 
     /**
      * Constructor
@@ -54,11 +54,11 @@ public class ValuesCommand {
      * @param prestigePointsConfigManager A {@link PrestigePointsConfigManager} instance.
      */
     public ValuesCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -71,7 +71,7 @@ public class ValuesCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the values command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the values command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("values")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.values") && ctx.getSender() instanceof Player)
                 .executes(ctx -> {

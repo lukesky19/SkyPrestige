@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConf
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -47,14 +47,14 @@ public record ConfirmGUIConfig(
         @Nullable String guiName,
         @Nullable GUIType guiType,
         int blueprintButtonSlot,
-        @NotNull ItemStackConfig filler,
-        @NotNull ButtonConfig confirmButton,
-        @NotNull ButtonConfig cancelButton,
-        @NotNull ButtonConfig rewardsButton,
-        @NotNull ButtonConfig keepMembers,
-        @NotNull ButtonConfig keepCommandRanks,
-        @NotNull ConditionalButtons conditionalButtons,
-        @NotNull List<ButtonConfig> dummyButtons) {
+        @NonNull ItemStackConfig filler,
+        @NonNull ButtonConfig confirmButton,
+        @NonNull ButtonConfig cancelButton,
+        @NonNull ButtonConfig rewardsButton,
+        @NonNull ButtonConfig keepMembers,
+        @NonNull ButtonConfig keepCommandRanks,
+        @NonNull ConditionalButtons conditionalButtons,
+        @NonNull List<ButtonConfig> dummyButtons) {
     /**
      * This record contains the configuration for the buttons displayed depending on the prestige level config.
      * @param keepIsland The {@link ButtonConfig} for the button that says the island isn't reset on prestige/opt-in/opt-out.
@@ -94,38 +94,38 @@ public record ConfirmGUIConfig(
      */
     @ConfigSerializable
     public record ConditionalButtons(
-            @NotNull ButtonConfig keepIsland,
-            @NotNull ButtonConfig resetIsland,
-            @NotNull ButtonConfig keepIslandSize,
-            @NotNull ButtonConfig resetIslandSize,
-            @NotNull ButtonConfig keepFlags,
-            @NotNull ButtonConfig resetFlags,
-            @NotNull ButtonConfig keepInventory,
-            @NotNull ButtonConfig clearInventory,
-            @NotNull ButtonConfig keepEnderChest,
-            @NotNull ButtonConfig clearEnderChest,
-            @NotNull ButtonConfig keepExp,
-            @NotNull ButtonConfig resetExp,
-            @NotNull ButtonConfig keepMoney,
-            @NotNull ButtonConfig resetMoney,
-            @NotNull ButtonConfig keepAuctionItems,
-            @NotNull ButtonConfig resetAuctionItems,
-            @NotNull ButtonConfig keepGeneratorUpgrades,
-            @NotNull ButtonConfig resetGeneratorUpgrades,
-            @NotNull ButtonConfig keepVaultItems,
-            @NotNull ButtonConfig clearVaultItems,
-            @NotNull ButtonConfig startingMoney,
-            @NotNull ButtonConfig noStartingMoney,
-            @NotNull ButtonConfig keepSessionPlayTime,
-            @NotNull ButtonConfig resetSessionPlayTime,
-            @NotNull ButtonConfig keepDailyPlayTime,
-            @NotNull ButtonConfig resetDailyPlayTime,
-            @NotNull ButtonConfig keepWeeklyPlayTime,
-            @NotNull ButtonConfig resetWeeklyPlayTime,
-            @NotNull ButtonConfig keepMonthlyPlayTime,
-            @NotNull ButtonConfig resetMonthlyPlayTime,
-            @NotNull ButtonConfig keepYearlyPlayTime,
-            @NotNull ButtonConfig resetYearlyPlayTime,
-            @NotNull ButtonConfig keepTotalPlayTime,
-            @NotNull ButtonConfig resetTotalPlayTime) {}
+            @NonNull ButtonConfig keepIsland,
+            @NonNull ButtonConfig resetIsland,
+            @NonNull ButtonConfig keepIslandSize,
+            @NonNull ButtonConfig resetIslandSize,
+            @NonNull ButtonConfig keepFlags,
+            @NonNull ButtonConfig resetFlags,
+            @NonNull ButtonConfig keepInventory,
+            @NonNull ButtonConfig clearInventory,
+            @NonNull ButtonConfig keepEnderChest,
+            @NonNull ButtonConfig clearEnderChest,
+            @NonNull ButtonConfig keepExp,
+            @NonNull ButtonConfig resetExp,
+            @NonNull ButtonConfig keepMoney,
+            @NonNull ButtonConfig resetMoney,
+            @NonNull ButtonConfig keepAuctionItems,
+            @NonNull ButtonConfig resetAuctionItems,
+            @NonNull ButtonConfig keepGeneratorUpgrades,
+            @NonNull ButtonConfig resetGeneratorUpgrades,
+            @NonNull ButtonConfig keepVaultItems,
+            @NonNull ButtonConfig clearVaultItems,
+            @NonNull ButtonConfig startingMoney,
+            @NonNull ButtonConfig noStartingMoney,
+            @NonNull ButtonConfig keepSessionPlayTime,
+            @NonNull ButtonConfig resetSessionPlayTime,
+            @NonNull ButtonConfig keepDailyPlayTime,
+            @NonNull ButtonConfig resetDailyPlayTime,
+            @NonNull ButtonConfig keepWeeklyPlayTime,
+            @NonNull ButtonConfig resetWeeklyPlayTime,
+            @NonNull ButtonConfig keepMonthlyPlayTime,
+            @NonNull ButtonConfig resetMonthlyPlayTime,
+            @NonNull ButtonConfig keepYearlyPlayTime,
+            @NonNull ButtonConfig resetYearlyPlayTime,
+            @NonNull ButtonConfig keepTotalPlayTime,
+            @NonNull ButtonConfig resetTotalPlayTime) {}
 }

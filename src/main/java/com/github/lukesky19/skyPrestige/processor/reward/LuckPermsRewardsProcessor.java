@@ -20,6 +20,7 @@ package com.github.lukesky19.skyPrestige.processor.reward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.GroupReward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.PermissionReward;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
+import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skyPrestige.integration.hooks.LuckPermsHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -34,8 +35,7 @@ import net.luckperms.api.node.types.PermissionNode;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -43,13 +43,13 @@ import java.util.*;
  * Process rewards related to LuckPerms.
  */
 public class LuckPermsRewardsProcessor {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull HookManager hookManager;
 
     // These Maps store the nodes added or removed before the island is reset so they can be reverted later.
-    private final @NotNull Map<UUID, List<Node>> removedNodes = new HashMap<>();
-    private final @NotNull Map<UUID, List<Node>> addedNodes = new HashMap<>();
+    private final @NonNull Map<UUID, List<Node>> removedNodes = new HashMap<>();
+    private final @NonNull Map<UUID, List<Node>> addedNodes = new HashMap<>();
 
     /**
      * Constructor
@@ -57,7 +57,7 @@ public class LuckPermsRewardsProcessor {
      * @param logger A {@link ComponentLogger}.
      * @param hookManager A {@link HookManager} instance.
      */
-    public LuckPermsRewardsProcessor(@NotNull SkyPlugin plugin, @NotNull ComponentLogger logger, @NotNull HookManager hookManager) {
+    public LuckPermsRewardsProcessor(@NonNull SkyPlugin plugin, @NonNull ComponentLogger logger, @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = logger;
         this.hookManager = hookManager;
@@ -71,10 +71,10 @@ public class LuckPermsRewardsProcessor {
      * @param rewardConfig The {@link RewardConfig}.
      */
     public void processEarlyRewards(
-            @NotNull Player initiatingPlayer,
-            @NotNull List<Player> onlineIslandMembers,
-            @NotNull List<UUID> offlineIslandMembers,
-            @NotNull RewardConfig rewardConfig) {
+            @NonNull Player initiatingPlayer,
+            @NonNull List<Player> onlineIslandMembers,
+            @NonNull List<UUID> offlineIslandMembers,
+            @NonNull RewardConfig rewardConfig) {
         LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
         if(luckPermsHook.isHooked()) {
             List<PermissionReward> earlyPermissionRewards = rewardConfig.permissionRewards().stream()
@@ -98,26 +98,27 @@ public class LuckPermsRewardsProcessor {
                     .toList();
 
             // Process rewards given to the initiating player only first
-            @Nullable User initiatingUser = luckPermsHook.getUser(initiatingPlayer);
-            if(initiatingUser != null) {
-                processRewards(luckPermsHook, initiatingUser, initiatorPermissionRewards, initiatorGroupRewards, true);
-            }
-
-            // Process rewards given to all island members
-            // Online members
-            onlineIslandMembers.forEach(player -> {
-                @Nullable User user = luckPermsHook.getUser(player);
-                if(user != null) {
-                    processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards, true);
+            luckPermsHook.getOrLoadUser(initiatingPlayer, initiatingPlayer.getUniqueId()).thenAccept(initiatingUser -> {
+                if(initiatingUser != null) {
+                    processRewards(luckPermsHook, initiatingUser, initiatorPermissionRewards, initiatorGroupRewards, true);
                 }
             });
 
+            // Process rewards given to all island members
+            // Online members
+            onlineIslandMembers.forEach(player ->
+                    luckPermsHook.getOrLoadUser(player, player.getUniqueId()).thenAccept(user -> {
+                        if(user != null) {
+                            processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards, true);
+                        }
+                    }));
+
             // Offline members
             offlineIslandMembers.forEach(playerId ->
-                    luckPermsHook.loadUser(playerId).thenAcceptAsync(user -> {
+                    luckPermsHook.getOrLoadUser(playerId).thenAcceptAsync(user -> {
                         if(user != null) {
-                            processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards,true);
-                        }    
+                            processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards, true);
+                        }
                     }));
         }
     }
@@ -130,10 +131,10 @@ public class LuckPermsRewardsProcessor {
      * @param rewardConfig The {@link RewardConfig}.
      */
     public void processPostRewards(
-            @NotNull Player initiatingPlayer,
-            @NotNull List<Player> onlineIslandMembers,
-            @NotNull List<UUID> offlineIslandMembers,
-            @NotNull RewardConfig rewardConfig) {
+            @NonNull Player initiatingPlayer,
+            @NonNull List<Player> onlineIslandMembers,
+            @NonNull List<UUID> offlineIslandMembers,
+            @NonNull RewardConfig rewardConfig) {
         LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
         if(luckPermsHook.isHooked()) {
             List<PermissionReward> postPermissionRewards = rewardConfig.permissionRewards().stream()
@@ -157,23 +158,24 @@ public class LuckPermsRewardsProcessor {
                     .toList();
 
             // Process rewards given to the initiating player only first
-            User initiatingUser = luckPermsHook.getUser(initiatingPlayer);
-            if(initiatingUser != null) {
-                processRewards(luckPermsHook, initiatingUser, initiatorPermissionRewards, initiatorGroupRewards, false);
-            }
-
-            // Process rewards given to all island members
-            // Online members
-            onlineIslandMembers.forEach(player -> {
-                @Nullable User user = luckPermsHook.getUser(player);
-                if(user != null) {
-                    processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards, false);
+            luckPermsHook.getOrLoadUser(initiatingPlayer, initiatingPlayer.getUniqueId()).thenAccept(initiatingUser -> {
+                if(initiatingUser != null) {
+                    processRewards(luckPermsHook, initiatingUser, initiatorPermissionRewards, initiatorGroupRewards, false);
                 }
             });
 
+            // Process rewards given to all island members
+            // Online members
+            onlineIslandMembers.forEach(player ->
+                    luckPermsHook.getOrLoadUser(player, player.getUniqueId()).thenAccept(user -> {
+                        if(user != null) {
+                            processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards, false);
+                        }
+                    }));
+
             // Offline members
             offlineIslandMembers.forEach(playerId ->
-                    luckPermsHook.loadUser(playerId).thenAcceptAsync(user -> {
+                    luckPermsHook.getOrLoadUser(playerId).thenAcceptAsync(user -> {
                         if(user != null) {
                             processRewards(luckPermsHook, user, allMemberPermissionRewards, allMemberGroupRewards,false);
                         }
@@ -182,10 +184,36 @@ public class LuckPermsRewardsProcessor {
     }
 
     /**
+     * Process permission and group rewards for the player that joined an island.
+     * @apiNote Only rewards configured for all island members and on island join will be executed.
+     * @param user The LuckPerm's {@link User}.
+     * @param permissionRewardList The {@link List} of {@link PermissionReward}s.
+     * @param groupRewardList The {@link List} of {@link GroupReward}s.
+     */
+    public void processRetroactive(
+            @NonNull User user,
+            @NonNull List<PermissionReward> permissionRewardList,
+            @NonNull List<GroupReward> groupRewardList) {
+        LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
+        if(!luckPermsHook.isHooked()) return;
+
+        List<PermissionReward> playerPermissionRewards = permissionRewardList.stream()
+                .filter(PermissionReward::giveToAllIslandMembers)
+                .filter(IReward::giveOnIslandJoin)
+                .toList();
+        List<GroupReward> playerGroupRewards = groupRewardList.stream()
+                .filter(GroupReward::giveToAllIslandMembers)
+                .filter(IReward::giveOnIslandJoin)
+                .toList();
+
+        processRewards(luckPermsHook, user, playerPermissionRewards, playerGroupRewards,false);
+    }
+
+    /**
      * Remove the early rewards given to the {@link UUID}s provided that were stored, if any.
      * @param uniqueIds The {@link ImmutableSet} of {@link UUID}s to remove early rewards from.
      */
-    public void revertEarlyRewards(@NotNull ImmutableSet<UUID> uniqueIds) {
+    public void revertEarlyRewards(@NonNull ImmutableSet<UUID> uniqueIds) {
         LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
         if(!luckPermsHook.isHooked()) return;
 
@@ -205,20 +233,49 @@ public class LuckPermsRewardsProcessor {
 
         // Process reversion of rewards given
         // Online members
-        onlineIslandMembers.forEach(player -> {
-            User user = luckPermsHook.getUser(player);
+        onlineIslandMembers.forEach(this::revertEarlyRewards);
+
+        // Offline members
+        offlineIslandMembers.forEach(this::revertEarlyRewards);
+    }
+
+    /**
+     * Revert early rewards for the player provided.
+     * @param player The {@link Player}.
+     */
+    public void revertEarlyRewards(@NonNull Player player) {
+        LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
+        if(!luckPermsHook.isHooked()) return;
+
+        luckPermsHook.getOrLoadUser(player, player.getUniqueId()).thenAccept(user -> {
             if(user != null) {
                 revertEarlyRewards(luckPermsHook, user);
             }
         });
+    }
 
-        // Offline members
-        offlineIslandMembers.forEach(playerId ->
-                luckPermsHook.loadUser(playerId).thenAcceptAsync(user -> {
-                    if(user != null) {
-                        revertEarlyRewards(luckPermsHook, user);
-                    }
-                }));
+    /**
+     * Revert early rewards for the player id provided.
+     * @param playerId The {@link UUID} of the player.
+     */
+    public void revertEarlyRewards(@NonNull UUID playerId) {
+        LuckPermsHook luckPermsHook = hookManager.getHook(LuckPermsHook.class);
+        if(!luckPermsHook.isHooked()) return;
+
+        Player player = plugin.getServer().getPlayer(playerId);
+        if(player != null && player.isOnline() && player.isConnected()) {
+            luckPermsHook.getOrLoadUser(player, playerId).thenAccept(user -> {
+                if(user != null) {
+                    revertEarlyRewards(luckPermsHook, user);
+                }
+            });
+        } else {
+            luckPermsHook.getOrLoadUser(playerId).thenAccept(user -> {
+                if(user != null) {
+                    revertEarlyRewards(luckPermsHook, user);
+                }
+            });
+        }
     }
 
     /**
@@ -230,13 +287,13 @@ public class LuckPermsRewardsProcessor {
      * @param undo Should the changes be stored to undo later?
      */
     private void processRewards(
-            @NotNull LuckPermsHook luckPermsHook,
-            @NotNull User user,
-            @NotNull List<PermissionReward> permissionRewards,
-            @NotNull List<GroupReward> groupRewards,
+            @NonNull LuckPermsHook luckPermsHook,
+            @NonNull User user,
+            @NonNull List<PermissionReward> permissionRewards,
+            @NonNull List<GroupReward> groupRewards,
             boolean undo) {
-        @Nullable List<Node> removedNodes = null;
-        @Nullable List<Node> addedNodes = null;
+        List<Node> removedNodes = null;
+        List<Node> addedNodes = null;
         UUID userId = user.getUniqueId();
         if(undo) {
             removedNodes = this.removedNodes.computeIfAbsent(userId, uuid -> new ArrayList<>());
@@ -351,11 +408,11 @@ public class LuckPermsRewardsProcessor {
      * @param user The {@link User}.
      */
     private void revertEarlyRewards(
-            @NotNull LuckPermsHook luckPermsHook,
-            @NotNull User user) {
+            @NonNull LuckPermsHook luckPermsHook,
+            @NonNull User user) {
         UUID userId = user.getUniqueId();
-        @Nullable List<Node> removedNodes = this.removedNodes.get(userId);
-        @Nullable List<Node> addedNodes = this.addedNodes.get(userId);
+        List<Node> removedNodes = this.removedNodes.get(userId);
+        List<Node> addedNodes = this.addedNodes.get(userId);
 
         logger.info(AdventureUtil.deserialize("Reverting early permission/group rewards."));
 

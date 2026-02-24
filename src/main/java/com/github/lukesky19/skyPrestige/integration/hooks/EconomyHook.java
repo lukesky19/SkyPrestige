@@ -17,28 +17,28 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.integration.Hook;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This class manages interfacing with Vault.
  */
 public class EconomyHook implements Hook {
-    private final @NotNull SkyPlugin plugin;
+    private final @NonNull SkyPlugin plugin;
     private @Nullable Economy economy;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      */
-    public EconomyHook(@NotNull SkyPlugin plugin) {
+    public EconomyHook(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -70,7 +70,7 @@ public class EconomyHook implements Hook {
      * @param player The {@link OfflinePlayer}.
      * @param amount The amount to add.
      */
-    public void addToBalance(@NotNull OfflinePlayer player, double amount) {
+    public void addToBalance(@NonNull OfflinePlayer player, double amount) {
         if(economy == null) return;
 
         economy.depositPlayer(player, amount);
@@ -82,15 +82,16 @@ public class EconomyHook implements Hook {
      * @param player The {@link OfflinePlayer}.
      * @param amount The amount to remove.
      * @apiNote If the economy was not hooked into, this method will do nothing. Can be checked with {@link #isHooked()}.
+     * @return The amount removed.
      */
-    public void removeFromBalance(@NotNull OfflinePlayer player, double amount) {
-        if(economy == null) return;
+    public double removeFromBalance(@NonNull OfflinePlayer player, double amount) {
+        if(economy == null) return 0;
 
         double balance = economy.getBalance(player);
         if(balance - amount < 0) {
-            economy.withdrawPlayer(player, balance);
+            return economy.withdrawPlayer(player, balance).amount;
         } else {
-            economy.withdrawPlayer(player, amount);
+            return economy.withdrawPlayer(player, amount).amount;
         }
     }
 
@@ -100,7 +101,7 @@ public class EconomyHook implements Hook {
      * @param player The {@link Player} to get the economy for.
      * @return The player's balance or 0 if not hooked.
      */
-    public double getBalance(@NotNull OfflinePlayer player) {
+    public double getBalance(@NonNull OfflinePlayer player) {
         if(economy == null) return 0;
 
         return economy.getBalance(player);

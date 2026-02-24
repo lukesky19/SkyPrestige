@@ -33,8 +33,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Optional;
@@ -47,31 +47,31 @@ public abstract class PointsListener implements Listener {
     /**
      * A {@link JavaPlugin} instance.
      */
-    protected final @NotNull SkyPlugin plugin;
+    protected final @NonNull SkyPlugin plugin;
     /**
      * A {@link ComponentLogger} instance.
      */
-    protected final @NotNull ComponentLogger logger;
+    protected final @NonNull ComponentLogger logger;
     /**
      * A {@link PrestigePointsConfigManager} instance.
      */
-    protected final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+    protected final @NonNull PrestigePointsConfigManager prestigePointsConfigManager;
     /**
      * A {@link PrestigePointsManager} instance.
      */
-    protected final @NotNull PrestigePointsManager prestigePointsManager;
+    protected final @NonNull PrestigePointsManager prestigePointsManager;
     /**
      * An {@link IslandDataManager} instance.
      */
-    protected final @NotNull IslandDataManager islandDataManager;
+    protected final @NonNull IslandDataManager islandDataManager;
     /**
      * A {@link HookManager} instance.
      */
-    protected final @NotNull HookManager hookManager;
+    protected final @NonNull HookManager hookManager;
     /**
      * A {@link MultiplierManager} instance.
      */
-    protected final @NotNull MultiplierManager multiplierManager;
+    protected final @NonNull MultiplierManager multiplierManager;
 
 
     /**
@@ -84,12 +84,12 @@ public abstract class PointsListener implements Listener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PointsListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.prestigePointsConfigManager = prestigePointsConfigManager;
@@ -108,9 +108,9 @@ public abstract class PointsListener implements Listener {
      * @return true if invalid, false if not.
      */
     protected boolean isPlayerInvalid(
-            @NotNull Player player,
-            @NotNull UUID playerId,
-            @NotNull PrestigePointsConfig prestigePointsConfig) {
+            @NonNull Player player,
+            @NonNull UUID playerId,
+            @NonNull PrestigePointsConfig prestigePointsConfig) {
         if(player.getGameMode().equals(GameMode.CREATIVE)) return true;
 
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
@@ -124,7 +124,7 @@ public abstract class PointsListener implements Listener {
      * @param playerId The player's {@link UUID}.
      * @return The {@link Island} if valid, or null if invalid.
      */
-    protected @Nullable Island checkIsland(@NotNull Player player, @NotNull UUID playerId) {
+    protected @Nullable Island checkIsland(@NonNull Player player, @NonNull UUID playerId) {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
         if(optionalIsland.isEmpty()) return null;
@@ -142,9 +142,9 @@ public abstract class PointsListener implements Listener {
      * @param island The {@link Island}.
      * @return The {@link IslandData} or null.
      */
-    protected @Nullable IslandData checkIslandData(@NotNull Island island) {
+    protected @Nullable IslandData checkIslandData(@NonNull Island island) {
         // Island Data check.
-        @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
         if(islandData == null) {
             logger.error(AdventureUtil.deserialize("No island data found for island id " + island.getUniqueId() + "."));
             return null;

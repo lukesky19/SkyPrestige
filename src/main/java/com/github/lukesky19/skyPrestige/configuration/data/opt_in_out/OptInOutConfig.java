@@ -17,20 +17,20 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.opt_in_out;
 
-import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.PrestigeResetSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the plugin's configuration settings for prestige opt in or out.
  * @param configVersion The file's config version.
- * @param resetSettings The {@link ResetSettings}.
+ * @param resetSettings The {@link PrestigeResetSettings}.
  * @param rewardConfig The {@link RewardConfig}.
  */
 @ConfigSerializable
 public record OptInOutConfig(
         @Nullable String configVersion,
-        @NotNull ResetSettings resetSettings,
-        @NotNull RewardConfig rewardConfig) {}
+        @NonNull PrestigeResetSettings resetSettings,
+        @NonNull RewardConfig rewardConfig) {}

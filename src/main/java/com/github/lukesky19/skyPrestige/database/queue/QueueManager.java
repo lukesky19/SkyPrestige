@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.database.queue;
 
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class handles reads and writes to the database.
@@ -29,7 +29,7 @@ public class QueueManager extends MultiThreadQueueManager {
      * Constructor.
      * @param connectionManager A ConnectionManager instance.
      */
-    public QueueManager(@NotNull ConnectionManager connectionManager) {
+    public QueueManager(@NonNull ConnectionManager connectionManager) {
         super(connectionManager);
     }
 }

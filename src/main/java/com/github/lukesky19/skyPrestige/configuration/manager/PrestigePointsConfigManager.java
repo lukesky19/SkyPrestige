@@ -19,25 +19,15 @@ package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsMapping;
-import com.github.lukesky19.skyPrestige.configuration.serializer.*;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
 import com.github.lukesky19.skylib.api.format.FormatUtil;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
-import com.github.lukesky19.skylib.libs.configurate.yaml.NodeStyle;
-import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import org.bukkit.block.BlockType;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -48,13 +38,13 @@ import java.util.List;
  * This class manages the prestige points configuration.
  */
 public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePointsConfig> {
-    private final @NotNull List<ItemStack> displayItemStacks = new LinkedList<>();
+    private final @NonNull List<ItemStack> displayItemStacks = new LinkedList<>();
 
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public PrestigePointsConfigManager(@NotNull SkyPlugin plugin) {
+    public PrestigePointsConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "points.yml"), PrestigePointsConfig.class);
     }
 
@@ -79,51 +69,11 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
 
     @Override
     public void loadConfiguration() {
-        configuration = null;
         displayItemStacks.clear();
 
-        if(configurationPath == null) {
-            logger.error(AdventureUtil.deserialize("Unable to load configuration because the configuration path was not set."));
-            return;
-        }
+        super.loadConfiguration();
 
-        if(!configurationPath.toFile().exists()) {
-            saveBundledConfig();
-        }
-
-        @NotNull YamlConfigurationLoader yamlConfigurationLoader = createLoader(configurationPath);
-        try {
-            configuration = yamlConfigurationLoader.load().get(configClass);
-            if(configuration == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to load configuration. Class name: " + this.getClass().getName()));
-                return;
-            }
-            @NotNull PrestigePointsConfig preMigrationConfiguration = configuration;
-
-            // Migrate configuration
-            configuration = migrateConfiguration(configuration);
-            // If migration failed, return
-            if(configuration == null) {
-                logger.warn(AdventureUtil.deserialize("Migrated configuration is invalid. Class name: " + this.getClass().getName()));
-                return;
-            }
-
-            // Check if the configuration is invalid
-            if(!validateConfiguration(configuration)) {
-                logger.warn(AdventureUtil.deserialize("Configuration validation failed. Class name: " + this.getClass().getName()));
-                configuration =  null;
-                return;
-            }
-
-            // Save the migrated configuration if different
-            if(configuration != preMigrationConfiguration) {
-                saveConfiguration(configuration);
-            }
-
-            createDisplayItemStacks();
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load configuration. Error: " + configurateException.getMessage()));
-        }
+        createDisplayItemStacks();
     }
 
     private void createDisplayItemStacks() {
@@ -131,7 +81,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         PrestigePointsMapping points = configuration.prestigePointsMapping();
 
         // Play Time
-        @Nullable ItemStack playTimeStack = points.playTime().createDisplayItemStack(
+        ItemStack playTimeStack = points.playTime().createDisplayItemStack(
                 logger,
                 ItemType.CLOCK,
                 "Play Time",
@@ -139,7 +89,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(playTimeStack != null) displayItemStacks.add(playTimeStack);
 
         // Block Break
-        @Nullable ItemStack blockBreakDefaultStack = points.blockBreak().base().createDisplayItemStack(
+        ItemStack blockBreakDefaultStack = points.blockBreak().base().createDisplayItemStack(
                 logger,
                 ItemType.GOLDEN_PICKAXE,
                 "Block Break",
@@ -147,7 +97,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(blockBreakDefaultStack != null) displayItemStacks.add(blockBreakDefaultStack);
         points.blockBreak().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.GOLDEN_PICKAXE,
                         "Block Break",
@@ -159,7 +109,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Block Place
-        @Nullable ItemStack blockPlaceDefaultStack = points.blockPlace().base().createDisplayItemStack(
+        ItemStack blockPlaceDefaultStack = points.blockPlace().base().createDisplayItemStack(
                 logger,
                 ItemType.GRASS_BLOCK,
                 "Block Place",
@@ -167,7 +117,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(blockPlaceDefaultStack != null) displayItemStacks.add(blockPlaceDefaultStack);
         points.blockPlace().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.GRASS_BLOCK,
                         "Block Place",
@@ -179,7 +129,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Bone Meal
-        @Nullable ItemStack boneMealDefaultStack = points.boneMeal().base().createDisplayItemStack(
+        ItemStack boneMealDefaultStack = points.boneMeal().base().createDisplayItemStack(
                 logger,
                 ItemType.BONE_MEAL,
                 "Bone Meal",
@@ -187,7 +137,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(boneMealDefaultStack != null) displayItemStacks.add(boneMealDefaultStack);
         points.boneMeal().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.GRASS_BLOCK,
                         "Bone Meal",
@@ -199,7 +149,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Bottle
-        @Nullable ItemStack bottleDefaultStack = points.bottle().base().createDisplayItemStack(
+        ItemStack bottleDefaultStack = points.bottle().base().createDisplayItemStack(
                 logger,
                 ItemType.GLASS_BOTTLE,
                 "Bottling",
@@ -207,7 +157,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(bottleDefaultStack != null) displayItemStacks.add(bottleDefaultStack);
         points.bottle().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.GLASS_BOTTLE,
                         "Bottling",
@@ -219,7 +169,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Breed
-        @Nullable ItemStack breedDefaultStack = points.breed().base().createDisplayItemStack(
+        ItemStack breedDefaultStack = points.breed().base().createDisplayItemStack(
                 logger,
                 ItemType.WHEAT_SEEDS,
                 "Breeding",
@@ -227,7 +177,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(breedDefaultStack != null) displayItemStacks.add(breedDefaultStack);
         points.breed().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.WHEAT_SEEDS,
                         "Breeding",
@@ -239,7 +189,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Brew
-        @Nullable ItemStack brewDefaultStack = points.brew().base().createDisplayItemStack(
+        ItemStack brewDefaultStack = points.brew().base().createDisplayItemStack(
                 logger,
                 ItemType.BREWING_STAND,
                 "Brewing",
@@ -247,7 +197,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(brewDefaultStack != null) displayItemStacks.add(brewDefaultStack);
         points.brew().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.BREWING_STAND,
                         "Brewing",
@@ -259,7 +209,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Brush
-        @Nullable ItemStack brushDefaultStack = points.brush().base().createDisplayItemStack(
+        ItemStack brushDefaultStack = points.brush().base().createDisplayItemStack(
                 logger,
                 ItemType.SUSPICIOUS_SAND,
                 "Brushing",
@@ -267,7 +217,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(brushDefaultStack != null) displayItemStacks.add(brushDefaultStack);
         points.brush().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.SUSPICIOUS_SAND,
                         "Brushing",
@@ -279,7 +229,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Close
-        @Nullable ItemStack closeDefaultStack = points.close().base().createDisplayItemStack(
+        ItemStack closeDefaultStack = points.close().base().createDisplayItemStack(
                 logger,
                 ItemType.CHEST,
                 "Close",
@@ -287,7 +237,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(closeDefaultStack != null) displayItemStacks.add(closeDefaultStack);
         points.close().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.CHEST,
                         "Close",
@@ -299,7 +249,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Compost
-        @Nullable ItemStack compostDefaultStack = points.compost().base().createDisplayItemStack(
+        ItemStack compostDefaultStack = points.compost().base().createDisplayItemStack(
                 logger,
                 ItemType.COMPOSTER,
                 "Compost",
@@ -307,7 +257,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(compostDefaultStack != null) displayItemStacks.add(compostDefaultStack);
         points.compost().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.COMPOSTER,
                         "Compost",
@@ -319,7 +269,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Consume
-        @Nullable ItemStack consumeDefaultStack = points.compost().base().createDisplayItemStack(
+        ItemStack consumeDefaultStack = points.compost().base().createDisplayItemStack(
                 logger,
                 ItemType.APPLE,
                 "Consume",
@@ -327,7 +277,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(consumeDefaultStack != null) displayItemStacks.add(consumeDefaultStack);
         points.consume().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.APPLE,
                         "Consume",
@@ -339,7 +289,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Craft
-        @Nullable ItemStack craftDefaultStack = points.craft().base().createDisplayItemStack(
+        ItemStack craftDefaultStack = points.craft().base().createDisplayItemStack(
                 logger,
                 ItemType.CRAFTING_TABLE,
                 "Crafting",
@@ -347,7 +297,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(craftDefaultStack != null) displayItemStacks.add(craftDefaultStack);
         points.craft().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.CRAFTING_TABLE,
                         "Crafting",
@@ -359,7 +309,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Empty
-        @Nullable ItemStack emptyDefaultStack = points.empty().base().createDisplayItemStack(
+        ItemStack emptyDefaultStack = points.empty().base().createDisplayItemStack(
                 logger,
                 ItemType.BUCKET,
                 "Emptying",
@@ -367,7 +317,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(emptyDefaultStack != null) displayItemStacks.add(emptyDefaultStack);
         points.empty().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.BUCKET,
                         "Emptying",
@@ -379,7 +329,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Enchanting
-        @Nullable ItemStack enchantDefaultStack = points.enchant().base().createDisplayItemStack(
+        ItemStack enchantDefaultStack = points.enchant().base().createDisplayItemStack(
                 logger,
                 ItemType.ENCHANTING_TABLE,
                 "Enchanting",
@@ -387,7 +337,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(enchantDefaultStack != null) displayItemStacks.add(enchantDefaultStack);
         points.enchant().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.ENCHANTING_TABLE,
                         "Enchanting",
@@ -399,7 +349,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Filling
-        @Nullable ItemStack fillDefaultStack = points.fill().base().createDisplayItemStack(
+        ItemStack fillDefaultStack = points.fill().base().createDisplayItemStack(
                 logger,
                 ItemType.WATER_BUCKET,
                 "Filling",
@@ -407,7 +357,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(fillDefaultStack != null) displayItemStacks.add(fillDefaultStack);
         points.fill().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.WATER_BUCKET,
                         "Filling",
@@ -419,7 +369,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Fishing
-        @Nullable ItemStack fishDefaultStack = points.fish().base().createDisplayItemStack(
+        ItemStack fishDefaultStack = points.fish().base().createDisplayItemStack(
                 logger,
                 ItemType.FISHING_ROD,
                 "Fishing",
@@ -427,7 +377,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(fishDefaultStack != null) displayItemStacks.add(fishDefaultStack);
         points.fish().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.FISHING_ROD,
                         "Fishing",
@@ -439,7 +389,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Harvesting
-        @Nullable ItemStack harvestDefaultStack = points.harvest().base().createDisplayItemStack(
+        ItemStack harvestDefaultStack = points.harvest().base().createDisplayItemStack(
                 logger,
                 ItemType.SWEET_BERRIES,
                 "Harvesting",
@@ -447,7 +397,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(harvestDefaultStack != null) displayItemStacks.add(harvestDefaultStack);
         points.harvest().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.SWEET_BERRIES,
                         "Harvesting",
@@ -459,7 +409,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Pickup
-        @Nullable ItemStack pickupDefaultStack = points.pickup().base().createDisplayItemStack(
+        ItemStack pickupDefaultStack = points.pickup().base().createDisplayItemStack(
                 logger,
                 ItemType.HOPPER,
                 "Item Pickup",
@@ -467,7 +417,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(pickupDefaultStack != null) displayItemStacks.add(pickupDefaultStack);
         points.pickup().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.HOPPER,
                         "Item Pickup",
@@ -479,7 +429,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Drop
-        @Nullable ItemStack dropDefaultStack = points.drop().base().createDisplayItemStack(
+        ItemStack dropDefaultStack = points.drop().base().createDisplayItemStack(
                 logger,
                 ItemType.DROPPER,
                 "Item Drop",
@@ -487,7 +437,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(dropDefaultStack != null) displayItemStacks.add(dropDefaultStack);
         points.drop().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.DROPPER,
                         "Item Drop",
@@ -499,7 +449,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Kill
-        @Nullable ItemStack killDefaultStack = points.kill().base().createDisplayItemStack(
+        ItemStack killDefaultStack = points.kill().base().createDisplayItemStack(
                 logger,
                 ItemType.GOLDEN_SWORD,
                 "Killing",
@@ -507,7 +457,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(killDefaultStack != null) displayItemStacks.add(killDefaultStack);
         points.kill().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.GOLDEN_SWORD,
                         "Killing",
@@ -519,7 +469,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Milk
-        @Nullable ItemStack milkDefaultStack = points.milk().base().createDisplayItemStack(
+        ItemStack milkDefaultStack = points.milk().base().createDisplayItemStack(
                 logger,
                 ItemType.MILK_BUCKET,
                 "Milking",
@@ -527,7 +477,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(milkDefaultStack != null) displayItemStacks.add(milkDefaultStack);
         points.milk().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.MILK_BUCKET,
                         "Milking",
@@ -539,7 +489,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Name Items
-        @Nullable ItemStack itemNameDefaultStack = points.nameItem().base().createDisplayItemStack(
+        ItemStack itemNameDefaultStack = points.nameItem().base().createDisplayItemStack(
                 logger,
                 ItemType.ANVIL,
                 "Name",
@@ -547,7 +497,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(itemNameDefaultStack != null) displayItemStacks.add(itemNameDefaultStack);
         points.nameItem().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.ANVIL,
                         "Name Items",
@@ -559,7 +509,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Name Entities
-        @Nullable ItemStack nameEntitiesDefaultStack = points.nameEntity().base().createDisplayItemStack(
+        ItemStack nameEntitiesDefaultStack = points.nameEntity().base().createDisplayItemStack(
                 logger,
                 ItemType.NAME_TAG,
                 "Name",
@@ -567,7 +517,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(nameEntitiesDefaultStack != null) displayItemStacks.add(nameEntitiesDefaultStack);
         points.nameEntity().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.MILK_BUCKET,
                         "Milking",
@@ -579,7 +529,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Open
-        @Nullable ItemStack openDefaultStack = points.open().base().createDisplayItemStack(
+        ItemStack openDefaultStack = points.open().base().createDisplayItemStack(
                 logger,
                 ItemType.CHEST,
                 "Open",
@@ -587,7 +537,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(openDefaultStack != null) displayItemStacks.add(openDefaultStack);
         points.open().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.CHEST,
                         "Open",
@@ -599,7 +549,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Shear Block
-        @Nullable ItemStack shearBlockDefaultStack = points.shearBlock().base().createDisplayItemStack(
+        ItemStack shearBlockDefaultStack = points.shearBlock().base().createDisplayItemStack(
                 logger,
                 ItemType.SHEARS,
                 "Shear",
@@ -607,7 +557,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(shearBlockDefaultStack != null) displayItemStacks.add(shearBlockDefaultStack);
         points.shearBlock().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.SHEARS,
                         "Shear",
@@ -619,7 +569,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Shear Entities
-        @Nullable ItemStack shearEntityDefaultStack = points.shearEntity().base().createDisplayItemStack(
+        ItemStack shearEntityDefaultStack = points.shearEntity().base().createDisplayItemStack(
                 logger,
                 ItemType.SHEARS,
                 "Shear",
@@ -627,7 +577,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(shearEntityDefaultStack != null) displayItemStacks.add(shearEntityDefaultStack);
         points.shearEntity().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.SHEARS,
                         "Shear",
@@ -639,7 +589,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Sleep
-        @Nullable ItemStack sleepDefaultStack = points.sleep().base().createDisplayItemStack(
+        ItemStack sleepDefaultStack = points.sleep().base().createDisplayItemStack(
                 logger,
                 ItemType.RED_BED,
                 "Sleep",
@@ -647,7 +597,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(sleepDefaultStack != null) displayItemStacks.add(sleepDefaultStack);
         points.sleep().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.RED_BED,
                         "Sleep",
@@ -659,7 +609,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Smelt
-        @Nullable ItemStack smeltDefaultStack = points.smelt().base().createDisplayItemStack(
+        ItemStack smeltDefaultStack = points.smelt().base().createDisplayItemStack(
                 logger,
                 ItemType.FURNACE,
                 "Smelting",
@@ -667,7 +617,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(smeltDefaultStack != null) displayItemStacks.add(smeltDefaultStack);
         points.smelt().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.FURNACE,
                         "Smelting",
@@ -679,7 +629,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Strip
-        @Nullable ItemStack stripDefaultStack = points.strip().base().createDisplayItemStack(
+        ItemStack stripDefaultStack = points.strip().base().createDisplayItemStack(
                 logger,
                 ItemType.GOLDEN_AXE,
                 "Strip",
@@ -687,7 +637,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(stripDefaultStack != null) displayItemStacks.add(stripDefaultStack);
         points.strip().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.GOLDEN_AXE,
                         "Strip",
@@ -699,7 +649,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Tame
-        @Nullable ItemStack tameDefaultStack = points.tame().base().createDisplayItemStack(
+        ItemStack tameDefaultStack = points.tame().base().createDisplayItemStack(
                 logger,
                 ItemType.GOLDEN_CARROT,
                 "Tame",
@@ -707,7 +657,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(tameDefaultStack != null) displayItemStacks.add(tameDefaultStack);
         points.tame().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.GOLDEN_CARROT,
                         "Tame",
@@ -719,7 +669,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Throw
-        @Nullable ItemStack throwDefaultStack = points.thrown().base().createDisplayItemStack(
+        ItemStack throwDefaultStack = points.thrown().base().createDisplayItemStack(
                 logger,
                 ItemType.ENDER_PEARL,
                 "Throw",
@@ -727,7 +677,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(throwDefaultStack != null) displayItemStacks.add(throwDefaultStack);
         points.thrown().overrides().forEach(itemPoints -> {
             if(itemPoints.itemData().itemType() != null) {
-                @Nullable ItemStack overrideStack = itemPoints.createDisplayItemStack(
+                ItemStack overrideStack = itemPoints.createDisplayItemStack(
                         logger,
                         ItemType.ENDER_PEARL,
                         "Throw",
@@ -739,7 +689,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Unwax Block
-        @Nullable ItemStack unWaxBlockDefaultStack = points.unWaxBlock().base().createDisplayItemStack(
+        ItemStack unWaxBlockDefaultStack = points.unWaxBlock().base().createDisplayItemStack(
                 logger,
                 ItemType.DIAMOND_AXE,
                 "Remove Wax",
@@ -747,7 +697,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(unWaxBlockDefaultStack != null) displayItemStacks.add(unWaxBlockDefaultStack);
         points.unWaxBlock().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.DIAMOND_AXE,
                         "Remove Wax",
@@ -759,7 +709,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Unwax Entity
-        @Nullable ItemStack unWaxEntityDefaultStack = points.unWaxEntity().base().createDisplayItemStack(
+        ItemStack unWaxEntityDefaultStack = points.unWaxEntity().base().createDisplayItemStack(
                 logger,
                 ItemType.DIAMOND_AXE,
                 "Tame",
@@ -767,7 +717,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(unWaxEntityDefaultStack != null) displayItemStacks.add(unWaxEntityDefaultStack);
         points.unWaxEntity().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.DIAMOND_AXE,
                         "Tame",
@@ -779,7 +729,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Water Log
-        @Nullable ItemStack waterLogDefaultStack = points.waterLog().base().createDisplayItemStack(
+        ItemStack waterLogDefaultStack = points.waterLog().base().createDisplayItemStack(
                 logger,
                 ItemType.WATER_BUCKET,
                 "Water Log",
@@ -787,7 +737,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(waterLogDefaultStack != null) displayItemStacks.add(waterLogDefaultStack);
         points.waterLog().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.WATER_BUCKET,
                         "Water Log",
@@ -799,7 +749,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Wax Block
-        @Nullable ItemStack waxBlockDefaultStack = points.waxBlock().base().createDisplayItemStack(
+        ItemStack waxBlockDefaultStack = points.waxBlock().base().createDisplayItemStack(
                 logger,
                 ItemType.HONEYCOMB,
                 "Wax",
@@ -807,7 +757,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(waxBlockDefaultStack != null) displayItemStacks.add(waxBlockDefaultStack);
         points.waxBlock().overrides().forEach(blockPoints -> {
             if(blockPoints.blockData().blockType() != null) {
-                @Nullable ItemStack overrideStack = blockPoints.createDisplayItemStack(
+                ItemStack overrideStack = blockPoints.createDisplayItemStack(
                         logger,
                         ItemType.HONEYCOMB,
                         "Wax",
@@ -819,7 +769,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         });
 
         // Wax Entity
-        @Nullable ItemStack waxEntityDefaultStack = points.waxEntity().base().createDisplayItemStack(
+        ItemStack waxEntityDefaultStack = points.waxEntity().base().createDisplayItemStack(
                 logger,
                 ItemType.HONEYCOMB,
                 "Wax",
@@ -827,7 +777,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
         if(waxEntityDefaultStack != null) displayItemStacks.add(waxEntityDefaultStack);
         points.waxEntity().overrides().forEach(entityPoints -> {
             if(entityPoints.entityData().entityType() != null) {
-                @Nullable ItemStack overrideStack = entityPoints.createDisplayItemStack(
+                ItemStack overrideStack = entityPoints.createDisplayItemStack(
                         logger,
                         ItemType.HONEYCOMB,
                         "Wax",
@@ -840,27 +790,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
     }
 
     @Override
-    public void saveConfiguration(@NonNull PrestigePointsConfig configuration) {
-        if(configurationPath == null) {
-            logger.error(AdventureUtil.deserialize("Unable to save the configuration because the configuration path was not set."));
-            return;
-        }
-
-        try {
-            @NotNull YamlConfigurationLoader yamlConfigurationLoader = createLoader(configurationPath);
-
-            ConfigurationNode node = yamlConfigurationLoader.createNode();
-
-            node.set(configClass, configuration);
-
-            yamlConfigurationLoader.save(node);
-        } catch (ConfigurateException e) {
-            logger.error(AdventureUtil.deserialize("Failed to save settings config file. Error: " + e.getMessage()));
-        }
-    }
-
-    @Override
-    public @Nullable PrestigePointsConfig migrateConfiguration(@NotNull PrestigePointsConfig prestigePointsConfig) {
+    public @Nullable PrestigePointsConfig migrateConfiguration(@NonNull PrestigePointsConfig prestigePointsConfig) {
         switch(prestigePointsConfig.configVersion()) {
             case "1.0.0.0" -> {
                 // latest version, do nothing
@@ -882,21 +812,5 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
     @Override
     public void saveBundledConfig() {
         plugin.saveResource("points.yml", false);
-    }
-
-    private @NotNull YamlConfigurationLoader createLoader(@NotNull Path path) {
-        return YamlConfigurationLoader.builder()
-                .nodeStyle(NodeStyle.BLOCK)
-                .path(path)
-                .indent(4)
-                .defaultOptions(opts ->
-                        opts.serializers(build -> {
-                            build.registerExact(BlockType.class, new BlockTypeSerializer(logger));
-                            build.registerExact(ItemType.class, new ItemTypeSerializer(logger));
-                            build.registerExact(PotionType.class, new PotionTypeSerializer(logger));
-                            build.registerExact(Enchantment.class, new EnchantmentSerializer(logger));
-                            build.registerExact(EntityType.class, new EntityTypeSerializer(logger));
-                        }))
-                .build();
     }
 }

@@ -22,8 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.points.points.EntityP
 import com.github.lukesky19.skyPrestige.util.enums.ActionType;
 import com.github.lukesky19.skyPrestige.util.key.EntityKey;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,7 @@ import java.util.stream.Stream;
  * This class caches the prestige points for specific actions related to entities.
  */
 public class EntityPointsCache {
-    private final @NotNull Map<ActionType, LRUCache<EntityKey, Double>> entityMap = new HashMap<>();
+    private final @NonNull Map<ActionType, LRUCache<EntityKey, Double>> entityMap = new HashMap<>();
 
     /**
      * Constructor
@@ -48,13 +47,13 @@ public class EntityPointsCache {
      * @return The prestige points earned or 0.
      */
     public double getPoints(
-            @NotNull ActionType actionType,
-            @NotNull PrestigePointsMapping.Entity config,
-            @NotNull EntityType entityType) {
+            @NonNull ActionType actionType,
+            PrestigePointsMapping.@NonNull Entity config,
+            @NonNull EntityType entityType) {
         EntityKey entityKey = new EntityKey(entityType);
         LRUCache<EntityKey, Double> cache = entityMap.computeIfAbsent(actionType, k -> new LRUCache<>(200));
 
-        @Nullable Double cachedPoints = cache.get(entityKey);
+        Double cachedPoints = cache.get(entityKey);
         if(cachedPoints != null) {
             return cachedPoints;
         }
@@ -72,8 +71,8 @@ public class EntityPointsCache {
      * @return The prestige points earned or 0.
      */
     private double getFromConfig(
-            @NotNull PrestigePointsMapping.Entity config,
-            @NotNull EntityType entityType) {
+            PrestigePointsMapping.@NonNull Entity config,
+            @NonNull EntityType entityType) {
         Stream<EntityPoints> stream = config.overrides().stream();
 
         // Filtering logic
@@ -81,7 +80,7 @@ public class EntityPointsCache {
                 entityPoints.entityData().entityType() != null && entityPoints.entityData().entityType().equals(entityType));
 
         // Find the first matching entry
-        @Nullable Double points = stream.findFirst().map(EntityPoints::getPoints).orElse(null);
+        Double points = stream.findFirst().map(EntityPoints::getPoints).orElse(null);
 
         // If null, get the default points
         if(points == null) {

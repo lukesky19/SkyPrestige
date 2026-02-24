@@ -18,20 +18,20 @@
 package com.github.lukesky19.skyPrestige;
 
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 /**
  * This class acts as the API for SkyPrestige.
  */
 public class SkyPrestigeAPI {
-    private final @NotNull MultiplierManager multiplierManager;
+    private final @NonNull MultiplierManager multiplierManager;
 
     /**
      * Constructor
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
-    public SkyPrestigeAPI(@NotNull MultiplierManager multiplierManager) {
+    public SkyPrestigeAPI(@NonNull MultiplierManager multiplierManager) {
         this.multiplierManager = multiplierManager;
     }
 
@@ -151,7 +151,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean addIslandMultiplier(@NotNull Island island, double multiplier, boolean notice) {
+    public boolean addIslandMultiplier(@NonNull Island island, double multiplier, boolean notice) {
         return multiplierManager.addIslandMultiplier(null, island, multiplier, null, notice);
     }
 
@@ -162,7 +162,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean addIslandMultiplier(@NotNull Island island, long time, boolean notice) {
+    public boolean addIslandMultiplier(@NonNull Island island, long time, boolean notice) {
         return multiplierManager.addIslandMultiplier(null, island, null, time, notice);
     }
 
@@ -174,7 +174,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean addIslandMultiplier(@NotNull Island island, double multiplier, long time, boolean notice) {
+    public boolean addIslandMultiplier(@NonNull Island island, double multiplier, long time, boolean notice) {
         return multiplierManager.addIslandMultiplier(null, island, multiplier, time, notice);
     }
 
@@ -185,7 +185,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean removeIslandMultiplier(@NotNull Island island, double multiplier, boolean notice) {
+    public boolean removeIslandMultiplier(@NonNull Island island, double multiplier, boolean notice) {
         return multiplierManager.removeIslandMultiplier(null, island, multiplier, null, notice);
     }
 
@@ -196,7 +196,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean removeIslandMultiplier(@NotNull Island island, long time, boolean notice) {
+    public boolean removeIslandMultiplier(@NonNull Island island, long time, boolean notice) {
         return multiplierManager.removeIslandMultiplier(null, island, null, time, notice);
     }
 
@@ -208,7 +208,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean removeIslandMultiplier(@NotNull Island island, double multiplier, long time, boolean notice) {
+    public boolean removeIslandMultiplier(@NonNull Island island, double multiplier, long time, boolean notice) {
         return multiplierManager.removeIslandMultiplier(null, island, multiplier, time, notice);
     }
 
@@ -219,7 +219,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean setIslandMultiplier(@NotNull Island island, double multiplier, boolean notice) {
+    public boolean setIslandMultiplier(@NonNull Island island, double multiplier, boolean notice) {
         return multiplierManager.setIslandMultiplier(null, island, multiplier, null, notice);
     }
 
@@ -230,7 +230,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean setIslandMultiplier(@NotNull Island island, long time, boolean notice) {
+    public boolean setIslandMultiplier(@NonNull Island island, long time, boolean notice) {
         return multiplierManager.setIslandMultiplier(null, island, null, time, notice);
     }
 
@@ -242,7 +242,7 @@ public class SkyPrestigeAPI {
      * @param notice Should the island members be notified of the change?
      * @return true if successful, false if not.
      */
-    public boolean setIslandMultiplier(@NotNull Island island, double multiplier, long time, boolean notice) {
+    public boolean setIslandMultiplier(@NonNull Island island, double multiplier, long time, boolean notice) {
         return multiplierManager.setIslandMultiplier(null, island, multiplier, time, notice);
     }
 
@@ -251,7 +251,7 @@ public class SkyPrestigeAPI {
      * @param island The {@link Island}.
      * @return The island multiplier.
      */
-    public double getIslandMultiplier(@NotNull Island island) {
+    public double getIslandMultiplier(@NonNull Island island) {
         return multiplierManager.getIslandMultiplier(island);
     }
 
@@ -260,7 +260,7 @@ public class SkyPrestigeAPI {
      * @param island The {@link Island}.
      * @return The remaining time.
      */
-    public long getIslandMultiplierTime(@NotNull Island island) {
+    public long getIslandMultiplierTime(@NonNull Island island) {
         return multiplierManager.getIslandMultiplierTime(island);
     }
 
@@ -269,7 +269,7 @@ public class SkyPrestigeAPI {
      * @param island The {@link Island} to get the multiplier for.
      * @return The effective multiplier. Will always be greater than or equal to 1.0.
      */
-    public double getEffectiveMultiplier(@NotNull Island island) {
+    public double getEffectiveMultiplier(@NonNull Island island) {
         return multiplierManager.getMultiplier(island);
     }
 }

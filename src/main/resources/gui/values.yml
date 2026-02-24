@@ -3,10 +3,9 @@ config-version: 1.0.0.0
 gui-name: "Prestige Point Values"
 gui-type: CHEST_54
 filler:
-    item-type: seagrass
+    item-type: gray_stained_glass_pane
     name: " "
     amount: 1
-    model-name: minecraft:air
 next-page:
     item:
         item-type: arrow

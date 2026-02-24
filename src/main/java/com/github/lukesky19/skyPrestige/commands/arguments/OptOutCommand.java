@@ -30,8 +30,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Optional;
@@ -40,10 +39,10 @@ import java.util.Optional;
  * This class creates the opt-out command argument for the skyprestige command.
  */
 public class OptOutCommand {
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull PrestigeExemptionManager prestigeExemptionManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull PrestigeExemptionManager prestigeExemptionManager;
 
     /**
      * Constructor
@@ -53,10 +52,10 @@ public class OptOutCommand {
      * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
      */
     public OptOutCommand(
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull PrestigeExemptionManager prestigeExemptionManager) {
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull PrestigeExemptionManager prestigeExemptionManager) {
         this.localeManager = localeManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
@@ -67,30 +66,32 @@ public class OptOutCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the opt-out command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the opt-out command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("opt-out")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.opt-out"))
                 .executes(ctx -> {
-                    @NotNull Locale locale = localeManager.getConfiguration();
                     CommandSender sender = ctx.getSource().getSender();
                     if(!(sender instanceof Player player)) return 0;
-                    @NotNull BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
 
-                    @NotNull Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
+                    Locale locale = localeManager.getConfiguration();
+                    Locale.OptOutMessages optOutMessages = locale.optOutMessages();
+                    BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+
+                    Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
                     if(optionalIsland.isEmpty()) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeStatusPlayerNotOnIsland()));
+                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.playerNotOnIsland()));
                         return 0;
                     }
                     Island island = optionalIsland.get();
 
-                    @Nullable IslandData islandData = islandDataManager.getData(optionalIsland.get().getUniqueId());
+                    IslandData islandData = islandDataManager.getData(optionalIsland.get().getUniqueId());
                     if(islandData == null) {
                         sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         return 0;
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandAlreadyOptedOut()));
+                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.islandAlreadyOptedOut()));
                         return 0;
                     }
 

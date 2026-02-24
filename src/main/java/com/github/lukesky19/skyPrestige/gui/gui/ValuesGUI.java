@@ -37,7 +37,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -50,8 +50,8 @@ import java.util.function.Consumer;
  */
 public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull PrestigePointsConfigManager prestigePointsConfigManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull PrestigePointsConfigManager prestigePointsConfigManager;
     // Config
     private final @Nullable ValuesGUIConfig valuesGUIConfig;
     // Page info
@@ -69,12 +69,12 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param player The {@link Player} viewing the GUI.
      */
     public ValuesGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull Player player) {
+            @NonNull SkyPlugin plugin,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull Player player) {
         super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
@@ -170,28 +170,28 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when the player's inventory is clicked. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Handles when a click occurs in either inventory. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -202,9 +202,9 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig fillerConfig = valuesGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -318,7 +318,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the values GUI due to an invalid slot."));
             return;
@@ -326,8 +326,8 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -344,7 +344,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
-    private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the values GUI due to an invalid slot."));
             return;
@@ -352,9 +352,9 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> createDisplayButton(itemStack, buttonConfig.slot()));
     }
 
@@ -363,7 +363,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param itemStack The {@link ItemStack} for the button.
      * @param slot The slot to place the button at.
      */
-    private void createDisplayButton(@NotNull ItemStack itemStack, int slot) {
+    private void createDisplayButton(@NonNull ItemStack itemStack, int slot) {
         GUIButton.Builder builder = new GUIButton.Builder();
 
         builder.setItemStack(itemStack);

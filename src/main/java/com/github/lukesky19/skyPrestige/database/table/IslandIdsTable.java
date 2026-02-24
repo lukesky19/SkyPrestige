@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.database.table;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ import java.util.concurrent.CompletableFuture;
  * This class creates a table to store all island ids.
  */
 public class IslandIdsTable {
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull VersionsTable versionsTable;
-    private final @NotNull String tableName = "skyprestige_island_ids";
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull VersionsTable versionsTable;
+    private final @NonNull String tableName = "skyprestige_island_ids";
 
     /**
      * Constructor
@@ -41,8 +41,8 @@ public class IslandIdsTable {
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public IslandIdsTable(
-            @NotNull QueueManager queueManager,
-            @NotNull VersionsTable versionsTable) {
+            @NonNull QueueManager queueManager,
+            @NonNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
         this.versionsTable = versionsTable;
     }
@@ -52,7 +52,7 @@ public class IslandIdsTable {
      * Queues the table creation and index creation sql.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> createTable() {
+    public @NonNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (island_id TEXT PRIMARY KEY NOT NULL UNIQUE);";
         String indexCreationSql = "CREATE INDEX IF NOT EXISTS idx_island_ids_island_id ON " + tableName + "(island_id);";
 
@@ -65,7 +65,7 @@ public class IslandIdsTable {
      * @param islandId The unique id of an island.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> insertIslandId(@NotNull String islandId) {
+    public @NonNull CompletableFuture<Void> insertIslandId(@NonNull String islandId) {
         String insertIslandIdSql = "INSERT INTO " + tableName + " (island_id) VALUES (?) ON CONFLICT (island_id) DO NOTHING";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
@@ -79,7 +79,7 @@ public class IslandIdsTable {
      * @param newIslandId The new island's id.
      * @return A {@link CompletableFuture} of type {@link Void} that can be used to determine when the method is complete.
      */
-    public @NotNull CompletableFuture<Void> updateIslandId(@NotNull String oldIslandId, @NotNull String newIslandId) {
+    public @NonNull CompletableFuture<Void> updateIslandId(@NonNull String oldIslandId, @NonNull String newIslandId) {
         String updateSql = "UPDATE " + tableName + " SET island_id = ? WHERE island_id = ?";
 
         CaseSensitiveStringParameter oldIslandIdParameter = new CaseSensitiveStringParameter(oldIslandId);
@@ -92,11 +92,11 @@ public class IslandIdsTable {
      * Get a list of all island ids stored in the table.
      * @return A {@link CompletableFuture} containing a {@link List} of {@link String}s for the island ids in the table.
      */
-    public @NotNull CompletableFuture<@NotNull List<@NotNull String>> getIslandIds() {
+    public @NonNull CompletableFuture<@NonNull List<@NonNull String>> getIslandIds() {
         String sql = "SELECT island_id FROM " + tableName;
 
         return queueManager.queueReadTransaction(sql, resultSet -> {
-            @NotNull List<@NotNull String> islandIdList = new ArrayList<>();
+            List<@NonNull String> islandIdList = new ArrayList<>();
 
             try {
                 while(resultSet.next()) {

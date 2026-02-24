@@ -25,8 +25,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  * This class caches the prestige points for specific actions related to items.
  */
 public class ItemPointsCache {
-    private final @NotNull Map<ActionType, LRUCache<ItemKey, Double>> itemMap = new HashMap<>();
+    private final @NonNull Map<ActionType, LRUCache<ItemKey, Double>> itemMap = new HashMap<>();
 
     /**
      * Constructor
@@ -54,16 +54,16 @@ public class ItemPointsCache {
      * @return The prestige points earned or 0.
      */
     public double getPoints(
-            @NotNull ActionType actionType,
-            @NotNull PrestigePointsMapping.Item config,
-            @NotNull ItemType itemType,
+            @NonNull ActionType actionType,
+            PrestigePointsMapping.@NonNull Item config,
+            @NonNull ItemType itemType,
             @Nullable EntityType entityType,
             @Nullable PotionType potionType,
             @Nullable Map<Enchantment, Integer> enchantments) {
         ItemKey itemKey = new ItemKey(itemType, entityType, potionType, enchantments);
         LRUCache<ItemKey, Double> cache = itemMap.computeIfAbsent(actionType, k -> new LRUCache<>(1000));
 
-        @Nullable Double cachedPoints = cache.get(itemKey);
+        Double cachedPoints = cache.get(itemKey);
         if(cachedPoints != null) {
             return cachedPoints;
         }
@@ -84,8 +84,8 @@ public class ItemPointsCache {
      * @return The prestige points earned or 0.
      */
     private double getFromConfig(
-            @NotNull PrestigePointsMapping.Item config,
-            @NotNull ItemType itemType,
+            PrestigePointsMapping.@NonNull Item config,
+            @NonNull ItemType itemType,
             @Nullable EntityType entityType,
             @Nullable PotionType potionType,
             @Nullable Map<Enchantment, Integer> enchantments) {
@@ -131,7 +131,7 @@ public class ItemPointsCache {
         }
 
         // Find the first matching entry
-        @Nullable Double points = stream.findFirst().map(ItemPoints::getPoints).orElse(null);
+        Double points = stream.findFirst().map(ItemPoints::getPoints).orElse(null);
 
         // If null, get the default points
         if(points == null) {

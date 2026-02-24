@@ -22,8 +22,8 @@ import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTe
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
      * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup(@NotNull TestInfo testInfo) {
+    public void setup(@NonNull TestInfo testInfo) {
         super.setup(testInfo);
 
         // Setup table classes
@@ -99,7 +99,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
     public void testSetPlayerLogoutLocation() {
-        @Nullable World world = MockBukkitExtension.getServer().getWorld("world");
+        World world = MockBukkitExtension.getServer().getWorld("world");
         if(world == null) {
             fail("The server does not have a world setup!");
             return;
@@ -126,7 +126,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
     public void testGetPlayerIdsWithinByBounds() {
-        @Nullable World world = MockBukkitExtension.getServer().getWorld("world");
+        World world = MockBukkitExtension.getServer().getWorld("world");
         if(world == null) {
             fail("The server does not have a world setup!");
             return;
@@ -186,14 +186,14 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
      * @param playerId The player id.
      * @return A {@link CompletableFuture} containing the player's logout {@link Location} or null. The y value will always be 0.
      */
-    private @NotNull CompletableFuture<@Nullable Location> getPlayerLogoutLocation(@NotNull UUID playerId) {
+    private @NonNull CompletableFuture<@Nullable Location> getPlayerLogoutLocation(@NonNull UUID playerId) {
         String selectSql = "SELECT world, x, z FROM skyprestige_player_logout_locations WHERE player_id = ?";
 
         return liveQueueManager.queueReadTransaction(selectSql, List.of(new UUIDParameter(playerId)), resultSet -> {
             try {
                 if(resultSet.next()) {
                     String worldName = resultSet.getString("world");
-                    @Nullable World world = MockBukkitExtension.getServer().getWorld(worldName);
+                    World world = MockBukkitExtension.getServer().getWorld(worldName);
                     if(world == null) return null;
                     int x = resultSet.getInt("x");
                     int z = resultSet.getInt("z");

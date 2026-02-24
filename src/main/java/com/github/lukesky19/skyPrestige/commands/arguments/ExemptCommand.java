@@ -32,8 +32,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
@@ -42,10 +41,10 @@ import java.util.List;
  * This class creates the exempt command argument for the skyprestige command.
  */
 public class ExemptCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -55,10 +54,10 @@ public class ExemptCommand {
      * @param hookManager A {@link HookManager} instance.
      */
     public ExemptCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.islandDataManager = islandDataManager;
@@ -69,16 +68,18 @@ public class ExemptCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the exempt command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the exempt command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("exempt")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.exempt"))
                 .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
                         .executes(ctx -> {
                             Locale locale = localeManager.getConfiguration();
+                            Locale.LeaderboardMessages leaderboardMessages = locale.leaderboardMessages();
+
                             CommandSender sender = ctx.getSource().getSender();
                             Island island = ctx.getArgument("island_id", Island.class);
                             String islandId = island.getUniqueId();
-                            @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                            IslandData islandData = islandDataManager.getData(islandId);
                             if(islandData == null) {
                                 if(sender instanceof Player) {
                                     sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
@@ -92,9 +93,9 @@ public class ExemptCommand {
                             islandData.setLeaderboardExempt(true);
 
                             if(sender instanceof Player) {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandExempt(), List.of(Placeholder.parsed("island_id", islandId))));
+                                sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + leaderboardMessages.islandExempt(), List.of(Placeholder.parsed("island_id", islandId))));
                             } else {
-                                sender.sendMessage(AdventureUtil.deserialize(locale.islandExempt(), List.of(Placeholder.parsed("island_id", islandId))));
+                                sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.islandExempt(), List.of(Placeholder.parsed("island_id", islandId))));
                             }
 
                             return 1;

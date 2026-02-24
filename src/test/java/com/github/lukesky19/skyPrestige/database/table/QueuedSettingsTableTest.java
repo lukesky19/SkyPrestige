@@ -17,12 +17,12 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
+import com.github.lukesky19.skyPrestige.data.data.reset.QueuedSettings;
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
+import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,11 +45,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * This class tests the {@link OfflineStatusChangeTable} class.
+ * This class tests the {@link QueuedSettingsTable} class.
  * Most code is tested against a live database except for errors.
  */
 @Execution(ExecutionMode.SAME_THREAD)
-public class OfflineStatusChangeTableTest extends AbstractTableTest {
+public class QueuedSettingsTableTest  extends AbstractTableTest {
     @Mock
     private ComponentLogger logger;
 
@@ -57,15 +57,15 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     private PlayerIdsTable playerIdsTable;
 
     // Classes being tested
-    private OfflineStatusChangeTable liveOfflineStatusChangeTable;
-    private OfflineStatusChangeTable offlineStatusChangeTableWithMockedQueueManager;
+    private QueuedSettingsTable liveQueuedSettingsTable;
+    private QueuedSettingsTable queuedSettingsTableWithMockedQueueManager;
 
     /**
      * Set up the required data for the tests.
      * @param testInfo The {@link TestInfo}.
      */
     @BeforeEach
-    public void setup(@NotNull TestInfo testInfo) {
+    public void setup(@NonNull TestInfo testInfo) {
         super.setup(testInfo);
 
         // Setup table classes
@@ -80,8 +80,8 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
                         .thenCompose(v2 -> playerIdsTable.createTable())).join();
 
         // Setup classes for tests
-        liveOfflineStatusChangeTable = new OfflineStatusChangeTable(logger, liveQueueManager, versionsTable);
-        offlineStatusChangeTableWithMockedQueueManager = new OfflineStatusChangeTable(logger, mockedQueueManager, versionsTable);
+        liveQueuedSettingsTable = new QueuedSettingsTable(logger, liveQueueManager, versionsTable);
+        queuedSettingsTableWithMockedQueueManager = new QueuedSettingsTable(logger, mockedQueueManager, versionsTable);
     }
 
     /**
@@ -90,7 +90,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     @Test
     public void testCreateTable() {
         // Check that the table was created successfully and didn't error
-        liveOfflineStatusChangeTable.createTable()
+        liveQueuedSettingsTable.createTable()
                 .thenAccept(Assertions::assertNull)
                 .exceptionally(ex -> {
                     fail("Future completed exceptionally: " + ex.getMessage());
@@ -109,7 +109,7 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Error")));
 
         // Check that the table creation errored
-        offlineStatusChangeTableWithMockedQueueManager.createTable()
+        queuedSettingsTableWithMockedQueueManager.createTable()
                 .thenAccept(v -> fail("Table creation should of failed exceptionally."))
                 .exceptionally(ex -> {
                     verify(logger).error(any(Component.class));
@@ -119,24 +119,26 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     }
 
     /**
-     * Test the insertion of an offline status change.
+     * Test the queuing of settings.
      */
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testInsertOfflineStatusChange() {
+    public void testQueueSettings() {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        boolean status = true;
 
-        liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
+        liveQueuedSettingsTable.createTable().thenCompose(v1 -> {
             return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
                 return playerIdsTable.insertPlayerId(playerId).thenCompose(v3 -> {
-                    return liveOfflineStatusChangeTable.insertOfflineStatusChange(playerId, islandId, status).thenCompose(v4 -> {
-                        return getData(playerId).thenApply(data -> {
-                            assertNotNull(data);
-                            assertEquals(playerId.toString(), data.playerId());
-                            assertEquals(islandId, data.islandId());
-                            assertEquals(status, data.status());
+                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(v4 -> {
+                        return liveQueuedSettingsTable.getQueuedSettings(playerId).thenApply(list -> {
+                            assertFalse(list.isEmpty());
+                            assertEquals(1, list.size());
+                            QueuedSettings queuedSettings = list.getFirst();
+                            assertEquals(playerId, queuedSettings.playerId());
+                            assertEquals(islandId, queuedSettings.islandId());
+                            assertEquals(SettingsType.PRESTIGE, queuedSettings.settingsType());
+                            assertEquals(1, queuedSettings.prestigeLevel());
                             return null;
                         });
                     });
@@ -146,16 +148,16 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     }
 
     /**
-     * Test the insertion of an offline status change, but an error occurs.
+     * Test the queuing of settings, but an error occurs.
      */
     @Test
-    public void testInsertOfflineStatusChangeError() {
+    public void testQueueSettingsError() {
         // When a write transaction is queued, return a failed future
         when(mockedQueueManager.queueWriteTransaction(anyString(), anyList()))
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Error")));
 
         // Check that the table creation errored
-        offlineStatusChangeTableWithMockedQueueManager.insertOfflineStatusChange(UUID.randomUUID(), "BSkyBlock" + UUID.randomUUID(), true)
+        queuedSettingsTableWithMockedQueueManager.queueSettings(UUID.randomUUID(), "BSkyBlock" + UUID.randomUUID(), SettingsType.PRESTIGE, 1)
                 .thenAccept(v -> fail("Table creation should of failed exceptionally."))
                 .exceptionally(ex -> {
                     verify(logger).error(any(Component.class));
@@ -165,28 +167,30 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     }
 
     /**
-     * Test the deletion of an offline status change.
+     * Test the clearing of queued settings.
      */
     @Test
     @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testRemoveOfflineStatusChange() {
+    public void testClearQueuedSettings() {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
-        boolean status = true;
 
-        liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
+        liveQueuedSettingsTable.createTable().thenCompose(v1 -> {
             return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
                 return playerIdsTable.insertPlayerId(playerId).thenCompose(v3 -> {
-                    return liveOfflineStatusChangeTable.insertOfflineStatusChange(playerId, islandId, status).thenCompose(v4 -> {
-                        return getData(playerId).thenCompose(data1 -> {
-                            assertNotNull(data1);
-                            assertEquals(playerId.toString(), data1.playerId());
-                            assertEquals(islandId, data1.islandId());
-                            assertEquals(status, data1.status);
+                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(v4 -> {
+                        return liveQueuedSettingsTable.getQueuedSettings(playerId).thenCompose(list1 -> {
+                            assertFalse(list1.isEmpty());
+                            assertEquals(1, list1.size());
+                            QueuedSettings queuedSettings = list1.getFirst();
+                            assertEquals(playerId, queuedSettings.playerId());
+                            assertEquals(islandId, queuedSettings.islandId());
+                            assertEquals(SettingsType.PRESTIGE, queuedSettings.settingsType());
+                            assertEquals(1, queuedSettings.prestigeLevel());
 
-                            return liveOfflineStatusChangeTable.removeOfflineStatusChange(playerId).thenCompose(v5 -> {
-                                return getData(playerId).thenApply(data2 -> {
-                                    assertNull(data2);
+                            return liveQueuedSettingsTable.clearQueuedSettings(playerId).thenCompose(v5 -> {
+                                return liveQueuedSettingsTable.getQueuedSettings(playerId).thenApply(list2 -> {
+                                    assertTrue(list2.isEmpty());
                                     return null;
                                 });
                             });
@@ -201,13 +205,13 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
      * Test the deletion of an offline status change, but an error occurs.
      */
     @Test
-    public void testRemoveOfflineStatusChangeError() {
+    public void testClearQueuedSettingsError() {
         // When a write transaction is queued, return a failed future
         when(mockedQueueManager.queueWriteTransaction(anyString(), anyList()))
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Error")));
 
         // Check that the table creation errored
-        offlineStatusChangeTableWithMockedQueueManager.removeOfflineStatusChange(UUID.randomUUID())
+        queuedSettingsTableWithMockedQueueManager.clearQueuedSettings(UUID.randomUUID())
                 .thenAccept(v -> fail("Table creation should of failed exceptionally."))
                 .exceptionally(ex -> {
                     verify(logger).error(any(Component.class));
@@ -217,35 +221,36 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
     }
 
     /**
-     * Test the retrieval of all offline status change statuses.
+     * Test the retrieval of queued settings, but an error occurs.
      */
     @Test
-    @SuppressWarnings("CodeBlock2Expr") // In my opinion, it is more readable to have the code blocks than lambda expressions here.
-    public void testGetOfflineStatusChanges() {
-        UUID playerId = UUID.randomUUID();
-        String islandId = "BSkyBlock" + UUID.randomUUID();
-        boolean status = true;
-
-        liveOfflineStatusChangeTable.createTable().thenCompose(v1 -> {
-            return playerIdsTable.insertPlayerId(playerId).thenCompose(v2 -> {
-                return islandIdsTable.insertIslandId(islandId).thenCompose(v5 -> {
-                    return liveOfflineStatusChangeTable.insertOfflineStatusChange(playerId, islandId, status).thenCompose(v8 -> {
-                        return liveOfflineStatusChangeTable.getOfflineStatusChanges(playerId).thenApply(list -> {
-                            assertTrue(list.contains(status));
-                            return null;
-                        });
-                    });
+    public void testGetQueuedSettingsQueueManagerError() {
+        // When a read transaction is queued, intercept the invocation to replace the existing ResultSet with the mocked one.
+        when(mockedQueueManager.queueReadTransaction(anyString(), anyList(), Mockito.<Function<ResultSet, List<QueuedSettings>>>any()))
+                .thenAnswer(invocation -> {
+                    // Return a failed future
+                    return CompletableFuture.failedFuture(new RuntimeException("Runtime Test Error"));
                 });
-            });
-        }).join();
+
+        // Ensure that a RunTimeException is thrown
+        CompletableFuture<List<QueuedSettings>> future = queuedSettingsTableWithMockedQueueManager.getQueuedSettings(UUID.randomUUID());
+        future.join();
+
+        verify(logger).error(any(Component.class));
+
+        future.exceptionally(ex -> {
+            // Ensure the error message is the same as the one used above
+            assertEquals("Runtime Test Error", ex.getMessage());
+            return null;
+        });
     }
 
     /**
-     * Test the retrieval of all offline status change statuses, but a SQLException error occurs.
+     * Test the retrieval of queued settings, but an error occurs.
      */
     @Test
     @SuppressWarnings("resource") // The ResultSet here is a mock, so a try-with-resources block is unnecessary.
-    public void testGetOfficeStatusChangesSQLExceptionError() {
+    public void testGetQueuedSettingsResultSetError() {
         // Created a mocked ResultSet
         ResultSet resultSetMock = Mockito.mock(ResultSet.class);
 
@@ -267,59 +272,10 @@ public class OfflineStatusChangeTableTest extends AbstractTableTest {
 
         // Ensure that a RunTimeException is thrown
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                offlineStatusChangeTableWithMockedQueueManager.getOfflineStatusChanges(UUID.randomUUID())
+                queuedSettingsTableWithMockedQueueManager.getQueuedSettings(UUID.randomUUID())
                         .join());
 
         // Ensure the error message is the same as the one used above
         assertEquals("Test Error", exception.getCause().getMessage());
     }
-
-    /**
-     * Test the retrieval of all offline status change statuses, but the future completes exceptionally.
-     */
-    @Test
-    public void testGetOfflineStatusChangesQueueManagerError() {
-        when(mockedQueueManager.queueReadTransaction(anyString(), anyList(), Mockito.<Function<ResultSet, List<Integer>>>any()))
-                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Test Error")));
-
-        offlineStatusChangeTableWithMockedQueueManager.getOfflineStatusChanges(UUID.randomUUID()).join();
-
-        // Ensure an error message is logged
-        verify(logger).error(any(Component.class));
-    }
-
-    /**
-     * Get the offline status change data for the player id provided.
-     * @param playerId The player's {@link UUID}.
-     * @return A {@link CompletableFuture} containing the {@link OfflineStatusData} or null.
-     */
-    private @NotNull CompletableFuture<@Nullable OfflineStatusData> getData(@NotNull UUID playerId) {
-        String readSql = "SELECT player_id, island_id, status FROM skyprestige_offline_status_change WHERE player_id = ?";
-
-        return liveQueueManager.queueReadTransaction(readSql, List.of(new UUIDParameter(playerId)), resultSet -> {
-            try {
-                if(resultSet.next()) {
-                    return new OfflineStatusData(
-                            resultSet.getString("player_id"),
-                            resultSet.getString("island_id"),
-                            resultSet.getBoolean("status"));
-                }
-
-                return null;
-            } catch(SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    /**
-     * This record stores offline status change data for test validation purposes.
-     * @param playerId The player's {@link UUID} as a String.
-     * @param islandId The island's id.
-     * @param status The status.
-     */
-    private record OfflineStatusData(
-            @NotNull String playerId,
-            @NotNull String islandId,
-            boolean status) {}
 }

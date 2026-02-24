@@ -25,8 +25,8 @@ import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
-import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.processor.reset.SettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -36,12 +36,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.api.events.island.IslandCreatedEvent;
 import world.bentobox.bentobox.api.events.island.IslandResetEvent;
 import world.bentobox.bentobox.api.events.team.TeamJoinEvent;
-import world.bentobox.bentobox.api.events.team.TeamJoinedEvent;
 import world.bentobox.bentobox.api.events.team.TeamKickEvent;
 import world.bentobox.bentobox.api.events.team.TeamLeaveEvent;
 import world.bentobox.bentobox.database.objects.Island;
@@ -53,16 +51,19 @@ import java.util.UUID;
  * This class listens for events related to islands.
  */
 public class IslandListener implements Listener {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull OptInConfigManager optInConfigManager;
-    private final @NotNull OptOutConfigManager optOutConfigManager;
-    private final @NotNull PrestigePointsManager prestigePointsManager;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull IslandSettingsProcessor islandSettingsProcessor;
-    private final @NotNull RewardsProcessor rewardsProcessor;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull OptInConfigManager optInConfigManager;
+    private final @NonNull OptOutConfigManager optOutConfigManager;
+
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull GUIManager guiManager;
+
+    private final @NonNull SettingsProcessor settingsProcessor;
+    private final @NonNull RewardsProcessor rewardsProcessor;
 
     /**
      * Constructor
@@ -70,32 +71,32 @@ public class IslandListener implements Listener {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param optInConfigManager An {@link OptInConfigManager} instance.
      * @param optOutConfigManager An {@link OptOutConfigManager} instance.
-     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
-     * @param islandSettingsProcessor An {@link IslandSettingsProcessor} instance.
+     * @param settingsProcessor A {@link SettingsProcessor} instance.
      * @param rewardsProcessor A {@link RewardsProcessor} instance.
+     * @param guiManager A {@link GUIManager} instance.
      */
     public IslandListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull OptInConfigManager optInConfigManager,
-            @NotNull OptOutConfigManager optOutConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull IslandSettingsProcessor islandSettingsProcessor,
-            @NotNull RewardsProcessor rewardsProcessor) {
+            @NonNull SkyPlugin plugin,
+            @NonNull SettingsManager settingsManager,
+            @NonNull OptInConfigManager optInConfigManager,
+            @NonNull OptOutConfigManager optOutConfigManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull SettingsProcessor settingsProcessor,
+            @NonNull RewardsProcessor rewardsProcessor,
+            @NonNull GUIManager guiManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
         this.optInConfigManager = optInConfigManager;
         this.optOutConfigManager = optOutConfigManager;
-        this.prestigePointsManager = prestigePointsManager;
         this.databaseManager = databaseManager;
         this.islandDataManager = islandDataManager;
-        this.islandSettingsProcessor = islandSettingsProcessor;
+        this.settingsProcessor = settingsProcessor;
         this.rewardsProcessor = rewardsProcessor;
+        this.guiManager = guiManager;
     }
 
     /**
@@ -112,7 +113,7 @@ public class IslandListener implements Listener {
         IslandData islandData = new IslandData(islandId);
         islandDataManager.setData(islandId, islandData);
 
-        @Nullable Settings settings = settingsManager.getConfiguration();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
             logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige settings due to invalid plugin settings."));
             return;
@@ -121,14 +122,14 @@ public class IslandListener implements Listener {
         if(settings.startOptedOut()) {
             islandData.setPrestigeExempt(true);
 
-            @Nullable OptInOutConfig optOutConfig = optOutConfigManager.getConfiguration();
+            OptInOutConfig optOutConfig = optOutConfigManager.getConfiguration();
             if(optOutConfig == null) {
                 logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due invalid opt-out config."));
                 return;
             }
 
             UUID playerId = islandCreatedEvent.getPlayerUUID();
-            @Nullable Player player = plugin.getServer().getPlayer(playerId);
+            Player player = plugin.getServer().getPlayer(playerId);
             if(player == null || !player.isOnline() || !player.isConnected()) {
                 logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due to the player being invalid."));
                 return;
@@ -136,18 +137,18 @@ public class IslandListener implements Listener {
 
             if(settings.applyOptOutRewardsForInitialIslands()) {
                 rewardsProcessor.processEarlyRewards(player, List.of(player), List.of(), optOutConfig.rewardConfig());
-                rewardsProcessor.processPostRewards(player, island, List.of(player), List.of(), optOutConfig.rewardConfig(), -1);
+                rewardsProcessor.processPostRewards(player, island, List.of(player), List.of(), optOutConfig.rewardConfig());
             }
         } else {
             if(settings.applyOptInRewardsForInitialIslands()) {
-                @Nullable OptInOutConfig optInConfig = optInConfigManager.getConfiguration();
+                OptInOutConfig optInConfig = optInConfigManager.getConfiguration();
                 if(optInConfig == null) {
                     logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due invalid opt-in config."));
                     return;
                 }
 
                 UUID playerId = islandCreatedEvent.getPlayerUUID();
-                @Nullable Player player = plugin.getServer().getPlayer(playerId);
+                Player player = plugin.getServer().getPlayer(playerId);
                 if(player == null || !player.isOnline() || !player.isConnected()) {
                     logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due to the player being invalid."));
                     return;
@@ -155,7 +156,7 @@ public class IslandListener implements Listener {
 
                 if(settings.applyOptOutRewardsForInitialIslands()) {
                     rewardsProcessor.processEarlyRewards(player, List.of(player), List.of(), optInConfig.rewardConfig());
-                    rewardsProcessor.processPostRewards(player, island, List.of(player), List.of(), optInConfig.rewardConfig(), -1);
+                    rewardsProcessor.processPostRewards(player, island, List.of(player), List.of(), optInConfig.rewardConfig());
                 }
             }
         }
@@ -167,56 +168,62 @@ public class IslandListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onIslandReset(IslandResetEvent islandResetEvent) {
+        UUID playerId = islandResetEvent.getPlayerUUID();
+        Player player = plugin.getServer().getPlayer(playerId);
+        if(player == null || !player.isOnline() || !player.isConnected()) return;
         Island oldIsland = islandResetEvent.getOldIsland();
-        String oldIslandId = oldIsland.getUniqueId();
         Island newIsland = islandResetEvent.getIsland();
 
-        @Nullable Player player = plugin.getServer().getPlayer(islandResetEvent.getPlayerUUID());
-        if(player == null || !player.isOnline() || !player.isConnected()) {
-            logger.error(AdventureUtil.deserialize("The player that reset the island is no longer online."));
-            return;
-        }
+        // Close any open GUIs
+        guiManager.closeGUIsByIslandId(oldIsland.getUniqueId());
 
-        // Retrieve the IslandData for the old island.
-        @Nullable IslandData islandData = islandDataManager.getData(oldIslandId);
-        if(islandData == null) {
-            logger.error(AdventureUtil.deserialize("No island data found for the island id " + oldIslandId + "."));
-            return;
-        }
-
-        @Nullable Settings settings = settingsManager.getConfiguration();
-        if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to process island settings on island reset due to invalid plugin settings."));
-            return;
-        }
-
-        islandSettingsProcessor.processIslandSettings(player, settings.islandResetSettings(), oldIsland, newIsland, islandData);
+        settingsProcessor.onIslandReset(player, oldIsland, newIsland);
     }
 
     /**
-     * Listens to when a player joins an island's team and updates the island's required prestige points.
-     * @param teamJoinedEvent A {@link TeamJoinEvent}.
+     * Listens to when a player joins an island's team and reverts early rewards and applies settings.
+     * @param teamJoinEvent A {@link TeamJoinEvent}.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onIslandTeamJoin(TeamJoinedEvent teamJoinedEvent) {
-        prestigePointsManager.recalculateRequiredPrestigePoints(teamJoinedEvent.getIsland());
+    public void onIslandTeamJoin(TeamJoinEvent teamJoinEvent) {
+        UUID playerId = teamJoinEvent.getPlayerUUID();
+        Player player = plugin.getServer().getPlayer(playerId);
+        Island island = teamJoinEvent.getIsland();
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        if(islandData == null) return;
+
+        rewardsProcessor.revertEarlyRewards(playerId);
+
+        settingsProcessor.onTeamJoin(island, islandData, playerId, player);
     }
 
     /**
-     * Listens to when a player leaves an island's team and updates the island's required prestige points.
+     * Listens to when a player leaves an island's team and reverts early rewards and applies settings.
      * @param teamLeaveEvent A {@link TeamLeaveEvent}.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onIslandTeamLeave(TeamLeaveEvent teamLeaveEvent) {
-        prestigePointsManager.recalculateRequiredPrestigePoints(teamLeaveEvent.getIsland());
+        UUID playerId = teamLeaveEvent.getPlayerUUID();
+        Player player = plugin.getServer().getPlayer(playerId);
+        Island island = teamLeaveEvent.getIsland();
+
+        rewardsProcessor.revertEarlyRewards(playerId);
+
+        settingsProcessor.onTeamLeave(island, playerId, player);
     }
 
     /**
-     * Listens to when a player is kicked from an island's team and updates the island's required prestige points.
+     * Listens to when a player is kicked from an island's team and reverts early rewards and applies settings.
      * @param teamKickEvent A {@link TeamKickEvent}.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onIslandTeamKick(TeamKickEvent teamKickEvent) {
-        prestigePointsManager.recalculateRequiredPrestigePoints(teamKickEvent.getIsland());
+        UUID playerId = teamKickEvent.getPlayerUUID();
+        Player player = plugin.getServer().getPlayer(playerId);
+        Island island = teamKickEvent.getIsland();
+
+        rewardsProcessor.revertEarlyRewards(playerId);
+
+        settingsProcessor.onTeamKick(island, playerId, player);
     }
 }

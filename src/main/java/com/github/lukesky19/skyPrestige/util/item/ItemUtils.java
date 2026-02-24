@@ -34,8 +34,8 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 import org.bukkit.spawner.Spawner;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -46,11 +46,11 @@ import java.util.Set;
  * This class is used to validate and extract data from {@link ItemStack}s.
  */
 public class ItemUtils {
-    private static final @NotNull Set<ItemType> AXES = new LinkedHashSet<>();
+    private static final @NonNull Set<ItemType> AXES = new LinkedHashSet<>();
     private static final HashMap<BlockType, ItemType> BLOCK_TO_ITEM_TYPES = new HashMap<>();
 
     static {
-        Registry<@NotNull ItemType> itemTypeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM);
+        Registry<@NonNull ItemType> itemTypeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM);
         itemTypeRegistry.forEach(itemType -> {
             String name = itemType.getKey().toString().toLowerCase();
 
@@ -78,8 +78,8 @@ public class ItemUtils {
      * @param itemType The {@link ItemType} to check.
      * @return true if an axe, otherwise false.
      */
-    public static boolean isItemTypeAxe(@NotNull ItemType itemType) {
-        return AXES.contains(itemType);
+    public static boolean isNotAxe(@NonNull ItemType itemType) {
+        return !AXES.contains(itemType);
     }
 
     /**
@@ -89,7 +89,7 @@ public class ItemUtils {
      * @param itemStack The {@link ItemStack}.
      * @return The stack size.
      */
-    public static int getAmount(@NotNull RoseStackerHook roseStackerHook, @NotNull ItemStack itemStack) {
+    public static int getAmount(@NonNull RoseStackerHook roseStackerHook, @NonNull ItemStack itemStack) {
         if(roseStackerHook.isHooked() && dev.rosewood.rosestacker.utils.ItemUtils.hasStoredStackSize(itemStack)) {
             return dev.rosewood.rosestacker.utils.ItemUtils.getStackedItemStackAmount(itemStack);
         }
@@ -103,13 +103,13 @@ public class ItemUtils {
      * @param itemStack The {@link ItemStack}.
      * @return The {@link EntityType} or null if not a spawner / no associated {@link EntityType}.
      */
-    public static @Nullable EntityType getEntityType(@NotNull RoseStackerHook roseStackerHook, @NotNull ItemStack itemStack) {
+    public static @Nullable EntityType getEntityType(@NonNull RoseStackerHook roseStackerHook, @NonNull ItemStack itemStack) {
         if(roseStackerHook.isHooked() && dev.rosewood.rosestacker.utils.ItemUtils.hasStoredStackSize(itemStack)) {
             return dev.rosewood.rosestacker.utils.ItemUtils.getStackedItemEntityType(itemStack);
         } else {
             if(itemStack.getItemMeta() instanceof BlockStateMeta blockStateMeta) {
                 if(blockStateMeta.getBlockState() instanceof Spawner spawner) {
-                    @Nullable EntitySnapshot entitySnapshot = spawner.getSpawnedEntity();
+                    EntitySnapshot entitySnapshot = spawner.getSpawnedEntity();
                     if(entitySnapshot != null) {
                         entitySnapshot.getEntityType();
                     }
@@ -125,7 +125,7 @@ public class ItemUtils {
      * @param itemStack The {@link ItemStack}.
      * @return The {@link PotionType} or null if not a potion / no associated {@link PotionType}.
      */
-    public static @Nullable PotionType getPotionType(@NotNull ItemStack itemStack) {
+    public static @Nullable PotionType getPotionType(@NonNull ItemStack itemStack) {
         if(itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
             return potionMeta.getBasePotionType();
         }
@@ -138,7 +138,7 @@ public class ItemUtils {
      * @param itemStack The {@link ItemStack}.
      * @return The {@link Map} mapping {@link Enchantment} to levels as {@link Integer}s or null if no enchantments.
      */
-    public static @Nullable Map<Enchantment, Integer> getEnchantments(@NotNull ItemStack itemStack) {
+    public static @Nullable Map<Enchantment, Integer> getEnchantments(@NonNull ItemStack itemStack) {
         if(itemStack.getItemMeta() instanceof EnchantmentStorageMeta enchantmentStorageMeta) {
             if(!enchantmentStorageMeta.getStoredEnchants().isEmpty()) {
                 return enchantmentStorageMeta.getStoredEnchants();
@@ -159,8 +159,8 @@ public class ItemUtils {
      * @return The {@link ItemType} or null if no spawn egg exists for that {@link EntityType}.
      */
     public static @Nullable ItemType getItemTypeFromEntityType(
-            @NotNull ComponentLogger logger,
-            @NotNull EntityType entityType) {
+            @NonNull ComponentLogger logger,
+            @NonNull EntityType entityType) {
         return RegistryUtil.getItemType(logger, entityType.getKey().getKey() + "_spawn_egg").orElse(null);
     }
 
@@ -170,7 +170,7 @@ public class ItemUtils {
      * @param blockType The {@link BlockType}.
      * @return The {@link ItemType} or null.
      */
-    public static @Nullable ItemType getItemTypeFromBlockType(@NotNull BlockType blockType) {
+    public static @Nullable ItemType getItemTypeFromBlockType(@NonNull BlockType blockType) {
         if(BLOCK_TO_ITEM_TYPES.containsKey(blockType)) {
             return BLOCK_TO_ITEM_TYPES.get(blockType);
         } else if(blockType.hasItemType()) {

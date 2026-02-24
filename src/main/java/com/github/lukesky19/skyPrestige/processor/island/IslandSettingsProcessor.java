@@ -28,7 +28,7 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
@@ -41,10 +41,10 @@ import java.util.HashMap;
  * This class manages the processing of {@link IslandSettings}.
  */
 public class IslandSettingsProcessor {
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull IslandDataManager islandDataManager;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull IslandDataManager islandDataManager;
 
     /**
      * Constructor
@@ -54,10 +54,10 @@ public class IslandSettingsProcessor {
      * @param islandDataManager An {@link IslandDataManager} instance.
      */
     public IslandSettingsProcessor(
-            @NotNull SkyPlugin plugin,
-            @NotNull HookManager hookManager,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull IslandDataManager islandDataManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull HookManager hookManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull IslandDataManager islandDataManager) {
         this.logger = plugin.getComponentLogger();
         this.hookManager = hookManager;
         this.databaseManager = databaseManager;
@@ -70,15 +70,14 @@ public class IslandSettingsProcessor {
      * @param islandSettings The {@link IslandSettings} to process.
      * @param oldIsland The old {@link Island}.
      * @param newIsland The new {@link Island}.
-     * @param oldIslandData The {@link IslandData}.
+     * @param islandData The {@link IslandData}.
      */
     public void processIslandSettings(
-            @NotNull Player player,
-            @NotNull IslandSettings islandSettings,
-            @NotNull Island oldIsland,
-            @NotNull Island newIsland,
-            @NotNull IslandData oldIslandData) {
-        IslandData newIslandData = oldIslandData.clone();
+            @NonNull Player player,
+            @NonNull IslandSettings islandSettings,
+            @NonNull Island oldIsland,
+            @NonNull Island newIsland,
+            @NonNull IslandData islandData) {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         IslandWorldManager islandWorldManager = bentoBoxHook.getIslandWorldManager();
         MagicCobblestoneGeneratorHook magicCobblestoneGeneratorHook = hookManager.getHook(MagicCobblestoneGeneratorHook.class);
@@ -124,25 +123,25 @@ public class IslandSettingsProcessor {
 
         // Reset prestige points if configured to do so
         if(islandSettings.resetPrestigePoints()) {
-            newIslandData.setPrestigePoints(0);
+            islandData.setPrestigePoints(0);
         }
 
         // Reset prestige level if configured to do so
         if(islandSettings.resetPrestigeLevel()) {
-            newIslandData.setPrestigeLevel(0);
+            islandData.setPrestigeLevel(0);
         }
 
         // Clear vault if configured to do so
         if(islandSettings.clearVault()) {
-            newIslandData.clearVaultItems();
+            islandData.clearVaultItems();
         }
 
         islandDataManager.removeDataByIdentifier(oldIsland.getUniqueId());
-        islandDataManager.setData(newIsland.getUniqueId(), newIslandData);
+        islandDataManager.setData(newIsland.getUniqueId(), islandData);
 
         databaseManager.getIslandIdsTable().updateIslandId(oldIsland.getUniqueId(), newIsland.getUniqueId())
                 .thenAccept(v1 ->
-                        databaseManager.getIslandDataTable().saveIslandData(newIsland.getUniqueId(), newIslandData).exceptionally(ex -> {
+                        databaseManager.getIslandDataTable().saveIslandData(newIsland.getUniqueId(), islandData).exceptionally(ex -> {
                                     logger.error(AdventureUtil.deserialize("Failed to save island data for new island id: " + newIsland.getUniqueId() + ". Error: " + ex.getMessage()));
                                     return null;
                                 })
@@ -153,63 +152,5 @@ public class IslandSettingsProcessor {
 
         // Update island
         IslandsManager.updateIsland(newIsland);
-    }
-
-    /**
-     * Process the island settings. This method is used to process island settings when an island is opted in or out of prestige.
-     * It processes opt in/opt out specific settings, then calls {@link #processIslandSettings(Player, IslandSettings, Island, Island, IslandData)}.
-     * @param player The {@link Player} who initiated the settings being applied.
-     * @param islandSettings The {@link IslandSettings} to process.
-     * @param oldIsland The old {@link Island}.
-     * @param newIsland The new {@link Island}.
-     * @param oldIslandData The {@link IslandData}.
-     * @param prestigeExempt true for opt out, false of opt in.
-     */
-    public void processIslandSettings(
-            @NotNull Player player,
-            @NotNull IslandSettings islandSettings,
-            @NotNull Island oldIsland,
-            @NotNull Island newIsland,
-            @NotNull IslandData oldIslandData,
-            boolean prestigeExempt) {
-        IslandData newIslandData = oldIslandData.clone();
-
-        newIslandData.setPrestigeExempt(prestigeExempt);
-
-        newIslandData.setLeaderboardExempt(prestigeExempt);
-
-        processIslandSettings(player, islandSettings, oldIsland, newIsland, newIslandData);
-    }
-
-    /**
-     * Process the island settings. This method is used to process island settings when an island is prestiged.
-     * It processes prestige specific settings, then calls {@link #processIslandSettings(Player, IslandSettings, Island, Island, IslandData)}.
-     * @param player The {@link Player} who initiated the settings being applied.
-     * @param islandSettings The {@link IslandSettings} to process.
-     * @param oldIsland The old {@link Island}.
-     * @param newIsland The new {@link Island}.
-     * @param islandData The {@link IslandData}.
-     * @param requiredPrestigePoints The prestige points that were required to trigger the processing of the island settings.
-     * @param prestigeLevel The prestige level to update the island data with.
-     */
-    public void processIslandSettings(
-            @NotNull Player player,
-            @NotNull IslandSettings islandSettings,
-            @NotNull Island oldIsland,
-            @NotNull Island newIsland,
-            @NotNull IslandData islandData,
-            double requiredPrestigePoints,
-            int prestigeLevel) {
-        IslandData newIslandData = islandData.clone();
-
-        // Update the prestige level
-        newIslandData.setPrestigeLevel(prestigeLevel);
-
-        // Remove required prestige points if configured to do so.
-        if(islandSettings.removeRequiredPrestigePoints()) {
-            newIslandData.removePrestigePoints(requiredPrestigePoints);
-        }
-
-        processIslandSettings(player, islandSettings, oldIsland, newIsland, newIslandData);
     }
 }

@@ -25,21 +25,21 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class creates the help command argument for the skyprestige command.
  */
 public class HelpCommand {
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
 
     /**
      * Constructor
      * @param logger The plugin's {@link ComponentLogger}.
      * @param localeManager A {@link LocaleManager} instance.
      */
-    public HelpCommand(@NotNull ComponentLogger logger, @NotNull LocaleManager localeManager) {
+    public HelpCommand(@NonNull ComponentLogger logger, @NonNull LocaleManager localeManager) {
         this.logger = logger;
         this.localeManager = localeManager;
     }
@@ -48,7 +48,7 @@ public class HelpCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the help command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the help command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("help")
             .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.help"))
             .executes(ctx -> {

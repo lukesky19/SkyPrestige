@@ -24,8 +24,8 @@ import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -34,15 +34,15 @@ import java.nio.file.Path;
  * Manages the plugin's GUI configurations.
  */
 public class GUIConfigManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
 
-    private @Nullable ProgressGUIConfig progressGUIConfig;
     private @Nullable BlueprintGUIConfig blueprintGUIConfig;
     private @Nullable ExchangeGUIConfig exchangeGUIConfig;
     private @Nullable VaultGUIConfig vaultGUIConfig;
     private @Nullable ValuesGUIConfig valuesGUIConfig;
     private @Nullable InfoGUIConfig infoGUIConfig;
+    private @Nullable RequirementsGUIConfig requirementsGUIConfig;
 
     private @Nullable RewardsGUIConfig prestigeRewardsGUIConfig;
     private @Nullable RewardsGUIConfig optInRewardsGUIConfig;
@@ -52,35 +52,35 @@ public class GUIConfigManager {
     private @Nullable ConfirmGUIConfig confirmOptInGUIConfig;
     private @Nullable ConfirmGUIConfig confirmOptOutGUIConfig;
 
-    private final @NotNull Path progressPath;
-    private final @NotNull Path blueprintsPath;
-    private final @NotNull Path exchangePath;
-    private final @NotNull Path vaultPath;
-    private final @NotNull Path valuesPath;
-    private final @NotNull Path infoPath;
+    private final @NonNull Path blueprintsPath;
+    private final @NonNull Path exchangePath;
+    private final @NonNull Path vaultPath;
+    private final @NonNull Path valuesPath;
+    private final @NonNull Path infoPath;
+    private final @NonNull Path requirementsPath;
 
-    private final @NotNull Path prestigeRewardsPath;
-    private final @NotNull Path optInRewardsPath;
-    private final @NotNull Path optOutRewardsPath;
+    private final @NonNull Path prestigeRewardsPath;
+    private final @NonNull Path optInRewardsPath;
+    private final @NonNull Path optOutRewardsPath;
 
-    private final @NotNull Path confirmPrestigePath;
-    private final @NotNull Path confirmOptInPath;
-    private final @NotNull Path confirmOptOutPath;
+    private final @NonNull Path confirmPrestigePath;
+    private final @NonNull Path confirmOptInPath;
+    private final @NonNull Path confirmOptOutPath;
 
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public GUIConfigManager(@NotNull SkyPlugin plugin) {
+    public GUIConfigManager(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
 
-        progressPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "progress.yml");
         blueprintsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "blueprints.yml");
         exchangePath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "exchange.yml");
         vaultPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "vault.yml");
         valuesPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "values.yml");
         infoPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "info.yml");
+        requirementsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "requirements.yml");
 
         prestigeRewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "prestige_rewards.yml");
         optInRewardsPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "opt_in_rewards.yml");
@@ -89,14 +89,6 @@ public class GUIConfigManager {
         confirmPrestigePath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_prestige.yml");
         confirmOptInPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_in.yml");
         confirmOptOutPath = Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "confirm_opt_out.yml");
-    }
-
-    /**
-     * Get the {@link ProgressGUIConfig}. May be null.
-     * @return The {@link ProgressGUIConfig} or null.
-     */
-    public @Nullable ProgressGUIConfig getProgressGUIConfig() {
-        return progressGUIConfig;
     }
 
     /**
@@ -148,6 +140,14 @@ public class GUIConfigManager {
     }
 
     /**
+     * Get the {@link RequirementsGUIConfig} for prestige. May be null.
+     * @return The {@link RequirementsGUIConfig} or null.
+     */
+    public @Nullable RequirementsGUIConfig getRequirementsGUIConfig() {
+        return requirementsGUIConfig;
+    }
+
+    /**
      * Get the {@link RewardsGUIConfig} for opt in. May be null.
      * @return The {@link RewardsGUIConfig} or null.
      */
@@ -191,12 +191,12 @@ public class GUIConfigManager {
      * (Re-)load the GUI configurations.
      */
     public void reload() {
-        progressGUIConfig = null;
         blueprintGUIConfig = null;
         exchangeGUIConfig = null;
         vaultGUIConfig = null;
         valuesGUIConfig = null;
         infoGUIConfig = null;
+        requirementsGUIConfig = null;
 
         prestigeRewardsGUIConfig = null;
         optInRewardsGUIConfig = null;
@@ -208,12 +208,12 @@ public class GUIConfigManager {
 
         saveDefaultConfig();
 
-        progressGUIConfig = loadConfiguration(progressPath, ProgressGUIConfig.class);
         blueprintGUIConfig = loadConfiguration(blueprintsPath, BlueprintGUIConfig.class);
         exchangeGUIConfig = loadConfiguration(exchangePath, ExchangeGUIConfig.class);
         vaultGUIConfig = loadConfiguration(vaultPath, VaultGUIConfig.class);
         valuesGUIConfig = loadConfiguration(valuesPath, ValuesGUIConfig.class);
         infoGUIConfig = loadConfiguration(infoPath, InfoGUIConfig.class);
+        requirementsGUIConfig = loadConfiguration(requirementsPath, RequirementsGUIConfig.class);
 
         prestigeRewardsGUIConfig = loadConfiguration(prestigeRewardsPath, RewardsGUIConfig.class);
         optInRewardsGUIConfig = loadConfiguration(optInRewardsPath, RewardsGUIConfig.class);
@@ -231,7 +231,7 @@ public class GUIConfigManager {
      * @return The configuration or null.
      * @param <T> The class created for the configuration.
      */
-    private <T> @Nullable T loadConfiguration(@NotNull Path path, @NotNull Class<T> clazz) {
+    private <T> @Nullable T loadConfiguration(@NonNull Path path, @NonNull Class<T> clazz) {
         YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
 
         try {
@@ -246,9 +246,6 @@ public class GUIConfigManager {
      * Save the default config files if they don't exist.
      */
     private void saveDefaultConfig() {
-        if(!progressPath.toFile().exists()) {
-            plugin.saveResource("gui" + File.separator + "progress.yml", false);
-        }
         if(!blueprintsPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "blueprints.yml", false);
         }
@@ -263,6 +260,9 @@ public class GUIConfigManager {
         }
         if(!infoPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "info.yml", false);
+        }
+        if(!requirementsPath.toFile().exists()) {
+            plugin.saveResource("gui" + File.separator + "requirements.yml", false);
         }
 
         if(!prestigeRewardsPath.toFile().exists()) {

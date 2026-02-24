@@ -22,8 +22,8 @@ import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public record ExchangeGUIConfig(
         @Nullable String configVersion,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull List<PageConfig> pages) {
+        @NonNull List<PageConfig> pages) {
     /**
      * The configuration for a specific page.
      * @param filler The {@link ItemStackConfig} to fill the GUI with.
@@ -52,13 +52,13 @@ public record ExchangeGUIConfig(
      */
     @ConfigSerializable
     public record PageConfig(
-            @NotNull ItemStackConfig filler,
-            @NotNull ButtonConfig prevPage,
-            @NotNull ButtonConfig nextPage,
-            @NotNull ButtonConfig exit,
-            @NotNull ButtonConfig prestigePoints,
-            @NotNull List<ExchangeButtonConfig> exchangeButtons,
-            @NotNull List<ButtonConfig> dummyButtons) {}
+            @NonNull ItemStackConfig filler,
+            @NonNull ButtonConfig prevPage,
+            @NonNull ButtonConfig nextPage,
+            @NonNull ButtonConfig exit,
+            @NonNull ButtonConfig prestigePoints,
+            @NonNull List<ExchangeButtonConfig> exchangeButtons,
+            @NonNull List<ButtonConfig> dummyButtons) {}
 
     /**
      * This record contains the configuration for an exchange button to display in a GUI.
@@ -70,9 +70,9 @@ public record ExchangeGUIConfig(
      */
     @ConfigSerializable
     public record ExchangeButtonConfig(
-            @NotNull ItemStackConfig displayItem,
-            @NotNull ItemStackConfig exchangeItem,
-            @NotNull List<String> exchangeCommands,
+            @NonNull ItemStackConfig displayItem,
+            @NonNull ItemStackConfig exchangeItem,
+            @NonNull List<String> exchangeCommands,
             @Nullable Integer slot,
             @Nullable Double exchangePoints) {}
 }

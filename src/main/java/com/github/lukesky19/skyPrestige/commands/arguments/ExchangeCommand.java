@@ -28,6 +28,8 @@ import com.github.lukesky19.skyPrestige.gui.gui.ExchangeGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -37,8 +39,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.UUID;
@@ -47,14 +48,16 @@ import java.util.UUID;
  * This class creates the exchange command argument for the skyprestige command.
  */
 public class ExchangeCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull PrestigeManager prestigeManager;
+    private final @NonNull PrestigeExemptionManager prestigeExemptionManager;
 
     /**
      * Constructor
@@ -65,15 +68,19 @@ public class ExchangeCommand {
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
+     * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
      */
     public ExchangeCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull SettingsManager settingsManager,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull PrestigeManager prestigeManager,
+            @NonNull PrestigeExemptionManager prestigeExemptionManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.settingsManager = settingsManager;
@@ -82,33 +89,37 @@ public class ExchangeCommand {
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
+        this.prestigeManager = prestigeManager;
+        this.prestigeExemptionManager = prestigeExemptionManager;
     }
 
     /**
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the exchange command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the exchange command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("exchange")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.exchange"))
                 .executes(ctx -> {
-                    @Nullable Settings settings = settingsManager.getConfiguration();
+                    Settings settings = settingsManager.getConfiguration();
                     Locale locale = localeManager.getConfiguration();
+                    Locale.ExchangeMessages exchangeMessages = locale.exchangeMessages();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
                     BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
                     if(!bentoBoxHook.isHooked()) return 0;
 
-                    @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+                    Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePlayerNotOnIsland()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.playerNotOnIsland()));
                         return 0;
                     }
+                    String islandId = island.getUniqueId();
 
-                    @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                    IslandData islandData = islandDataManager.getData(islandId);
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
                         return 0;
                     }
 
@@ -119,12 +130,22 @@ public class ExchangeCommand {
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePrestigeExempt()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeExempt()));
+                        return 0;
+                    }
+
+                    // Prevent exchanging prestige points if the island is in the process of prestiging or opting in/out of prestige.
+                    if(prestigeManager.isIslandPrestiging(islandId)) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeInProgress()));
+                        return 0;
+                    }
+                    if(prestigeExemptionManager.isIslandExempting(islandId)) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.optOutInProgress()));
                         return 0;
                     }
 
                     if(islandData.getPrestigeLevel() < settings.exchangePrestigeLevel()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.exchangePrestigeLevelNotMet()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeLevelNotMet()));
                         return 0;
                     }
 

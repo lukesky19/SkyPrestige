@@ -17,15 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.api.integration.Hook;
 import com.olziedev.playerauctions.api.PlayerAuctionsAPI;
 import com.olziedev.playerauctions.api.events.auction.PlayerAuctionRemoveEvent;
 import com.olziedev.playerauctions.api.player.APlayer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,14 +34,14 @@ import java.util.UUID;
  * This class manages interfacing with the Player Auctions plugin.
  */
 public class PlayerAuctionsHook implements Hook {
-    private final @NotNull SkyPlugin plugin;
+    private final @NonNull SkyPlugin plugin;
     private @Nullable PlayerAuctionsAPI playerAuctionsAPI;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
      */
-    public PlayerAuctionsHook(@NotNull SkyPlugin plugin) {
+    public PlayerAuctionsHook(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -50,7 +50,7 @@ public class PlayerAuctionsHook implements Hook {
      */
     @Override
     public void initialize() {
-        @Nullable Plugin plugin = this.plugin.getServer().getPluginManager().getPlugin("PlayerAuctions");
+        Plugin plugin = this.plugin.getServer().getPluginManager().getPlugin("PlayerAuctions");
         if(plugin != null && plugin.isEnabled()) {
             playerAuctionsAPI = PlayerAuctionsAPI.getInstance();
         }
@@ -69,7 +69,7 @@ public class PlayerAuctionsHook implements Hook {
      * Clear the auctions for the {@link UUID} provided.
      * @param uuid The {@link UUID} of the player.
      */
-    public void clearPlayerAuctions(@NotNull UUID uuid) {
+    public void clearPlayerAuctions(@NonNull UUID uuid) {
         if(playerAuctionsAPI == null) return;
 
         APlayer auctionPlayer = playerAuctionsAPI.getAuctionPlayer(uuid);

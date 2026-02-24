@@ -31,15 +31,14 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class creates the protectionorb command argument for the skyprestige command.
  */
 public class ProtectionOrbCommand {
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull ProtectionOrbManager protectionOrbManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull ProtectionOrbManager protectionOrbManager;
 
     /**
      * Constructor
@@ -47,8 +46,8 @@ public class ProtectionOrbCommand {
      * @param protectionOrbManager A {@link ProtectionOrbManager} instance.
      */
     public ProtectionOrbCommand(
-            @NotNull LocaleManager localeManager,
-            @NotNull ProtectionOrbManager protectionOrbManager) {
+            @NonNull LocaleManager localeManager,
+            @NonNull ProtectionOrbManager protectionOrbManager) {
         this.localeManager = localeManager;
         this.protectionOrbManager = protectionOrbManager;
     }
@@ -57,7 +56,7 @@ public class ProtectionOrbCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the protectionorb command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the protectionorb command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("protectionorb")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.protectionorb"))
                 .then(Commands.literal("give")
@@ -68,7 +67,7 @@ public class ProtectionOrbCommand {
                                             CommandSender commandSender = ctx.getSource().getSender();
                                             Player player = ctx.getArgument("player_name", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
                                             int amount = ctx.getArgument("amount", Integer.class);
-                                            @Nullable ItemStack protectionOrbStack = protectionOrbManager.getProtectionOrb();
+                                            ItemStack protectionOrbStack = protectionOrbManager.getProtectionOrb();
 
                                             if(protectionOrbStack == null) {
                                                 if(commandSender instanceof Player) {

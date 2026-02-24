@@ -23,7 +23,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.points.points.ItemPoi
 import com.github.lukesky19.skyPrestige.configuration.data.points.points.TimePoints;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.meta.Setting;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -68,42 +68,42 @@ import java.util.List;
  */
 @ConfigSerializable
 public record PrestigePointsMapping(
-        @NotNull TimePoints playTime,
-        @NotNull Block blockBreak,
-        @NotNull Block blockPlace,
-        @NotNull Block boneMeal,
-        @NotNull Item bottle,
-        @NotNull Entity breed,
-        @NotNull Item brew,
-        @NotNull Block brush,
-        @NotNull Block close,
-        @NotNull Item compost,
-        @NotNull Item consume,
-        @NotNull Item craft,
-        @NotNull Item empty,
-        @NotNull Item enchant,
-        @NotNull Item fill,
-        @NotNull Item fish,
-        @NotNull Block harvest,
-        @NotNull Item pickup,
-        @NotNull Item drop,
-        @NotNull Entity kill,
-        @NotNull Entity milk,
-        @NotNull Item nameItem,
-        @NotNull Entity nameEntity,
-        @NotNull Block open,
-        @NotNull Block shearBlock,
-        @NotNull Entity shearEntity,
-        @NotNull Block sleep,
-        @NotNull Item smelt,
-        @NotNull Block strip,
-        @NotNull Entity tame,
-        @NotNull Item thrown,
-        @NotNull Block unWaxBlock,
-        @NotNull Entity unWaxEntity,
-        @NotNull Block waterLog,
-        @NotNull Block waxBlock,
-        @NotNull Entity waxEntity) {
+        @NonNull TimePoints playTime,
+        @NonNull Block blockBreak,
+        @NonNull Block blockPlace,
+        @NonNull Block boneMeal,
+        @NonNull Item bottle,
+        @NonNull Entity breed,
+        @NonNull Item brew,
+        @NonNull Block brush,
+        @NonNull Block close,
+        @NonNull Item compost,
+        @NonNull Item consume,
+        @NonNull Item craft,
+        @NonNull Item empty,
+        @NonNull Item enchant,
+        @NonNull Item fill,
+        @NonNull Item fish,
+        @NonNull Block harvest,
+        @NonNull Item pickup,
+        @NonNull Item drop,
+        @NonNull Entity kill,
+        @NonNull Entity milk,
+        @NonNull Item nameItem,
+        @NonNull Entity nameEntity,
+        @NonNull Block open,
+        @NonNull Block shearBlock,
+        @NonNull Entity shearEntity,
+        @NonNull Block sleep,
+        @NonNull Item smelt,
+        @NonNull Block strip,
+        @NonNull Entity tame,
+        @NonNull Item thrown,
+        @NonNull Block unWaxBlock,
+        @NonNull Entity unWaxEntity,
+        @NonNull Block waterLog,
+        @NonNull Block waxBlock,
+        @NonNull Entity waxEntity) {
     /**
      * The configuration for block-based prestige points.
      * @param base The default {@link BlockPoints} configuration.
@@ -111,8 +111,8 @@ public record PrestigePointsMapping(
      */
     @ConfigSerializable
     public record Block(
-            @NotNull @Setting("default") BlockPoints base,
-            @NotNull List<BlockPoints> overrides) {}
+            @NonNull @Setting("default") BlockPoints base,
+            @NonNull List<BlockPoints> overrides) {}
 
     /**
      * The configuration for item-based prestige points.
@@ -121,8 +121,8 @@ public record PrestigePointsMapping(
      */
     @ConfigSerializable
     public record Item(
-            @NotNull @Setting("default") ItemPoints base,
-            @NotNull List<ItemPoints> overrides) {}
+            @NonNull @Setting("default") ItemPoints base,
+            @NonNull List<ItemPoints> overrides) {}
 
     /**
      * The configuration for entity-based prestige points.
@@ -131,6 +131,6 @@ public record PrestigePointsMapping(
      */
     @ConfigSerializable
     public record Entity(
-            @NotNull @Setting("default") EntityPoints base,
-            @NotNull List<EntityPoints> overrides) {}
+            @NonNull @Setting("default") EntityPoints base,
+            @NonNull List<EntityPoints> overrides) {}
 }

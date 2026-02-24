@@ -4,8 +4,22 @@ main: com.github.lukesky19.skyPrestige.SkyPrestige
 api-version: '1.21'
 authors: [ lukeskywlker19 ]
 
-depend: [ BentoBox, SkyLib ]
-softdepend: [ LuckPerms, PlaceholderAPI, PlayerAuctions, RoseStacker, SkyEnchants, SkyShop, SkyPlayTime, SkySellWands, Vault ]
+depend:
+    - BentoBox
+    - SkyLib
+softdepend:
+    - ExcellentCrates
+    - LuckPerms
+    - PlaceholderAPI
+    - PlayerAuctions
+    - Quests
+    - RoseStacker
+    - SkyEnchants
+    - SkyHoppers
+    - SkyShop
+    - SkyPlayTime
+    - SkySellWands
+    - Vault
 
 permissions:
     skyprestige.commands.skyprestige:

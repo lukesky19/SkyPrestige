@@ -21,7 +21,7 @@ import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,9 +31,9 @@ import java.util.concurrent.CompletableFuture;
  * This class creates a table to store all {@link Player}'s {@link UUID}s.
  */
 public class PlayerIdsTable {
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull VersionsTable versionsTable;
-    private final @NotNull String tableName = "skyprestige_player_ids";
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull VersionsTable versionsTable;
+    private final @NonNull String tableName = "skyprestige_player_ids";
 
     /**
      * Constructor
@@ -41,8 +41,8 @@ public class PlayerIdsTable {
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public PlayerIdsTable(
-            @NotNull QueueManager queueManager,
-            @NotNull VersionsTable versionsTable) {
+            @NonNull QueueManager queueManager,
+            @NonNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
         this.versionsTable = versionsTable;
     }
@@ -52,7 +52,7 @@ public class PlayerIdsTable {
      * Queues the table creation and index creation sql.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> createTable() {
+    public @NonNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (player_id VARCHAR(36) NOT NULL UNIQUE);";
         String indexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_ids_player_id ON " + tableName + "(player_id);";
 
@@ -64,7 +64,7 @@ public class PlayerIdsTable {
      * @param uuid The {@link UUID} of the {@link Player}.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> insertPlayerId(@NotNull UUID uuid) {
+    public @NonNull CompletableFuture<Void> insertPlayerId(@NonNull UUID uuid) {
         String insertPlayerIdSql = "INSERT INTO " + tableName + " (player_id) VALUES (?) ON CONFLICT (player_id) DO NOTHING";
 
         UUIDParameter parameter = new UUIDParameter(uuid);

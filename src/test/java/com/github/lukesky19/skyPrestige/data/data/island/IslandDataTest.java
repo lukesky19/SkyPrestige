@@ -132,20 +132,6 @@ public class IslandDataTest {
     }
 
     /**
-     * Tests if two island data objects are not equal because of required prestige points.
-     */
-    @Test
-    public void testEqualsNotEqualByRequiredPrestigePoints() {
-        String islandId = "BSkyBlock" + UUID.randomUUID();
-        IslandData islandData1 = new IslandData(islandId, 0, 100, new Multiplier(), false, false, new HashMap<>());
-        islandData1.setRequiredPrestigePoints(100.0);
-        IslandData islandData2 = new IslandData(islandId, 0, 100, new Multiplier(), false, false, new HashMap<>());
-        islandData2.setRequiredPrestigePoints(200.0);
-
-        assertNotEquals(islandData1, islandData2);
-    }
-
-    /**
      * Tests if two island data objects are not equal because of the multiplier.
      */
     @Test
@@ -324,19 +310,6 @@ public class IslandDataTest {
         IslandData islandData = new IslandData("BSkyBlock" + UUID.randomUUID());
 
         assertEquals(0, islandData.getPrestigeLevel());
-    }
-
-    /**
-     * Test setting and getting the required prestige points.
-     */
-    @Test
-    public void testSetGetRequiredPrestigePoints() {
-        IslandData islandData = new IslandData("BSkyBlock" + UUID.randomUUID());
-
-        islandData.setRequiredPrestigePoints(100.0);
-
-        assertNotNull(islandData.getRequiredPrestigePoints());
-        assertEquals(100.0, islandData.getRequiredPrestigePoints());
     }
 
     /**

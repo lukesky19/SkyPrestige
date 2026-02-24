@@ -18,13 +18,18 @@
 package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
+import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.manager.GUIConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.gui.gui.RequirementsGUI;
+import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
+import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -34,9 +39,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
@@ -46,35 +49,45 @@ import java.util.UUID;
  * This class creates the requirements command argument for the skyprestige command.
  */
 public class RequirementsCommand {
-    private final @NotNull ComponentLogger logger;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
 
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull PrestigePointsManager prestigePointsManager;
-    private final @NotNull PrestigeConfigManager prestigeConfigManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull PrestigeConfigManager prestigeConfigManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
 
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull RequirementsManager requirementsManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
+     * @param plugin A {@link SkyPlugin} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
-     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
+     * @param guiManager A {@link GUIManager} instance.
+     * @param requirementsManager A {@link RequirementsManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public RequirementsCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull PrestigeConfigManager prestigeConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull PrestigeConfigManager prestigeConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull RequirementsManager requirementsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
+        this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
         this.prestigeConfigManager = prestigeConfigManager;
-        this.prestigePointsManager = prestigePointsManager;
+        this.guiConfigManager = guiConfigManager;
+        this.guiManager = guiManager;
+        this.requirementsManager = requirementsManager;
         this.islandDataManager = islandDataManager;
         this.hookManager = hookManager;
     }
@@ -83,7 +96,7 @@ public class RequirementsCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the requirements command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the requirements command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("requirements")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.requirements") && ctx.getSender() instanceof Player)
                 .then(Commands.argument("level", IntegerArgumentType.integer())
@@ -94,36 +107,132 @@ public class RequirementsCommand {
                         })
                         .executes(ctx -> {
                             Locale locale = localeManager.getConfiguration();
+
                             Player player = (Player) ctx.getSource().getSender();
                             UUID uuid = player.getUniqueId();
                             int level = ctx.getArgument("level", int.class);
 
-                            BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-                            @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
-                            if(island == null) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.progressPlayerNotOnIsland()));
+                            PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(level);
+                            if(prestigeConfig == null) {
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError(), List.of(Placeholder.parsed("level", String.valueOf(level)))));
                                 return 0;
                             }
 
-                            @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                            BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+                            Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+                            if(island == null) {
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
+                                return 0;
+                            }
+
+                            if(island.getOwner() == null) {
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
+                                return 0;
+                            }
+
+                            if(island.getOwner() != uuid && !island.getMemberSet().contains(uuid)) {
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
+                                return 0;
+                            }
+
+                            IslandData islandData = islandDataManager.getData(island.getUniqueId());
                             if(islandData == null) {
                                 player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                                 logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
                                 return 0;
                             }
 
-                            @Nullable Double requiredPrestigePoints = prestigePointsManager.calculateRequiredPrestigePoints(island, level);
-                            if(requiredPrestigePoints == null) return 0;
+                            if(islandData.isPrestigeExempt()) {
+                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
+                                return 0;
+                            }
 
-                            player.sendMessage(AdventureUtil.deserialize(
-                                    player,
-                                    locale.prefix() + locale.requirementsPointsForLevel(),
-                                    List.of(
-                                            Placeholder.parsed("prestige_level", String.valueOf(level)),
-                                            Placeholder.parsed("prestige_points", String.valueOf(requiredPrestigePoints)))));
+                            openRequirementsGUI(locale, player, uuid, prestigeConfig, island, islandData);
 
                             return 1;
                         })
-                ).build();
+                )
+                .executes(ctx -> {
+                    Locale locale = localeManager.getConfiguration();
+
+                    Player player = (Player) ctx.getSource().getSender();
+                    UUID uuid = player.getUniqueId();
+
+                    BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+                    Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
+                    if(island == null) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
+                        return 0;
+                    }
+
+                    if(island.getOwner() == null) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
+                        return 0;
+                    }
+
+                    if(island.getOwner() != uuid && !island.getMemberSet().contains(uuid)) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
+                        return 0;
+                    }
+
+                    IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                    if(islandData == null) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                        return 0;
+                    }
+
+                    if(islandData.isPrestigeExempt()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
+                        return 0;
+                    }
+
+                    int nextLevel = islandData.getPrestigeLevel() + 1;
+                    if(nextLevel > prestigeConfigManager.getMaxLevel()) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().maxPrestigeLevel()));
+                        return 0;
+                    }
+
+                    PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextLevel);
+                    if(prestigeConfig == null) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError()));
+                        return 0;
+                    }
+
+                    openRequirementsGUI(locale, player, uuid, prestigeConfig, island, islandData);
+
+                    return 1;
+                }).build();
+    }
+
+    private void openRequirementsGUI(
+            @NonNull Locale locale,
+            @NonNull Player player,
+            @NonNull UUID playerId,
+            @NonNull PrestigeConfig prestigeConfig,
+            @NonNull Island island,
+            @NonNull IslandData islandData) {
+        IslandIdUUIDKey identifier = new IslandIdUUIDKey(island.getUniqueId(), playerId);
+        RequirementsGUI gui = new RequirementsGUI(plugin, guiManager, identifier, player, guiConfigManager, requirementsManager, hookManager, prestigeConfig, island, islandData);
+
+        boolean creationResult = gui.create();
+        if(!creationResult) {
+            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the requirements GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            return;
+        }
+
+        boolean updateResult = gui.update();
+        if(!updateResult) {
+            logger.error(AdventureUtil.deserialize("Unable to decorate the requirements GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            return;
+        }
+
+        boolean openResult = gui.open();
+        if(!openResult) {
+            logger.error(AdventureUtil.deserialize("Unable to open the requirements for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+        }
     }
 }

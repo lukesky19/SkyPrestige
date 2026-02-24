@@ -45,8 +45,8 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -59,16 +59,16 @@ import java.util.function.Consumer;
  */
 public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
     // Plugin Classes
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull VaultConfigManager vaultConfigManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull VaultConfigManager vaultConfigManager;
     // Island
-    private final @NotNull String islandId;
-    private final @NotNull IslandData islandData;
+    private final @NonNull String islandId;
+    private final @NonNull IslandData islandData;
     // Config
     private final @Nullable VaultGUIConfig vaultGUIConfig;
-    private @Nullable VaultGUIConfig.PageConfig pageConfig;
+    private VaultGUIConfig.@Nullable PageConfig pageConfig;
     // Page info
     private int pageNum = 0;
 
@@ -86,16 +86,16 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param player The {@link Player} viewing the GUI.
      */
     public VaultGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull DatabaseManager databaseManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull VaultConfigManager vaultConfigManager,
-            @NotNull String islandId,
-            @NotNull IslandData islandData,
-            @NotNull Player player) {
+            @NonNull SkyPlugin plugin,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull LocaleManager localeManager,
+            @NonNull VaultConfigManager vaultConfigManager,
+            @NonNull String islandId,
+            @NonNull IslandData islandData,
+            @NonNull Player player) {
         super(plugin, guiManager, identifier, player);
 
         this.guiManager = guiManager;
@@ -218,7 +218,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryCloseEvent An {@link InventoryCloseEvent}
      */
     @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+    public void handleClose(@NonNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
         guiManager.removeOpenGUI(identifier);
@@ -232,7 +232,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleTopClick(@NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleTopClick(@NonNull InventoryClickEvent inventoryClickEvent) {
         inventoryClickEvent.setCancelled(true);
         int slot = inventoryClickEvent.getSlot();
 
@@ -248,25 +248,25 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when the player's inventory is clicked. Attempts to store the item clicked in the vault.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {
         inventoryClickEvent.setCancelled(true);
         if(pageConfig == null) return;
-        @NotNull Locale locale = localeManager.getConfiguration();
-        @NotNull Map<Integer, ItemStack> vaultItems = islandData.getVaultItemsByPageNumber(pageNum);
+        Locale locale = localeManager.getConfiguration();
+        Map<Integer, ItemStack> vaultItems = islandData.getVaultItemsByPageNumber(pageNum);
 
         int clickedSlot = inventoryClickEvent.getSlot();
         ItemStack itemStack = inventoryClickEvent.getCurrentItem();
@@ -276,7 +276,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
 
         // If the item is restricted, don't add the item to the vault and send the player an error message
         if(vaultConfigManager.isVaultItemTypeDisallowed(itemType)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultItemNotAllowed()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultMessages().itemNotAllowed()));
             return;
         }
 
@@ -291,7 +291,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
                 continue; // Skip if conditions aren't met
             }
 
-            @Nullable ItemStack vaultItem = vaultItems.get(slot);
+            ItemStack vaultItem = vaultItems.get(slot);
             // Check if the slot is empty
             if(vaultItem != null && !vaultItem.isEmpty()) {
                 // Check if the item in the slot is similar
@@ -344,7 +344,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -355,9 +355,9 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig fillerConfig = pageConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -429,7 +429,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
     private void createStorageSlots() {
         if (inventoryView == null || pageConfig == null) return;
 
-        @NotNull Map<Integer, ItemStack> vaultItems = islandData.getVaultItemsByPageNumber(pageNum);
+        Map<Integer, ItemStack> vaultItems = islandData.getVaultItemsByPageNumber(pageNum);
         int islandPrestigeLevel = islandData.getPrestigeLevel();
 
         pageConfig.slots().stream()
@@ -457,16 +457,16 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param lockedItem The {@link ItemStackConfig} for the placeholder item when the player doesn't have access to the slot.
      */
     private void createStorageButton(
-            @NotNull Map<Integer, ItemStack> vaultItems,
+            @NonNull Map<Integer, ItemStack> vaultItems,
             int slot,
             int islandPrestigeLevel,
             int requiredPrestigeLevel,
-            @NotNull ItemStackConfig unlockedItem,
-            @NotNull ItemStackConfig lockedItem) {
+            @NonNull ItemStackConfig unlockedItem,
+            @NonNull ItemStackConfig lockedItem) {
         slotButtons.remove(slot);
 
         if(islandPrestigeLevel >= requiredPrestigeLevel) {
-            @Nullable ItemStack vaultItemStack = vaultItems.get(slot);
+            ItemStack vaultItemStack = vaultItems.get(slot);
             if(vaultItemStack == null) {
                 // Add the unlocked placeholder button to the GUI
                 createUnlockedButton(unlockedItem, slot);
@@ -486,7 +486,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param slot The slot to place the button at.
      */
     private void createUnlockedButton(
-            @NotNull ItemStackConfig unlockedItem,
+            @NonNull ItemStackConfig unlockedItem,
             int slot) {
         if(unlockedItem.itemType() != null) {
             // Create the button using the item config
@@ -508,7 +508,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param requiredPrestigeLevel The prestige level required to access this slot.
      */
     private void createLockedButton(
-            @NotNull ItemStackConfig lockedItem,
+            @NonNull ItemStackConfig lockedItem,
             int slot,
             int islandPrestigeLevel,
             int requiredPrestigeLevel) {
@@ -526,8 +526,8 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param slot The slot to place the button at.
      */
     private void createVaultButton(
-            @NotNull ItemStack vaultItemStack,
-            @NotNull ItemStackConfig unlockedItem,
+            @NonNull ItemStack vaultItemStack,
+            @NonNull ItemStackConfig unlockedItem,
             int slot) {
         // Create a button for the vault item
         createActionButton(vaultItemStack, slot, inventoryClickEvent -> {
@@ -566,7 +566,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the vault GUI due to an invalid slot."));
             return;
@@ -574,9 +574,9 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         optionalItemStack.ifPresent(itemStack -> createActionButton(itemStack, buttonConfig.slot(), action));
     }
@@ -587,7 +587,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param slot The slot to place the button at.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ItemStack itemStack, int slot, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ItemStack itemStack, int slot, @NonNull Consumer<InventoryClickEvent> action) {
         GUIButton.Builder builder = new GUIButton.Builder();
 
         builder.setItemStack(itemStack);
@@ -602,7 +602,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
-    private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the vault GUI due to an invalid slot."));
             return;
@@ -610,8 +610,8 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -626,10 +626,10 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param itemStackConfig The {@link ItemStackConfig}.
      * @param slot The slot number to place the button.
      */
-    private void createDisplayButton(@NotNull ItemStackConfig itemStackConfig, int slot, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ItemStackConfig itemStackConfig, int slot, @NonNull List<TagResolver.Single> placeholders) {
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();

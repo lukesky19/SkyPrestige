@@ -25,7 +25,7 @@ import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
 import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import org.bukkit.Location;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,9 +37,9 @@ import java.util.concurrent.CompletableFuture;
  * Creates a table to store the location and island the player logged out on.
  */
 public class PlayerLogoutLocationsTable {
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull VersionsTable versionsTable;
-    private final @NotNull String tableName = "skyprestige_player_logout_locations";
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull VersionsTable versionsTable;
+    private final @NonNull String tableName = "skyprestige_player_logout_locations";
 
     /**
      * Constructor
@@ -47,8 +47,8 @@ public class PlayerLogoutLocationsTable {
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public PlayerLogoutLocationsTable(
-            @NotNull QueueManager queueManager,
-            @NotNull VersionsTable versionsTable) {
+            @NonNull QueueManager queueManager,
+            @NonNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
         this.versionsTable = versionsTable;
     }
@@ -58,7 +58,7 @@ public class PlayerLogoutLocationsTable {
      * Queues the table creation and index creation sql.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> createTable() {
+    public @NonNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 "player_id VARCHAR(36) NOT NULL UNIQUE, " +
                 "world TEXT NOT NULL, " +
@@ -78,7 +78,7 @@ public class PlayerLogoutLocationsTable {
      * @param location The {@link Location} the player logged out at.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> setPlayerLogoutLocation(@NotNull UUID uuid, @NotNull Location location) {
+    public @NonNull CompletableFuture<Void> setPlayerLogoutLocation(@NonNull UUID uuid, @NonNull Location location) {
         String updateSql = "INSERT INTO " + tableName + " (" +
                 "player_id, " +
                 "world, " +
@@ -126,7 +126,7 @@ public class PlayerLogoutLocationsTable {
      * @param maxZ The island's max Z coordinate.
      * @return A {@link CompletableFuture} containing a {@link List} of {@link UUID}s. The list may be empty.
      */
-    public @NotNull CompletableFuture<List<UUID>> getPlayerIdsWithinByBounds(@NotNull String worldName, int minX, int maxX, int minZ, int maxZ) {
+    public @NonNull CompletableFuture<List<UUID>> getPlayerIdsWithinByBounds(@NonNull String worldName, int minX, int maxX, int minZ, int maxZ) {
         String selectSql = "SELECT player_id FROM " + tableName + " WHERE world = ? AND x >= ? AND x <= ? AND z >= ? AND z <= ?";
 
         StringParameter worldNameParameter = new StringParameter(worldName);

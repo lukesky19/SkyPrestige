@@ -23,8 +23,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
@@ -40,4 +40,4 @@ public record ItemData(
         @Nullable ItemType itemType,
         @Nullable EntityType entityType,
         @Nullable PotionType potionType,
-        @NotNull Map<Enchantment, Integer> enchantments) {}
+        @NonNull Map<Enchantment, Integer> enchantments) {}

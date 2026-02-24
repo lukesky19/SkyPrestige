@@ -26,6 +26,8 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
+import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
@@ -35,8 +37,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -46,15 +47,17 @@ import java.util.UUID;
  * This class creates the vault command argument for the skyprestige command.
  */
 public class VaultCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull VaultConfigManager vaultConfigManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull VaultConfigManager vaultConfigManager;
 
-    private final @NotNull GUIManager guiManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull DatabaseManager databaseManager;
+    private final @NonNull GUIManager guiManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull PrestigeManager prestigeManager;
+    private final @NonNull PrestigeExemptionManager prestigeExemptionManager;
 
     /**
      * Constructor
@@ -65,15 +68,19 @@ public class VaultCommand {
      * @param guiManager A {@link GUIManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
+     * @param prestigeManager A {@link PrestigeManager} instance.
+     * @param prestigeExemptionManager A {@link PrestigeExemptionManager} instance.
      */
     public VaultCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull VaultConfigManager vaultConfigManager,
-            @NotNull GUIManager guiManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull DatabaseManager databaseManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull VaultConfigManager vaultConfigManager,
+            @NonNull GUIManager guiManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull PrestigeManager prestigeManager,
+            @NonNull PrestigeExemptionManager prestigeExemptionManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -82,29 +89,32 @@ public class VaultCommand {
         this.guiManager = guiManager;
         this.islandDataManager = islandDataManager;
         this.databaseManager = databaseManager;
+        this.prestigeManager = prestigeManager;
+        this.prestigeExemptionManager = prestigeExemptionManager;
     }
 
     /**
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the vault command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the vault command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         return Commands.literal("vault")
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.vault"))
                 .executes(ctx -> {
                     Locale locale = localeManager.getConfiguration();
+                    Locale.VaultMessages vaultMessages = locale.vaultMessages();
                     Player player = (Player) ctx.getSource().getSender();
                     UUID uuid = player.getUniqueId();
 
                     Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultPlayerNotOnIsland()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.playerNotOnIsland()));
                         return 0;
                     }
 
                     String islandId = island.getUniqueId();
 
-                    @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                    IslandData islandData = islandDataManager.getData(islandId);
                     if(islandData == null) {
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         logger.warn(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
@@ -112,7 +122,17 @@ public class VaultCommand {
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.vaultPrestigeExempt()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.prestigeExempt()));
+                        return 0;
+                    }
+
+                    // Prevent modifying the vault if the island is in the process of prestiging or opting in/out of prestige.
+                    if(prestigeManager.isIslandPrestiging(islandId)) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.prestigeInProgress()));
+                        return 0;
+                    }
+                    if(prestigeExemptionManager.isIslandExempting(islandId)) {
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.optOutInProgress()));
                         return 0;
                     }
 

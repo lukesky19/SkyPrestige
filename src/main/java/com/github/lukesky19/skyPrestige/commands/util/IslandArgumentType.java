@@ -32,7 +32,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Optional;
@@ -43,15 +43,15 @@ import java.util.stream.Collectors;
  * This class handles island arguments.
  */
 public class IslandArgumentType implements CustomArgumentType.Converted<Island, String> {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull BentoBoxHook bentoBoxHook;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull BentoBoxHook bentoBoxHook;
 
     /**
      * Constructor
      * @param plugin A {@link SkyPlugin} instance.
      * @param hookManager A {@link HookManager} instance.
      */
-    public IslandArgumentType(@NotNull SkyPlugin plugin, @NotNull HookManager hookManager) {
+    public IslandArgumentType(@NonNull SkyPlugin plugin, @NonNull HookManager hookManager) {
         this.plugin = plugin;
         bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
     }
@@ -69,7 +69,7 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
      * @throws CommandSyntaxException If no island was found for the island id.
      */
     @Override
-    public @NotNull Island convert(@NotNull String islandId) throws CommandSyntaxException {
+    public @NonNull Island convert(@NonNull String islandId) throws CommandSyntaxException {
         Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
         if(optionalIsland.isPresent()) {
             return optionalIsland.get();
@@ -86,7 +86,7 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
      * @param <S> The context type.
      */
     @Override
-    public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, @NotNull SuggestionsBuilder builder) {
+    public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, @NonNull SuggestionsBuilder builder) {
         bentoBoxHook.getIslandsManager().getIslands().stream()
                 .filter(island -> island.getUniqueId().startsWith(builder.getRemaining()))
                 .forEach(island -> {
@@ -105,7 +105,7 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
      * @return The native type.
      */
     @Override
-    public @NotNull ArgumentType<String> getNativeType() {
+    public @NonNull ArgumentType<String> getNativeType() {
         return StringArgumentType.string();
     }
 }

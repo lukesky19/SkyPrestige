@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.configuration.data.reward;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * The configuration for the island range to add.
@@ -30,11 +30,20 @@ import org.jetbrains.annotations.NotNull;
  */
 @ConfigSerializable
 public record IslandRangeReward(
-        @NotNull ItemStackConfig displayItem,
+        @NonNull ItemStackConfig displayItem,
         boolean setSize,
         int islandSize) implements IReward {
     @Override
-    public @NotNull ItemStackConfig displayItem() {
+    public @NonNull ItemStackConfig displayItem() {
         return displayItem;
+    }
+
+    /**
+     * Always false. This is only applicable to player-based rewards.
+     * @return Always false.
+     */
+    @Override
+    public boolean giveOnIslandJoin() {
+        return false;
     }
 }

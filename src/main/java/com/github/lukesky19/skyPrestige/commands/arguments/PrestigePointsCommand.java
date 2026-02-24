@@ -40,8 +40,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -54,11 +53,11 @@ import java.util.stream.Collectors;
  * This class creates the points command argument for the skyprestige command.
  */
 public class PrestigePointsCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -68,10 +67,10 @@ public class PrestigePointsCommand {
      * @param hookManager A {@link HookManager} instance.
      */
     public PrestigePointsCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.localeManager = localeManager;
@@ -83,7 +82,7 @@ public class PrestigePointsCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the points command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the points command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("points");
         builder.requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.points"));
         builder.then(Commands.literal("set")
@@ -96,7 +95,7 @@ public class PrestigePointsCommand {
                                     String islandId = island.getUniqueId();
                                     double prestigePoints = ctx.getArgument("points", double.class);
 
-                                    @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                                    IslandData islandData = islandDataManager.getData(islandId);
                                     if(islandData == null) {
                                         logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
 
@@ -155,7 +154,7 @@ public class PrestigePointsCommand {
                                     String islandId = ctx.getArgument("island_id", String.class);
                                     double prestigePoints = ctx.getArgument("points", double.class);
 
-                                    @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                                    IslandData islandData = islandDataManager.getData(islandId);
                                     if(islandData == null) {
                                         logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
 
@@ -214,7 +213,7 @@ public class PrestigePointsCommand {
                                     String islandId = ctx.getArgument("island_id", String.class);
                                     double prestigePoints = ctx.getArgument("points", double.class);
 
-                                    @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                                    IslandData islandData = islandDataManager.getData(islandId);
                                     if(islandData == null) {
                                         logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
 
@@ -271,7 +270,7 @@ public class PrestigePointsCommand {
                             CommandSender sender = ctx.getSource().getSender();
                             String islandId = ctx.getArgument("island_id", String.class);
 
-                            @Nullable IslandData islandData = islandDataManager.getData(islandId);
+                            IslandData islandData = islandDataManager.getData(islandId);
                             if(islandData == null) {
                                 logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
 

@@ -20,8 +20,8 @@ package com.github.lukesky19.skyPrestige.util.key;
 import com.github.lukesky19.skyPrestige.util.cache.BlockPointsCache;
 import org.bukkit.block.BlockType;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record is used as a key in the {@link BlockPointsCache} to cache frequently retrieved prestige point values.
@@ -31,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
  * @param waterLogged The optional water logged state of the block.
  */
 public record BlockKey(
-        @NotNull BlockType blockType,
+        @NonNull BlockType blockType,
         @Nullable EntityType entityType,
         @Nullable Integer age,
         @Nullable Boolean waterLogged) {}

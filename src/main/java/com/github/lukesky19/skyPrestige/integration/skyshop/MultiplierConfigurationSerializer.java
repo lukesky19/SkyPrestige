@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.integration.skyshop;
 
 import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skyshop.api.serializer.ConfigurationSerializer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Serializes/deserializes {@link ShopMultiplierConfiguration}.
@@ -37,5 +37,5 @@ public class MultiplierConfigurationSerializer extends ConfigurationSerializer<S
      * @param root The root {@link ConfigurationNode}.
      */
     @Override
-    public void migrate(@NotNull ConfigurationNode root) {}
+    public void migrate(@NonNull ConfigurationNode root) {}
 }

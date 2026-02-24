@@ -23,6 +23,8 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -42,8 +44,11 @@ import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
+import com.github.lukesky19.skyPrestige.processor.queued.QueuedSettingsProcessor;
+import com.github.lukesky19.skyPrestige.processor.reset.SettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
+import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -54,8 +59,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
 import java.util.UUID;
@@ -84,6 +90,8 @@ public class SkyPrestige extends SkyPlugin {
     private TaskManager taskManager;
     private ProtectionOrbManager protectionOrbManager;
     private PrestigePointsManager prestigePointsManager;
+
+    private QueuedSettingsProcessor queuedSettingsProcessor;
 
     private @Nullable SkyPrestigeExpansion skyPrestigeExpansion;
 
@@ -129,13 +137,16 @@ public class SkyPrestige extends SkyPlugin {
         IslandSettingsProcessor islandSettingsProcessor = new IslandSettingsProcessor(this, hookManager, databaseManager, islandDataManager);
         PlayerSettingsProcessor playerSettingsProcessor = new PlayerSettingsProcessor(hookManager, protectionOrbManager);
         RewardsProcessor rewardsProcessor = new RewardsProcessor(this, hookManager);
-        prestigePointsManager = new PrestigePointsManager(this.getComponentLogger(), prestigeConfigManager, prestigePointsConfigManager, islandDataManager);
-        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, prestigePointsConfigManager, prestigePointsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
+        SettingsProcessor settingsProcessor = new SettingsProcessor(this, databaseManager, hookManager, settingsManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, islandSettingsProcessor, playerSettingsProcessor, rewardsProcessor);
+        queuedSettingsProcessor = new QueuedSettingsProcessor(this, databaseManager, settingsManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, playerSettingsProcessor, rewardsProcessor);
+        prestigePointsManager = new PrestigePointsManager(prestigePointsConfigManager);
+        RequirementsManager requirementsManager = new RequirementsManager(this, localeManager, hookManager);
+        PrestigeManager prestigeManager = new PrestigeManager(this, settingsManager, localeManager, guiConfigManager, prestigeConfigManager, requirementsManager, databaseManager, guiManager, islandDataManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         PrestigeExemptionManager prestigeExemptionManager = new PrestigeExemptionManager(this, localeManager, guiConfigManager, optInConfigManager, optOutConfigManager, databaseManager, guiManager, hookManager, playerSettingsProcessor, islandSettingsProcessor, rewardsProcessor);
         TeleportationManager teleportationManager = new TeleportationManager(this, settingsManager, databaseManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigePointsConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, prestigePointsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigePointsConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, requirementsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -147,7 +158,7 @@ public class SkyPrestige extends SkyPlugin {
         this.getServer().getServicesManager().register(SkyPrestigeAPI.class, skyPrestigeAPI, this, ServicePriority.Lowest);
 
         // Register PlaceholderAPI Expansion
-        registerExpansion(prestigePointsManager, multiplierManager, hookManager);
+        registerExpansion(requirementsManager, multiplierManager, hookManager);
 
         // Listeners
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -156,11 +167,11 @@ public class SkyPrestige extends SkyPlugin {
         pluginManager.registerEvents(new FreshBrewListener(hookManager), this);
 
         // Connection-related Listeners
-        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, prestigeManager, prestigeExemptionManager, islandDataManager, teleportationManager), this);
+        pluginManager.registerEvents(new PlayerJoinListener(databaseManager, islandDataManager, teleportationManager, hookManager, queuedSettingsProcessor), this);
         pluginManager.registerEvents(new PlayerQuitListener(this, databaseManager, islandDataManager, hookManager), this);
 
         // Prestige-related Listeners
-        pluginManager.registerEvents(new IslandListener(this, settingsManager, optInConfigManager, optOutConfigManager, prestigePointsManager, databaseManager, islandDataManager, islandSettingsProcessor, rewardsProcessor), this);
+        pluginManager.registerEvents(new IslandListener(this, settingsManager, optInConfigManager, optOutConfigManager, databaseManager, islandDataManager, settingsProcessor, rewardsProcessor, guiManager), this);
 
         // Protection Orb Listener
         pluginManager.registerEvents(new ProtectionOrbListener(localeManager, protectionOrbManager), this);
@@ -224,9 +235,9 @@ public class SkyPrestige extends SkyPlugin {
         }
         pluginManager.registerEvents(new WaterLogListener(this, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager), this);
 
-        @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
+        Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
         if(plugin != null && plugin.isEnabled()) {
-            @Nullable RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
+            RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
             if(rsp != null) {
                 // Register SkyShop integration if the api is already registered
                 rsp.getProvider().register(
@@ -239,6 +250,18 @@ public class SkyPrestige extends SkyPlugin {
         // Reload the plugin
         reload();
 
+        // Load player quest data
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+        if(lmbQuestHook.isHooked()) {
+            this.getServer().getOnlinePlayers().forEach(player -> {
+                UUID uuid = player.getUniqueId();
+
+                List<Island> playerIslands = bentoBoxHook.getIslands(uuid);
+                playerIslands.forEach(island -> lmbQuestHook.loadPlayerData(island.getMemberSet()));
+            });
+        }
+
         databaseFuture.thenAccept(v -> {
             // Load player data for any online players.
             this.getServer().getOnlinePlayers().forEach(player -> {
@@ -250,8 +273,8 @@ public class SkyPrestige extends SkyPlugin {
                 // Load the player's island data
                 islandDataManager.loadDataByPlayerIdentifier(uuid);
 
-                // Handle any prestiges that occurred while the player was offline
-                prestigeManager.handleOfflinePrestiges(player);
+                // Process any settings queued while the player was offline
+                queuedSettingsProcessor.processQueuedSettings(player);
 
                 // Handle any queued teleports for the player.
                 teleportationManager.handleQueuedTeleports(player);
@@ -268,9 +291,9 @@ public class SkyPrestige extends SkyPlugin {
         unregisterExpansion();
 
         // Unregister SkyShop integration
-        @Nullable Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
+        Plugin plugin = this.getServer().getPluginManager().getPlugin("SkyShop");
         if(plugin != null && plugin.isEnabled()) {
-            @Nullable RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
+            RegisteredServiceProvider<SkyShopAPI> rsp = this.getServer().getServicesManager().getRegistration(SkyShopAPI.class);
             if(rsp != null) {
                 SkyShopAPI skyShopAPI = rsp.getProvider();
 
@@ -350,12 +373,12 @@ public class SkyPrestige extends SkyPlugin {
             String[] splitVersion = version.split("\\.");
             int second = Integer.parseInt(splitVersion[1]);
 
-            if(second >= 4) {
+            if(second >= 5) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.5.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }
@@ -364,15 +387,16 @@ public class SkyPrestige extends SkyPlugin {
      * This method registers the PlaceholderAPI expansion if PlaceholderAPI is enabled.
      */
     private void registerExpansion(
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull MultiplierManager multiplierManager,
-            @NotNull HookManager hookManager) {
+            @NonNull RequirementsManager requirementsManager,
+            @NonNull MultiplierManager multiplierManager,
+            @NonNull HookManager hookManager) {
         if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(skyPrestigeExpansion == null) {
                 skyPrestigeExpansion = new SkyPrestigeExpansion(
                         settingsManager,
+                        prestigeConfigManager,
                         placeholderConfigManager,
-                        prestigePointsManager,
+                        requirementsManager,
                         islandDataManager,
                         leaderboardManager,
                         multiplierManager,

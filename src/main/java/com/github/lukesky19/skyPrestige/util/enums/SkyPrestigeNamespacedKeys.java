@@ -18,8 +18,8 @@
 package com.github.lukesky19.skyPrestige.util.enums;
 
 import org.bukkit.NamespacedKey;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This enum contains the NamespacedKeys used by the plugin.
@@ -49,7 +49,7 @@ public enum SkyPrestigeNamespacedKeys {
     /**
      * The {@link NamespacedKey} for the enum.
      */
-    private final @NotNull NamespacedKey key;
+    private final @NonNull NamespacedKey key;
 
     /**
      * Creates a new {@link NamespacedKey} for the enum.
@@ -62,7 +62,7 @@ public enum SkyPrestigeNamespacedKeys {
      * Gets the {@link NamespacedKey} for the setting.
      * @return A {@link NamespacedKey}.
      */
-    public @NotNull NamespacedKey getKey() {
+    public @NonNull NamespacedKey getKey() {
         return key;
     }
 

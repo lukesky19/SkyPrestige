@@ -22,8 +22,8 @@ import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skylib.api.gui.abstracts.AbstractGUIManager;
 import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This class manages open GUIs.
@@ -35,7 +35,7 @@ public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
     public GUIManager() {}
 
     @Override
-    public @Nullable BaseGUI<IslandIdUUIDKey> getOpenGUI(@NotNull IslandIdUUIDKey identifier) {
+    public @Nullable BaseGUI<IslandIdUUIDKey> getOpenGUI(@NonNull IslandIdUUIDKey identifier) {
         BaseGUI<IslandIdUUIDKey> gui = dataMap.get(identifier);
         if(gui != null) return gui;
 
@@ -47,7 +47,7 @@ public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
      * Refresh any {@link ExchangeGUI}s that are open for the island id provided.
      * @param islandId The island id.
      */
-    public void refreshExchangeGUIs(@NotNull String islandId) {
+    public void refreshExchangeGUIs(@NonNull String islandId) {
         dataMap.entrySet().stream()
                 .filter(entry -> entry.getKey() != null
                         && entry.getKey().islandId() != null
@@ -64,7 +64,7 @@ public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
      * Refresh any {@link VaultGUI}s that are open for the island id provided.
      * @param islandId The island id.
      */
-    public void refreshVaultGUIs(@NotNull String islandId) {
+    public void refreshVaultGUIs(@NonNull String islandId) {
         dataMap.entrySet().stream()
                 .filter(entry -> entry.getKey() != null
                         && entry.getKey().islandId() != null
@@ -76,4 +76,21 @@ public class GUIManager extends AbstractGUIManager<IslandIdUUIDKey> {
                     gui.refresh();
                 });
     }
+
+    /**
+     * Close open GUIs that are open for the island id provided.
+     * @param islandId The island id.
+     */
+    public void closeGUIsByIslandId(@NonNull String islandId) {
+        dataMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null
+                        && entry.getKey().islandId() != null
+                        && entry.getKey().islandId().equals(islandId))
+                .forEach(entry -> {
+                    BaseGUI<IslandIdUUIDKey> gui = entry.getValue();
+                    if(!(gui instanceof VaultGUI)) return;
+
+                    gui.close();
+                });
+}
 }

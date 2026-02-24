@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.configuration.interfaces;
 
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This interface is used to create reward configurations.
@@ -29,5 +29,11 @@ public interface IReward {
      * Get the {@link ItemStackConfig} to create an {@link ItemStack} that is displayed inside the rewards GUI.
      * @return An {@link ItemStackConfig}.
      */
-    @NotNull ItemStackConfig displayItem();
+    @NonNull ItemStackConfig displayItem();
+
+    /**
+     * Should the reward be retroactively given when a player joins an island?
+     * @return true or false
+     */
+    boolean giveOnIslandJoin();
 }

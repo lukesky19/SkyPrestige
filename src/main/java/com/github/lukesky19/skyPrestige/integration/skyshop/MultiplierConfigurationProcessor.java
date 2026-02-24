@@ -29,17 +29,16 @@ import com.github.lukesky19.skyshop.api.processor.TransactionProcessor;
 import com.github.lukesky19.skyshop.api.result.TransactionResult;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 /**
  * This class processes {@link ShopMultiplierConfiguration} for buying/selling prestige point multipliers.
  */
 public class MultiplierConfigurationProcessor implements TransactionProcessor {
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull MultiplierManager multiplierManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull MultiplierManager multiplierManager;
 
     /**
      * Constructor
@@ -48,9 +47,9 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
      * @param multiplierManager A {@link MultiplierManager}
      */
     public MultiplierConfigurationProcessor(
-            @NotNull LocaleManager localeManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull LocaleManager localeManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         this.localeManager = localeManager;
         this.hookManager = hookManager;
         this.multiplierManager = multiplierManager;
@@ -65,16 +64,16 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
      * @return A {@link TransactionResult}.
      */
     @Override
-    public @NotNull TransactionResult canBuy(@NotNull Player player, @NotNull TransactionConfiguration configuration, int amount) {
+    public @NonNull TransactionResult canBuy(@NonNull Player player, @NonNull TransactionConfiguration configuration, int amount) {
         if(!(configuration instanceof ShopMultiplierConfiguration shopMultiplierConfiguration)) return new TransactionResult("Wrong Type", true, true, false);
 
-        @Nullable MultiplierType multiplierType = shopMultiplierConfiguration.multiplierType();
-        @Nullable Double multiplier = shopMultiplierConfiguration.multiplier();
+        MultiplierType multiplierType = shopMultiplierConfiguration.multiplierType();
+        Double multiplier = shopMultiplierConfiguration.multiplier();
         boolean activeMultiplierPreventPurchase = shopMultiplierConfiguration.activeMultiplierPreventPurchase();
         boolean activeMultiplierHigherPreventPurchase = shopMultiplierConfiguration.activeMultiplierHigherPreventPurchase();
         boolean resetMultiplierTimeIfHigherMultiplier = shopMultiplierConfiguration.resetMultiplierTimeIfHigherMultiplier();
-        @Nullable Long time = shopMultiplierConfiguration.time();
-        @Nullable Long maxTime = shopMultiplierConfiguration.maxTime();
+        Long time = shopMultiplierConfiguration.time();
+        Long maxTime = shopMultiplierConfiguration.maxTime();
 
         if(multiplierType == null
                 || ((multiplier == null || multiplier <= 0)
@@ -83,6 +82,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
         }
 
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
 
         // Check if BentoBox is hooked into
@@ -91,9 +91,9 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
         }
 
         long updatedTime;
-        Component multiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierActive());
-        Component higherMultiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().higherMultiplierActive());
-        Component multiplierTimeMax = AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierTimeMax());
+        Component multiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierActive());
+        Component higherMultiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().higherMultiplierActive());
+        Component multiplierTimeMax = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierTimeMax());
         if(multiplierType.equals(MultiplierType.SERVER)) {
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > 0.0) {
@@ -129,9 +129,9 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
             }
         } else {
             // Get and validate the island
-            @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
+            Island island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().notOnIsland()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
                 return new TransactionResult("Player not on island", true, false, false);
             }
 
@@ -180,7 +180,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
      * @return A {@link TransactionResult}.
      */
     @Override
-    public @NotNull TransactionResult canSell(@NotNull Player player, @NotNull TransactionConfiguration configuration, int amount) {
+    public @NonNull TransactionResult canSell(@NonNull Player player, @NonNull TransactionConfiguration configuration, int amount) {
         if(!(configuration instanceof ShopMultiplierConfiguration)) return new TransactionResult("Wrong Type", true, true, false);
 
         return new TransactionResult("Selling of prestige multiplier not supported", true, true, false);
@@ -196,16 +196,16 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
      * @return A {@link TransactionResult}.
      */
     @Override
-    public @NotNull TransactionResult buy(@NotNull Player player, @NotNull TransactionConfiguration configuration, int amount) {
+    public @NonNull TransactionResult buy(@NonNull Player player, @NonNull TransactionConfiguration configuration, int amount) {
         if(!(configuration instanceof ShopMultiplierConfiguration shopMultiplierConfiguration)) return new TransactionResult("Wrong Type", true, true, false);
 
-        @Nullable MultiplierType multiplierType = shopMultiplierConfiguration.multiplierType();
-        @Nullable Double multiplier = shopMultiplierConfiguration.multiplier();
+        MultiplierType multiplierType = shopMultiplierConfiguration.multiplierType();
+        Double multiplier = shopMultiplierConfiguration.multiplier();
         boolean activeMultiplierPreventPurchase = shopMultiplierConfiguration.activeMultiplierPreventPurchase();
         boolean activeMultiplierHigherPreventPurchase = shopMultiplierConfiguration.activeMultiplierHigherPreventPurchase();
         boolean resetMultiplierTimeIfHigherMultiplier = shopMultiplierConfiguration.resetMultiplierTimeIfHigherMultiplier();
-        @Nullable Long time = shopMultiplierConfiguration.time();
-        @Nullable Long maxTime = shopMultiplierConfiguration.maxTime();
+        Long time = shopMultiplierConfiguration.time();
+        Long maxTime = shopMultiplierConfiguration.maxTime();
 
         if(multiplierType == null
                 || ((multiplier == null || multiplier <= 0)
@@ -214,6 +214,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
         }
 
         Locale locale = localeManager.getConfiguration();
+        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
 
         // Check if BentoBox is hooked into
@@ -221,19 +222,22 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
             return new TransactionResult("BentoBox not hooked into", true, true, false);
         }
 
-        @Nullable Island island = null;
-        @Nullable Long updatedTime = null;
+        Island island = null;
+        Long updatedTime = null;
+        String multiplierActiveMessage = locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierActive();
+        String higherMultiplierActiveMessage = locale.prefix() + multiplierMessages.shopMultiplierMessages().higherMultiplierActive();
+        String multiplierTimeMaxMessage = locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierTimeMax();
         if(multiplierType.equals(MultiplierType.SERVER)) {
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > 0.0) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierActive()));
+                    player.sendMessage(AdventureUtil.deserialize(multiplierActiveMessage));
                     return new TransactionResult("A server multiplier is already active", true, false, false);
                 }
             }
 
             if(multiplier != null && activeMultiplierHigherPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > multiplier) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().higherMultiplierActive()));
+                    player.sendMessage(AdventureUtil.deserialize(higherMultiplierActiveMessage));
                     return new TransactionResult("A higher server multiplier is already active", true, false, false);
                 }
             }
@@ -252,7 +256,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
 
                 // Check max time
                 if(maxTime != null && updatedTime > maxTime) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierTimeMax()));
+                    player.sendMessage(AdventureUtil.deserialize(multiplierTimeMaxMessage));
                     return new TransactionResult("The maximum multiplier time would be exceeded by this transaction", true, false, false);
                 }
             }
@@ -260,20 +264,20 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
             // Get and validate the island
             island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().notOnIsland()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
                 return new TransactionResult("Player not on island", true, false, false);
             }
 
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getIslandMultiplier(island) > 0.0) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierActive()));
+                    player.sendMessage(AdventureUtil.deserialize(multiplierActiveMessage));
                     return new TransactionResult("An island multiplier is already active", true, false, false);
                 }
             }
 
             if(multiplier != null && activeMultiplierHigherPreventPurchase) {
                 if(multiplierManager.getIslandMultiplier(island) > multiplier) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().higherMultiplierActive()));
+                    player.sendMessage(AdventureUtil.deserialize(higherMultiplierActiveMessage));
                     return new TransactionResult("A higher island multiplier is already active", true, false, false);
                 }
             }
@@ -292,7 +296,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
 
                 // Check max time
                 if(maxTime != null && updatedTime > maxTime) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().shopMultiplierMessages().multiplierTimeMax()));
+                    player.sendMessage(AdventureUtil.deserialize(multiplierTimeMaxMessage));
                     return new TransactionResult("The maximum multiplier time would be exceeded by this transaction", true, false, false);
                 }
             }
@@ -321,7 +325,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
      * @return A {@link TransactionResult}.
      */
     @Override
-    public @NotNull TransactionResult sell(@NotNull Player player, @NotNull TransactionConfiguration configuration, int amount) {
+    public @NonNull TransactionResult sell(@NonNull Player player, @NonNull TransactionConfiguration configuration, int amount) {
         if(!(configuration instanceof ShopMultiplierConfiguration)) return new TransactionResult("Wrong Type", true, true, false);
 
         return new TransactionResult("Selling of prestige multiplier not supported", true, true, false);

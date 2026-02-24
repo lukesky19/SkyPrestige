@@ -18,7 +18,7 @@
 package com.github.lukesky19.skyPrestige.configuration.data.reward;
 
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ import java.util.List;
  */
 @ConfigSerializable
 public record RewardConfig(
-        @NotNull List<ItemReward> itemRewards,
-        @NotNull List<CommandReward> commandRewards,
-        @NotNull List<PermissionReward> permissionRewards,
-        @NotNull List<GroupReward> groupRewards,
-        @NotNull List<MoneyReward> moneyRewards,
-        @NotNull IslandRangeReward islandSizeReward) {}
+        @NonNull List<ItemReward> itemRewards,
+        @NonNull List<CommandReward> commandRewards,
+        @NonNull List<PermissionReward> permissionRewards,
+        @NonNull List<GroupReward> groupRewards,
+        @NonNull List<MoneyReward> moneyRewards,
+        @NonNull IslandRangeReward islandSizeReward) {}

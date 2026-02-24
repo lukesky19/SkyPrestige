@@ -10,11 +10,19 @@ required-prestige-points:
     no-island-text: "0.0"
     opted-out-text: "0.0"
 progress-bar:
+    prestige-points-weight: 1
+    money-weight: 1
+    item-weight: 1
+    quest-weight: 1
     no-island-text: "<gray>No Island Found"
     opted-out-text: "<gray>Island Opted Out"
     filled-bar-text: "<green>|"
     empty-bar-text: "<red>|"
 legacy-progress-bar:
+    prestige-points-weight: 1
+    money-weight: 1
+    item-weight: 1
+    quest-weight: 1
     no-island-text: "&7No Island Found"
     opted-out-text: "&7Island Opted Out"
     filled-bar-text: "&a|"

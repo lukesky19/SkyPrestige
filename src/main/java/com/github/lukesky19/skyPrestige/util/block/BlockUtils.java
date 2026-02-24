@@ -30,8 +30,8 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.EntityType;
 import org.bukkit.spawner.Spawner;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -40,11 +40,11 @@ import java.util.Set;
  * This class is used to validate and extract data from {@link Block}s.
  */
 public class BlockUtils {
-    private static final @NotNull Set<BlockType> STRIPPED_LOGS = new LinkedHashSet<>();
-    private static final @NotNull Set<BlockType> WAXED_BLOCKS = new LinkedHashSet<>();
+    private static final @NonNull Set<BlockType> STRIPPED_LOGS = new LinkedHashSet<>();
+    private static final @NonNull Set<BlockType> WAXED_BLOCKS = new LinkedHashSet<>();
 
     static {
-        Registry<@NotNull BlockType> blockTypeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.BLOCK);
+        Registry<@NonNull BlockType> blockTypeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.BLOCK);
         blockTypeRegistry.forEach(blockType -> {
             String name = blockType.getKey().toString().toLowerCase();
 
@@ -71,7 +71,7 @@ public class BlockUtils {
      * @param blockType The {@link BlockType} to check.
      * @return true if a stripped log, otherwise false.
      */
-    public static boolean isBlockTypeStripped(@NotNull BlockType blockType) {
+    public static boolean isBlockTypeStripped(@NonNull BlockType blockType) {
         return STRIPPED_LOGS.contains(blockType);
     }
 
@@ -80,7 +80,7 @@ public class BlockUtils {
      * @param blockType The {@link BlockType} to check.
      * @return true if a stripped log, otherwise false.
      */
-    public static boolean isBlockTypeWaxed(@NotNull BlockType blockType) {
+    public static boolean isBlockTypeWaxed(@NonNull BlockType blockType) {
         return WAXED_BLOCKS.contains(blockType);
     }
 
@@ -90,7 +90,7 @@ public class BlockUtils {
      * @param blockType The {@link BlockType} of the block to check.
      * @return true if waxed, otherwise false.
      */
-    public static boolean isBlockWaxed(@NotNull Block block, @NotNull BlockType blockType) {
+    public static boolean isBlockWaxed(@NonNull Block block, @NonNull BlockType blockType) {
         if(isBlockTypeWaxed(blockType)) {
             return true;
         } else if(block.getState(false) instanceof Sign sign) {
@@ -105,7 +105,7 @@ public class BlockUtils {
      * @param blockData The {@link BlockData}.
      * @return The age or null.
      */
-    public static @Nullable Integer getAge(@NotNull BlockData blockData) {
+    public static @Nullable Integer getAge(@NonNull BlockData blockData) {
         return blockData instanceof Ageable ageable ? ageable.getAge() : null;
     }
 
@@ -114,7 +114,7 @@ public class BlockUtils {
      * @param blockData The {@link BlockData}.
      * @return The water logged status or null.
      */
-    public static @Nullable Boolean getWaterLogged(@NotNull org.bukkit.block.data.BlockData blockData) {
+    public static @Nullable Boolean getWaterLogged(@NonNull BlockData blockData) {
         return blockData instanceof Waterlogged waterlogged ? waterlogged.isWaterlogged() : null;
     }
 
@@ -124,7 +124,7 @@ public class BlockUtils {
      * @param block The {@link Block}
      * @return The {@link EntityType}.
      */
-    public static @Nullable EntityType getEntityType(@NotNull RoseStackerHook roseStackerHook, @NotNull Block block) {
+    public static @Nullable EntityType getEntityType(@NonNull RoseStackerHook roseStackerHook, @NonNull Block block) {
         BlockState blockState = block.getState(false);
         if(roseStackerHook.isHooked()) {
             if(!roseStackerHook.isBlockNotStacked(block)) return null;

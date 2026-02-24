@@ -20,8 +20,8 @@ package com.github.lukesky19.skyPrestige.configuration.data.gui.common;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the configuration for a single button to display in a GUI.
@@ -30,5 +30,5 @@ import org.jetbrains.annotations.Nullable;
  */
 @ConfigSerializable
 public record ButtonConfig(
-        @NotNull ItemStackConfig item,
+        @NonNull ItemStackConfig item,
         @Nullable Integer slot) {}

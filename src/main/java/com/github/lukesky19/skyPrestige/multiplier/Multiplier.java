@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.multiplier;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class stores the data for a multiplier.
@@ -47,7 +47,7 @@ public class Multiplier {
      */
     @Override
     @SuppressWarnings("MethodDoesntCallSuperMethod") // A constructor is used to clone data instead.
-    public @NotNull Multiplier clone() {
+    public @NonNull Multiplier clone() {
         return new Multiplier(multiplier, time);
     }
 
@@ -58,7 +58,7 @@ public class Multiplier {
      * @return true if equal, otherwise false.
      */
     @Override
-    public boolean equals(@NotNull Object compareObject) {
+    public boolean equals(@NonNull Object compareObject) {
         if(!(compareObject instanceof Multiplier compareMultiplier)) return false;
 
         return this.getMultiplier() == compareMultiplier.getMultiplier()

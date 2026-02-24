@@ -20,22 +20,28 @@ package com.github.lukesky19.skyPrestige.configuration.data.reward;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The configuration for a permission reward.
  * @param displayItem The {@link ItemStackConfig} to display inside the rewards GUI.
  * @param giveToAllIslandMembers Whether to run the commands for to all island members.
+ * @param giveOnIslandJoin Should the reward be retroactively given on island join?
  * @param beforeIslandReset Should the permission be given before the island is reset?
  * @param removeGroup Should the group be removed?
  * @param groupName The group name.
  */
 @ConfigSerializable
 public record GroupReward(
-        @NotNull ItemStackConfig displayItem,
+        @NonNull ItemStackConfig displayItem,
         boolean giveToAllIslandMembers,
+        boolean giveOnIslandJoin,
         boolean beforeIslandReset,
         boolean removeGroup,
         @Nullable String groupName) implements IReward {
+    @Override
+    public boolean giveOnIslandJoin() {
+        return giveOnIslandJoin;
+    }
 }

@@ -19,6 +19,8 @@ package com.github.lukesky19.skyPrestige.configuration.data.placeholder;
 
 import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the configuration for PlaceholderAPI placeholders.
@@ -32,13 +34,13 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
  */
 @ConfigSerializable
 public record PlaceholderConfig(
-        String configVersion,
-        PrestigeNumberConfig prestigeLevel,
-        PrestigeNumberConfig prestigePoints,
-        PrestigeNumberConfig requiredPrestigePoints,
-        ProgressBarConfig progressBar,
-        ProgressBarConfig legacyProgressBar,
-        MultiplierConfig multiplier) {
+        @Nullable String configVersion,
+        @NonNull PrestigeNumberConfig prestigeLevel,
+        @NonNull PrestigeNumberConfig prestigePoints,
+        @NonNull PrestigeNumberConfig requiredPrestigePoints,
+        @NonNull ProgressBarConfig progressBar,
+        @NonNull ProgressBarConfig legacyProgressBar,
+        @NonNull MultiplierConfig multiplier) {
     /**
      * This record contains configuration related to prestige level and prestige points placeholders.
      * @param noIslandText The text to display when there is no island.
@@ -46,10 +48,14 @@ public record PlaceholderConfig(
      */
     @ConfigSerializable
     public record PrestigeNumberConfig(
-            String noIslandText,
-            String optedOutText) {}
+            @Nullable String noIslandText,
+            @Nullable String optedOutText) {}
     /**
      * This record contains configuration related to the progress bar placeholder.
+     * @param prestigePointsWeight The prestige points weight.
+     * @param moneyWeight The money weight
+     * @param itemWeight The item weight.
+     * @param questWeight The quest weight.
      * @param noIslandText The text to display when there is no island.
      * @param optedOutText The text to display when the island is opted out of prestige.
      * @param filledBarText The text to use for when a progress bar is filled, i.e., {@literal <green>|}
@@ -57,10 +63,14 @@ public record PlaceholderConfig(
      */
     @ConfigSerializable
     public record ProgressBarConfig(
-            String noIslandText,
-            String optedOutText,
-            String filledBarText,
-            String emptyBarText) {}
+            double prestigePointsWeight,
+            double moneyWeight,
+            double itemWeight,
+            double questWeight,
+            @Nullable String noIslandText,
+            @Nullable String optedOutText,
+            @Nullable String filledBarText,
+            @Nullable String emptyBarText) {}
     /**
      * This record contains the configuration for multiplier placeholders.
      * @param noIslandText The text to display when there is no island.
@@ -69,7 +79,7 @@ public record PlaceholderConfig(
      */
     @ConfigSerializable
     public record MultiplierConfig(
-            String noIslandText,
-            String optedOutText,
-            TimeFormat timeFormat) {}
+            @Nullable String noIslandText,
+            @Nullable String optedOutText,
+            @NonNull TimeFormat timeFormat) {}
 }

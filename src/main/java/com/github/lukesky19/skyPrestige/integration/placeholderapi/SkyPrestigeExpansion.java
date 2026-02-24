@@ -18,26 +18,34 @@
 package com.github.lukesky19.skyPrestige.integration.placeholderapi;
 
 import com.github.lukesky19.skyPrestige.configuration.data.placeholder.PlaceholderConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
+import com.github.lukesky19.skyPrestige.configuration.data.requirement.QuestRequirement;
 import com.github.lukesky19.skyPrestige.configuration.manager.PlaceholderConfigManager;
+import com.github.lukesky19.skyPrestige.configuration.manager.PrestigeConfigManager;
 import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
+import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.leonardobishop.quests.common.player.QPlayer;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -46,34 +54,38 @@ import java.util.concurrent.ExecutionException;
  * This class supplies placeholders that other plugins can access using PlaceholderAPI.
  */
 public class SkyPrestigeExpansion extends PlaceholderExpansion {
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull PrestigePointsManager prestigePointsManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull LeaderboardManager leaderboardManager;
-    private final @NotNull MultiplierManager multiplierManager;
-    private final @NotNull PlaceholderConfigManager placeholderConfigManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull PrestigeConfigManager prestigeConfigManager;
+    private final @NonNull PlaceholderConfigManager placeholderConfigManager;
+    private final @NonNull RequirementsManager requirementsManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull LeaderboardManager leaderboardManager;
+    private final @NonNull MultiplierManager multiplierManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
      * @param settingsManager A {@link SettingsManager} instance.
+     * @param prestigeConfigManager A {@link PrestigeConfigManager} instance.
      * @param placeholderConfigManager A {@link PlaceholderConfigManager} instance.
-     * @param prestigePointsManager A {@link PrestigePointsManager} instance.
+     * @param requirementsManager A {@link RequirementsManager} instance.
      * @param islandDataManager A {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param multiplierManager A {@link MultiplierManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public SkyPrestigeExpansion(
-            @NotNull SettingsManager settingsManager,
-            @NotNull PlaceholderConfigManager placeholderConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull LeaderboardManager leaderboardManager,
-            @NotNull MultiplierManager multiplierManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SettingsManager settingsManager,
+            @NonNull PrestigeConfigManager prestigeConfigManager,
+            @NonNull PlaceholderConfigManager placeholderConfigManager,
+            @NonNull RequirementsManager requirementsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull LeaderboardManager leaderboardManager,
+            @NonNull MultiplierManager multiplierManager,
+            @NonNull HookManager hookManager) {
         this.settingsManager = settingsManager;
-        this.prestigePointsManager = prestigePointsManager;
+        this.prestigeConfigManager = prestigeConfigManager;
+        this.requirementsManager = requirementsManager;
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.multiplierManager = multiplierManager;
@@ -86,7 +98,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @return The name of the author.
      */
     @Override
-    public @NotNull String getAuthor() {
+    public @NonNull String getAuthor() {
         return "lukeskywlker19";
     }
 
@@ -95,7 +107,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @return The identifier for the expansion.
      */
     @Override
-    public @NotNull String getIdentifier() {
+    public @NonNull String getIdentifier() {
         return "SkyPrestige";
     }
 
@@ -104,7 +116,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @return The version of the expansion.
      */
     @Override
-    public @NotNull String getVersion() {
+    public @NonNull String getVersion() {
         return "1.0.0.0";
     }
 
@@ -125,19 +137,19 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @throws RuntimeException Is thrown if a {@link InterruptedException} or {@link ExecutionException} occurs.
      */
     @Override
-    public @Nullable String onPlaceholderRequest(@NotNull Player player, @NotNull String params) {
+    public @Nullable String onPlaceholderRequest(@NonNull Player player, @NonNull String params) {
         String placeholder = params.toLowerCase();
-        @NotNull PlaceholderConfig placeholderConfig = placeholderConfigManager.getConfiguration();
+        PlaceholderConfig placeholderConfig = placeholderConfigManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         if(!bentoBoxHook.isHooked()) return null;
 
         switch(placeholder) {
             case "prestige_level" -> {
                 // Get the player's island
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.prestigeLevel().noIslandText();
                 // Get the IslandData
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.prestigeLevel().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.prestigeLevel().optedOutText();
 
@@ -147,10 +159,10 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
 
             case "prestige_points" -> {
                 // Get the player's island
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.prestigePoints().noIslandText();
                 // Get the IslandData
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.prestigePoints().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.prestigePoints().optedOutText();
 
@@ -160,40 +172,83 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
 
             case "required_prestige_points" -> {
                 // Get the player's island
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.requiredPrestigePoints().noIslandText();
                 // Get the IslandData
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.requiredPrestigePoints().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.requiredPrestigePoints().optedOutText();
-
-                // Recalculate the required prestige points of not cached already
-                if(islandData.getRequiredPrestigePoints() == null) {
-                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
-                }
+                PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
+                if(prestigeConfig == null) return "0.0";
 
                 // Return the prestige points required to prestige
-                return NumberUtils.formatDecimal(islandData.getRequiredPrestigePoints());
+                return NumberUtils.formatDecimal(requirementsManager.calculateRequiredPrestigePoints(island.getMemberSet().size(), islandData, prestigeConfig.prestigePointsRequirement()));
             }
 
             case "progress_bar" -> {
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.progressBar().noIslandText();
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.progressBar().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.progressBar().optedOutText();
-
-                if(islandData.getRequiredPrestigePoints() == null) {
-                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
-                }
+                PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
+                if(prestigeConfig == null) return null;
 
                 int progressBarSize = settingsManager.getConfiguration() != null ?
                         settingsManager.getConfiguration().progressBarSize() : 10;
                 StringBuilder bar = new StringBuilder();
 
+                Server server = player.getServer();
+                // Get a list of all island member's QPlayer.
+                LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+                List<QPlayer> qPlayerList = lmbQuestHook.getQPlayerList(island.getMemberSet());
+                // Get online island member's players
+                List<Player> onlineIslandMembers = island.getMemberSet().stream()
+                        .map(server::getPlayer)
+                        .filter(Objects::nonNull)
+                        .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
+                        .toList();
+                // Get all island member's offline player.
+                List<OfflinePlayer> offlinePlayerList = island.getMemberSet().stream()
+                        .map(server::getOfflinePlayer)
+                        .toList();
+
+                int memberCount = island.getMemberSet().size();
+                double progressCount = 0;
+                double totalCount = 0;
+
+                if(prestigeConfig.prestigePointsRequirement().prestigePoints() > 0) {
+                    double weight = Math.max(0, placeholderConfig.progressBar().prestigePointsWeight());
+                    double requiredPrestigePoints = requirementsManager.calculateRequiredPrestigePoints(memberCount, islandData, prestigeConfig.prestigePointsRequirement());
+                    progressCount += Math.min(islandData.getPrestigePoints(), requiredPrestigePoints) * weight;
+                    totalCount += requiredPrestigePoints * weight;
+                }
+
+                if(prestigeConfig.moneyRequirement().money() > 0) {
+                    double weight = Math.max(0, placeholderConfig.progressBar().moneyWeight());
+                    double requiredMoney = requirementsManager.calculateRequiredMoney(memberCount, islandData, prestigeConfig.moneyRequirement());
+                    progressCount += Math.min(requirementsManager.getMoneyCompletedCount(offlinePlayerList), requiredMoney) * weight;
+                    totalCount += requiredMoney * weight;
+                }
+
+                if(!prestigeConfig.inventoryRequirements().isEmpty()) {
+                    double weight = Math.max(0, placeholderConfig.progressBar().itemWeight());
+                    List<ItemStack> requiredItems = requirementsManager.calculateRequiredItems(memberCount, islandData, prestigeConfig.inventoryRequirements()).keySet().stream().toList();
+                    progressCount += requirementsManager.getItemCompletedCount(onlineIslandMembers, requiredItems) * weight;
+                    totalCount += requiredItems.size() * weight;
+                }
+
+                if(!prestigeConfig.questRequirements().isEmpty()) {
+                    double weight = Math.max(0, placeholderConfig.progressBar().questWeight());
+                    List<String> questIds = prestigeConfig.questRequirements().stream()
+                            .map(QuestRequirement::questId).filter(Objects::nonNull).toList();
+
+                    progressCount += requirementsManager.getQuestsCompletedCount(qPlayerList, questIds) * weight;
+                    totalCount += questIds.size() * weight;
+                }
+
                 // Calculate current progress percentage
-                double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
-                        Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
+                double currentPercentage = totalCount > 0 ? Math.min((progressCount / totalCount) * 100, 100.0) : 0;
 
                 // Calculate the number of filled bars
                 int filledBars = (int) (currentPercentage / (100.0 / progressBarSize));
@@ -210,23 +265,69 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "progress_bar_legacy" -> {
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.legacyProgressBar().noIslandText();
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.legacyProgressBar().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.legacyProgressBar().optedOutText();
-
-                if(islandData.getRequiredPrestigePoints() == null) {
-                    prestigePointsManager.recalculateRequiredPrestigePoints(island);
-                }
+                PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
+                if(prestigeConfig == null) return null;
 
                 int progressBarSize = settingsManager.getConfiguration() != null ?
                         settingsManager.getConfiguration().progressBarSize() : 10;
                 StringBuilder bar = new StringBuilder();
 
+                Server server = player.getServer();
+                // Get a list of all island member's QPlayer.
+                LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+                List<QPlayer> qPlayerList = lmbQuestHook.getQPlayerList(island.getMemberSet());
+                // Get online island member's players
+                List<Player> onlineIslandMembers = island.getMemberSet().stream()
+                        .map(server::getPlayer)
+                        .filter(Objects::nonNull)
+                        .filter(memberPlayer -> memberPlayer.isOnline() && memberPlayer.isConnected())
+                        .toList();
+                // Get all island member's offline player.
+                List<OfflinePlayer> offlinePlayerList = island.getMemberSet().stream()
+                        .map(server::getOfflinePlayer)
+                        .toList();
+
+                int memberCount = island.getMemberSet().size();
+                double progressCount = 0;
+                double totalCount = 0;
+
+                if(prestigeConfig.prestigePointsRequirement().prestigePoints() > 0) {
+                    double weight = Math.max(0, placeholderConfig.legacyProgressBar().prestigePointsWeight());
+                    double requiredPrestigePoints = requirementsManager.calculateRequiredPrestigePoints(memberCount, islandData, prestigeConfig.prestigePointsRequirement());
+                    progressCount += Math.min(islandData.getPrestigePoints(), requiredPrestigePoints) * weight;
+                    totalCount += requiredPrestigePoints * weight;
+                }
+
+                if(prestigeConfig.moneyRequirement().money() > 0) {
+                    double weight = Math.max(0, placeholderConfig.legacyProgressBar().moneyWeight());
+                    double requiredMoney = requirementsManager.calculateRequiredMoney(memberCount, islandData, prestigeConfig.moneyRequirement());
+                    progressCount += Math.min(requirementsManager.getMoneyCompletedCount(offlinePlayerList), requiredMoney) * weight;
+                    totalCount += requiredMoney * weight;
+                }
+
+                if(!prestigeConfig.inventoryRequirements().isEmpty()) {
+                    double weight = Math.max(0, placeholderConfig.legacyProgressBar().itemWeight());
+                    List<ItemStack> requiredItems = requirementsManager.calculateRequiredItems(memberCount, islandData, prestigeConfig.inventoryRequirements()).keySet().stream().toList();
+                    progressCount += requirementsManager.getItemCompletedCount(onlineIslandMembers, requiredItems) * weight;
+                    totalCount += requiredItems.size() * weight;
+                }
+
+                if(!prestigeConfig.questRequirements().isEmpty()) {
+                    double weight = Math.max(0, placeholderConfig.legacyProgressBar().questWeight());
+                    List<String> questIds = prestigeConfig.questRequirements().stream()
+                            .map(QuestRequirement::questId).filter(Objects::nonNull).toList();
+
+                    progressCount += requirementsManager.getQuestsCompletedCount(qPlayerList, questIds) * weight;
+                    totalCount += questIds.size() * weight;
+                }
+
                 // Calculate current progress percentage
-                double currentPercentage = islandData.getRequiredPrestigePoints() > 0 ?
-                        Math.min((islandData.getPrestigePoints() / islandData.getRequiredPrestigePoints()) * 100, 100.0) : 0;
+                double currentPercentage = totalCount > 0 ? Math.min((progressCount / totalCount) * 100, 100.0) : 0;
 
                 // Calculate the number of filled bars
                 int filledBars = (int) (currentPercentage / (100.0 / progressBarSize));
@@ -243,9 +344,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "multiplier" -> {
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.multiplier().noIslandText();
-                @Nullable IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.multiplier().noIslandText();
 
                 return String.valueOf(multiplierManager.getMultiplier(island));
@@ -264,14 +365,14 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "island_multiplier" -> {
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return "0.0";
 
                 return String.valueOf(multiplierManager.getIslandMultiplier(island));
             }
 
             case "island_multiplier_time" -> {
-                @Nullable Island island = getIsland(bentoBoxHook, player);
+                Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return "0";
 
                 return AdventureUtil.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
@@ -282,11 +383,11 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                     String[] split = placeholder.split("_");
                     if(split.length != 3) return "";
 
-                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    Integer positionNumber = getInteger(split[2]);
                     if(positionNumber == null) return "";
                     if(positionNumber > 10) return "";
 
-                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
                     if(position == null) return "";
 
                     return position.ownerName();
@@ -294,11 +395,11 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                     String[] split = placeholder.split("_");
                     if(split.length != 3) return "";
 
-                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    Integer positionNumber = getInteger(split[2]);
                     if(positionNumber == null) return "";
                     if(positionNumber > 10) return "";
 
-                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
                     if(position == null) return "";
 
                     return String.valueOf(position.prestigeLevel());
@@ -306,11 +407,11 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                     String[] split = placeholder.split("_");
                     if(split.length != 3) return "";
 
-                    @Nullable Integer positionNumber = getInteger(split[2]);
+                    Integer positionNumber = getInteger(split[2]);
                     if(positionNumber == null) return "";
                     if(positionNumber > 10) return "";
 
-                    @Nullable Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
+                    Position position = leaderboardManager.getPositionAtPositionNumber(positionNumber);
                     if(position == null) return "";
 
                     return NumberUtils.formatDecimal(position.prestigePoints());
@@ -329,11 +430,11 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @param player The {@link Player}.
      * @return The player's {@link Island} or null.
      */
-    private @Nullable Island getIsland(@NotNull BentoBoxHook bentoBoxHook, @NotNull Player player) {
+    private @Nullable Island getIsland(@NonNull BentoBoxHook bentoBoxHook, @NonNull Player player) {
         UUID playerId = player.getUniqueId();
 
         // Get the Island at the player's location
-        @Nullable Island island = getIslandAtPlayerLocation(bentoBoxHook, player, playerId);
+        Island island = getIslandAtPlayerLocation(bentoBoxHook, player, playerId);
 
         // If there is no island at the player's location, get their primary island for the world they are in
         if(island == null) island = getPrimaryIsland(bentoBoxHook, player, playerId);
@@ -352,9 +453,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @param playerId The player's {@link UUID}.
      * @return An {@link Island} or null.
      */
-    private @Nullable Island getIslandAtPlayerLocation(@NotNull BentoBoxHook bentoBoxHook, @NotNull Player player, @NotNull UUID playerId) {
+    private @Nullable Island getIslandAtPlayerLocation(@NonNull BentoBoxHook bentoBoxHook, @NonNull Player player, @NonNull UUID playerId) {
         // Get the Island at the player's location
-        @Nullable Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
+        Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
 
         // If the island is not null, check if they are the owner or a member
         if(island != null) {
@@ -373,9 +474,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @param playerId The player's {@link UUID}.
      * @return An {@link Island} or null.
      */
-    private @Nullable Island getPrimaryIsland(@NotNull BentoBoxHook bentoBoxHook, @NotNull Player player, @NotNull UUID playerId) {
+    private @Nullable Island getPrimaryIsland(@NonNull BentoBoxHook bentoBoxHook, @NonNull Player player, @NonNull UUID playerId) {
         // Get the Island at the player's location
-        @Nullable Island island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
+        Island island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
 
         // If the island is not null, check if they are the owner or a member
         if(island != null) {
@@ -393,9 +494,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @param playerId The player's {@link UUID}.
      * @return An {@link Island} or null.
      */
-    private @Nullable Island getAnyIsland(@NotNull BentoBoxHook bentoBoxHook, @NotNull UUID playerId) {
+    private @Nullable Island getAnyIsland(@NonNull BentoBoxHook bentoBoxHook, @NonNull UUID playerId) {
         // Get the player's islands
-        @NotNull List<Island> islandList = bentoBoxHook.getIslands(playerId);
+        List<Island> islandList = bentoBoxHook.getIslands(playerId);
 
         // Get the first island they own (if any)
         Optional<Island> ownedIsland = islandList.stream()
@@ -415,7 +516,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
      * @param text The {@link String} to parse.
      * @return The {@link Integer} or null.
      */
-    private @Nullable Integer getInteger(@NotNull String text) {
+    private @Nullable Integer getInteger(@NonNull String text) {
         try {
             return Integer.parseInt(text);
         } catch (NumberFormatException e) {

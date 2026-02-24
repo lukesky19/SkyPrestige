@@ -24,8 +24,8 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import java.util.Optional;
 @ConfigSerializable
 public record TimePoints(
         double points,
-        @NotNull ItemStackConfig displayItem) implements Points {
+        @NonNull ItemStackConfig displayItem) implements Points {
     @Override
     public double getPoints() {
         return points;
@@ -54,19 +54,19 @@ public record TimePoints(
     }
 
     @Override
-    public @NotNull ItemStackConfig getDisplayItemStackConfig() {
+    public @NonNull ItemStackConfig getDisplayItemStackConfig() {
         return displayItem;
     }
 
     @Override
     public @Nullable ItemStack createDisplayItemStack(
-            @NotNull ComponentLogger logger,
-            @NotNull ItemType fallback,
-            @NotNull String name,
-            @NotNull List<String> lore) {
+            @NonNull ComponentLogger logger,
+            @NonNull ItemType fallback,
+            @NonNull String name,
+            @NonNull List<String> lore) {
         if(displayItem.itemType() != null) {
             ItemStackBuilder defaultBuilder = new ItemStackBuilder(logger);
-            defaultBuilder.fromItemStackConfig(displayItem, null, null, List.of());
+            defaultBuilder.fromItemStackConfig(displayItem, null, List.of());
             Optional<ItemStack> optional = defaultBuilder.buildItemStack();
             if (optional.isPresent()) {
                 return optional.get();

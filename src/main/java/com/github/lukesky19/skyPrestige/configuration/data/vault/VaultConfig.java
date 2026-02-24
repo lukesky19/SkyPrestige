@@ -20,8 +20,8 @@ package com.github.lukesky19.skyPrestige.configuration.data.vault;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -33,4 +33,4 @@ import java.util.List;
 @ConfigSerializable
 public record VaultConfig(
         @Nullable String configVersion,
-        @NotNull List<String> vaultDisallowedItems) {}
+        @NonNull List<String> vaultDisallowedItems) {}

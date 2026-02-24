@@ -35,7 +35,7 @@ public class DatabaseTestExtension implements BeforeAllCallback, AfterAllCallbac
     public void beforeAll(ExtensionContext context) {
         // Setup thread pool/executor service
         if(testClassCounter.get() == 0) {
-            ThreadPoolManager.initializeThreadPool(new Settings(1, 4, 30));
+            ThreadPoolManager.initializeThreadPool(new Settings(1,1, 4, 30));
         }
     }
 

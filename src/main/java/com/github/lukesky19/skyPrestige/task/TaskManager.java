@@ -32,21 +32,21 @@ import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This class manages the plugin's task that regularly saves island data to the database.
  */
 public class TaskManager {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull LocaleManager localeManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull LocaleManager localeManager;
 
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull LeaderboardManager leaderboardManager;
-    private final @NotNull MultiplierManager multiplierManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull LeaderboardManager leaderboardManager;
+    private final @NonNull MultiplierManager multiplierManager;
+    private final @NonNull HookManager hookManager;
 
     private @Nullable BukkitTask saveTask;
     private @Nullable BukkitTask cacheTopTenTask;
@@ -64,13 +64,13 @@ public class TaskManager {
      * @param hookManager A {@link HookManager} instance.
      */
     public TaskManager(
-            @NotNull SkyPlugin plugin,
-            @NotNull SettingsManager settingsManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull LeaderboardManager leaderboardManager,
-            @NotNull MultiplierManager multiplierManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull SettingsManager settingsManager,
+            @NonNull LocaleManager localeManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull LeaderboardManager leaderboardManager,
+            @NonNull MultiplierManager multiplierManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
@@ -106,7 +106,7 @@ public class TaskManager {
      * Starts the {@link SaveTask}.
      */
     private void startSaveTask() {
-        @Nullable Settings settings = settingsManager.getConfiguration();
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null || settings.saveFrequencySeconds() == null) {
             plugin.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
             return;

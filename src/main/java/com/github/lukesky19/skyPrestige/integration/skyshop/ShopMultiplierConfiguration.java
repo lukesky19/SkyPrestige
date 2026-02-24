@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.integration.skyshop;
 import com.github.lukesky19.skyPrestige.util.enums.MultiplierType;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import com.github.lukesky19.skyshop.api.configuration.TransactionConfiguration;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the configuration is used by SkyShop to purchase multipliers.

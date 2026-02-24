@@ -29,15 +29,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class listens to players clicking an item with a protection orb and adds protection to the item to prevent it from being removed on prestige.
  */
 public class ProtectionOrbListener implements Listener {
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull ProtectionOrbManager protectionOrbManager;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull ProtectionOrbManager protectionOrbManager;
 
     /**
      * Constructor
@@ -45,8 +44,8 @@ public class ProtectionOrbListener implements Listener {
      * @param protectionOrbManager A {@link ProtectionOrbManager} instance.
      */
     public ProtectionOrbListener(
-            @NotNull LocaleManager localeManager,
-            @NotNull ProtectionOrbManager protectionOrbManager) {
+            @NonNull LocaleManager localeManager,
+            @NonNull ProtectionOrbManager protectionOrbManager) {
         this.localeManager = localeManager;
         this.protectionOrbManager = protectionOrbManager;
     }
@@ -57,34 +56,37 @@ public class ProtectionOrbListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onItemClick(InventoryClickEvent inventoryClickEvent) {
-        @NotNull Locale locale = localeManager.getConfiguration();
         if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
         if(!(inventoryClickEvent.getClickedInventory() instanceof PlayerInventory)) return;
 
         // Clicked ItemStack
-        @Nullable ItemStack clickedSlotItemStack = inventoryClickEvent.getCurrentItem();
+        ItemStack clickedSlotItemStack = inventoryClickEvent.getCurrentItem();
         if(clickedSlotItemStack == null || clickedSlotItemStack.isEmpty()) return;
-        @Nullable ItemType clickedSlotItemType = clickedSlotItemStack.getType().asItemType();
+        ItemType clickedSlotItemType = clickedSlotItemStack.getType().asItemType();
         if(clickedSlotItemType == null) return;
 
         // ItemStack on cursor
-        @NotNull ItemStack cursorItem = inventoryClickEvent.getCursor();
+        ItemStack cursorItem = inventoryClickEvent.getCursor();
         if(cursorItem.isEmpty()) return;
 
         // Check if the cursor item is a protection orb
         if(!protectionOrbManager.isItemStackProtectionOrb(cursorItem)) return;
 
+        // Locale
+        Locale locale = localeManager.getConfiguration();
+        Locale.ProtectionOrbMessages protectionOrbMessages = locale.protectionOrbMessages();
+
         // Check if the item is allowed to be protected
         if(protectionOrbManager.isProtectionOrbItemTypeDisallowed(clickedSlotItemType)) {
             inventoryClickEvent.setCancelled(true);
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.protectionOrbNotAllowed()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbNotAllowed()));
             return;
         }
 
         // Check if the item is already protected
         if(protectionOrbManager.isItemStackProtected(clickedSlotItemStack)) {
             inventoryClickEvent.setCancelled(true);
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.protectionOrbAlreadyProtected()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbAlreadyProtected()));
             return;
         }
 
@@ -103,6 +105,6 @@ public class ProtectionOrbListener implements Listener {
         // Protect the item
         protectionOrbManager.protectItemStack(clickedSlotItemStack);
 
-        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.protectionOrbProtected()));
+        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbProtected()));
     }
 }

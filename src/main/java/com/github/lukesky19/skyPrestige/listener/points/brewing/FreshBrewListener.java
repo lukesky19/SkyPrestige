@@ -31,8 +31,7 @@ import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.Optional;
@@ -41,13 +40,13 @@ import java.util.Optional;
  * Listens for when a brewing stands completes brewing and marks the slots as freshly brewed.
  */
 public class FreshBrewListener implements Listener {
-    private final @NotNull HookManager hookManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
      * @param hookManager A {@link HookManager} instance.
      */
-    public FreshBrewListener(@NotNull HookManager hookManager) {
+    public FreshBrewListener(@NonNull HookManager hookManager) {
         this.hookManager = hookManager;
     }
 
@@ -73,21 +72,21 @@ public class FreshBrewListener implements Listener {
         ItemStack bottle3 = brewerInventory.getItem(2);
 
         if(bottle1 != null && !bottle1.isEmpty()) {
-            @Nullable NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(0);
+            NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(0);
             if(key != null) {
                 pdc.set(key, PersistentDataType.BOOLEAN, true);
             }
         }
 
         if(bottle2 != null && !bottle2.isEmpty()) {
-            @Nullable NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(1);
+            NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(1);
             if(key != null) {
                 pdc.set(key, PersistentDataType.BOOLEAN, true);
             }
         }
 
         if(bottle3 != null && !bottle3.isEmpty()) {
-            @Nullable NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(2);
+            NamespacedKey key = SkyPrestigeNamespacedKeys.getFreshlyBrewedKey(2);
             if(key != null) {
                 pdc.set(key, PersistentDataType.BOOLEAN, true);
             }

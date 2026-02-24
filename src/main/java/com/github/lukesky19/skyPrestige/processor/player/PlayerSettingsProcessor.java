@@ -30,7 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +39,8 @@ import java.util.UUID;
  * This class manages the processing of {@link PlayerSettings}.
  */
 public class PlayerSettingsProcessor {
-    private final @NotNull HookManager hookManager;
-    private final @NotNull ProtectionOrbManager protectionOrbManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull ProtectionOrbManager protectionOrbManager;
 
     /**
      * Constructor
@@ -48,8 +48,8 @@ public class PlayerSettingsProcessor {
      * @param protectionOrbManager A {@link ProtectionOrbManager} instance.
      */
     public PlayerSettingsProcessor(
-            @NotNull HookManager hookManager,
-            @NotNull ProtectionOrbManager protectionOrbManager) {
+            @NonNull HookManager hookManager,
+            @NonNull ProtectionOrbManager protectionOrbManager) {
         this.hookManager = hookManager;
         this.protectionOrbManager = protectionOrbManager;
     }
@@ -64,10 +64,10 @@ public class PlayerSettingsProcessor {
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettings(
-            @NotNull PlayerSettings playerSettings,
-            @NotNull Player initiatingPlayer,
-            @NotNull List<Player> onlinePlayerList,
-            @NotNull List<UUID> offlinePlayerIds,
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player initiatingPlayer,
+            @NonNull List<Player> onlinePlayerList,
+            @NonNull List<UUID> offlinePlayerIds,
             double startingMoney,
             boolean giveToAll) {
         // Online Player Settings
@@ -85,8 +85,8 @@ public class PlayerSettingsProcessor {
      * @param giveToAll Whether to give the starting money to all players.
      */
     public void processPlayerSettingsOnLogin(
-            @NotNull PlayerSettings playerSettings,
-            @NotNull Player player,
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player player,
             double startingMoney,
             boolean giveToAll) {
         processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
@@ -108,9 +108,9 @@ public class PlayerSettingsProcessor {
      * @param startingMoney The starting money.
      * @param giveToAll Whether to give the starting money to all players.
      */
-    private void processPlayerSettings(
-            @NotNull PlayerSettings playerSettings,
-            @NotNull Player player,
+    public void processPlayerSettings(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player player,
             boolean isPlayerInitiator,
             double startingMoney,
             boolean giveToAll) {
@@ -136,9 +136,9 @@ public class PlayerSettingsProcessor {
      * @param player The {@link Player} to process settings for.
      */
     private void processInventorySettings(
-            @NotNull InventorySettings playerInventorySettings,
-            @NotNull InventorySettings playerEnderChestInventorySettings,
-            @NotNull Player player) {
+            @NonNull InventorySettings playerInventorySettings,
+            @NonNull InventorySettings playerEnderChestInventorySettings,
+            @NonNull Player player) {
         processInventorySettings(playerInventorySettings, player.getInventory());
         processInventorySettings(playerEnderChestInventorySettings, player.getEnderChest());
     }
@@ -149,8 +149,8 @@ public class PlayerSettingsProcessor {
      * @param inventory The {@link Inventory}.
      */
     private void processInventorySettings(
-            @NotNull InventorySettings inventorySettings,
-            @NotNull Inventory inventory) {
+            @NonNull InventorySettings inventorySettings,
+            @NonNull Inventory inventory) {
         if(inventorySettings.resetInventory()) {
             SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
             ItemStack emptyStack = ItemType.AIR.createItemStack();
@@ -171,7 +171,7 @@ public class PlayerSettingsProcessor {
      * Reset the player's experience.
      * @param player The {@link Player} to reset experience for
      */
-    private void resetExperience(@NotNull Player player) {
+    private void resetExperience(@NonNull Player player) {
         player.setLevel(0);
         player.setExp(0);
     }
@@ -185,7 +185,7 @@ public class PlayerSettingsProcessor {
      * @param giveAll Whether to give the starting money to all players.
      */
     private void processEconomySettings(
-            @NotNull Player player,
+            @NonNull Player player,
             boolean isPlayerInitiator,
             boolean resetMoney,
             double startingMoney,
@@ -213,7 +213,7 @@ public class PlayerSettingsProcessor {
      * Reset the auction house items for the player id provided.
      * @param playerId The {@link UUID}.
      */
-    private void resetAuctionHouse(@NotNull UUID playerId) {
+    private void resetAuctionHouse(@NonNull UUID playerId) {
         PlayerAuctionsHook playerAuctionsHook = hookManager.getHook(PlayerAuctionsHook.class);
 
         if(playerAuctionsHook.isHooked()) {
@@ -226,7 +226,7 @@ public class PlayerSettingsProcessor {
      * @param player The {@link Player}
      * @param playTimeSettings The {@link PlayTimeSettings}.
      */
-    private void resetPlayTime(@NotNull Player player, @NotNull PlayTimeSettings playTimeSettings) {
+    private void resetPlayTime(@NonNull Player player, @NonNull PlayTimeSettings playTimeSettings) {
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
 
         if(skyPlayTimeHook.isHooked()) {

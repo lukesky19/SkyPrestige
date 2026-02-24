@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skyPrestige.integration.interfaces.Hook;
+import com.github.lukesky19.skylib.api.integration.Hook;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.GameModeAddon;
 import world.bentobox.bentobox.api.events.island.IslandEvent;
@@ -38,11 +38,11 @@ import java.util.UUID;
  * This class manages interfacing with the BentoBox plugin.
  */
 public class BentoBoxHook implements Hook {
-    private @NotNull IslandWorldManager islandWorldManager;
-    private @NotNull IslandsManager islandsManager;
-    private @NotNull BlueprintsManager blueprintsManager;
-    private @NotNull AddonsManager addonsManager;
-    private @NotNull PlayersManager playersManager;
+    private @NonNull IslandWorldManager islandWorldManager;
+    private @NonNull IslandsManager islandsManager;
+    private @NonNull BlueprintsManager blueprintsManager;
+    private @NonNull AddonsManager addonsManager;
+    private @NonNull PlayersManager playersManager;
 
     /**
      * Constructor
@@ -56,7 +56,7 @@ public class BentoBoxHook implements Hook {
      */
     @Override
     public void initialize() {
-        @NotNull BentoBox bentoBox = BentoBox.getInstance();
+        BentoBox bentoBox = BentoBox.getInstance();
         islandWorldManager = bentoBox.getIWM();
         islandsManager = bentoBox.getIslandsManager();
         blueprintsManager = bentoBox.getBlueprintsManager();
@@ -77,7 +77,7 @@ public class BentoBoxHook implements Hook {
      * Get the {@link IslandWorldManager}.
      * @return The {@link IslandWorldManager}.
      */
-    public @NotNull IslandWorldManager getIslandWorldManager() {
+    public @NonNull IslandWorldManager getIslandWorldManager() {
         return islandWorldManager;
     }
 
@@ -85,7 +85,7 @@ public class BentoBoxHook implements Hook {
      * Get the {@link IslandsManager}.
      * @return The {@link IslandsManager}.
      */
-    public @NotNull IslandsManager getIslandsManager() {
+    public @NonNull IslandsManager getIslandsManager() {
         return islandsManager;
     }
 
@@ -93,7 +93,7 @@ public class BentoBoxHook implements Hook {
      * Get the {@link PlayersManager}.
      * @return The {@link PlayersManager}
      */
-    public @NotNull PlayersManager getPlayersManager() {
+    public @NonNull PlayersManager getPlayersManager() {
         return playersManager;
     }
 
@@ -101,7 +101,7 @@ public class BentoBoxHook implements Hook {
      * Get the {@link BlueprintsManager}.
      * @return The {@link BlueprintsManager}
      */
-    public @NotNull BlueprintsManager getBlueprintsManager() {
+    public @NonNull BlueprintsManager getBlueprintsManager() {
         return blueprintsManager;
     }
 
@@ -110,7 +110,7 @@ public class BentoBoxHook implements Hook {
      * @param gameModeAddon The {@link GameModeAddon} to get blueprints for.
      * @return A {@link Map} mapping blueprint names to {@link BlueprintBundle}s or null.
      */
-    public @NotNull Map<String, BlueprintBundle> getBlueprints(@NotNull GameModeAddon gameModeAddon) {
+    public @NonNull Map<String, BlueprintBundle> getBlueprints(@NonNull GameModeAddon gameModeAddon) {
         return blueprintsManager.getBlueprintBundles(gameModeAddon);
     }
 
@@ -119,7 +119,7 @@ public class BentoBoxHook implements Hook {
      * @param playerId The player's {@link UUID}.
      * @return A {@link List} of {@link Island} or null.
      */
-    public @NotNull List<Island> getIslands(@NotNull UUID playerId) {
+    public @NonNull List<Island> getIslands(@NonNull UUID playerId) {
         return islandsManager.getIslands(playerId);
     }
 
@@ -129,7 +129,7 @@ public class BentoBoxHook implements Hook {
      * @param playerId The player's {@link UUID}.
      * @return An {@link Island}. May be null.
      */
-    public @Nullable Island getIsland(@NotNull World world, @NotNull UUID playerId) {
+    public @Nullable Island getIsland(@NonNull World world, @NonNull UUID playerId) {
         return islandsManager.getIsland(world, playerId);
     }
 
@@ -138,7 +138,7 @@ public class BentoBoxHook implements Hook {
      * @param islandId The island's id.
      * @return An {@link Optional} containing an {@link Island}.
      */
-    public @NotNull Optional<Island> getIslandById(@NotNull String islandId) {
+    public @NonNull Optional<Island> getIslandById(@NonNull String islandId) {
         return islandsManager.getIslandById(islandId, false);
     }
 
@@ -147,7 +147,7 @@ public class BentoBoxHook implements Hook {
      * @param location The {@link Location}.
      * @return An {@link Optional} containing an {@link Island}.
      */
-    public @NotNull Optional<Island> getIslandAtLocation(@NotNull Location location) {
+    public @NonNull Optional<Island> getIslandAtLocation(@NonNull Location location) {
         return islandsManager.getIslandAt(location);
     }
 
@@ -156,7 +156,7 @@ public class BentoBoxHook implements Hook {
      * @param world The {@link World}.
      * @return An {@link Optional} containing a {@link GameModeAddon}.
      */
-    public @NotNull Optional<GameModeAddon> getGameModeAddon(@NotNull World world) {
+    public @NonNull Optional<GameModeAddon> getGameModeAddon(@NonNull World world) {
         return addonsManager.getGameModeAddons().stream()
                 .filter(gameModeAddon -> gameModeAddon.inWorld(world))
                 .findFirst();
@@ -168,7 +168,7 @@ public class BentoBoxHook implements Hook {
      * @return The default island protection range.
      * @throws RuntimeException If the world is not managed by a {@link GameModeAddon}.
      */
-    public int getDefaultProtectionRange(@NotNull World world) {
+    public int getDefaultProtectionRange(@NonNull World world) {
         return getGameModeAddon(world).map(gameModeAddon ->
                 gameModeAddon.getWorldSettings().getIslandProtectionRange())
                 .orElseThrow(() -> new RuntimeException("No default island size found."));
@@ -181,7 +181,7 @@ public class BentoBoxHook implements Hook {
      * @param oldSize The old island's size.
      * @param newSize The new island's size to set.
      */
-    public void setIslandSize(@NotNull UUID playerId, @NotNull Island island, int oldSize, int newSize) {
+    public void setIslandSize(@NonNull UUID playerId, @NonNull Island island, int oldSize, int newSize) {
         // Set the island range
         island.setProtectionRange(newSize);
 

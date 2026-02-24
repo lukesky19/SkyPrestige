@@ -18,13 +18,12 @@
 package com.github.lukesky19.skyPrestige.configuration.data.points;
 
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the configuration for prestige points obtained for different actions.
  * @param configVersion The file's config version.
- * @param scaleFormula The formula to scale prestige points.
  * @param awardPointsWhileAfk Whether to award prestige points if AFK.
  * @param accurateRoseStacker Whether to consider stacked blocks and entities for prestige points.
  * @param skyEnchantsMultiBreak Whether to listen to SkyEnchant's multibreak events.
@@ -33,8 +32,7 @@ import org.jetbrains.annotations.Nullable;
 @ConfigSerializable
 public record PrestigePointsConfig(
         @Nullable String configVersion,
-        @Nullable String scaleFormula,
         boolean awardPointsWhileAfk,
         boolean accurateRoseStacker,
         boolean skyEnchantsMultiBreak,
-        @NotNull PrestigePointsMapping prestigePointsMapping) {}
+        @NonNull PrestigePointsMapping prestigePointsMapping) {}

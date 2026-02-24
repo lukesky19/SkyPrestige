@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.configuration.data.locale;
 
 import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -32,52 +32,17 @@ import java.util.List;
  * @param reload The plugin's reload message.
  * @param guiOpenError The message sent to a player when a GUI fails to open.
  * @param islandDataNotFound The message sent when the island's data were not found for an island.
- * @param islandPrestigeLevelUpdated The message sent when an island has its prestige level updated.
- * @param prestigePlayerOnly The message sent when a non-player tries to prestige.
- * @param islandPrestigeLevelMax The message sent when a player tries to prestige their island, but they are at the max level.
- * @param prestigePlayerInWrongWorld The message sent when a player tries to prestige in a non-BentoBox world.
- * @param prestigePlayerNotOnIsland The message sent when a player tries to prestige while not on an Island.
- * @param prestigeIslandNotOwned The message sent when a player tries to prestige an island that is not owned.
- * @param prestigePlayerNotMemberOrOwner The message sent when a player tries to prestige an island they are not the owner or a member of.
- * @param prestigeNotEnoughPrestigePoints The message sent when the island doesn't have enough prestige points to prestige.
- * @param prestigeIslandOptedOut The message sent when the island is opted out of prestige, but a player tries to prestige.
- * @param prestigeConfigError The message sent when a player tries to prestige their island, but it fails due to a config error.
- * @param prestigeConfigRequirementError The message sent when a player tries to prestige their island, but it fails due to a requirement config error.
- * @param prestigeAnnouncement The message sent to the server when a player prestiges their island.
- * @param prestigeIslandMemberMessage The message sent to online island members when their island is prestiged.
- * @param progressPlayerNotOnIsland The message sent when a player tries to view their progress towards the next prestige level while not on an island.
- * @param progressMaxPrestigeLevel The message sent when a player tries to view their progress towards the next prestige level, but their island is at the max prestige level.
- * @param progressPrestigeExempt The message sent when a player tries to view their progress towards the next prestige level, but their island is opted out of prestige.
- * @param rewardsPlayerNotOnIsland The message sent when a player tries to view their next prestige level's rewards while not on an island.
- * @param rewardsMaxPrestigeLevel The message sent when a player tries to view their next prestige level's rewards, but their island is at the max prestige level.
- * @param rewardsPrestigeExempt The message sent when a player tries to view the rewards for next prestige level, but their island is opted out of prestige.
- * @param exchangePlayerNotOnIsland The message sent when a player tries to exchange their prestige points, while not on an island.
- * @param exchangePrestigeLevelNotMet The message sent when a player tries to exchange their prestige points, but don't meet the required prestige level.
- * @param exchangeNotEnoughPrestigePoints The message sent when a player tries to exchange their prestige points, but doesn't have enough prestige points for an exchange.
- * @param exchangePrestigeExempt The message sent when a player tries to exchange prestige points, but their island is opted out of prestige.
- * @param vaultPlayerNotOnIsland The message sent when a player tries to open their island vault while not on an island.
- * @param vaultItemNotAllowed The message sent when a player tries to put an item in their island vault that isn't allowed.
- * @param vaultPrestigeExempt The message sent when a player tries to open their island vault, but their island is opted out of prestige.
- * @param requirementsConfigError The message sent to a player when there is a config error when viewing prestige level requirements.
- * @param requirementsLevelNotFound The message sent to a player when there is no prestige level configured for the level number provided.
- * @param requirementsPointsForLevel The message sent to a player to display prestige points required for a level.
- * @param islandExempt The message sent when an island is marked as exempt from the top leaderboard placeholders.
- * @param islandUnexempt The message sent when an island is marked as not exempt from the top leaderboard placeholders.
- * @param islandAlreadyOptedIn The message sent when a player tries to opt into prestige, but they are already opted in.
- * @param islandAlreadyOptedOut The message sent when a player tries to opt-out of prestige, but they are opted out.
- * @param leaderboardTitle The leaderboard title.
- * @param leaderboardPosition The leaderboard positon text.
- * @param leaderboardPositionEmpty The leaderboard positon empty text.
- * @param protectionOrbAlreadyProtected The message sent when an item is already protected.
- * @param protectionOrbNotAllowed The message sent when an item is not allowed to be protected.
- * @param protectionOrbProtected The message sent when an item is protected.
- * @param multiplier The messages related to multipliers.
- * @param prestigeStatusPlayerInWrongWorld The message sent when a player tries to opt in or out of prestige in a non-BentoBox world.
- * @param prestigeStatusPlayerNotOnIsland The message sent when a player tries to opt in or out of prestige while not on an Island.
- * @param prestigeStatusIslandNotOwned The message sent when a player tries to opt in or out of prestige and that island is not owned.
- * @param prestigeStatusPlayerNotMemberOrOwner The message sent when a player tries to opt in or out of prestige an island they are not the owner or a member of.
- * @param prestigeOptInIslandMemberMessage The message sent to online island members when their island is opted into prestige.
- * @param prestigeOptOutIslandMemberMessage The message sent to online island members when their island is opted out of prestige.
+ * @param prestigeLevelUpdated The message sent when an island has its prestige level updated.
+ * @param prestigeMessages The messages related to prestiging.
+ * @param optInMessages The messages related to opting into prestige.
+ * @param optOutMessages The messages related to opting out of prestige.
+ * @param rewardMessages The messages related to rewards.
+ * @param exchangeMessages The messages related to exchanging prestige points.
+ * @param vaultMessages The messages related to the vault.
+ * @param requirementMessages The messages related to viewing prestige requirements.
+ * @param leaderboardMessages The messages related to the prestige leaderboard.
+ * @param protectionOrbMessages The messages related to the protection orb.
+ * @param multiplierMessages The messages related to multipliers.
  * @param delimiter The deliminator used for listing enchantments.
  * @param finalDelimiter The final deliminator used for listing enchantments.
  */
@@ -85,58 +50,197 @@ import java.util.List;
 public record Locale(
         @Nullable String configVersion,
         String prefix,
-        @NotNull List<String> help,
+        @NonNull List<String> help,
         String reload,
         String guiOpenError,
         String islandDataNotFound,
-        String islandPrestigeLevelUpdated,
-        String prestigePlayerOnly,
-        String islandPrestigeLevelMax,
-        String prestigePlayerInWrongWorld,
-        String prestigePlayerNotOnIsland,
-        String prestigeIslandNotOwned,
-        String prestigePlayerNotMemberOrOwner,
-        String prestigeNotEnoughPrestigePoints,
-        String prestigeIslandOptedOut,
-        String prestigeConfigError,
-        String prestigeConfigRequirementError,
-        String prestigeAnnouncement,
-        String prestigeIslandMemberMessage,
-        String progressPlayerNotOnIsland,
-        String progressMaxPrestigeLevel,
-        String progressPrestigeExempt,
-        String rewardsPlayerNotOnIsland,
-        String rewardsMaxPrestigeLevel,
-        String rewardsPrestigeExempt,
-        String exchangePlayerNotOnIsland,
-        String exchangePrestigeLevelNotMet,
-        String exchangeNotEnoughPrestigePoints,
-        String exchangePrestigeExempt,
-        String vaultPlayerNotOnIsland,
-        String vaultItemNotAllowed,
-        String vaultPrestigeExempt,
-        String requirementsLevelNotFound,
-        String requirementsConfigError,
-        String requirementsPointsForLevel,
-        String islandExempt,
-        String islandUnexempt,
-        String islandAlreadyOptedIn,
-        String islandAlreadyOptedOut,
-        String leaderboardTitle,
-        String leaderboardPosition,
-        String leaderboardPositionEmpty,
-        String protectionOrbNotAllowed,
-        String protectionOrbAlreadyProtected,
-        String protectionOrbProtected,
-        MultiplierMessages multiplier,
-        String prestigeStatusPlayerInWrongWorld,
-        String prestigeStatusPlayerNotOnIsland,
-        String prestigeStatusIslandNotOwned,
-        String prestigeStatusPlayerNotMemberOrOwner,
-        String prestigeOptInIslandMemberMessage,
-        String prestigeOptOutIslandMemberMessage,
+        String prestigeLevelUpdated,
+        PrestigeMessages prestigeMessages,
+        OptInMessages optInMessages,
+        OptOutMessages optOutMessages,
+        RewardMessages rewardMessages,
+        ExchangeMessages exchangeMessages,
+        VaultMessages vaultMessages,
+        RequirementMessages requirementMessages,
+        LeaderboardMessages leaderboardMessages,
+        ProtectionOrbMessages protectionOrbMessages,
+        MultiplierMessages multiplierMessages,
         String delimiter,
         String finalDelimiter) {
+    /**
+     * The messages related to prestiging an island.
+     * @param prestigePlayerOnly The message sent when a non-player tries to prestige.
+     * @param prestigeLevelMax The message sent when a player tries to prestige their island, but they are at the max level.
+     * @param playerInWrongWorld The message sent when a player tries to prestige in a non-BentoBox world.
+     * @param playerNotOnIsland The message sent when a player tries to prestige while not on an Island.
+     * @param islandNotOwned The message sent when a player tries to prestige an island that is not owned.
+     * @param playerNotMemberOrOwner The message sent when a player tries to prestige an island they are not the owner or a member of.
+     * @param prestigeInProgress The message sent when a player tries to prestige an island, but another player initiated the prestige process.
+     * @param notEnoughItems The message sent when a player tries to prestige an island, but collectively, the online members lack the required items.
+     * @param notEnoughMoney The message sent when a player tries to prestige an island, but collectively, the online members lack the required money.
+     * @param notEnoughPrestigePoints The message sent when the island doesn't have enough prestige points to prestige.
+     * @param questIncomplete The message sent when the island members have not completed the required quests to prestige.
+     * @param islandOptedOut The message sent when the island is opted out of prestige, but a player tries to prestige.
+     * @param prestigeConfigError The message sent when a player tries to prestige their island, but it fails due to a config error.
+     * @param requirementError The message sent when a player tries to prestige their island, but it fails due to a requirement config error.
+     * @param prestigeAnnouncement The message sent to the server when a player prestiges their island.
+     * @param prestigeIslandMemberMessage The message sent to online island members when their island is prestiged.
+     */
+    @ConfigSerializable
+    public record PrestigeMessages(
+            String prestigePlayerOnly,
+            String prestigeLevelMax,
+            String playerInWrongWorld,
+            String playerNotOnIsland,
+            String islandNotOwned,
+            String playerNotMemberOrOwner,
+            String prestigeInProgress,
+            String notEnoughItems,
+            String notEnoughMoney,
+            String notEnoughPrestigePoints,
+            String questIncomplete,
+            String islandOptedOut,
+            String prestigeConfigError,
+            String requirementError,
+            String prestigeAnnouncement,
+            String prestigeIslandMemberMessage) {}
+
+    /**
+     * The messages related to opting into prestige.
+     * @param playerInWrongWorld The message sent when a player tries to opt into prestige in a non-BentoBox world.
+     * @param playerNotOnIsland The message sent when a player tries to opt into  prestige while not on an Island.
+     * @param islandNotOwned The message sent when a player tries to opt into  prestige and that island is not owned.
+     * @param playerNotMemberOrOwner The message sent when a player tries to opt into prestige an island they are not the owner or a member of.
+     * @param islandAlreadyOptedIn The message sent when a player tries to opt into prestige when their island is already opted in.
+     * @param islandMemberMessage The message sent to online island members when their island is opted into prestige.
+     * @param optInInProgress The message sent when a player tries to opt into prestige, but another player has initiated the process.
+     */
+    @ConfigSerializable
+    public record OptInMessages(
+            String playerInWrongWorld,
+            String playerNotOnIsland,
+            String islandNotOwned,
+            String playerNotMemberOrOwner,
+            String islandAlreadyOptedIn,
+            String islandMemberMessage,
+            String optInInProgress) {}
+
+    /**
+     * The messages related to opting out of prestige.
+     * @param playerInWrongWorld The message sent when a player tries to opt out of prestige in a non-BentoBox world.
+     * @param playerNotOnIsland The message sent when a player tries to opt out of prestige while not on an Island.
+     * @param islandNotOwned The message sent when a player tries to opt out of prestige and that island is not owned.
+     * @param playerNotMemberOrOwner The message sent when a player tries to opt out of prestige an island they are not the owner or a member of.
+     * @param islandAlreadyOptedOut The message sent when a player tries to opt out of prestige when their island is already opted out.
+     * @param islandMemberMessage The message sent to online island members when their island is opted out of prestige.
+     * @param optOutInProgress The message sent when a player tries to opt out of prestige, but another player has initiated the process.
+     */
+    @ConfigSerializable
+    public record OptOutMessages(
+            String playerInWrongWorld,
+            String playerNotOnIsland,
+            String islandNotOwned,
+            String playerNotMemberOrOwner,
+            String islandAlreadyOptedOut,
+            String islandMemberMessage,
+            String optOutInProgress) {}
+
+    /**
+     * The messages related to rewards.
+     * @param playerNotOnIsland The message sent when a player tries to view their next prestige level's rewards while not on an island.
+     * @param prestigeExempt The message sent when a player tries to view the rewards for next prestige level, but their island is opted out of prestige.
+     * @param maxPrestigeLevel The message sent when a player tries to view their next prestige level's rewards, but their island is at the max prestige level.
+     * @param prestigeConfigError The message sent to a player when there is no prestige level configured for the level number provided.
+     */
+    @ConfigSerializable
+    public record RewardMessages(
+            String playerNotOnIsland,
+            String prestigeExempt,
+            String maxPrestigeLevel,
+            String prestigeConfigError) {}
+
+    /**
+     * The messages related to exchanging prestige points.
+     * @param playerNotOnIsland The message sent when a player tries to exchange their prestige points, while not on an island.
+     * @param prestigeLevelNotMet The message sent when a player tries to exchange their prestige points, but don't meet the required prestige level.
+     * @param prestigeExempt The message sent when a player tries to exchange prestige points, but their island is opted out of prestige.
+     * @param prestigeInProgress The message sent when a player tries to exchange prestige points, but their island is in the process of being prestiged.
+     * @param optOutInProgress The message sent when a player tries to exchange prestige points, but their island is in the process of opting out of prestige.
+     * @param notEnoughPrestigePoints The message sent when a player tries to exchange their prestige points, but doesn't have enough prestige points for an exchange.
+     */
+    @ConfigSerializable
+    public record ExchangeMessages(
+            String playerNotOnIsland,
+            String prestigeLevelNotMet,
+            String prestigeExempt,
+            String prestigeInProgress,
+            String optOutInProgress,
+            String notEnoughPrestigePoints) {}
+
+    /**
+     * The messages related to the vault.
+     * @param playerNotOnIsland The message sent when a player tries to open their island vault while not on an island.
+     * @param itemNotAllowed The message sent when a player tries to put an item in their island vault that isn't allowed.
+     * @param prestigeExempt The message sent when a player tries to open their island vault, but their island is opted out of prestige.
+     * @param prestigeInProgress The message sent when a player tries to access the island vault, but their island is in the process of being prestiged.
+     * @param optOutInProgress The message sent when a player tries to access the island vault, but their island is in the process of opting out of prestige.
+     */
+    @ConfigSerializable
+    public record VaultMessages(
+            String playerNotOnIsland,
+            String itemNotAllowed,
+            String prestigeExempt,
+            String prestigeInProgress,
+            String optOutInProgress) {}
+
+    /**
+     * The messages related to viewing prestige requirements.
+     * @param playerNotOnIsland The message sent to a player when they are not on an island when attempting to view prestige requirements.
+     * @param islandNotOwned The message sent when a player tries to view prestige requirements and the island is not owned.
+     * @param playerNotMemberOrOwner The message sent when a player tries to view prestige requirements for an island they are not the owner or a member of.
+     * @param prestigeExempt The message sent when a player tries to view prestige requirements for an island that is exempt from prestige.
+     * @param maxPrestigeLevel The message sent to a player when their island is at the max prestige level.
+     * @param prestigeConfigError The message sent to a player when there is no prestige level configured for the level number provided.
+     * @param requirementsConfigError The message sent to a player when there is a config error when viewing prestige level requirements.
+     */
+    @ConfigSerializable
+    public record RequirementMessages(
+            String playerNotOnIsland,
+            String islandNotOwned,
+            String playerNotMemberOrOwner,
+            String prestigeExempt,
+            String maxPrestigeLevel,
+            String prestigeConfigError,
+            String requirementsConfigError) {}
+
+    /**
+     * The messages related to the prestige leaderboard.
+     * @param islandExempt The message sent when an island is marked as exempt from the top leaderboard placeholders.
+     * @param islandUnexempt The message sent when an island is marked as not exempt from the top leaderboard placeholders.
+     * @param leaderboardTitle The leaderboard title.
+     * @param leaderboardPosition The leaderboard positon text.
+     * @param leaderboardPositionEmpty The leaderboard positon empty text.
+     */
+    @ConfigSerializable
+    public record LeaderboardMessages(
+            String islandExempt,
+            String islandUnexempt,
+            String leaderboardTitle,
+            String leaderboardPosition,
+            String leaderboardPositionEmpty) {}
+
+    /**
+     * The messages related to the protection orb item.
+     * @param protectionOrbAlreadyProtected The message sent when an item is already protected.
+     * @param protectionOrbNotAllowed The message sent when an item is not allowed to be protected.
+     * @param protectionOrbProtected The message sent when an item is protected.
+     */
+    @ConfigSerializable
+    public record ProtectionOrbMessages(
+            String protectionOrbNotAllowed,
+            String protectionOrbAlreadyProtected,
+            String protectionOrbProtected) {}
+
     /**
      * This record contains the messages related to the multiplier.
      * @param serverMultiplierChangedTimeLimit The message sent when the server multiplier is updated with a time limit.

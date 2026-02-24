@@ -19,16 +19,20 @@ package com.github.lukesky19.skyPrestige.listener.connection;
 
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
-import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.processor.queued.QueuedSettingsProcessor;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import world.bentobox.bentobox.database.objects.Island;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,31 +40,31 @@ import java.util.concurrent.CompletableFuture;
  * Listens for when a player joins and creates or loads any data necessary for their islands.
  */
 public class PlayerJoinListener implements Listener {
-    private final @NotNull DatabaseManager databaseManager;
-    private final @NotNull PrestigeManager prestigeManager;
-    private final @NotNull PrestigeExemptionManager prestigeStatusManager;
-    private final @NotNull IslandDataManager islandDataManager;
-    private final @NotNull TeleportationManager teleportationManager;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull TeleportationManager teleportationManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull QueuedSettingsProcessor queuedSettingsProcessor;
 
     /**
      * Constructor
      * @param databaseManager A {@link DatabaseManager} instance.
-     * @param prestigeManager A {@link PrestigeManager} instance.
-     * @param prestigeStatusManager A {@link PrestigeExemptionManager} instance.
      * @param islandDataManager An {@link IslandDataManager} instance.
      * @param teleportationManager A {@link TeleportationManager} instance.
+     * @param hookManager A {@link HookManager} instance.
+     * @param queuedSettingsProcessor A {@link QueuedSettingsProcessor} instance.
      */
     public PlayerJoinListener(
-            @NotNull DatabaseManager databaseManager,
-            @NotNull PrestigeManager prestigeManager,
-            @NotNull PrestigeExemptionManager prestigeStatusManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull TeleportationManager teleportationManager) {
+            @NonNull DatabaseManager databaseManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull TeleportationManager teleportationManager,
+            @NonNull HookManager hookManager,
+            @NonNull QueuedSettingsProcessor queuedSettingsProcessor) {
         this.databaseManager = databaseManager;
-        this.prestigeManager = prestigeManager;
-        this.prestigeStatusManager = prestigeStatusManager;
         this.islandDataManager = islandDataManager;
         this.teleportationManager = teleportationManager;
+        this.hookManager = hookManager;
+        this.queuedSettingsProcessor = queuedSettingsProcessor;
     }
 
     /**
@@ -78,13 +82,15 @@ public class PlayerJoinListener implements Listener {
         // Handle any queued teleports for the player.
         teleportationManager.handleQueuedTeleports(player);
 
-        @NotNull CompletableFuture<Void> loadFuture = islandDataManager.loadDataByPlayerIdentifier(uuid);
-        loadFuture.thenAccept(v -> {
-            // Handle any prestiges that occurred while the player was offline
-            prestigeManager.handleOfflinePrestiges(player);
+        CompletableFuture<Void> loadFuture = islandDataManager.loadDataByPlayerIdentifier(uuid);
+        loadFuture.thenAccept(v -> queuedSettingsProcessor.processQueuedSettings(player));
 
-            // Handle any prestige exemption changes that occurred while the player was offline
-            prestigeStatusManager.handleOfflineStatusChanges(player);
-        });
+        // Load player quest data
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+        if(lmbQuestHook.isHooked()) {
+            List<Island> playerIslands = bentoBoxHook.getIslands(uuid);
+            playerIslands.forEach(island -> lmbQuestHook.loadPlayerData(island.getMemberSet()));
+        }
     }
 }

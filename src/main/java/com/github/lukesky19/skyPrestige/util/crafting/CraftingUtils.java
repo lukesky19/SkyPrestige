@@ -22,8 +22,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -46,16 +46,16 @@ public class CraftingUtils {
      * @param event A {@link CraftItemEvent}.
      * @return The amount of items crafted.
      */
-    public static int calculateCraftedAmount(@NotNull CraftItemEvent event) {
+    public static int calculateCraftedAmount(@NonNull CraftItemEvent event) {
         // Get the ItemStack in the output slot. This is the result of the recipe and not always the ItemStack given to the player.
-        @Nullable ItemStack craftStack = event.getInventory().getResult();
+        ItemStack craftStack = event.getInventory().getResult();
         // Return 0 if there is no ItemStack in the output slot.
         if(craftStack == null) return 0;
 
         // Get the player's inventory.
-        @NotNull PlayerInventory inventory = event.getWhoClicked().getInventory();
+        PlayerInventory inventory = event.getWhoClicked().getInventory();
         // Get the ItemStacks in the crafting matrix.
-        @Nullable ItemStack @NotNull[] ingredients = event.getInventory().getMatrix();
+        @Nullable ItemStack[] ingredients = event.getInventory().getMatrix();
 
         // Return the amount crafted based on the click type.
         return switch (event.getClick()) {
@@ -77,9 +77,9 @@ public class CraftingUtils {
      * @return The amount of items crafted due to a shift click.
      */
     private static int getShiftCraftAmount(
-            @NotNull ItemStack craftStack,
-            @NotNull Inventory inventory,
-            @Nullable ItemStack @NotNull [] ingredients) {
+            @NonNull ItemStack craftStack,
+            @NonNull Inventory inventory,
+            @Nullable ItemStack @NonNull [] ingredients) {
         // Get the available space inside the Inventory for the provided ItemStack
         int availableSpace = getAvailableSpace(inventory, craftStack);
         // Get the amount of items per craft
@@ -97,7 +97,7 @@ public class CraftingUtils {
      * @param ingredients The array of {@link ItemStack}s inside the crafting matrix.
      * @return The amount of items crafted due to a control drop (ctrl key + drop key).
      */
-    private static int getMaxCraftAmount(@NotNull ItemStack craftStack, @Nullable ItemStack @NotNull [] ingredients) {
+    private static int getMaxCraftAmount(@NonNull ItemStack craftStack, @Nullable ItemStack @NonNull [] ingredients) {
         // Return the maximum amount of items crafted by multiplying the amount of times crafting occurs by the craft stack's amount.
         return getCraftingCount(ingredients) * craftStack.getAmount();
     }
@@ -108,7 +108,7 @@ public class CraftingUtils {
      * @param swapStack The {@link ItemStack} in the slot being swapped to.
      * @return The amount of items crafted.
      */
-    private static int getSwapCraftAmount(@NotNull ItemStack craftStack, @Nullable ItemStack swapStack) {
+    private static int getSwapCraftAmount(@NonNull ItemStack craftStack, @Nullable ItemStack swapStack) {
         return (swapStack != null && swapStack.getType().asItemType() != null
                 && swapStack.getType().asItemType() != ItemType.AIR) ? craftStack.getAmount() : 0;
     }
@@ -119,7 +119,7 @@ public class CraftingUtils {
      * @param cursorStack The {@link ItemStack} in the player's cursor.
      * @return The amount of items crafted.
      */
-    private static int getClickCraftAmount(@NotNull ItemStack craftStack, @Nullable ItemStack cursorStack) {
+    private static int getClickCraftAmount(@NonNull ItemStack craftStack, @Nullable ItemStack cursorStack) {
         if(cursorStack == null
                 || cursorStack.getType().asItemType() == null
                 || cursorStack.getType().asItemType() == ItemType.AIR
@@ -139,7 +139,7 @@ public class CraftingUtils {
      * @param cursorStack The {@link ItemStack} in the player's cursor.
      * @return The amount of items crafted.
      */
-    private static int getDropCraftAmount(@NotNull ItemStack craftStack, @Nullable ItemStack cursorStack) {
+    private static int getDropCraftAmount(@NonNull ItemStack craftStack, @Nullable ItemStack cursorStack) {
         return (cursorStack != null && cursorStack.getType().asItemType() != null
                 && cursorStack.getType().asItemType() != ItemType.AIR) ? craftStack.getAmount() : 0;
     }
@@ -150,7 +150,7 @@ public class CraftingUtils {
      * @param craftStack The {@link ItemStack} to compare.
      * @return The maximum amount for the {@link ItemStack} provided that can fit inside the provided {@link Inventory}.
      */
-    private static int getAvailableSpace(@NotNull Inventory inventory, @NotNull ItemStack craftStack) {
+    private static int getAvailableSpace(@NonNull Inventory inventory, @NonNull ItemStack craftStack) {
         int availableSpace = 0;
 
         for(@Nullable ItemStack inventoryStack : inventory.getStorageContents()) {
@@ -172,7 +172,7 @@ public class CraftingUtils {
      * @param ingredients The array of {@link ItemStack}s inside the crafting matrix.
      * @return The number of times that crafting occurs based on the ingredient with the smallest stack size.
      */
-    private static int getCraftingCount(@Nullable ItemStack @NotNull [] ingredients) {
+    private static int getCraftingCount(@Nullable ItemStack @NonNull [] ingredients) {
         return Arrays.stream(ingredients)
                 .filter(item -> item != null && !item.isEmpty())
                 .mapToInt(ItemStack::getAmount)

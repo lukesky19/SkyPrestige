@@ -17,11 +17,10 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.settings;
 
-import com.github.lukesky19.skyPrestige.configuration.data.reset.ResetSettings;
-import com.github.lukesky19.skyPrestige.configuration.data.reset.island.IslandSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.OtherResetSettings;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the plugin's configuration settings.
@@ -33,7 +32,10 @@ import org.jetbrains.annotations.Nullable;
  * @param startOptedOut Whether islands should start opted out or not.
  * @param applyOptInRewardsForInitialIslands Whether the opt-in reward settings should be run on initial (first) island creation.
  * @param applyOptOutRewardsForInitialIslands Whether the opt-out reward settings should be run on initial (first) island creation.
- * @param islandResetSettings The {@link ResetSettings} for normal island resets.
+ * @param islandResetSettings The {@link OtherResetSettings} for normal island resets.
+ * @param teamJoinSettings The {@link OtherResetSettings} for team joins.
+ * @param teamLeaveSettings The {@link OtherResetSettings} for team leaves.
+ * @param teamKickSettings The {@link OtherResetSettings} for team kicks.
  */
 @ConfigSerializable
 public record Settings(
@@ -45,4 +47,7 @@ public record Settings(
         boolean startOptedOut,
         boolean applyOptInRewardsForInitialIslands,
         boolean applyOptOutRewardsForInitialIslands,
-        @NotNull IslandSettings islandResetSettings) {}
+        @NonNull OtherResetSettings islandResetSettings,
+        @NonNull OtherResetSettings teamJoinSettings,
+        @NonNull OtherResetSettings teamLeaveSettings,
+        @NonNull OtherResetSettings teamKickSettings) {}

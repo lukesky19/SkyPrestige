@@ -17,7 +17,6 @@
 */
 package com.github.lukesky19.skyPrestige.data.data.leaderboard;
 
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -119,9 +118,9 @@ public class TopTenTest {
 
         topTen.setPositions(positionList);
 
-        @Nullable Position position1 = topTen.getPosition(1);
-        @Nullable Position position2 = topTen.getPosition(2);
-        @Nullable Position position3 = topTen.getPosition(3);
+        Position position1 = topTen.getPosition(1);
+        Position position2 = topTen.getPosition(2);
+        Position position3 = topTen.getPosition(3);
 
         assertNotNull(position1);
         assertNotNull(position2);

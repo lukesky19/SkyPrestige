@@ -23,7 +23,7 @@ import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class can be used to create a confirmation GUI.
@@ -37,10 +37,10 @@ public abstract class ConfirmGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param player The {@link Player} associated with the created GUI.
      */
     public ConfirmGUI(
-            @NotNull JavaPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull Player player) {
+            @NonNull JavaPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull Player player) {
         super(plugin, guiManager, identifier, player);
     }
 

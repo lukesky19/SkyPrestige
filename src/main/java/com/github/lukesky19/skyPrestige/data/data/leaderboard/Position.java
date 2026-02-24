@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.data.data.leaderboard;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the position in a top ten.
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
  * @param prestigePoints The prestige points of the island.
  */
 public record Position(
-        @NotNull String islandId,
+        @NonNull String islandId,
         @Nullable String ownerName,
         int prestigeLevel,
         double prestigePoints) {

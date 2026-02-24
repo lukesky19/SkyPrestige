@@ -36,8 +36,7 @@ import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.io.*;
@@ -49,12 +48,12 @@ import java.util.concurrent.CompletableFuture;
  * This class creates a table to store island data.
  */
 public class IslandDataTable {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull HookManager hookManager;
-    private final @NotNull VersionsTable versionsTable;
-    private final @NotNull String tableName = "skyprestige_island_data";
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull HookManager hookManager;
+    private final @NonNull VersionsTable versionsTable;
+    private final @NonNull String tableName = "skyprestige_island_data";
 
     /**
      * Constructor
@@ -64,10 +63,10 @@ public class IslandDataTable {
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public IslandDataTable(
-            @NotNull SkyPlugin plugin,
-            @NotNull QueueManager queueManager,
-            @NotNull HookManager hookManager,
-            @NotNull VersionsTable versionsTable) {
+            @NonNull SkyPlugin plugin,
+            @NonNull QueueManager queueManager,
+            @NonNull HookManager hookManager,
+            @NonNull VersionsTable versionsTable) {
         this.plugin = plugin;
         this.logger = plugin.getComponentLogger();
         this.queueManager = queueManager;
@@ -79,7 +78,7 @@ public class IslandDataTable {
      * Creates the table that stores island's vaults by island id. Also creates any indexes.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> createTable() {
+    public @NonNull CompletableFuture<Void> createTable() {
         String tableCreationSql =
                 "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -109,7 +108,7 @@ public class IslandDataTable {
      * @param islandData The {@link IslandData} for the island.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<IslandData> loadIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
+    public @NonNull CompletableFuture<IslandData> loadIslandData(@NonNull String islandId, @NonNull IslandData islandData) {
         String selectSql = "SELECT level, points, multiplier, multiplier_time, vault_data, leaderboard_exempt, prestige_exempt FROM " + tableName + " WHERE island_id = ?";
 
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
@@ -124,7 +123,7 @@ public class IslandDataTable {
                     boolean leaderboardExempt = resultSet.getBoolean("leaderboard_exempt");
                     boolean prestigeExempt = resultSet.getBoolean("prestige_exempt");
                     byte[] rawVaultData = resultSet.getBytes("vault_data");
-                    @NotNull Map<PageSlotKey, ItemStack> vaultData = deserializeItemMap(islandId, rawVaultData);
+                    Map<PageSlotKey, ItemStack> vaultData = deserializeItemMap(islandId, rawVaultData);
 
                     islandData.setPrestigeLevel(level);
                     islandData.setPrestigePoints(points);
@@ -148,7 +147,7 @@ public class IslandDataTable {
      * @param islandData The {@link IslandData} to save.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> saveIslandData(@NotNull String islandId, @NotNull IslandData islandData) {
+    public @NonNull CompletableFuture<Void> saveIslandData(@NonNull String islandId, @NonNull IslandData islandData) {
         String updateSql = "INSERT INTO " + tableName + " (" +
                 "island_id, " +
                 "level, " +
@@ -208,7 +207,7 @@ public class IslandDataTable {
      * @param islandDataMap A {@link Map} mapping island ids to {@link IslandData}.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> saveIslandData(@NotNull Map<String, IslandData> islandDataMap) {
+    public @NonNull CompletableFuture<Void> saveIslandData(@NonNull Map<String, IslandData> islandDataMap) {
         String updateSql = "INSERT INTO " + tableName + " (" +
                 "island_id, " +
                 "level, " +
@@ -272,7 +271,7 @@ public class IslandDataTable {
      * Retrieves the {@link TopTen} based on prestige levels then prestige points.
      * @return A {@link CompletableFuture} containing the {@link TopTen} by prestige levels then prestige points.
      */
-    public @NotNull CompletableFuture<@NotNull TopTen> getTopTenByPrestigeLevelAndPointsNotExempt() {
+    public @NonNull CompletableFuture<@NonNull TopTen> getTopTenByPrestigeLevelAndPointsNotExempt() {
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
 
         String sql = "SELECT island_id, level, points FROM " + tableName + " WHERE leaderboard_exempt = 0 ORDER BY level DESC, points DESC LIMIT 10";
@@ -285,12 +284,12 @@ public class IslandDataTable {
                     Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
                     int level = resultSet.getInt("level");
                     double points = resultSet.getDouble("points");
-                    @Nullable String ownerName = null;
+                    String ownerName = null;
 
                     if(optionalIsland.isPresent()) {
                         Island island = optionalIsland.get();
 
-                        @Nullable UUID ownerId = island.getOwner();
+                        UUID ownerId = island.getOwner();
 
                         if(ownerId != null) {
                             OfflinePlayer player = plugin.getServer().getOfflinePlayer(ownerId);
@@ -314,7 +313,7 @@ public class IslandDataTable {
      * @return A byte array.
      * @throws RuntimeException on any IO exception.
      */
-    public byte[] serializeItemMap(@NotNull Map<PageSlotKey, ItemStack> itemMap) {
+    public byte[] serializeItemMap(@NonNull Map<PageSlotKey, ItemStack> itemMap) {
         Map<PageSlotKey, byte[]> rawMap = new HashMap<>();
 
         itemMap.forEach((pageSlotKey, itemStack) -> {
@@ -340,7 +339,7 @@ public class IslandDataTable {
      * @throws RuntimeException on any IOException or ClassNotFoundException.
      */
     @SuppressWarnings("unchecked")
-    public @NotNull Map<PageSlotKey, ItemStack> deserializeItemMap(@NotNull String islandId, byte[] mapBytes) {
+    public @NonNull Map<PageSlotKey, ItemStack> deserializeItemMap(@NonNull String islandId, byte[] mapBytes) {
         try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(mapBytes))) {
             Map<PageSlotKey, ItemStack> itemMap = new HashMap<>();
 

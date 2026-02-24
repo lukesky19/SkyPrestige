@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.util.enums.ActionType;
 import com.github.lukesky19.skyPrestige.util.key.BlockKey;
 import org.bukkit.block.BlockType;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * This class caches the prestige points for specific actions related to blocks.
  */
 public class BlockPointsCache {
-    private final @NotNull Map<ActionType, LRUCache<BlockKey, Double>> blockMap = new HashMap<>();
+    private final @NonNull Map<ActionType, LRUCache<BlockKey, Double>> blockMap = new HashMap<>();
 
     /**
      * Constructor
@@ -52,16 +52,16 @@ public class BlockPointsCache {
      * @return The prestige points earned or 0.
      */
     public double getPoints(
-            @NotNull ActionType actionType,
-            @NotNull PrestigePointsMapping.Block config,
-            @NotNull BlockType blockType,
+            @NonNull ActionType actionType,
+            PrestigePointsMapping.@NonNull Block config,
+            @NonNull BlockType blockType,
             @Nullable EntityType entityType,
             @Nullable Integer age,
             @Nullable Boolean waterLogged) {
         BlockKey blockKey = new BlockKey(blockType, entityType, age, waterLogged);
         LRUCache<BlockKey, Double> cache = blockMap.computeIfAbsent(actionType, k -> new LRUCache<>(250));
 
-        @Nullable Double cachedPoints = cache.get(blockKey);
+        Double cachedPoints = cache.get(blockKey);
         if(cachedPoints != null) {
             return cachedPoints;
         }
@@ -82,8 +82,8 @@ public class BlockPointsCache {
      * @return The prestige points earned or 0.
      */
     private double getFromConfig(
-            @NotNull PrestigePointsMapping.Block config,
-            @NotNull BlockType blockType,
+            PrestigePointsMapping.@NonNull Block config,
+            @NonNull BlockType blockType,
             @Nullable EntityType entityType,
             @Nullable Integer age,
             @Nullable Boolean waterLogged) {
@@ -127,7 +127,7 @@ public class BlockPointsCache {
         }
 
         // Find the first matching entry
-        @Nullable Double points = stream.findFirst().map(BlockPoints::getPoints).orElse(null);
+        Double points = stream.findFirst().map(BlockPoints::getPoints).orElse(null);
 
         // If null, get the default points
         if(points == null) {

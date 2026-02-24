@@ -26,7 +26,6 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
  * @param keepGeneratorUpgrades Whether to keep generator upgrades on island reset or not.
  * @param keepIslandFlags Whether to keep island flags on island reset or not.
  * @param resetPrestigePoints Whether to reset prestige points on island reset or not.
- * @param removeRequiredPrestigePoints Whether to remove the required prestige points or not from the island's total.
  * @param resetPrestigeLevel Whether to reset the island's prestige level or not.
  * @param clearVault Whether to clear the island's vault or not.
  */
@@ -37,6 +36,5 @@ public record IslandSettings(
         boolean keepGeneratorUpgrades,
         boolean keepIslandFlags,
         boolean resetPrestigePoints,
-        boolean removeRequiredPrestigePoints,
         boolean resetPrestigeLevel,
         boolean clearVault) {}

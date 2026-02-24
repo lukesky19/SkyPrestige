@@ -44,7 +44,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -68,8 +68,8 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
     private int currentRewardKey = 0;
     private int numOfRewardsAdded = 0;
     private int numOfRewardsErrored = 0;
-    private final @NotNull Map<Integer, Integer> rewardsAddedPerPage = new HashMap<>();
-    private final @NotNull Map<Integer, Integer> errorCountsPerPage = new HashMap<>();
+    private final @NonNull Map<Integer, Integer> rewardsAddedPerPage = new HashMap<>();
+    private final @NonNull Map<Integer, Integer> errorCountsPerPage = new HashMap<>();
 
     /**
      * Constructor
@@ -82,12 +82,12 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param confirmOptInGUI The {@link ConfirmOptInGUI} the player came from, if any.
      */
     public OptInRewardsGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull Player player,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull OptInConfigManager optInConfigManager,
+            @NonNull SkyPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull Player player,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull OptInConfigManager optInConfigManager,
             @Nullable ConfirmOptInGUI confirmOptInGUI) {
         super(plugin, guiManager, identifier, player);
 
@@ -108,12 +108,12 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param confirmOptInGUI The {@link ConfirmOptInGUI} the player came from, if any.
      */
     public OptInRewardsGUI(
-            @NotNull SkyPlugin plugin,
-            @NotNull IGUIManager<IslandIdUUIDKey> guiManager,
-            @NotNull IslandIdUUIDKey identifier,
-            @NotNull Player player,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull OptInOutConfig optInConfig,
+            @NonNull SkyPlugin plugin,
+            @NonNull IGUIManager<IslandIdUUIDKey> guiManager,
+            @NonNull IslandIdUUIDKey identifier,
+            @NonNull Player player,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull OptInOutConfig optInConfig,
             @Nullable ConfirmOptInGUI confirmOptInGUI) {
         super(plugin, guiManager, identifier, player);
 
@@ -236,7 +236,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryCloseEvent An {@link InventoryCloseEvent}
      */
     @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+    public void handleClose(@NonNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
         guiManager.removeOpenGUI(identifier);
@@ -249,28 +249,28 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when items are dragged across the entire inventory. This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * Handles when the player's inventory is clicked. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Handles when a click occurs in either inventory. This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -280,9 +280,9 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
         assert rewardsGUIConfig != null;
         ItemStackConfig fillerConfig = rewardsGUIConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -365,7 +365,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create the buttons to display rewards for the GUI.
      * @param rewardConfig The {@link RewardConfig}.
      */
-    private void createRewardsButtons(@NotNull RewardConfig rewardConfig) {
+    private void createRewardsButtons(@NonNull RewardConfig rewardConfig) {
         int totalRewardsCount = getTotalRewardsCount(rewardConfig);
 
         while(numOfRewardsAdded < rewardsPerPage && currentRewardKey < totalRewardsCount) {
@@ -384,7 +384,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param rewardConfig The {@link RewardConfig}.
      * @return The total number of rewards.
      */
-    private int getTotalRewardsCount(@NotNull RewardConfig rewardConfig) {
+    private int getTotalRewardsCount(@NonNull RewardConfig rewardConfig) {
         int count = rewardConfig.itemRewards().size() +
                 rewardConfig.commandRewards().size() +
                 rewardConfig.permissionRewards().size() +
@@ -402,14 +402,14 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * Create a reward button that displays a reward.
      * @param reward The {@link ItemReward}, {@link CommandReward}, or {@link MoneyReward} to process. May be null.
      */
-    private void addRewardButton(@NotNull IReward reward) {
+    private void addRewardButton(@NonNull IReward reward) {
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
 
         ItemStackConfig itemStackConfig = reward.displayItem();
         if(itemStackConfig.itemType() != null) {
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
 
-            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             if(optionalItemStack.isPresent()) {
                 createDisplayButton(optionalItemStack.get(), getRewardSlot());
                 numOfRewardsAdded++;
@@ -425,7 +425,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param rewardConfig The {@link RewardConfig}.
      * @return A {@link IReward} to process. May be null.
      */
-    private @Nullable IReward getCurrentReward(@NotNull RewardConfig rewardConfig) {
+    private @Nullable IReward getCurrentReward(@NonNull RewardConfig rewardConfig) {
         int itemRewardsCount = rewardConfig.itemRewards().size();
         int commandRewardsCount = rewardConfig.commandRewards().size();
         int permissionRewardsCount = rewardConfig.permissionRewards().size();
@@ -471,7 +471,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param action A {@link Consumer} that takes an {@link InventoryClickEvent} to execute when the button is clicked.
      */
-    private void createActionButton(@NotNull ButtonConfig buttonConfig, @NotNull Consumer<InventoryClickEvent> action) {
+    private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
             return;
@@ -479,8 +479,8 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -497,7 +497,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param buttonConfig The {@link ButtonConfig}.
      * @param placeholders A {@link List} of {@link TagResolver.Single} of placeholders for the button's ItemStack.
      */
-    private void createDisplayButton(@NotNull ButtonConfig buttonConfig, @NotNull List<TagResolver.Single> placeholders) {
+    private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
             return;
@@ -505,9 +505,9 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
 
         ItemStackConfig itemStackConfig = buttonConfig.item();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(plugin.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, placeholders);
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, player, placeholders);
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> createDisplayButton(itemStack, buttonConfig.slot()));
     }
 
@@ -516,7 +516,7 @@ public class OptInRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
      * @param itemStack The {@link ItemStack} for the button.
      * @param slot The slot to place the button at.
      */
-    private void createDisplayButton(@NotNull ItemStack itemStack, int slot) {
+    private void createDisplayButton(@NonNull ItemStack itemStack, int slot) {
         GUIButton.Builder builder = new GUIButton.Builder();
 
         builder.setItemStack(itemStack);

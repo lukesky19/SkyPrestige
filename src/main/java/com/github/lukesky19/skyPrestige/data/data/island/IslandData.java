@@ -20,8 +20,7 @@ package com.github.lukesky19.skyPrestige.data.data.island;
 import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,14 +30,13 @@ import java.util.stream.Collectors;
  * This class contains the data for an island.
  */
 public class IslandData {
-    private @NotNull String islandId;
+    private @NonNull String islandId;
     private int prestigeLevel = 0;
     private double prestigePoints = 0;
-    private @Nullable Double requiredPrestigePoints;
-    private @NotNull Multiplier multiplier = new Multiplier();
+    private @NonNull Multiplier multiplier = new Multiplier();
     private boolean leaderboardExempt = false;
     private boolean prestigeExempt = false;
-    private @NotNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
+    private @NonNull Map<PageSlotKey, ItemStack> vaultItems = new HashMap<>();
 
     /**
      * Use {@link #IslandData(String)} or {@link IslandData#IslandData(String, int, double, Multiplier, boolean, boolean, Map)} instead.
@@ -53,7 +51,7 @@ public class IslandData {
      * Constructor
      * @param islandId The unique id of the island.
      */
-    public IslandData(@NotNull String islandId) {
+    public IslandData(@NonNull String islandId) {
         this.islandId = islandId;
     }
 
@@ -68,13 +66,13 @@ public class IslandData {
      * @param vaultItems The vault items.
      */
     public IslandData(
-            @NotNull String islandId,
+            @NonNull String islandId,
             int prestigeLevel,
             double prestigePoints,
-            @NotNull Multiplier multiplier,
+            @NonNull Multiplier multiplier,
             boolean leaderboardExempt,
             boolean prestigeExempt,
-            @NotNull Map<PageSlotKey, ItemStack> vaultItems) {
+            @NonNull Map<PageSlotKey, ItemStack> vaultItems) {
         this.islandId = islandId;
         this.prestigeLevel = prestigeLevel;
         this.prestigePoints = prestigePoints;
@@ -90,7 +88,7 @@ public class IslandData {
      */
     @Override
     @SuppressWarnings("MethodDoesntCallSuperMethod") // A constructor is used to clone data instead.
-    public @NotNull IslandData clone() {
+    public @NonNull IslandData clone() {
         return new IslandData(islandId, prestigeLevel, prestigePoints, multiplier, leaderboardExempt, prestigeExempt, vaultItems);
     }
 
@@ -101,15 +99,12 @@ public class IslandData {
      * @return true if equal, otherwise false.
      */
     @Override
-    public boolean equals(@NotNull Object compareObject) {
+    public boolean equals(@NonNull Object compareObject) {
         if(!(compareObject instanceof IslandData compareIslandData)) return false;
 
         return this.getIslandId().equals(compareIslandData.getIslandId())
                 && this.getPrestigeLevel() == compareIslandData.getPrestigeLevel()
                 && this.getPrestigePoints() == compareIslandData.getPrestigePoints()
-                && ((this.getRequiredPrestigePoints() == null && compareIslandData.getRequiredPrestigePoints() == null)
-                    || (this.getRequiredPrestigePoints() != null && compareIslandData.getRequiredPrestigePoints() != null
-                        && this.getRequiredPrestigePoints().equals(compareIslandData.getRequiredPrestigePoints())))
                 && this.multiplier.getMultiplier() == compareIslandData.getMultiplier()
                 && this.multiplier.getTime() == compareIslandData.getMultiplierTime()
                 && this.isLeaderboardExempt() == compareIslandData.isLeaderboardExempt()
@@ -121,7 +116,7 @@ public class IslandData {
      * Get the island id that this IslandData belongs to.
      * @return The island id.
      */
-    public @NotNull String getIslandId() {
+    public @NonNull String getIslandId() {
         return islandId;
     }
 
@@ -129,7 +124,7 @@ public class IslandData {
      * Set the island id that this IslandData belongs to.
      * @param islandId The island id.
      */
-    public void setIslandId(@NotNull String islandId) {
+    public void setIslandId(@NonNull String islandId) {
         this.islandId = islandId;
     }
 
@@ -185,23 +180,6 @@ public class IslandData {
      */
     public double getPrestigePoints() {
         return prestigePoints;
-    }
-
-    /**
-     * Set the prestige points required for the island to prestige.
-     * @param requiredPrestigePoints The prestige points required for the island to prestige.
-     * @apiNote This method should not be used to set a custom amount required to prestige as this value is updated occasionally.
-     */
-    public void setRequiredPrestigePoints(@Nullable Double requiredPrestigePoints) {
-        this.requiredPrestigePoints = requiredPrestigePoints;
-    }
-
-    /**
-     * Get the prestige points required for the island to prestige.
-     * @return The prestige points required for the island to prestige. Returns null if no value has been cached yet.
-     */
-    public @Nullable Double getRequiredPrestigePoints() {
-        return requiredPrestigePoints;
     }
 
     /**
@@ -306,7 +284,7 @@ public class IslandData {
      * @param slot The slot number to store the item at.
      * @param itemStack The {@link ItemStack} to add.
      */
-    public void addVaultItem(int pageNum, int slot, @NotNull ItemStack itemStack) {
+    public void addVaultItem(int pageNum, int slot, @NonNull ItemStack itemStack) {
         PageSlotKey pageSlotKey = new PageSlotKey(pageNum, slot);
         vaultItems.put(pageSlotKey, itemStack);
     }
@@ -325,7 +303,7 @@ public class IslandData {
      * Get the {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      * @return A {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      */
-    public @NotNull Map<PageSlotKey, ItemStack> getVaultItems() {
+    public @NonNull Map<PageSlotKey, ItemStack> getVaultItems() {
         return vaultItems;
     }
 
@@ -334,7 +312,7 @@ public class IslandData {
      * @param pageNum The page number.
      * @return A {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      */
-    public @NotNull Map<Integer, ItemStack> getVaultItemsByPageNumber(int pageNum) {
+    public @NonNull Map<Integer, ItemStack> getVaultItemsByPageNumber(int pageNum) {
         return vaultItems.entrySet().stream()
                 .filter(entry -> entry.getKey().page() == pageNum)
                 .collect(Collectors.toMap(entry -> entry.getKey().slot(), Map.Entry::getValue));
@@ -351,7 +329,7 @@ public class IslandData {
      * Replace the current vault items with the one provided.
      * @param vaultItems A {@link Map} mapping {@link PageSlotKey}s to {@link ItemStack}s.
      */
-    public void setVaultItems(@NotNull Map<PageSlotKey, ItemStack> vaultItems) {
+    public void setVaultItems(@NonNull Map<PageSlotKey, ItemStack> vaultItems) {
         this.vaultItems = new HashMap<>(vaultItems);
     }
 }

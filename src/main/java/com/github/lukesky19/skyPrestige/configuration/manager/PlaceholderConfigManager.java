@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skyPrestige.configuration.data.placeholder.PlaceholderConfig;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -37,7 +37,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
      * Constructor
      * @param plugin A {@link SkyPlugin}.
      */
-    public PlaceholderConfigManager(@NotNull SkyPlugin plugin) {
+    public PlaceholderConfigManager(@NonNull SkyPlugin plugin) {
         super(plugin, Path.of(plugin.getDataFolder() + File.separator + "placeholders.yml"), PlaceholderConfig.class);
 
         createDefaultPlaceholderConfig();
@@ -48,7 +48,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
      * @return The plugin's placeholder config if not null or the default placeholder config otherwise.
      */
     @Override
-    public @NotNull PlaceholderConfig getConfiguration() {
+    public @NonNull PlaceholderConfig getConfiguration() {
         if(configuration == null) return defaultPlaceholderConfig;
         return configuration;
     }
@@ -59,7 +59,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
      * @return The configuration passed.
      */
     @Override
-    public @Nullable PlaceholderConfig migrateConfiguration(@NotNull PlaceholderConfig placeholderConfig) {
+    public @Nullable PlaceholderConfig migrateConfiguration(@NonNull PlaceholderConfig placeholderConfig) {
         return placeholderConfig;
     }
 
@@ -90,12 +90,20 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
                         "0.0",
                         "0.0"),
                 new PlaceholderConfig.ProgressBarConfig(
+                        0.20,
+                        0.20,
+                        1.5,
+                        1.5,
                         "<gray>No Island Found",
                         "<gray>Island Opted Out",
                         "<green>|",
                         "<red>|"
                 ),
                 new PlaceholderConfig.ProgressBarConfig(
+                        0.20,
+                        0.20,
+                        1.5,
+                        1.5,
                         "&7No Island Found",
                         "&7Island Opted Out",
                         "&a|",

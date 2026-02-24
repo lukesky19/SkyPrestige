@@ -36,8 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.ArrayList;
@@ -47,10 +46,10 @@ import java.util.List;
  * This class creates the multiplier command argument for the skyprestige command.
  */
 public class MultiplierCommand {
-    private final @NotNull SkyPlugin plugin;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull MultiplierManager multiplierManager;
-    private final @NotNull HookManager hookManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull MultiplierManager multiplierManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
@@ -60,10 +59,10 @@ public class MultiplierCommand {
      * @param hookManager A {@link HookManager} instance.
      */
     public MultiplierCommand(
-            @NotNull SkyPlugin plugin,
-            @NotNull LocaleManager localeManager,
-            @NotNull MultiplierManager multiplierManager,
-            @NotNull HookManager hookManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull LocaleManager localeManager,
+            @NonNull MultiplierManager multiplierManager,
+            @NonNull HookManager hookManager) {
         this.plugin = plugin;
         this.localeManager = localeManager;
         this.multiplierManager = multiplierManager;
@@ -74,23 +73,24 @@ public class MultiplierCommand {
      * Creates the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the multiplier command argument for the /skyprestige command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the multiplier command argument for the /skyprestige command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("multiplier");
         builder.requires(ctx -> ctx.getSender() instanceof Player && ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier"));
         
         builder.executes(ctx -> {
             Locale locale = localeManager.getConfiguration();
+            Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
             Player player = (Player) ctx.getSource().getSender();
             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-            @Nullable Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
+            Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().multiplierNotOnIsland()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
                 return 0;
             }
 
             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("multiplier", String.valueOf(multiplierManager.getMultiplier(island))));
             
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().effectiveMultiplier(), placeholders));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.effectiveMultiplier(), placeholders));
             
             return 1;
         });
@@ -158,7 +158,9 @@ public class MultiplierCommand {
                         Player initiator = (Player) ctx.getSource().getSender();
                         boolean notice = ctx.getArgument("notice", boolean.class);
 
-                        return multiplierManager.clearServerMultiplier(initiator, notice) ? 1 : 0;
+                        multiplierManager.clearServerMultiplier(initiator, notice);
+
+                        return 1;
                     })
                 )
             )
@@ -167,17 +169,18 @@ public class MultiplierCommand {
                 .requires(ctx -> ctx.getSender().hasPermission("skyprestige.commands.skyprestige.multiplier.server.get"))
                 .executes(ctx -> {
                     Locale locale = localeManager.getConfiguration();
+                    Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
                     Player initiator = (Player) ctx.getSource().getSender();
                     double multiplier = multiplierManager.getServerMultiplier();
                     long time = multiplierManager.getServerMultiplierTime();
 
                     List<TagResolver.Single> placeholders = new ArrayList<>();
                     placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-                    if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+                    if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                     Component message = time != -1 ?
-                            AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
-                            AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
+                            AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                            AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
 
                     initiator.sendMessage(message);
 
@@ -187,17 +190,18 @@ public class MultiplierCommand {
 
             .executes(ctx -> {
                 Locale locale = localeManager.getConfiguration();
+                Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
                 Player initiator = (Player) ctx.getSource().getSender();
                 double multiplier = multiplierManager.getServerMultiplier();
                 long time = multiplierManager.getServerMultiplierTime();
 
                 List<TagResolver.Single> placeholders = new ArrayList<>();
                 placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                 Component message = time != -1 ?
-                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierTimeLimit(), placeholders) :
-                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().serverMultiplierNoTimeLimit(), placeholders);
+                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
 
                 initiator.sendMessage(message);
 
@@ -288,6 +292,7 @@ public class MultiplierCommand {
                 .then(Commands.argument("island_id", new IslandArgumentType(plugin, hookManager))
                     .executes(ctx -> {
                         Locale locale = localeManager.getConfiguration();
+                        Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
                         Player initiator = (Player) ctx.getSource().getSender();
                         Island island = ctx.getArgument("island_id", Island.class);
                         double multiplier = multiplierManager.getIslandMultiplier(island);
@@ -295,11 +300,11 @@ public class MultiplierCommand {
 
                         List<TagResolver.Single> placeholders = new ArrayList<>();
                         placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-                        if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+                        if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                         Component message = time != -1 ?
-                                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
-                                AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
+                                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
 
                         initiator.sendMessage(message);
 
@@ -310,12 +315,13 @@ public class MultiplierCommand {
 
             .executes(ctx -> {
                 Locale locale = localeManager.getConfiguration();
+                Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
                 Player initiator = (Player) ctx.getSource().getSender();
 
                 BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
-                @Nullable Island island = bentoBoxHook.getIslandAtLocation(initiator.getLocation()).orElse(null);
+                Island island = bentoBoxHook.getIslandAtLocation(initiator.getLocation()).orElse(null);
                 if(island == null) {
-                    initiator.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.multiplier().multiplierNotOnIsland()));
+                    initiator.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
                     return 0;
                 }
                 double multiplier = multiplierManager.getIslandMultiplier(island);
@@ -323,11 +329,11 @@ public class MultiplierCommand {
 
                 List<TagResolver.Single> placeholders = new ArrayList<>();
                 placeholders.add(Placeholder.parsed("multiplier", String.valueOf(multiplier)));
-                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(locale.multiplier().multiplierTimePlaceholder(), time)));
+                if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                 Component message = time != -1 ?
-                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierTimeLimit(), placeholders) :
-                        AdventureUtil.deserialize(locale.prefix() + locale.multiplier().islandMultiplierNoTimeLimit(), placeholders);
+                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
 
                 initiator.sendMessage(message);
 

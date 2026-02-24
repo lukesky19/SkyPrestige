@@ -37,8 +37,7 @@ import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.util.HashMap;
@@ -59,12 +58,12 @@ public class PlayerAnvilEnchantListener extends PointsListener {
      * @param multiplierManager A {@link MultiplierManager} instance.
      */
     public PlayerAnvilEnchantListener(
-            @NotNull SkyPlugin plugin,
-            @NotNull PrestigePointsConfigManager prestigePointsConfigManager,
-            @NotNull PrestigePointsManager prestigePointsManager,
-            @NotNull IslandDataManager islandDataManager,
-            @NotNull HookManager hookManager,
-            @NotNull MultiplierManager multiplierManager) {
+            @NonNull SkyPlugin plugin,
+            @NonNull PrestigePointsConfigManager prestigePointsConfigManager,
+            @NonNull PrestigePointsManager prestigePointsManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager,
+            @NonNull MultiplierManager multiplierManager) {
         super(plugin, prestigePointsConfigManager, prestigePointsManager, islandDataManager, hookManager, multiplierManager);
     }
 
@@ -75,7 +74,7 @@ public class PlayerAnvilEnchantListener extends PointsListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerAnvilEnchant(InventoryClickEvent inventoryClickEvent) {
         // Config
-        @Nullable PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
+        PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
             logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
             return;
@@ -86,23 +85,23 @@ public class PlayerAnvilEnchantListener extends PointsListener {
 
         // Player
         if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
-        @NotNull UUID playerId = player.getUniqueId();
+        UUID playerId = player.getUniqueId();
         if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
 
         // Island Check
-        @Nullable Island island = checkIsland(player, playerId);
+        Island island = checkIsland(player, playerId);
         if(island == null) return;
 
         // IslandData check.
-        @Nullable IslandData islandData = checkIslandData(island);
+        IslandData islandData = checkIslandData(island);
         if(islandData == null) return;
 
         // Item
-        @Nullable ItemStack firstItem = anvil.getFirstItem();
-        @Nullable ItemStack resultItem = anvil.getResult();
+        ItemStack firstItem = anvil.getFirstItem();
+        ItemStack resultItem = anvil.getResult();
         if(firstItem == null || firstItem.isEmpty() || resultItem == null || resultItem.isEmpty()) return;
         if(!firstItem.hasItemMeta() || !resultItem.hasItemMeta()) return;
-        @Nullable ItemType firstItemItemType = firstItem.getType().asItemType();
+        ItemType firstItemItemType = firstItem.getType().asItemType();
         if(firstItemItemType == null) return;
         int amount = resultItem.getAmount();
 
@@ -125,8 +124,8 @@ public class PlayerAnvilEnchantListener extends PointsListener {
      * @param updatedEnchantments The updated item's enchantments.
      * @return A {@link Map} mapping {@link Enchantment}s to enchantment levels.
      */
-    private @NotNull Map<Enchantment, Integer> getUniqueEnchantments(@NotNull Map<Enchantment, Integer> originalEnchantments, @NotNull Map<Enchantment, Integer> updatedEnchantments) {
-        @NotNull Map<Enchantment, Integer> uniqueEnchantments = new HashMap<>();
+    private @NonNull Map<Enchantment, Integer> getUniqueEnchantments(@NonNull Map<Enchantment, Integer> originalEnchantments, @NonNull Map<Enchantment, Integer> updatedEnchantments) {
+        Map<Enchantment, Integer> uniqueEnchantments = new HashMap<>();
 
         for(Map.Entry<Enchantment, Integer> enchantmentEntry : updatedEnchantments.entrySet()) {
             if(!originalEnchantments.containsKey(enchantmentEntry.getKey())) {
