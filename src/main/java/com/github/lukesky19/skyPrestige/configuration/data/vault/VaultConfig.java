@@ -21,16 +21,15 @@ import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializ
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemType;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
  * This record holds the configuration related to the vault.
- * @param configVersion The config version.
+ * @param version The config version.
  * @param vaultDisallowedItems The {@link List} of {@link ItemType} {@link NamespacedKey}s as a {@link String} that are not allowed in the vault.
  */
 @ConfigSerializable
 public record VaultConfig(
-        @Nullable String configVersion,
+        int version,
         @NonNull List<String> vaultDisallowedItems) {}

@@ -79,7 +79,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
      */
     private void createDefaultPlaceholderConfig() {
         defaultPlaceholderConfig = new PlaceholderConfig(
-                "1.0.0.0",
+                1,
                 new PlaceholderConfig.PrestigeNumberConfig(
                         "0",
                         "0"),

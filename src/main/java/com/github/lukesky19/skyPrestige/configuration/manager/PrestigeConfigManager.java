@@ -23,6 +23,8 @@ import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.KeyValueConfigManager;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
+import com.github.lukesky19.skylib.libs.configurate.serialize.SerializationException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -89,7 +91,11 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
 
         YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(configurationPath);
         try {
-            configuration = yamlConfigurationLoader.load().get(configClass);
+            ConfigurationNode root = yamlConfigurationLoader.load();
+            migrateVersion(root);
+            yamlConfigurationLoader.save(root);
+
+            configuration = root.get(configClass);
             if(configuration == null) return;
 
             PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
@@ -127,22 +133,22 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
      */
     @Override
     protected @Nullable PrestigeConfig migrateConfiguration(@NonNull PrestigeConfig configuration) {
-        switch(configuration.configVersion()) {
-            case "2.0.0.0" -> {
+        switch(configuration.version()) {
+            case 2 -> {
                 // Current version, do nothing
                 return configuration;
             }
 
-            case "1.0.0.0" -> {
-                logger.error(AdventureUtil.deserialize("A prestige config file is from version 1.0.0.0 and cannot be migrated."));
+            case 1 -> {
+                logger.error(AdventureUtil.deserialize("A prestige config file is from version 1 and cannot be migrated."));
                 logger.error(AdventureUtil.deserialize("Please regenerate or update your files."));
 
                 return null;
             }
 
-            case null, default -> {
+            default -> {
                 logger.error(AdventureUtil.deserialize("A prestige config file version is unrecognized and cannot be migrated."));
-                logger.error(AdventureUtil.deserialize("Please regenerate or update your files to version 2.0.0.0."));
+                logger.error(AdventureUtil.deserialize("Please regenerate or update your files to version 2."));
 
                 return null;
             }
@@ -152,5 +158,29 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
     @Override
     protected boolean validateConfiguration(@NonNull PrestigeConfig configuration) {
         return true;
+    }
+
+    /**
+     * Migrate the string-based version to a numeric version number.
+     * @param root The root {@link ConfigurationNode}.
+     */
+    private void migrateVersion(@NonNull ConfigurationNode root) {
+        ConfigurationNode versionNode = root.node("version");
+        int version = versionNode.getInt();
+        if(version > 0) return;
+
+        ConfigurationNode legacyVersionNode = root.node("config-version");
+        String legacyVersion = legacyVersionNode.virtual() ? null : legacyVersionNode.getString();
+        try {
+            switch(legacyVersion) {
+                case "2.0.0.0" -> versionNode.set(2);
+
+                case "1.0.0.0" -> versionNode.set(1);
+
+                case null, default -> logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version due to an unrecognized version."));
+            }
+        } catch (SerializationException e) {
+            logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
+        }
     }
 }

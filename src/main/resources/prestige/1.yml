@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 2.0.0.0
+version: 2
 prestige-level: 1
 scale-factor: 2.5
 required-prestige-points: 100

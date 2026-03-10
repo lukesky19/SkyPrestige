@@ -41,13 +41,13 @@ public class OptOutConfigManager extends SimpleConfigManager<OptInOutConfig> {
 
     @Override
     public @Nullable OptInOutConfig migrateConfiguration(@NonNull OptInOutConfig optInOutConfig) {
-        switch(optInOutConfig.configVersion()) {
-            case "1.0.0.0" -> {
+        switch(optInOutConfig.version()) {
+            case 1 -> {
                 // latest version, do nothing
                 return optInOutConfig;
             }
 
-            case null, default -> {
+            default -> {
                 logger.warn(AdventureUtil.deserialize("Unknown config version for the opt-out config. Unable to update config."));
                 return null;
             }

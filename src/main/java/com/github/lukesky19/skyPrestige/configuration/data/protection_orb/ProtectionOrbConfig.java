@@ -26,14 +26,14 @@ import java.util.List;
 
 /**
  * This contains the configuration related to the protection orb that protects an item from being reset on prestige.
- * @param configVersion The config version of the file.
+ * @param version The config version.
  * @param itemStackConfig The {@link ItemStackConfig} for the protection orb.
  * @param disallowedItems The {@link List} of disallowed item names or namespaced keys.
  * @param protectedLore The lore to add to an item that is protected.
  */
 @ConfigSerializable
 public record ProtectionOrbConfig(
-        @Nullable String configVersion,
+        int version,
         @NonNull ItemStackConfig itemStackConfig,
         @NonNull List<String> disallowedItems,
         @Nullable String protectedLore) {}

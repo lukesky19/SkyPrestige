@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * This record contains the configuration for the blueprint gui.
- * @param configVersion The config version.
+ * @param version The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
  * @param filler The {@link ItemStackConfig} to fill the GUI with.
@@ -39,7 +39,7 @@ import java.util.List;
  */
 @ConfigSerializable
 public record BlueprintGUIConfig(
-        @Nullable String configVersion,
+        int version,
         @Nullable String guiName,
         @Nullable GUIType guiType,
         @NonNull ItemStackConfig filler,

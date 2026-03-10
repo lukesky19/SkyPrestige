@@ -791,13 +791,13 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
 
     @Override
     public @Nullable PrestigePointsConfig migrateConfiguration(@NonNull PrestigePointsConfig prestigePointsConfig) {
-        switch(prestigePointsConfig.configVersion()) {
-            case "1.0.0.0" -> {
+        switch(prestigePointsConfig.version()) {
+            case 1 -> {
                 // latest version, do nothing
                 return prestigePointsConfig;
             }
 
-            case null, default -> {
+            default -> {
                 logger.warn(AdventureUtil.deserialize("Unknown config version for the prestige points config. Unable to update config."));
                 return null;
             }

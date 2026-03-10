@@ -42,13 +42,13 @@ public class VaultConfigManager extends SimpleConfigManager<VaultConfig> {
 
     @Override
     public @Nullable VaultConfig migrateConfiguration(@NonNull VaultConfig vaultConfig) {
-        switch(vaultConfig.configVersion()) {
-            case "1.0.0.0" -> {
+        switch(vaultConfig.version()) {
+            case 1 -> {
                 // latest version, do nothing
                 return vaultConfig;
             }
 
-            case null, default -> {
+            default -> {
                 logger.warn(AdventureUtil.deserialize("Unknown config version for the vault config. Unable to update config."));
                 return null;
             }

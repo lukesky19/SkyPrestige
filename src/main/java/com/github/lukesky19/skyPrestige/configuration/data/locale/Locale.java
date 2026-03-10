@@ -20,13 +20,12 @@ package com.github.lukesky19.skyPrestige.configuration.data.locale;
 import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
  * The plugin's locale configuration.
- * @param configVersion The config version of the locale.
+ * @param version The config version of the locale.
  * @param prefix The plugin's prefix.
  * @param help The list of messages to send for the plugin's help message.
  * @param reload The plugin's reload message.
@@ -48,7 +47,7 @@ import java.util.List;
  */
 @ConfigSerializable
 public record Locale(
-        @Nullable String configVersion,
+        int version,
         String prefix,
         @NonNull List<String> help,
         String reload,

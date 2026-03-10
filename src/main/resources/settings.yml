@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 2.0.0.0
+version: 2
 # The file in SkyPrestige/locale to use.
 locale: en_US
 # How frequently island data is periodically saved. Island data are also saved on player disconnect and server shutdown.

@@ -21,6 +21,11 @@ import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
+import com.github.lukesky19.skylib.libs.configurate.serialize.SerializationException;
+import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -40,19 +45,61 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
     }
 
     @Override
+    public void loadConfiguration() {
+        configuration = null;
+
+        if(configurationPath == null) return;
+
+        saveBundledConfig();
+
+        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(configurationPath);
+        try {
+            ConfigurationNode root = loader.load();
+            migrateVersion(root);
+            loader.save(root);
+
+            Settings settings = root.get(Settings.class);
+            if(settings == null) {
+                logger.warn(AdventureUtil.deserialize("Failed to load settings.yml."));
+                return;
+            }
+
+            Settings migratedConfiguration = migrateConfiguration(settings);
+            if(migratedConfiguration == null) {
+                logger.warn(AdventureUtil.deserialize("Failed to migrate settings.yml."));
+                return;
+            }
+
+            if(!settings.equals(migratedConfiguration)) {
+                saveConfiguration(migratedConfiguration);
+            }
+
+            // Check if the configuration is invalid
+            if(!validateConfiguration(migratedConfiguration)) {
+                logger.warn(AdventureUtil.deserialize("Settings configuration validation failed."));
+                return;
+            }
+
+            this.configuration = migratedConfiguration;
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Failed to load configuration. Error: " + configurateException.getMessage()));
+        }
+    }
+
+    @Override
     public @Nullable Settings migrateConfiguration(@NonNull Settings settings) {
-        switch(settings.configVersion()) {
-            case "2.0.0.0" -> {
+        switch(settings.version()) {
+            case 3 -> {
                 // latest version, do nothing
                 return settings;
             }
 
-            case "1.1.0.0", "1.0.0.0" -> {
-                logger.warn(AdventureUtil.deserialize("Unable to migrate version 1.0.0.0 or 1.1.0.0 config versions for settings config. Please regenerate or manually migrate your configuration."));
+            case 2, 1 -> {
+                logger.warn(AdventureUtil.deserialize("Unable to migrate version 1 or 2 config versions for settings config. Please regenerate or manually migrate your configuration."));
                 return null;
             }
 
-            case null, default -> {
+            default -> {
                 logger.warn(AdventureUtil.deserialize("Unknown config version for settings config. Unable to update config."));
                 return null;
             }
@@ -66,6 +113,36 @@ public class SettingsManager extends SimpleConfigManager<Settings> {
 
     @Override
     public void saveBundledConfig() {
-        plugin.saveResource("settings.yml", false);
+        if(configurationPath == null) return;
+
+        if(!configurationPath.toFile().exists()) {
+            plugin.saveResource("settings.yml", false);
+        }
+    }
+
+    /**
+     * Migrate the string-based version to a numeric version number.
+     * @param root The root {@link ConfigurationNode}.
+     */
+    private void migrateVersion(@NonNull ConfigurationNode root) {
+        ConfigurationNode versionNode = root.node("version");
+        int version = versionNode.getInt();
+        if(version > 0) return;
+
+        ConfigurationNode legacyVersionNode = root.node("config-version");
+        String legacyVersion = legacyVersionNode.virtual() ? null : legacyVersionNode.getString();
+        try {
+            switch(legacyVersion) {
+                case "2.0.0.0" -> versionNode.set(3);
+
+                case "1.1.0.0" -> versionNode.set(2);
+
+                case "1.0.0.0" -> versionNode.set(1);
+
+                case null, default -> logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version due to an unrecognized version."));
+            }
+        } catch (SerializationException e) {
+            logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
+        }
     }
 }

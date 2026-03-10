@@ -25,13 +25,12 @@ import com.github.lukesky19.skyPrestige.configuration.data.reset.PrestigeResetSe
 import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
  * This record contains the configuration for a prestige level.
- * @param configVersion The config version of the file.
+ * @param version The config version.
  * @param prestigeLevel The prestige level this configuration is for.
  * @param prestigePointsRequirement The {@link PrestigePointsRequirement}.
  * @param moneyRequirement The {@link MoneyRequirement}.
@@ -42,7 +41,7 @@ import java.util.List;
  */
 @ConfigSerializable
 public record PrestigeConfig(
-        @Nullable String configVersion,
+        int version,
         int prestigeLevel,
         @NonNull PrestigePointsRequirement prestigePointsRequirement,
         @NonNull MoneyRequirement moneyRequirement,

@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.1
+version: 1
 gui-name: "Exchange Prestige Points"
 gui-type: CHEST_54
 pages:

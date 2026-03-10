@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 2.0.0.0
+version: 2
 prefix: "<green><bold>SkyPrestige</bold></green><gray> ▪ </gray>"
 help:
     - "<green>SkyPrestige is developed by <white><bold>lukeskywlker19</bold></white>.</green>"

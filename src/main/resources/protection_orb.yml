@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+version: 1
 # These settings are related to the protection orb.
 item-stack-config:
     item-type: heart_of_the_sea

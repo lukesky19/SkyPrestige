@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the plugin's configuration settings.
- * @param configVersion The file's config version.
+ * @param version The config version.
  * @param locale The locale to use.
  * @param saveFrequencySeconds How frequently island data is periodically saved.
  * @param exchangePrestigeLevel The required prestige level to be able to exchange prestige points.
@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  */
 @ConfigSerializable
 public record Settings(
-        @Nullable String configVersion,
+        int version,
         @Nullable String locale,
         @Nullable Integer saveFrequencySeconds,
         int exchangePrestigeLevel,

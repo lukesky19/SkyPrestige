@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * This record contains the configuration for PlaceholderAPI placeholders.
- * @param configVersion The config version.
+ * @param version The config version.
  * @param prestigeLevel The configuration for the prestige level placeholder.
  * @param prestigePoints The configuration for the prestige points placeholder.
  * @param requiredPrestigePoints The configuration for the required prestige points placeholder.
@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  */
 @ConfigSerializable
 public record PlaceholderConfig(
-        @Nullable String configVersion,
+        int version,
         @NonNull PrestigeNumberConfig prestigeLevel,
         @NonNull PrestigeNumberConfig prestigePoints,
         @NonNull PrestigeNumberConfig requiredPrestigePoints,

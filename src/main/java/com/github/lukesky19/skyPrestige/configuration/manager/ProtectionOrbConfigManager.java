@@ -41,13 +41,13 @@ public class ProtectionOrbConfigManager extends SimpleConfigManager<ProtectionOr
 
     @Override
     public @Nullable ProtectionOrbConfig migrateConfiguration(@NonNull ProtectionOrbConfig protectionOrbConfig) {
-        switch(protectionOrbConfig.configVersion()) {
-            case "1.0.0.0" -> {
+        switch(protectionOrbConfig.version()) {
+            case 1 -> {
                 // latest version, do nothing
                 return protectionOrbConfig;
             }
 
-            case null, default -> {
+            default -> {
                 logger.warn(AdventureUtil.deserialize("Unknown config version for protection orb config. Unable to update config."));
                 return null;
             }
