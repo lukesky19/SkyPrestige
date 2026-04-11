@@ -424,7 +424,7 @@ public class SettingsProcessor {
             if(permissionConfig.permission() == null) continue;
 
             if(permissionConfig.removePermission()) {
-                List<PermissionNode> permissionNodeList = luckPermsHook.getPermissionNodes(user, permissionConfig.permission());
+                List<PermissionNode> permissionNodeList = luckPermsHook.getPermissionNodes(user, permissionConfig.permission(), permissionConfig.contexts());
                 if(permissionNodeList.isEmpty()) continue;
 
                 for(PermissionNode permissionNode : permissionNodeList) {
@@ -441,7 +441,7 @@ public class SettingsProcessor {
                     }
                 }
             } else {
-                PermissionNode permissionNode = luckPermsHook.createPermissionNode(permissionConfig.permission(), !permissionConfig.negatePermission());
+                PermissionNode permissionNode = luckPermsHook.createPermissionNode(permissionConfig.permission(), !permissionConfig.negatePermission(), permissionConfig.contexts());
 
                 DataMutateResult result = luckPermsHook.addNode(user, permissionNode);
 
@@ -461,7 +461,7 @@ public class SettingsProcessor {
             if(groupConfig.groupName() == null) continue;
 
             if(groupConfig.removeGroup()) {
-                List<InheritanceNode> inheritanceNodeList = luckPermsHook.getInheritanceNodes(user, groupConfig.groupName());
+                List<InheritanceNode> inheritanceNodeList = luckPermsHook.getInheritanceNodes(user, groupConfig.groupName(), groupConfig.contexts());
                 if(inheritanceNodeList.isEmpty()) continue;
 
                 for(InheritanceNode inheritanceNode : inheritanceNodeList) {
@@ -478,7 +478,7 @@ public class SettingsProcessor {
                     }
                 }
             } else {
-                InheritanceNode inheritanceNode = luckPermsHook.createInheritanceNode(groupConfig.groupName());
+                InheritanceNode inheritanceNode = luckPermsHook.createInheritanceNode(groupConfig.groupName(), groupConfig.contexts());
 
                 DataMutateResult result = luckPermsHook.addNode(user, inheritanceNode);
 

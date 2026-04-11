@@ -15,25 +15,15 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyPrestige.configuration.data.reset.common;
+package com.github.lukesky19.skyPrestige.configuration.data.common;
 
-import com.github.lukesky19.skyPrestige.configuration.data.common.Context;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
-
 /**
- * This record contains the permission settings.
- * @param permission The permission.
- * @param removePermission Whether the permission should be removed or not.
- * @param negatePermission Whether the permission should be negated or not.
- * @param contexts The permission contexts.
+ * The permission or inheritance node context.
+ * @param type The type.
+ * @param value The value.
  */
 @ConfigSerializable
-public record PermissionConfig(
-        @Nullable String permission,
-        boolean removePermission,
-        boolean negatePermission,
-        @NonNull List<Context> contexts) {}
+public record Context(@Nullable String type, @Nullable String value) {}

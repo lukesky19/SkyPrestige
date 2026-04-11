@@ -17,11 +17,14 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.reward;
 
+import com.github.lukesky19.skyPrestige.configuration.data.common.Context;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * The configuration for a permission reward.
@@ -31,6 +34,7 @@ import org.jspecify.annotations.Nullable;
  * @param beforeIslandReset Should the permission be given before the island is reset?
  * @param removePermission Should the permission be removed?
  * @param negatePermission Should the permission be added, but set as false?
+ * @param contexts The permission contexts.
  * @param permission The permission.
  */
 @ConfigSerializable
@@ -41,6 +45,7 @@ public record PermissionReward(
         boolean beforeIslandReset,
         boolean removePermission,
         boolean negatePermission,
+        @NonNull List<Context> contexts,
         @Nullable String permission) implements IReward {
     @Override
     public boolean giveOnIslandJoin() {

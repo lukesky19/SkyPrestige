@@ -304,7 +304,7 @@ public class LuckPermsRewardsProcessor {
             if(permissionReward.permission() == null) continue;
 
             if(permissionReward.removePermission()) {
-                List<PermissionNode> permissionNodeList = luckPermsHook.getPermissionNodes(user, permissionReward.permission());
+                List<PermissionNode> permissionNodeList = luckPermsHook.getPermissionNodes(user, permissionReward.permission(), permissionReward.contexts());
                 if(permissionNodeList.isEmpty()) continue;
 
                 for(PermissionNode permissionNode : permissionNodeList) {
@@ -327,7 +327,7 @@ public class LuckPermsRewardsProcessor {
                     }
                 }
             } else {
-                PermissionNode permissionNode = luckPermsHook.createPermissionNode(permissionReward.permission(), !permissionReward.negatePermission());
+                PermissionNode permissionNode = luckPermsHook.createPermissionNode(permissionReward.permission(), !permissionReward.negatePermission(), permissionReward.contexts());
 
                 DataMutateResult result = luckPermsHook.addNode(user, permissionNode);
 
@@ -353,7 +353,7 @@ public class LuckPermsRewardsProcessor {
             if(groupReward.groupName() == null) continue;
 
             if(groupReward.removeGroup()) {
-                List<InheritanceNode> inheritanceNodeList = luckPermsHook.getInheritanceNodes(user, groupReward.groupName());
+                List<InheritanceNode> inheritanceNodeList = luckPermsHook.getInheritanceNodes(user, groupReward.groupName(), groupReward.contexts());
                 if(inheritanceNodeList.isEmpty()) continue;
 
                 for(InheritanceNode inheritanceNode : inheritanceNodeList) {
@@ -376,7 +376,7 @@ public class LuckPermsRewardsProcessor {
                     }
                 }
             } else {
-                InheritanceNode inheritanceNode = luckPermsHook.createInheritanceNode(groupReward.groupName());
+                InheritanceNode inheritanceNode = luckPermsHook.createInheritanceNode(groupReward.groupName(), groupReward.contexts());
 
                 DataMutateResult result = luckPermsHook.addNode(user, inheritanceNode);
 

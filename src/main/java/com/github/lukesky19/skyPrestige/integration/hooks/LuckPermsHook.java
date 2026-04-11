@@ -1,9 +1,12 @@
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
+import com.github.lukesky19.skyPrestige.configuration.data.common.Context;
 import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.integration.Hook;
 import dev.rosewood.rosestacker.api.RoseStackerAPI;
 import net.luckperms.api.LuckPerms;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
@@ -130,19 +133,29 @@ public class LuckPermsHook implements Hook {
     }
 
     /**
-     * Get a {@link List} of {@link PermissionNode}s for the user and permission provided.
+     * Get a {@link List} of {@link PermissionNode}s for the user, permission, and contexts provided.
      * @param user The {@link User}
      * @param permission The permission.
+     * @param contexts The permission contexts.
      * @return A {@link List} of {@link PermissionNode}s. Will be empty if the user has no permissions that matched.
      */
-    public @NonNull List<PermissionNode> getPermissionNodes(@NonNull User user, @NonNull String permission) {
+    public @NonNull List<PermissionNode> getPermissionNodes(@NonNull User user, @NonNull String permission, @NonNull List<Context> contexts) {
         List<PermissionNode> permissionNodeList = new ArrayList<>();
 
         for(Node node : user.getDistinctNodes()) {
             if(!(node instanceof PermissionNode permissionNode)) continue;
+            if(!permissionNode.getPermission().equals(permission)) continue;
 
-            if(permissionNode.getPermission().equals(permission)) {
+            if(contexts.isEmpty()) {
                 permissionNodeList.add(permissionNode);
+            } else {
+                ImmutableContextSet contextSet = permissionNode.getContexts();
+                boolean contextsMatch = contexts.stream()
+                        .filter(e -> e.type() != null && e.value() != null)
+                        .allMatch(e -> contextSet.contains(e.type(), e.value()));
+                if(contextsMatch) {
+                    permissionNodeList.add(permissionNode);
+                }
             }
         }
 
@@ -153,26 +166,56 @@ public class LuckPermsHook implements Hook {
      * Create a permission node for the permission and value provided.
      * @param permission The permission.
      * @param value The value of the permission. true allows the player to access the permission, false doesn't (negated).
+     * @param contexts The permission contexts.
      * @return A {@link PermissionNode}.
      */
-    public @NonNull PermissionNode createPermissionNode(@NonNull String permission, boolean value) {
-        return PermissionNode.builder(permission).value(value).build();
+    public @NonNull PermissionNode createPermissionNode(
+            @NonNull String permission,
+            boolean value,
+            @NonNull List<Context> contexts) {
+        PermissionNode.Builder nodeBuilder = PermissionNode.builder(permission);
+        nodeBuilder.value(value);
+
+        if(!contexts.isEmpty()) {
+            ImmutableContextSet.Builder contextBuilder = ImmutableContextSet.builder();
+            contexts.stream()
+                    .filter(e -> e.type() != null && e.value() != null)
+                    .forEach(e -> contextBuilder.add(e.type(), e.value()));
+            ContextSet contextSet = contextBuilder.build();
+
+            nodeBuilder.context(contextSet);
+        }
+
+        return nodeBuilder.build();
     }
 
     /**
      * Get a {@link List} of {@link InheritanceNode}s for the user and group name provided.
      * @param user The {@link User}
      * @param group The group name.
+     * @param contexts The permission contexts.
      * @return A {@link List} of {@link InheritanceNode}s. Will be empty if the user has no permissions that matched.
      */
-    public @NonNull List<InheritanceNode> getInheritanceNodes(@NonNull User user, @NonNull String group) {
+    public @NonNull List<InheritanceNode> getInheritanceNodes(
+            @NonNull User user,
+            @NonNull String group,
+            @NonNull List<Context> contexts) {
         List<InheritanceNode> inheritanceNodeList = new ArrayList<>();
 
         for(Node node : user.getDistinctNodes()) {
             if(!(node instanceof InheritanceNode inheritanceNode)) continue;
+            if(!inheritanceNode.getGroupName().equals(group)) continue;
 
-            if(inheritanceNode.getGroupName().equals(group)) {
+            if(contexts.isEmpty()) {
                 inheritanceNodeList.add(inheritanceNode);
+            } else {
+                ImmutableContextSet contextSet = inheritanceNode.getContexts();
+                boolean contextsMatch = contexts.stream()
+                        .filter(e -> e.type() != null && e.value() != null)
+                        .allMatch(e -> contextSet.contains(e.type(), e.value()));
+                if(contextsMatch) {
+                    inheritanceNodeList.add(inheritanceNode);
+                }
             }
         }
 
@@ -182,9 +225,22 @@ public class LuckPermsHook implements Hook {
     /**
      * Create an inheritance node for the group name provided.
      * @param group The group name.
+     * @param contexts The permission contexts.
      * @return An {@link InheritanceNode}.
      */
-    public @NonNull InheritanceNode createInheritanceNode(@NonNull String group) {
-        return InheritanceNode.builder(group).build();
+    public @NonNull InheritanceNode createInheritanceNode(@NonNull String group, @NonNull List<Context> contexts) {
+        InheritanceNode.Builder nodeBuilder = InheritanceNode.builder(group);
+
+        if(!contexts.isEmpty()) {
+            ImmutableContextSet.Builder contextBuilder = ImmutableContextSet.builder();
+            contexts.stream()
+                    .filter(e -> e.type() != null && e.value() != null)
+                    .forEach(e -> contextBuilder.add(e.type(), e.value()));
+            ContextSet contextSet = contextBuilder.build();
+
+            nodeBuilder.context(contextSet);
+        }
+
+        return nodeBuilder.build();
     }
 }
