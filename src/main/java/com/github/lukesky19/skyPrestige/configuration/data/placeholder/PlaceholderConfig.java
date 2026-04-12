@@ -58,6 +58,7 @@ public record PlaceholderConfig(
      * @param questWeight The quest weight.
      * @param noIslandText The text to display when there is no island.
      * @param optedOutText The text to display when the island is opted out of prestige.
+     * @param maxLevelText The text to display when the island is at the max prestige level.
      * @param filledBarText The text to use for when a progress bar is filled, i.e., {@literal <green>|}
      * @param emptyBarText The text to use for when a progress bar is not filled, i.e., {@literal <red>|}
      */
@@ -69,6 +70,7 @@ public record PlaceholderConfig(
             double questWeight,
             @Nullable String noIslandText,
             @Nullable String optedOutText,
+            @Nullable String maxLevelText,
             @Nullable String filledBarText,
             @Nullable String emptyBarText) {}
     /**

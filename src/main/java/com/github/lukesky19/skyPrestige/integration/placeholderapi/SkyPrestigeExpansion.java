@@ -192,7 +192,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(islandData == null) return placeholderConfig.progressBar().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.progressBar().optedOutText();
                 PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
-                if(prestigeConfig == null) return null;
+                if(prestigeConfig == null) {
+                    return placeholderConfig.legacyProgressBar().maxLevelText() != null ? placeholderConfig.legacyProgressBar().maxLevelText() : "Max Level";
+                }
 
                 int progressBarSize = settingsManager.getConfiguration() != null ?
                         settingsManager.getConfiguration().progressBarSize() : 10;
@@ -271,7 +273,9 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(islandData == null) return placeholderConfig.legacyProgressBar().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.legacyProgressBar().optedOutText();
                 PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
-                if(prestigeConfig == null) return null;
+                if(prestigeConfig == null) {
+                    return placeholderConfig.legacyProgressBar().maxLevelText() != null ? placeholderConfig.legacyProgressBar().maxLevelText() : "Max Level";
+                }
 
                 int progressBarSize = settingsManager.getConfiguration() != null ?
                         settingsManager.getConfiguration().progressBarSize() : 10;

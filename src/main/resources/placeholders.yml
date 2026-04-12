@@ -16,6 +16,7 @@ progress-bar:
     quest-weight: 1
     no-island-text: "<gray>No Island Found"
     opted-out-text: "<gray>Island Opted Out"
+    max-level: "<gray>Max Level"
     filled-bar-text: "<green>|"
     empty-bar-text: "<red>|"
 legacy-progress-bar:
@@ -25,6 +26,7 @@ legacy-progress-bar:
     quest-weight: 1
     no-island-text: "&7No Island Found"
     opted-out-text: "&7Island Opted Out"
+    max-level: "&7Max Level"
     filled-bar-text: "&a|"
     empty-bar-text: "&c|"
 multiplier:

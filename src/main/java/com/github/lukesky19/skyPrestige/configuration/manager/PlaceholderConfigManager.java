@@ -96,6 +96,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
                         1.5,
                         "<gray>No Island Found",
                         "<gray>Island Opted Out",
+                        "<gray>Max Level",
                         "<green>|",
                         "<red>|"
                 ),
@@ -106,6 +107,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
                         1.5,
                         "&7No Island Found",
                         "&7Island Opted Out",
+                        "&7Max Level",
                         "&a|",
                         "&c|"
                 ),
