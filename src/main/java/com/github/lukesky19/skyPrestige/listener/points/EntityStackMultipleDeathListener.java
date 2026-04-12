@@ -84,7 +84,7 @@ public class EntityStackMultipleDeathListener extends PointsListener {
         Player player = stackedEntity.getEntity().getKiller();
         if(player == null) return;
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

@@ -88,7 +88,7 @@ public class PlayerUnwaxEntityListener extends PointsListener {
             Player player = playerInteractEntityEvent.getPlayer();
             if(!player.isOnline() || !player.isConnected()) return;
             UUID playerId = player.getUniqueId();
-            if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+            if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
             // Island Check
             Island island = checkIsland(player, playerId);

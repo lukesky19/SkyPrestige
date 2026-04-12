@@ -231,7 +231,7 @@ public class PlayerSettingsProcessor {
 
         if(skyPlayTimeHook.isHooked()) {
             skyPlayTimeHook.resetPlayTime(
-                    player.getUniqueId(),
+                    player,
                     playTimeSettings.resetSession(),
                     playTimeSettings.resetDaily(),
                     playTimeSettings.resetWeekly(),

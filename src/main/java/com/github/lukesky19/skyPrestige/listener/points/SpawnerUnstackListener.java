@@ -84,7 +84,7 @@ public class SpawnerUnstackListener extends PointsListener {
         Player player = spawnerUnstackEvent.getPlayer();
         if(player == null) return;
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

@@ -85,7 +85,7 @@ public class PlayerEnchantmentTableEnchantListener extends PointsListener {
         // Player
         Player player = enchantItemEvent.getEnchanter();
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

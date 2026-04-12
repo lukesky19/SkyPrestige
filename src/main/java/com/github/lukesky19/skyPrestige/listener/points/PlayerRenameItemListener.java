@@ -88,7 +88,7 @@ public class PlayerRenameItemListener extends PointsListener {
         // Player
         if(!(inventoryClickEvent.getWhoClicked() instanceof Player player)) return;
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Anvil
         if(!(inventoryClickEvent.getClickedInventory() instanceof AnvilInventory anvil)) return;

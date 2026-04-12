@@ -85,7 +85,7 @@ public class InventoryOpenListener extends PointsListener {
         // Player
         if(!(inventoryOpenEvent.getPlayer() instanceof Player player)) return;
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

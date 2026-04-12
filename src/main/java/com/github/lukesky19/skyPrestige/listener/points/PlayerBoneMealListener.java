@@ -84,7 +84,7 @@ public class PlayerBoneMealListener extends PointsListener {
         Player player = blockFertilizeEvent.getPlayer();
         if(player == null) return;
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

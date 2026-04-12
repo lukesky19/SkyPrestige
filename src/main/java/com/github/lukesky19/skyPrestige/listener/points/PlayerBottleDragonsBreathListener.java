@@ -82,7 +82,7 @@ public class PlayerBottleDragonsBreathListener extends PointsListener {
         // Player
         Player player = playerInteractEntityEvent.getPlayer();
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Projectile
         Entity entity = playerInteractEntityEvent.getRightClicked();

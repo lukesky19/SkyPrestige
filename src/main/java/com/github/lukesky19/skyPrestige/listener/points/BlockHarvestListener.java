@@ -83,7 +83,7 @@ public class BlockHarvestListener extends PointsListener {
         // Player
         Player player = playerHarvestBlockEvent.getPlayer();
         UUID playerId = player.getUniqueId();
-        if(isPlayerInvalid(player, playerId, prestigePointsConfig)) return;
+        if(isPlayerInvalid(player, prestigePointsConfig)) return;
 
         // Island Check
         Island island = checkIsland(player, playerId);

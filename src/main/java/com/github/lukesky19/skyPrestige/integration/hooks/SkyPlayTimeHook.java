@@ -27,8 +27,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.UUID;
-
 /**
  * This class manages interfacing with SkyPlayTime.
  */
@@ -76,27 +74,14 @@ public class SkyPlayTimeHook implements Hook {
     public boolean isPlayerAFK(@NonNull Player player) {
         if(skyPlayTimeAPI == null) return false;
 
-        UUID uuid = player.getUniqueId();
-        return skyPlayTimeAPI.isPlayerAfk(uuid);
-    }
-
-    /**
-     * Checks if the player is marked as afk according to SkyPlayTime.
-     * @apiNote Will always return false if SkyPlayTime was not hooked into.
-     * @param uuid The {@link UUID} of the player to check.
-     * @return true if afk, or false if not afk or SkyPlayTime was not hooked into.
-     */
-    public boolean isPlayerAFK(@NonNull UUID uuid) {
-        if(skyPlayTimeAPI == null) return false;
-
-        return skyPlayTimeAPI.isPlayerAfk(uuid);
+        return skyPlayTimeAPI.isPlayerAfk(player);
     }
 
     /**
      * Resets the play time for the player provided.
      * @apiNote If SkyPlayTime was not hooked into, this method will do nothing. Can be checked with {@link #isHooked()}.
      * @apiNote If all booleans are false, this method will do nothing.
-     * @param uuid The {@link UUID} of the player to reset play time for.
+     * @param player The {@link Player} to reset play time for.
      * @param session Should session play time be reset?
      * @param daily Should daily play time be reset?
      * @param weekly Should weekly play time be reset?
@@ -104,10 +89,10 @@ public class SkyPlayTimeHook implements Hook {
      * @param yearly Should yearly play time be reset?
      * @param total Should total play time be reset?
      */
-    public void resetPlayTime(@NonNull UUID uuid, boolean session, boolean daily, boolean weekly, boolean monthly, boolean yearly, boolean total) {
+    public void resetPlayTime(@NonNull Player player, boolean session, boolean daily, boolean weekly, boolean monthly, boolean yearly, boolean total) {
         if(skyPlayTimeAPI == null) return;
         if(!session && !daily && !weekly && !monthly && !yearly && !total) return;
 
-        skyPlayTimeAPI.resetPlayTime(uuid, session, daily, weekly, monthly, yearly, total);
+        skyPlayTimeAPI.resetPlayTime(player, session, daily, weekly, monthly, yearly, total);
     }
 }

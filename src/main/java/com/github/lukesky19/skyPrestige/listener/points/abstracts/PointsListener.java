@@ -103,18 +103,16 @@ public abstract class PointsListener implements Listener {
      * Is the player invalid? This is where points should NOT be awarded.
      * Checks creative mode and SkyPlayTime AFK status if hooked.
      * @param player The {@link Player}.
-     * @param playerId The player's {@link UUID}.
      * @param prestigePointsConfig The {@link PrestigePointsConfig}.
      * @return true if invalid, false if not.
      */
     protected boolean isPlayerInvalid(
             @NonNull Player player,
-            @NonNull UUID playerId,
             @NonNull PrestigePointsConfig prestigePointsConfig) {
         if(player.getGameMode().equals(GameMode.CREATIVE)) return true;
 
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
-        return skyPlayTimeHook.isHooked() && prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(playerId);
+        return skyPlayTimeHook.isHooked() && prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(player);
     }
 
     /**
