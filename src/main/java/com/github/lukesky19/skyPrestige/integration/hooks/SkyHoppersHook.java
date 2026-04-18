@@ -18,8 +18,8 @@
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
 import com.github.lukesky19.skyHoppers.SkyHoppersAPI;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.integration.Hook;
+import com.github.lukesky19.skylib.common.api.integration.Hook;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jspecify.annotations.NonNull;

@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.listener.protection;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -79,14 +79,14 @@ public class ProtectionOrbListener implements Listener {
         // Check if the item is allowed to be protected
         if(protectionOrbManager.isProtectionOrbItemTypeDisallowed(clickedSlotItemType)) {
             inventoryClickEvent.setCancelled(true);
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbNotAllowed()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbNotAllowed()));
             return;
         }
 
         // Check if the item is already protected
         if(protectionOrbManager.isItemStackProtected(clickedSlotItemStack)) {
             inventoryClickEvent.setCancelled(true);
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbAlreadyProtected()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbAlreadyProtected()));
             return;
         }
 
@@ -105,6 +105,6 @@ public class ProtectionOrbListener implements Listener {
         // Protect the item
         protectionOrbManager.protectItemStack(clickedSlotItemStack);
 
-        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbProtected()));
+        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + protectionOrbMessages.protectionOrbProtected()));
     }
 }

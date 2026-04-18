@@ -44,8 +44,8 @@ import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.leonardobishop.quests.common.player.QPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -166,21 +166,21 @@ public class PrestigeManager {
         // Check if the player is in a world managed by a GameModeAddon
         Optional<GameModeAddon> optionalGameModeAddon = bentoBoxHook.getGameModeAddon(player.getWorld());
         if(optionalGameModeAddon.isEmpty()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerInWrongWorld()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.playerInWrongWorld()));
             return;
         }
 
         // Check if the player is on an island
         Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
         if(optionalIsland.isEmpty()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerNotOnIsland()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.playerNotOnIsland()));
             return;
         }
         Island island = optionalIsland.get();
         String islandId = island.getUniqueId();
 
         if(inProgressPrestiges.contains(islandId)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeInProgress()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().prestigeInProgress()));
             return;
         }
 
@@ -188,20 +188,20 @@ public class PrestigeManager {
 
         // Check if the player attempting to toggle the island's prestige status is not the owner or an island member.
         if((island.getOwner() == null || !island.getOwner().equals(playerId)) && !island.getMemberSet().contains(playerId)) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.playerNotMemberOrOwner()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.playerNotMemberOrOwner()));
             return;
         }
 
         // Get the island data for the island.
         IslandData islandData = islandDataManager.getData(islandId);
         if(islandData == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-            logger.error(AdventureUtil.deserialize("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
+            logger.error(AdventureUtility.plain("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
             return;
         }
 
         if(islandData.isPrestigeExempt()) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.islandOptedOut()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.islandOptedOut()));
             return;
         }
 
@@ -210,11 +210,11 @@ public class PrestigeManager {
         // If the prestige config is null, the player is at the max prestige level
         PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextPrestigeLevel);
         if(prestigeConfig == null) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + prestigeMessages.prestigeLevelMax()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.prestigeLevelMax()));
             return;
         }
 
-        player.sendMessage(AdventureUtil.deserialize("<red>Gathering necessary data for prestige..."));
+        player.sendMessage(AdventureUtility.deserialize("<red>Gathering necessary data for prestige..."));
 
         // Get a list of QPlayers for all island members
         LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
@@ -315,24 +315,24 @@ public class PrestigeManager {
         // Create the GUI
         boolean creationResult = gui.create();
         if(!creationResult) {
-            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Update the GUI
         boolean updateResult = gui.update();
         if(!updateResult) {
-            logger.error(AdventureUtil.deserialize("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Open the GUI
         boolean openResult = gui.open();
         if(!openResult) {
-            logger.error(AdventureUtil.deserialize("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 
@@ -374,22 +374,22 @@ public class PrestigeManager {
 
         boolean creationResult = confirmGUI.create();
         if (!creationResult) {
-            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean updateResult = confirmGUI.update();
         if (!updateResult) {
-            logger.error(AdventureUtil.deserialize("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean openResult = confirmGUI.open();
         if (!openResult) {
-            logger.error(AdventureUtil.deserialize("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 
@@ -475,7 +475,7 @@ public class PrestigeManager {
                     islandData);
         } else {
             if(blueprintName == null) {
-                logger.error(AdventureUtil.deserialize("Unable to prestige island for player " + player.getName() + " because the selected blueprint name is null."));
+                logger.error(AdventureUtility.plain("Unable to prestige island for player " + player.getName() + " because the selected blueprint name is null."));
                 return;
             }
 
@@ -503,7 +503,7 @@ public class PrestigeManager {
 
             // If the new island failed to be created, log and error and return
             if(island == null) {
-                logger.error(AdventureUtil.deserialize("Island Creation failed for prestige."));
+                logger.error(AdventureUtility.plain("Island Creation failed for prestige."));
                 return;
             }
         }
@@ -529,10 +529,10 @@ public class PrestigeManager {
         placeholders.add(Placeholder.parsed("player", player.getName()));
         placeholders.add(Placeholder.parsed("prestige_level", String.valueOf(prestigeLevel)));
 
-        Component announcementMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeAnnouncement(), placeholders);
+        Component announcementMessage = AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().prestigeAnnouncement(), placeholders);
         plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(announcementMessage));
 
-        Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().prestigeIslandMemberMessage(), placeholders);
+        Component islandMemberMessage = AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().prestigeIslandMemberMessage(), placeholders);
         onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
 
         inProgressPrestiges.remove(islandId);

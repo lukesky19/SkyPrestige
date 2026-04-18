@@ -29,8 +29,8 @@ import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -108,7 +108,7 @@ public class VaultCommand {
 
                     Island island = BentoBox.getInstance().getIslandsManager().getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.playerNotOnIsland()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + vaultMessages.playerNotOnIsland()));
                         return 0;
                     }
 
@@ -116,23 +116,23 @@ public class VaultCommand {
 
                     IslandData islandData = islandDataManager.getData(islandId);
                     if(islandData == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        logger.warn(AdventureUtility.plain("No island data found for the island " + islandId + "."));
                         return 0;
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.prestigeExempt()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + vaultMessages.prestigeExempt()));
                         return 0;
                     }
 
                     // Prevent modifying the vault if the island is in the process of prestiging or opting in/out of prestige.
                     if(prestigeManager.isIslandPrestiging(islandId)) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.prestigeInProgress()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + vaultMessages.prestigeInProgress()));
                         return 0;
                     }
                     if(prestigeExemptionManager.isIslandExempting(islandId)) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + vaultMessages.optOutInProgress()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + vaultMessages.optOutInProgress()));
                         return 0;
                     }
 
@@ -142,22 +142,22 @@ public class VaultCommand {
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the vault GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to create the InventoryView for the vault GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean updateResult = gui.update();
                     if(!updateResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to decorate the vault GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to decorate the vault GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean openResult = gui.open();
                     if(!openResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to open the vault GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to open the vault GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 

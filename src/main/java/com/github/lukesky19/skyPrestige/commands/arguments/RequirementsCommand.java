@@ -30,8 +30,8 @@ import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -114,36 +114,36 @@ public class RequirementsCommand {
 
                             PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(level);
                             if(prestigeConfig == null) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError(), List.of(Placeholder.parsed("level", String.valueOf(level)))));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError(), List.of(Placeholder.parsed("level", String.valueOf(level)))));
                                 return 0;
                             }
 
                             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
                             Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                             if(island == null) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
                                 return 0;
                             }
 
                             if(island.getOwner() == null) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
                                 return 0;
                             }
 
                             if(island.getOwner() != uuid && !island.getMemberSet().contains(uuid)) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
                                 return 0;
                             }
 
                             IslandData islandData = islandDataManager.getData(island.getUniqueId());
                             if(islandData == null) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                                logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                                logger.warn(AdventureUtility.plain("No island data found for the island " + island.getUniqueId() + "."));
                                 return 0;
                             }
 
                             if(islandData.isPrestigeExempt()) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
                                 return 0;
                             }
 
@@ -161,41 +161,41 @@ public class RequirementsCommand {
                     BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
                     Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().playerNotOnIsland()));
                         return 0;
                     }
 
                     if(island.getOwner() == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().islandNotOwned()));
                         return 0;
                     }
 
                     if(island.getOwner() != uuid && !island.getMemberSet().contains(uuid)) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().playerNotMemberOrOwner()));
                         return 0;
                     }
 
                     IslandData islandData = islandDataManager.getData(island.getUniqueId());
                     if(islandData == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + island.getUniqueId() + "."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        logger.warn(AdventureUtility.plain("No island data found for the island " + island.getUniqueId() + "."));
                         return 0;
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().prestigeExempt()));
                         return 0;
                     }
 
                     int nextLevel = islandData.getPrestigeLevel() + 1;
                     if(nextLevel > prestigeConfigManager.getMaxLevel()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().maxPrestigeLevel()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().maxPrestigeLevel()));
                         return 0;
                     }
 
                     PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextLevel);
                     if(prestigeConfig == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.requirementMessages().prestigeConfigError()));
                         return 0;
                     }
 
@@ -217,22 +217,22 @@ public class RequirementsCommand {
 
         boolean creationResult = gui.create();
         if(!creationResult) {
-            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the requirements GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to create the InventoryView for the requirements GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean updateResult = gui.update();
         if(!updateResult) {
-            logger.error(AdventureUtil.deserialize("Unable to decorate the requirements GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to decorate the requirements GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean openResult = gui.open();
         if(!openResult) {
-            logger.error(AdventureUtil.deserialize("Unable to open the requirements for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to open the requirements for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 }

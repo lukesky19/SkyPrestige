@@ -19,7 +19,6 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
 import org.jspecify.annotations.NonNull;
 
 import java.sql.SQLException;
@@ -37,7 +36,7 @@ public class IslandIdsTable {
 
     /**
      * Constructor
-     * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param queueManager A {@link QueueManager} instance.
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public IslandIdsTable(

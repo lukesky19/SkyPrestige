@@ -40,8 +40,8 @@ import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor
 import com.github.lukesky19.skyPrestige.processor.queued.QueuedSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.placeholderapi.PlaceholderAPIUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.user.User;
@@ -127,7 +127,7 @@ public class SettingsProcessor {
             @NonNull Island newIsland) {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to apply settings on island reset due to invalid settings.yml."));
+            logger.warn(AdventureUtility.plain("Unable to apply settings on island reset due to invalid settings.yml."));
             return;
         }
 
@@ -211,7 +211,7 @@ public class SettingsProcessor {
             @Nullable Player player) {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to apply settings on island join due to invalid settings.yml."));
+            logger.warn(AdventureUtility.plain("Unable to apply settings on island join due to invalid settings.yml."));
             return;
         }
 
@@ -309,7 +309,7 @@ public class SettingsProcessor {
     public void onTeamLeave(@NonNull Island island, @NonNull UUID playerId, @Nullable Player player) {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to apply settings on island leave due to invalid settings.yml."));
+            logger.warn(AdventureUtility.plain("Unable to apply settings on island leave due to invalid settings.yml."));
             return;
         }
 
@@ -363,7 +363,7 @@ public class SettingsProcessor {
     public void onTeamKick(@NonNull Island island, @NonNull UUID playerId, @Nullable Player player) {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to apply settings on island kick due to invalid settings.yml."));
+            logger.warn(AdventureUtility.plain("Unable to apply settings on island kick due to invalid settings.yml."));
             return;
         }
 
@@ -431,13 +431,13 @@ public class SettingsProcessor {
                     DataMutateResult result = luckPermsHook.removeNode(user, permissionNode);
 
                     switch(result) {
-                        case SUCCESS -> logger.info(AdventureUtil.deserialize("Removed permission " + permissionConfig.permission() + " from user " + user.getUsername() + "."));
+                        case SUCCESS -> logger.info(AdventureUtility.plain("Removed permission " + permissionConfig.permission() + " from user " + user.getUsername() + "."));
 
-                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Failed to remove permission " + permissionConfig.permission() + " from user " + user.getUsername() + "."));
+                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Failed to remove permission " + permissionConfig.permission() + " from user " + user.getUsername() + "."));
 
-                        case FAIL_LACKS -> logger.info(AdventureUtil.deserialize("User " + user.getUsername() + " does not have permission " + permissionConfig.permission() + " to remove."));
+                        case FAIL_LACKS -> logger.info(AdventureUtility.plain("User " + user.getUsername() + " does not have permission " + permissionConfig.permission() + " to remove."));
 
-                        case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to remove permission."));
+                        case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to remove permission."));
                     }
                 }
             } else {
@@ -446,13 +446,13 @@ public class SettingsProcessor {
                 DataMutateResult result = luckPermsHook.addNode(user, permissionNode);
 
                 switch(result) {
-                    case SUCCESS -> logger.info(AdventureUtil.deserialize("Added permission " + permissionConfig.permission() + " to user " + user.getUsername() + "."));
+                    case SUCCESS -> logger.info(AdventureUtility.plain("Added permission " + permissionConfig.permission() + " to user " + user.getUsername() + "."));
 
-                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtil.deserialize("Failed to add permission " + permissionConfig.permission() + " to user " + user.getUsername() + "."));
+                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtility.plain("Failed to add permission " + permissionConfig.permission() + " to user " + user.getUsername() + "."));
 
-                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Unable to add permission " + permissionConfig.permission() + " because user " + user.getUsername() + " already has the permission."));
+                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Unable to add permission " + permissionConfig.permission() + " because user " + user.getUsername() + " already has the permission."));
 
-                    case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to add permission."));
+                    case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to add permission."));
                 }
             }
         }
@@ -468,13 +468,13 @@ public class SettingsProcessor {
                     DataMutateResult result = luckPermsHook.removeNode(user, inheritanceNode);
 
                     switch(result) {
-                        case SUCCESS -> logger.info(AdventureUtil.deserialize("Removed group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
+                        case SUCCESS -> logger.info(AdventureUtility.plain("Removed group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
 
-                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Failed to remove group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
+                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Failed to remove group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
 
-                        case FAIL_LACKS -> logger.info(AdventureUtil.deserialize("User " + user.getUsername() + " does not have the group " + inheritanceNode.getGroupName() + " to remove."));
+                        case FAIL_LACKS -> logger.info(AdventureUtility.plain("User " + user.getUsername() + " does not have the group " + inheritanceNode.getGroupName() + " to remove."));
 
-                        case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to remove group."));
+                        case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to remove group."));
                     }
                 }
             } else {
@@ -483,13 +483,13 @@ public class SettingsProcessor {
                 DataMutateResult result = luckPermsHook.addNode(user, inheritanceNode);
 
                 switch(result) {
-                    case SUCCESS -> logger.info(AdventureUtil.deserialize("Added group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
+                    case SUCCESS -> logger.info(AdventureUtility.plain("Added group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
 
-                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtil.deserialize("Failed to add group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
+                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtility.plain("Failed to add group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
 
-                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Unable to add group " + inheritanceNode.getGroupName() + " because user " + user.getUsername() + " already has the group."));
+                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Unable to add group " + inheritanceNode.getGroupName() + " because user " + user.getUsername() + " already has the group."));
 
-                    case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to add group."));
+                    case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to add group."));
                 }
             }
         }

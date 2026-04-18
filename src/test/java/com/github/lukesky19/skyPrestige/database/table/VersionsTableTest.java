@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
@@ -41,7 +39,6 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link VersionsTable} class.
  * Most code is tested against a live database except for errors.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 public class VersionsTableTest extends AbstractTableTest {
     // Classes being tested
     private VersionsTable liveVersionsTable;
@@ -94,9 +91,9 @@ public class VersionsTableTest extends AbstractTableTest {
     @Test
     public void testUpdateAndGetVersion() {
         // Create the table
-        liveVersionsTable.createTable().thenCompose(v1 -> {
+        liveVersionsTable.createTable().thenCompose(_ -> {
             // Insert a version
-            return liveVersionsTable.updateVersion("test", 1).thenCompose(v2 -> {
+            return liveVersionsTable.updateVersion("test", 1).thenCompose(_ -> {
                 // Get the version
                 return liveVersionsTable.getVersion("test").thenApply(version -> {
                     // Test that the version retrieved equals what was inserted
@@ -113,7 +110,7 @@ public class VersionsTableTest extends AbstractTableTest {
     @Test
     public void testGetVersionNoVersion() {
         // Create the table
-        liveVersionsTable.createTable().thenCompose(v1 -> {
+        liveVersionsTable.createTable().thenCompose(_ -> {
             // Get the version
             return liveVersionsTable.getVersion("test").thenApply(version -> {
                 // Test that the version retrieved equals -1

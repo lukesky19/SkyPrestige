@@ -26,8 +26,8 @@ import com.github.lukesky19.skyPrestige.listener.points.abstracts.PointsListener
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.enums.ActionType;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -71,7 +71,7 @@ public class PlayerBucketFillListener extends PointsListener {
         // Config
         PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            logger.warn(AdventureUtility.plain("Unable to process prestige points due to invalid prestige points config."));
             return;
         }
 

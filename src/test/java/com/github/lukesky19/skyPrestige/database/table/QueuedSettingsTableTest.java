@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -48,7 +46,6 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link QueuedSettingsTable} class.
  * Most code is tested against a live database except for errors.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 public class QueuedSettingsTableTest  extends AbstractTableTest {
     @Mock
     private ComponentLogger logger;
@@ -76,8 +73,8 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
 
         // Create tables
         versionsTable.createTable()
-                .thenCompose(v1 -> islandIdsTable.createTable()
-                        .thenCompose(v2 -> playerIdsTable.createTable())).join();
+                .thenCompose(_ -> islandIdsTable.createTable()
+                        .thenCompose(_ -> playerIdsTable.createTable())).join();
 
         // Setup classes for tests
         liveQueuedSettingsTable = new QueuedSettingsTable(logger, liveQueueManager, versionsTable);
@@ -110,8 +107,8 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
 
         // Check that the table creation errored
         queuedSettingsTableWithMockedQueueManager.createTable()
-                .thenAccept(v -> fail("Table creation should of failed exceptionally."))
-                .exceptionally(ex -> {
+                .thenAccept(_ -> fail("Table creation should of failed exceptionally."))
+                .exceptionally(_ -> {
                     verify(logger).error(any(Component.class));
                     return null;
                 })
@@ -127,10 +124,10 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
 
-        liveQueuedSettingsTable.createTable().thenCompose(v1 -> {
-            return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
-                return playerIdsTable.insertPlayerId(playerId).thenCompose(v3 -> {
-                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(v4 -> {
+        liveQueuedSettingsTable.createTable().thenCompose(_ -> {
+            return islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
+                return playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(_ -> {
                         return liveQueuedSettingsTable.getQueuedSettings(playerId).thenApply(list -> {
                             assertFalse(list.isEmpty());
                             assertEquals(1, list.size());
@@ -158,8 +155,8 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
 
         // Check that the table creation errored
         queuedSettingsTableWithMockedQueueManager.queueSettings(UUID.randomUUID(), "BSkyBlock" + UUID.randomUUID(), SettingsType.PRESTIGE, 1)
-                .thenAccept(v -> fail("Table creation should of failed exceptionally."))
-                .exceptionally(ex -> {
+                .thenAccept(_ -> fail("Table creation should of failed exceptionally."))
+                .exceptionally(_ -> {
                     verify(logger).error(any(Component.class));
                     return null;
                 })
@@ -175,10 +172,10 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
         UUID playerId = UUID.randomUUID();
         String islandId = "BSkyBlock" + UUID.randomUUID();
 
-        liveQueuedSettingsTable.createTable().thenCompose(v1 -> {
-            return islandIdsTable.insertIslandId(islandId).thenCompose(v2 -> {
-                return playerIdsTable.insertPlayerId(playerId).thenCompose(v3 -> {
-                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(v4 -> {
+        liveQueuedSettingsTable.createTable().thenCompose(_ -> {
+            return islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
+                return playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+                    return liveQueuedSettingsTable.queueSettings(playerId, islandId, SettingsType.PRESTIGE, 1).thenCompose(_ -> {
                         return liveQueuedSettingsTable.getQueuedSettings(playerId).thenCompose(list1 -> {
                             assertFalse(list1.isEmpty());
                             assertEquals(1, list1.size());
@@ -188,7 +185,7 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
                             assertEquals(SettingsType.PRESTIGE, queuedSettings.settingsType());
                             assertEquals(1, queuedSettings.prestigeLevel());
 
-                            return liveQueuedSettingsTable.clearQueuedSettings(playerId).thenCompose(v5 -> {
+                            return liveQueuedSettingsTable.clearQueuedSettings(playerId).thenCompose(_ -> {
                                 return liveQueuedSettingsTable.getQueuedSettings(playerId).thenApply(list2 -> {
                                     assertTrue(list2.isEmpty());
                                     return null;
@@ -212,8 +209,8 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
 
         // Check that the table creation errored
         queuedSettingsTableWithMockedQueueManager.clearQueuedSettings(UUID.randomUUID())
-                .thenAccept(v -> fail("Table creation should of failed exceptionally."))
-                .exceptionally(ex -> {
+                .thenAccept(_ -> fail("Table creation should of failed exceptionally."))
+                .exceptionally(_ -> {
                     verify(logger).error(any(Component.class));
                     return null;
                 })
@@ -227,7 +224,7 @@ public class QueuedSettingsTableTest  extends AbstractTableTest {
     public void testGetQueuedSettingsQueueManagerError() {
         // When a read transaction is queued, intercept the invocation to replace the existing ResultSet with the mocked one.
         when(mockedQueueManager.queueReadTransaction(anyString(), anyList(), Mockito.<Function<ResultSet, List<QueuedSettings>>>any()))
-                .thenAnswer(invocation -> {
+                .thenAnswer(_ -> {
                     // Return a failed future
                     return CompletableFuture.failedFuture(new RuntimeException("Runtime Test Error"));
                 });

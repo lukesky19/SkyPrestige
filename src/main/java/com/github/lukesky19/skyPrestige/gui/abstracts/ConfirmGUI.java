@@ -18,8 +18,8 @@
 package com.github.lukesky19.skyPrestige.gui.abstracts;
 
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
-import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.paper.api.gui.templates.ChestGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;

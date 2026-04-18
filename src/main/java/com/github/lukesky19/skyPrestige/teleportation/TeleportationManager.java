@@ -22,8 +22,8 @@ import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -76,7 +76,7 @@ public class TeleportationManager {
             if(islandId == null) return;
             Settings settings = settingsManager.getConfiguration();
             if(settings == null) {
-                logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
+                logger.error(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
                 return;
             }
 
@@ -84,7 +84,7 @@ public class TeleportationManager {
             if(!bentoBoxHook.isHooked()) return;
             Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
             if(optionalIsland.isEmpty()) {
-                logger.error(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
+                logger.error(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
                 return;
             }
 
@@ -93,7 +93,7 @@ public class TeleportationManager {
             if(spawnPoint != null) {
                 player.teleportAsync(spawnPoint);
             } else {
-                logger.warn(AdventureUtil.deserialize("Unable to teleport player " + player.getName() + " due to now island spawn point set for island id " + islandId + "."));
+                logger.warn(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to now island spawn point set for island id " + islandId + "."));
             }
 
             databaseManager.getPlayerTeleportTable().deletePlayerIdAndIslandId(playerId);

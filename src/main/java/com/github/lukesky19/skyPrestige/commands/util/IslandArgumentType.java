@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.commands.util;
 
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -93,7 +93,7 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
                     String islandMembersNames = island.getMemberSet().stream().map(memberId ->
                                     plugin.getServer().getOfflinePlayer(memberId).getName())
                             .collect(Collectors.joining(","));
-                    Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtil.deserialize("Members: " + islandMembersNames));
+                    Message toolTip = MessageComponentSerializer.message().serialize(AdventureUtility.deserialize("Members: " + islandMembersNames));
                     builder.suggest(island.getUniqueId(), toolTip);
                 });
 

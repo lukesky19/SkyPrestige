@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.util.parameter;
 
-import com.github.lukesky19.skylib.api.database.parameter.Parameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.Parameter;
 import org.jspecify.annotations.NonNull;
 
 /**

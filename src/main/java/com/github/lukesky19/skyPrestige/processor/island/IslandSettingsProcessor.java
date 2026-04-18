@@ -24,8 +24,8 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.MagicCobblestoneGeneratorHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -142,11 +142,11 @@ public class IslandSettingsProcessor {
         databaseManager.getIslandIdsTable().updateIslandId(oldIsland.getUniqueId(), newIsland.getUniqueId())
                 .thenAccept(v1 ->
                         databaseManager.getIslandDataTable().saveIslandData(newIsland.getUniqueId(), islandData).exceptionally(ex -> {
-                                    logger.error(AdventureUtil.deserialize("Failed to save island data for new island id: " + newIsland.getUniqueId() + ". Error: " + ex.getMessage()));
+                                    logger.error(AdventureUtility.plain("Failed to save island data for new island id: " + newIsland.getUniqueId() + ". Error: " + ex.getMessage()));
                                     return null;
                                 })
                                 .exceptionally(ex -> {
-                                    logger.error(AdventureUtil.deserialize("Failed to update old island id " + oldIsland.getUniqueId() + " to new island id " + newIsland.getUniqueId() + ". Error: " + ex.getMessage()));
+                                    logger.error(AdventureUtility.plain("Failed to update old island id " + oldIsland.getUniqueId() + " to new island id " + newIsland.getUniqueId() + ". Error: " + ex.getMessage()));
                                     return null;
                                 }));
 

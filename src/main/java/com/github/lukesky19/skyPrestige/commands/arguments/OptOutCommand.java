@@ -24,7 +24,7 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -79,19 +79,19 @@ public class OptOutCommand {
 
                     Optional<Island> optionalIsland = bentoBoxHook.getIslandAtLocation(player.getLocation());
                     if(optionalIsland.isEmpty()) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.playerNotOnIsland()));
+                        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + optOutMessages.playerNotOnIsland()));
                         return 0;
                     }
                     Island island = optionalIsland.get();
 
                     IslandData islandData = islandDataManager.getData(optionalIsland.get().getUniqueId());
                     if(islandData == null) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
                         return 0;
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.islandAlreadyOptedOut()));
+                        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + optOutMessages.islandAlreadyOptedOut()));
                         return 0;
                     }
 

@@ -19,11 +19,11 @@ package com.github.lukesky19.skyPrestige.configuration.data.points.points;
 
 import com.github.lukesky19.skyPrestige.configuration.data.points.data.EntityData;
 import com.github.lukesky19.skyPrestige.util.item.ItemUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.format.FormatUtil;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import com.github.lukesky19.skylib.paper.api.format.FormatUtil;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -91,8 +91,8 @@ public record EntityPoints(
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
         itemStackBuilder.setItemType(itemType);
         itemStackBuilder.setEntityType(entityData.entityType());
-        itemStackBuilder.setName(AdventureUtil.deserialize(name, placeholders));
-        itemStackBuilder.setLore(lore.stream().map(line -> AdventureUtil.deserialize(line, placeholders)).toList());
+        itemStackBuilder.setName(AdventureUtility.deserialize(name, placeholders));
+        itemStackBuilder.setLore(lore.stream().map(line -> AdventureUtility.deserialize(line, placeholders)).toList());
 
         return itemStackBuilder.buildItemStack().orElse(null);
     }

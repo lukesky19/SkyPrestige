@@ -23,7 +23,7 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

@@ -18,7 +18,7 @@
 package com.github.lukesky19.skyPrestige.configuration.data.points.points;
 
 import com.github.lukesky19.skyPrestige.gui.gui.ValuesGUI;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;

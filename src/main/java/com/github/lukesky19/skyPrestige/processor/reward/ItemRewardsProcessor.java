@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.processor.reward;
 
 import com.github.lukesky19.skyPrestige.configuration.data.reward.ItemReward;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.player.PlayerUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

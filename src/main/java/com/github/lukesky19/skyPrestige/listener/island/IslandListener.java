@@ -28,8 +28,8 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.processor.reset.SettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -115,7 +115,7 @@ public class IslandListener implements Listener {
 
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige settings due to invalid plugin settings."));
+            logger.warn(AdventureUtility.plain("Unable to apply starting prestige settings due to invalid plugin settings."));
             return;
         }
 
@@ -124,14 +124,14 @@ public class IslandListener implements Listener {
 
             OptInOutConfig optOutConfig = optOutConfigManager.getConfiguration();
             if(optOutConfig == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due invalid opt-out config."));
+                logger.warn(AdventureUtility.plain("Unable to apply starting prestige rewards due invalid opt-out config."));
                 return;
             }
 
             UUID playerId = islandCreatedEvent.getPlayerUUID();
             Player player = plugin.getServer().getPlayer(playerId);
             if(player == null || !player.isOnline() || !player.isConnected()) {
-                logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due to the player being invalid."));
+                logger.warn(AdventureUtility.plain("Unable to apply starting prestige rewards due to the player being invalid."));
                 return;
             }
 
@@ -143,14 +143,14 @@ public class IslandListener implements Listener {
             if(settings.applyOptInRewardsForInitialIslands()) {
                 OptInOutConfig optInConfig = optInConfigManager.getConfiguration();
                 if(optInConfig == null) {
-                    logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due invalid opt-in config."));
+                    logger.warn(AdventureUtility.plain("Unable to apply starting prestige rewards due invalid opt-in config."));
                     return;
                 }
 
                 UUID playerId = islandCreatedEvent.getPlayerUUID();
                 Player player = plugin.getServer().getPlayer(playerId);
                 if(player == null || !player.isOnline() || !player.isConnected()) {
-                    logger.warn(AdventureUtil.deserialize("Unable to apply starting prestige rewards due to the player being invalid."));
+                    logger.warn(AdventureUtility.plain("Unable to apply starting prestige rewards due to the player being invalid."));
                     return;
                 }
 

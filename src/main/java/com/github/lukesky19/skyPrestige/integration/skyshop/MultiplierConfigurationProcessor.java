@@ -23,7 +23,7 @@ import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.util.enums.MultiplierType;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skyshop.api.configuration.TransactionConfiguration;
 import com.github.lukesky19.skyshop.api.processor.TransactionProcessor;
 import com.github.lukesky19.skyshop.api.result.TransactionResult;
@@ -91,9 +91,9 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
         }
 
         long updatedTime;
-        Component multiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierActive());
-        Component higherMultiplierActiveMessage = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().higherMultiplierActive());
-        Component multiplierTimeMax = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierTimeMax());
+        Component multiplierActiveMessage = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierActive());
+        Component higherMultiplierActiveMessage = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().higherMultiplierActive());
+        Component multiplierTimeMax = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().multiplierTimeMax());
         if(multiplierType.equals(MultiplierType.SERVER)) {
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > 0.0) {
@@ -131,7 +131,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
             // Get and validate the island
             Island island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
                 return new TransactionResult("Player not on island", true, false, false);
             }
 
@@ -230,14 +230,14 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
         if(multiplierType.equals(MultiplierType.SERVER)) {
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > 0.0) {
-                    player.sendMessage(AdventureUtil.deserialize(multiplierActiveMessage));
+                    player.sendMessage(AdventureUtility.deserialize(multiplierActiveMessage));
                     return new TransactionResult("A server multiplier is already active", true, false, false);
                 }
             }
 
             if(multiplier != null && activeMultiplierHigherPreventPurchase) {
                 if(multiplierManager.getServerMultiplier() > multiplier) {
-                    player.sendMessage(AdventureUtil.deserialize(higherMultiplierActiveMessage));
+                    player.sendMessage(AdventureUtility.deserialize(higherMultiplierActiveMessage));
                     return new TransactionResult("A higher server multiplier is already active", true, false, false);
                 }
             }
@@ -256,7 +256,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
 
                 // Check max time
                 if(maxTime != null && updatedTime > maxTime) {
-                    player.sendMessage(AdventureUtil.deserialize(multiplierTimeMaxMessage));
+                    player.sendMessage(AdventureUtility.deserialize(multiplierTimeMaxMessage));
                     return new TransactionResult("The maximum multiplier time would be exceeded by this transaction", true, false, false);
                 }
             }
@@ -264,20 +264,20 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
             // Get and validate the island
             island = bentoBoxHook.getIsland(player.getWorld(), player.getUniqueId());
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + multiplierMessages.shopMultiplierMessages().notOnIsland()));
                 return new TransactionResult("Player not on island", true, false, false);
             }
 
             if(activeMultiplierPreventPurchase) {
                 if(multiplierManager.getIslandMultiplier(island) > 0.0) {
-                    player.sendMessage(AdventureUtil.deserialize(multiplierActiveMessage));
+                    player.sendMessage(AdventureUtility.deserialize(multiplierActiveMessage));
                     return new TransactionResult("An island multiplier is already active", true, false, false);
                 }
             }
 
             if(multiplier != null && activeMultiplierHigherPreventPurchase) {
                 if(multiplierManager.getIslandMultiplier(island) > multiplier) {
-                    player.sendMessage(AdventureUtil.deserialize(higherMultiplierActiveMessage));
+                    player.sendMessage(AdventureUtility.deserialize(higherMultiplierActiveMessage));
                     return new TransactionResult("A higher island multiplier is already active", true, false, false);
                 }
             }
@@ -296,7 +296,7 @@ public class MultiplierConfigurationProcessor implements TransactionProcessor {
 
                 // Check max time
                 if(maxTime != null && updatedTime > maxTime) {
-                    player.sendMessage(AdventureUtil.deserialize(multiplierTimeMaxMessage));
+                    player.sendMessage(AdventureUtility.deserialize(multiplierTimeMaxMessage));
                     return new TransactionResult("The maximum multiplier time would be exceeded by this transaction", true, false, false);
                 }
             }

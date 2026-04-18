@@ -51,8 +51,8 @@ import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.github.lukesky19.skyshop.api.SkyShopAPI;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.Plugin;
@@ -316,10 +316,10 @@ public class SkyPrestige extends SkyPlugin {
 
                 saveFuture
                         .thenAccept(v -> this.getComponentLogger().info(
-                                AdventureUtil.deserialize("Successfully saved island data on plugin disable.")))
+                                AdventureUtility.deserialize("Successfully saved island data on plugin disable.")))
                         .exceptionally(ex -> {
                             this.getComponentLogger().error(
-                                    AdventureUtil.deserialize("Failed to save island data on plugin disable. " +
+                                    AdventureUtility.deserialize("Failed to save island data on plugin disable. " +
                                             "Data loss will occur. Error: " + ex.getMessage()));
                             return null;
                         });
@@ -371,14 +371,14 @@ public class SkyPrestige extends SkyPlugin {
         if(skyLib != null && skyLib.isEnabled()) {
             String version = skyLib.getPluginMeta().getVersion();
             String[] splitVersion = version.split("\\.");
-            int second = Integer.parseInt(splitVersion[1]);
+            int first = Integer.parseInt(splitVersion[0]);
 
-            if(second >= 5) {
+            if(first >= 2) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.5.0.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtility.deserialize("SkyLib Version 2.0.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

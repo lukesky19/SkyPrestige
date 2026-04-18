@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.processor.reward;
 import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.configuration.data.reward.CommandReward;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
-import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
+import com.github.lukesky19.skylib.paper.api.placeholderapi.PlaceholderAPIUtil;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;

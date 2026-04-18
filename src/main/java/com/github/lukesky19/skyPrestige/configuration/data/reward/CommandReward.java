@@ -18,8 +18,8 @@
 package com.github.lukesky19.skyPrestige.configuration.data.reward;
 
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;

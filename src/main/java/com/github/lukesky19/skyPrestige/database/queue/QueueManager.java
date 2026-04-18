@@ -18,7 +18,7 @@
 package com.github.lukesky19.skyPrestige.database.queue;
 
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.common.api.database.queue.MultiThreadQueueManager;
 import org.jspecify.annotations.NonNull;
 
 /**

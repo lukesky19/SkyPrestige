@@ -18,15 +18,13 @@
 package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -39,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the {@link PlayerIdsTable} class.
  * All code is tested against a live database.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 public class PlayerIdsTableTest extends AbstractTableTest {
     // Classes being tested
     private PlayerIdsTable livePlayerIdsTable;
@@ -82,8 +79,8 @@ public class PlayerIdsTableTest extends AbstractTableTest {
     public void testInsertPlayerId() {
         UUID playerId = UUID.randomUUID();
 
-        livePlayerIdsTable.createTable().thenCompose(v1 ->
-                livePlayerIdsTable.insertPlayerId(playerId).thenCompose(v2 ->
+        livePlayerIdsTable.createTable().thenCompose(_ ->
+                livePlayerIdsTable.insertPlayerId(playerId).thenCompose(_ ->
                         getPlayerId(playerId).thenApply(databasePlayerId -> {
                             assertNotNull(databasePlayerId);
                             assertEquals(playerId, databasePlayerId);

@@ -18,7 +18,7 @@
 package com.github.lukesky19.skyPrestige.util.item;
 
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
-import com.github.lukesky19.skylib.api.registry.RegistryUtil;
+import com.github.lukesky19.skylib.paper.api.registry.RegistryUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;

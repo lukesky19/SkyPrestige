@@ -18,11 +18,12 @@
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.gui.*;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.platform.PlatformUtils;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.yaml.NodeStyle;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -232,12 +233,11 @@ public class GUIConfigManager {
      * @param <T> The class created for the configuration.
      */
     private <T> @Nullable T loadConfiguration(@NonNull Path path, @NonNull Class<T> clazz) {
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-
+        YamlConfigurationLoader loader = createLoader(path);
         try {
             return loader.load().get(clazz);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtility.plain("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
             return null;
         }
     }
@@ -284,5 +284,22 @@ public class GUIConfigManager {
         if(!confirmOptOutPath.toFile().exists()) {
             plugin.saveResource("gui" + File.separator + "confirm_opt_out.yml", false);
         }
+    }
+
+    /**
+     * Create the {@link YamlConfigurationLoader} for the path provided.
+     * @apiNote {@link PlatformUtils#getSerializers()} are included by default.
+     * @param path The {@link Path}.
+     * @return The {@link YamlConfigurationLoader}.
+     */
+    protected @NonNull YamlConfigurationLoader createLoader(@NonNull Path path) {
+        return YamlConfigurationLoader.builder()
+                .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(4)
+                .defaultOptions(configurationOptions ->
+                        configurationOptions.serializers(builder ->
+                                builder.registerAll(PlatformUtils.getSerializers())))
+                .build();
     }
 }

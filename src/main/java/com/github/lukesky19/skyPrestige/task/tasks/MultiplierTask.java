@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jspecify.annotations.NonNull;
@@ -100,7 +100,7 @@ public class MultiplierTask extends BukkitRunnable {
         Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to online players
-        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierExpiredNotice());
+        Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierExpiredNotice());
         plugin.getServer().getOnlinePlayers().forEach(player -> player.sendMessage(message));
     }
 
@@ -113,7 +113,7 @@ public class MultiplierTask extends BukkitRunnable {
         Locale.MultiplierMessages multiplierMessages = locale.multiplierMessages();
 
         // Send notice to island members
-        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierExpiredNotice());
+        Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierExpiredNotice());
         island.getMemberSet().stream()
                 .map(memberId -> plugin.getServer().getPlayer(memberId))
                 .filter(Objects::nonNull)

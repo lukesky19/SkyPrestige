@@ -28,8 +28,8 @@ import com.github.lukesky19.skyPrestige.task.tasks.CacheTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.CalculateTopTenTask;
 import com.github.lukesky19.skyPrestige.task.tasks.MultiplierTask;
 import com.github.lukesky19.skyPrestige.task.tasks.SaveTask;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.NonNull;
@@ -108,7 +108,7 @@ public class TaskManager {
     private void startSaveTask() {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null || settings.saveFrequencySeconds() == null) {
-            plugin.getComponentLogger().warn(AdventureUtil.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
+            plugin.getComponentLogger().warn(AdventureUtility.deserialize("Unable to start the save task due to invalid plugin settings or save frequency seconds setting."));
             return;
         }
 

@@ -17,9 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.database.table;
 
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
-import com.github.lukesky19.skylib.api.database.queue.QueueManager;
+import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.StringParameter;
 import org.jspecify.annotations.NonNull;
 
 import java.sql.SQLException;

@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.interfaces;
 
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 

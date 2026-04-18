@@ -32,7 +32,7 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.database.table.QueuedSettingsTable;
 import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
-import com.github.lukesky19.skylib.api.placeholderapi.PlaceholderAPIUtil;
+import com.github.lukesky19.skylib.paper.api.placeholderapi.PlaceholderAPIUtil;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;

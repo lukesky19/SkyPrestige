@@ -17,8 +17,8 @@
 */
 package com.github.lukesky19.skyPrestige.common;
 
-import com.github.lukesky19.skylib.internal.ThreadPoolManager;
-import com.github.lukesky19.skylib.plugin.settings.Settings;
+import com.github.lukesky19.skylib.common.settings.Settings;
+import com.github.lukesky19.skylib.common.threading.ThreadPoolManager;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

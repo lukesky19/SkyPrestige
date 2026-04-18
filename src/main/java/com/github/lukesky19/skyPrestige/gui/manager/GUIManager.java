@@ -20,8 +20,8 @@ package com.github.lukesky19.skyPrestige.gui.manager;
 import com.github.lukesky19.skyPrestige.gui.gui.ExchangeGUI;
 import com.github.lukesky19.skyPrestige.gui.gui.VaultGUI;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.gui.abstracts.AbstractGUIManager;
-import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
+import com.github.lukesky19.skylib.paper.api.gui.abstracts.AbstractGUIManager;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.BaseGUI;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 

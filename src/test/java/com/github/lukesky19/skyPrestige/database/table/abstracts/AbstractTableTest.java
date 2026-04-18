@@ -20,7 +20,7 @@ package com.github.lukesky19.skyPrestige.database.table.abstracts;
 import com.github.lukesky19.skyPrestige.common.DatabaseTestExtension;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,7 @@ public abstract class AbstractTableTest {
         displayName = displayName.replaceAll("[^a-zA-Z0-9]", "_");
 
         // Intercept data folder requests
-        when(skyPrestige.getDataFolder()).thenReturn(new File("test_data_" + this.getClass().getName() + "_" + displayName));
+        when(skyPrestige.getDirectoryFile()).thenReturn(new File("test_data_" + this.getClass().getName() + "_" + displayName));
 
         // Set up the mocked queue manager
         mockedQueueManager = Mockito.mock(QueueManager.class);

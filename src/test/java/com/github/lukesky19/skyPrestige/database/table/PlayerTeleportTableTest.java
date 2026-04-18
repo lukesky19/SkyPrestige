@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
@@ -43,7 +41,6 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link PlayerTeleportTable} class.
  * Most code is tested against a live database except for errors.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 public class PlayerTeleportTableTest extends AbstractTableTest {
     // Other Tables
     private IslandIdsTable islandIdsTable;
@@ -68,8 +65,8 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
 
         // Create tables
         versionsTable.createTable()
-                .thenCompose(v1 -> islandIdsTable.createTable()
-                        .thenCompose(v2 -> playerIdsTable.createTable())).join();
+                .thenCompose(_ -> islandIdsTable.createTable()
+                        .thenCompose(_ -> playerIdsTable.createTable())).join();
 
         // Setup classes for tests
         livePlayerTeleportTable = new PlayerTeleportTable(liveQueueManager, versionsTable);
@@ -115,10 +112,10 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
         String islandId = "BSkyBlocK" + UUID.randomUUID();
         UUID playerId = UUID.randomUUID();
 
-        islandIdsTable.insertIslandId(islandId).thenCompose(v1 -> {
-            return playerIdsTable.insertPlayerId(playerId).thenCompose(v2 -> {
-                return livePlayerTeleportTable.createTable().thenCompose(v3 -> {
-                    return livePlayerTeleportTable.insertPlayerIdAndIslandId(playerId, islandId).thenCompose(v4 -> {
+        islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
+            return playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+                return livePlayerTeleportTable.createTable().thenCompose(_ -> {
+                    return livePlayerTeleportTable.insertPlayerIdAndIslandId(playerId, islandId).thenCompose(_ -> {
                         return livePlayerTeleportTable.getIslandId(playerId).thenApply(databaseIslandId -> {
                             assertEquals(islandId, databaseIslandId);
                             return null;
@@ -138,14 +135,14 @@ public class PlayerTeleportTableTest extends AbstractTableTest {
         String islandId = "BSkyBlocK" + UUID.randomUUID();
         UUID playerId = UUID.randomUUID();
 
-        islandIdsTable.insertIslandId(islandId).thenCompose(v1 -> {
-            return playerIdsTable.insertPlayerId(playerId).thenCompose(v2 -> {
-                return livePlayerTeleportTable.createTable().thenCompose(v3 -> {
-                    return livePlayerTeleportTable.insertPlayerIdAndIslandId(playerId, islandId).thenCompose(v4 -> {
+        islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
+            return playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+                return livePlayerTeleportTable.createTable().thenCompose(_ -> {
+                    return livePlayerTeleportTable.insertPlayerIdAndIslandId(playerId, islandId).thenCompose(_ -> {
                         return livePlayerTeleportTable.getIslandId(playerId).thenCompose(databaseIslandId1 -> {
                             assertEquals(islandId, databaseIslandId1);
 
-                            return livePlayerTeleportTable.deletePlayerIdAndIslandId(playerId).thenCompose(v5 -> {
+                            return livePlayerTeleportTable.deletePlayerIdAndIslandId(playerId).thenCompose(_ -> {
                                return livePlayerTeleportTable.getIslandId(playerId).thenApply(databaseIslandId2 -> {
                                    assertNull(databaseIslandId2);
                                    return null;

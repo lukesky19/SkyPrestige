@@ -32,15 +32,15 @@ import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.format.FormatUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
-import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.format.FormatUtil;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.paper.api.gui.templates.ChestGUI;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Quest;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -127,13 +127,13 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     public boolean create() {
         if(requirementsGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the rewards GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = requirementsGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the rewards GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the rewards GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -147,7 +147,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
             case CHEST_54 -> requirementsPerPage = 28;
 
             default -> {
-                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in rewards GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtility.plain("Unsupported GUI Type in rewards GUI config. Allowed Types: CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
@@ -164,13 +164,13 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
     @Override
     public boolean update() {
         if(requirementsGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtility.plain("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -276,7 +276,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
         ButtonConfig nextPageConfig = requirementsGUIConfig.nextPage();
 
         if(nextPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the next page button to the rewards GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the next page button to the rewards GUI due to an invalid slot."));
             return;
         }
 
@@ -297,7 +297,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
         ButtonConfig prevPageConfig = requirementsGUIConfig.prevPage();
 
         if(prevPageConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the previous page button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the previous page button to the requirements GUI due to an invalid slot."));
             return;
         }
 
@@ -320,7 +320,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
         ButtonConfig exitConfig = requirementsGUIConfig.exit();
 
         if(exitConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the exit button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the exit button to the requirements GUI due to an invalid slot."));
             return;
         }
 
@@ -395,7 +395,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
                 numOfRequirementsErrored++;
             }
         } else {
-            logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for a prestige points requirement in the requirements GUI."));
+            logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for a prestige points requirement in the requirements GUI."));
             numOfRequirementsErrored++;
         }
 
@@ -446,7 +446,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
                 numOfRequirementsErrored++;
             }
         } else {
-            logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for the money requirement in the requirements GUI."));
+            logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for the money requirement in the requirements GUI."));
             numOfRequirementsErrored++;
         }
 
@@ -474,14 +474,14 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
 
             Optional<ItemStack> optionalRequiredItem = requiredItemBuilder.buildItemStack();
             if(optionalRequiredItem.isEmpty()) {
-                logger.warn(AdventureUtil.deserialize("Failed to create the required ItemStack for an inventory requirement in the requirements GUI."));
+                logger.warn(AdventureUtility.plain("Failed to create the required ItemStack for an inventory requirement in the requirements GUI."));
                 numOfRequirementsErrored++;
                 continue;
             }
             ItemStack requiredStack = optionalRequiredItem.get();
             ItemType itemType = requiredStack.getType().asItemType();
             if(itemType == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to get the ItemType from the required ItemStack for an inventory requirement in the requirements GUI."));
+                logger.warn(AdventureUtility.plain("Failed to get the ItemType from the required ItemStack for an inventory requirement in the requirements GUI."));
                 numOfRequirementsErrored++;
                 continue;
             }
@@ -514,7 +514,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
                     numOfRequirementsErrored++;
                 }
             } else {
-                logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for the money requirement in the requirements GUI."));
+                logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for the money requirement in the requirements GUI."));
                 numOfRequirementsErrored++;
             }
 
@@ -551,7 +551,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
 
         LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
         if(!lmbQuestHook.isHooked()) {
-            logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStacks for a quest requirements in the requirements GUI due to the quests plugin not being hooked into."));
+            logger.warn(AdventureUtility.plain("Failed to create the display ItemStacks for a quest requirements in the requirements GUI due to the quests plugin not being hooked into."));
             numOfRequirementsErrored += questSize;
             currentRequirementKey += questSize;
             return;
@@ -562,7 +562,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
         for(int questKey = 0; questKey < questSize && numOfRequirementsAdded < requirementsPerPage && currentRequirementKey < totalRequirementCount; questKey++) {
             QuestRequirement questRequirement = prestigeConfig.questRequirements().get(questKey);
             if(questRequirement.questId() == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for a quest requirement in the requirements GUI due to a null quest id."));
+                logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for a quest requirement in the requirements GUI due to a null quest id."));
                 numOfRequirementsErrored++;
                 currentRequirementKey++;
                 continue;
@@ -570,7 +570,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
 
             Quest quest = lmbQuestHook.getQuestById(questRequirement.questId());
             if(quest == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for a quest requirement in the requirements GUI due to no quest found for quest id " + questRequirement.questId() + "."));
+                logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for a quest requirement in the requirements GUI due to no quest found for quest id " + questRequirement.questId() + "."));
                 numOfRequirementsErrored++;
                 currentRequirementKey++;
                 continue;
@@ -594,7 +594,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
                     numOfRequirementsErrored++;
                 }
             } else {
-                logger.warn(AdventureUtil.deserialize("Failed to create the display ItemStack for a quest requirement in the requirements GUI."));
+                logger.warn(AdventureUtility.plain("Failed to create the display ItemStack for a quest requirement in the requirements GUI."));
                 numOfRequirementsErrored++;
             }
 
@@ -624,7 +624,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
 
         requirementsGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the requirements GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the requirements GUI due to an invalid slot."));
                 return;
             }
 
@@ -639,7 +639,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add an action button to the requirements GUI due to an invalid slot."));
             return;
         }
 
@@ -665,7 +665,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
      */
     private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the requirements GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add a display button to the requirements GUI due to an invalid slot."));
             return;
         }
 

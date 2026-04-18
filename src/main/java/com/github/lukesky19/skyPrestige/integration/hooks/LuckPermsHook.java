@@ -1,8 +1,25 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
 import com.github.lukesky19.skyPrestige.configuration.data.common.Context;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.integration.Hook;
+import com.github.lukesky19.skylib.common.api.integration.Hook;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import dev.rosewood.rosestacker.api.RoseStackerAPI;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.context.ContextSet;

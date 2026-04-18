@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.protection_orb.ProtectionOrbConfig;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -48,7 +48,7 @@ public class ProtectionOrbConfigManager extends SimpleConfigManager<ProtectionOr
             }
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Unknown config version for protection orb config. Unable to update config."));
+                logger.warn(AdventureUtility.plain("Unknown config version for protection orb config. Unable to update config."));
                 return null;
             }
         }
@@ -60,7 +60,7 @@ public class ProtectionOrbConfigManager extends SimpleConfigManager<ProtectionOr
     }
 
     @Override
-    public void saveBundledConfig() {
+    public void saveDefaultConfiguration() {
         plugin.saveResource("protection_orb.yml", false);
     }
 }

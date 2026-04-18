@@ -22,7 +22,7 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;

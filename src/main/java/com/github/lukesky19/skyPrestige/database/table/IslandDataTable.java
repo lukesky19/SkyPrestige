@@ -26,13 +26,13 @@ import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import com.github.lukesky19.skyPrestige.util.parameter.ByteArrayParameter;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.database.parameter.Parameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.DoubleParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.LongParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.database.parameter.Parameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.DoubleParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.LongParameter;
+import com.github.lukesky19.skylib.common.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -97,7 +97,7 @@ public class IslandDataTable {
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, islandIdIndexCreationSql))
                 .thenCompose(list -> versionsTable.updateVersion(tableName, 1))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Island Data Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtility.plain("Island Data Table creation failed: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -347,7 +347,7 @@ public class IslandDataTable {
                 if(map.isEmpty()) return itemMap;
 
                 if(!(map.keySet().stream().allMatch(key -> key instanceof PageSlotKey))) {
-                    logger.warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+                    logger.warn(AdventureUtility.plain("The vault data for island id " + islandId + " is not in a valid or recognized format."));
                     return itemMap;
                 }
 
@@ -360,7 +360,7 @@ public class IslandDataTable {
                 return itemMap;
             }
 
-            logger.warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+            logger.warn(AdventureUtility.plain("The vault data for island id " + islandId + " is not in a valid or recognized format."));
             return itemMap;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);

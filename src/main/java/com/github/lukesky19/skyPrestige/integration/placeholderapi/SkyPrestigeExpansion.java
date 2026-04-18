@@ -33,7 +33,7 @@ import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.leonardobishop.quests.common.player.QPlayer;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -361,7 +361,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
             }
 
             case "server_multiplier_time" -> {
-                return AdventureUtil.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
+                return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
             }
 
             case "server_multiplier_time_raw" -> {
@@ -379,7 +379,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return "0";
 
-                return AdventureUtil.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
+                return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
             }
 
             default -> {

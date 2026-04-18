@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
@@ -44,7 +42,6 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link IslandIdsTable} class.
  * Most code is tested against a live database except for errors.
  */
-@Execution(ExecutionMode.SAME_THREAD)
 public class IslandIdTableTest extends AbstractTableTest {
     // Classes being tested
     private IslandIdsTable liveIslandIdsTable;
@@ -90,8 +87,8 @@ public class IslandIdTableTest extends AbstractTableTest {
         String islandId = "BSkyBlock" + UUID.randomUUID();
 
         liveIslandIdsTable.createTable()
-                .thenCompose(v1 -> liveIslandIdsTable.insertIslandId(islandId)
-                        .thenCompose(v2 -> getIslandId(islandId)
+                .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId)
+                        .thenCompose(_ -> getIslandId(islandId)
                                 .thenApply(databaseIslandId -> {
                                     assertNotNull(databaseIslandId);
                                     assertEquals(islandId, databaseIslandId);
@@ -113,9 +110,9 @@ public class IslandIdTableTest extends AbstractTableTest {
         String newIslandId = "BSkyBlock" + UUID.randomUUID();
 
         liveIslandIdsTable.createTable()
-                .thenCompose(v1 -> liveIslandIdsTable.insertIslandId(oldIslandId)
-                        .thenCompose(v2 -> liveIslandIdsTable.updateIslandId(oldIslandId, newIslandId)
-                                .thenCompose(v3 -> getIslandId(newIslandId)
+                .thenCompose(_ -> liveIslandIdsTable.insertIslandId(oldIslandId)
+                        .thenCompose(_ -> liveIslandIdsTable.updateIslandId(oldIslandId, newIslandId)
+                                .thenCompose(_ -> getIslandId(newIslandId)
                                         .thenApply(databaseIslandId -> {
                                             assertNotNull(databaseIslandId);
                                             assertEquals(newIslandId, databaseIslandId);
@@ -140,12 +137,12 @@ public class IslandIdTableTest extends AbstractTableTest {
         String islandId5 = "BSkyBlock" + UUID.randomUUID();
 
         liveIslandIdsTable.createTable()
-                .thenCompose(v1 -> liveIslandIdsTable.insertIslandId(islandId1)
-                        .thenCompose(v2 -> liveIslandIdsTable.insertIslandId(islandId2)
-                                .thenCompose(v3 -> liveIslandIdsTable.insertIslandId(islandId3)
-                                        .thenCompose(v4 -> liveIslandIdsTable.insertIslandId(islandId4)
-                                                .thenCompose(v5 -> liveIslandIdsTable.insertIslandId(islandId5)
-                                                        .thenCompose(v6 -> liveIslandIdsTable.getIslandIds()
+                .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId1)
+                        .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId2)
+                                .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId3)
+                                        .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId4)
+                                                .thenCompose(_ -> liveIslandIdsTable.insertIslandId(islandId5)
+                                                        .thenCompose(_ -> liveIslandIdsTable.getIslandIds()
                                                                 .thenApply(list -> {
                                                                     assertFalse(list.isEmpty());
                                                                     assertTrue(list.contains(islandId1));

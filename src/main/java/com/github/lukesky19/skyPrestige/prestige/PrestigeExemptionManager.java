@@ -40,8 +40,8 @@ import com.github.lukesky19.skyPrestige.processor.player.PlayerSettingsProcessor
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -156,7 +156,7 @@ public class PrestigeExemptionManager {
 
         OptInOutConfig optInOutConfig = islandData.isPrestigeExempt() ? optInConfigManager.getConfiguration() : optOutConfigManager.getConfiguration();
         if(optInOutConfig == null) {
-            logger.error(AdventureUtil.deserialize("Unable to toggle island prestige status due to invalid configuration."));
+            logger.error(AdventureUtility.plain("Unable to toggle island prestige status due to invalid configuration."));
             return;
         }
 
@@ -164,9 +164,9 @@ public class PrestigeExemptionManager {
         Optional<GameModeAddon> optionalGameModeAddon = bentoBoxHook.getGameModeAddon(player.getWorld());
         if(optionalGameModeAddon.isEmpty()) {
             if(islandData.isPrestigeExempt()) { // Opting In
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optInMessages.playerInWrongWorld()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optInMessages.playerInWrongWorld()));
             } else { // Opting Out
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.playerInWrongWorld()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optOutMessages.playerInWrongWorld()));
             }
 
             return;
@@ -175,9 +175,9 @@ public class PrestigeExemptionManager {
         // Check if the player attempting to toggle the island's prestige status is not the owner or an island member.
         if((island.getOwner() == null || !island.getOwner().equals(playerId)) && !island.getMemberSet().contains(playerId)) {
             if(islandData.isPrestigeExempt()) { // Opting In
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optInMessages.playerNotMemberOrOwner()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optInMessages.playerNotMemberOrOwner()));
             } else { // Opting Out
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.playerNotMemberOrOwner()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optOutMessages.playerNotMemberOrOwner()));
             }
 
             return;
@@ -185,9 +185,9 @@ public class PrestigeExemptionManager {
 
         if(inProgressExemptions.contains(islandId)) {
             if(islandData.isPrestigeExempt()) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optInMessages.optInInProgress()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optInMessages.optInInProgress()));
             } else {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + optOutMessages.optOutInProgress()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + optOutMessages.optOutInProgress()));
             }
             return;
         }
@@ -247,7 +247,7 @@ public class PrestigeExemptionManager {
             @Nullable String blueprintName) {
         OptInOutConfig optInOutConfig = oldIslandData.isPrestigeExempt() ? optInConfigManager.getConfiguration() : optOutConfigManager.getConfiguration();
         if(optInOutConfig == null) {
-            logger.error(AdventureUtil.deserialize("Unable to toggle island prestige status due to invalid configuration."));
+            logger.error(AdventureUtility.plain("Unable to toggle island prestige status due to invalid configuration."));
             return;
         }
         // Store the new prestige exemption status.
@@ -264,7 +264,7 @@ public class PrestigeExemptionManager {
             islandSettingsProcessor.processIslandSettings(player, optInOutConfig.resetSettings().islandSettings(), oldIsland, island, islandData);
         } else {
             if(blueprintName == null) {
-                logger.error(AdventureUtil.deserialize("Unable to opt in or out island for player " + player.getName() + " because the selected blueprint name is null."));
+                logger.error(AdventureUtility.plain("Unable to opt in or out island for player " + player.getName() + " because the selected blueprint name is null."));
                 return;
             }
 
@@ -286,7 +286,7 @@ public class PrestigeExemptionManager {
 
             // If the new island failed to be created, log and error and return
             if(island == null) {
-                logger.error(AdventureUtil.deserialize("Island Creation failed for opt out."));
+                logger.error(AdventureUtility.plain("Island Creation failed for opt out."));
                 return;
             }
         }
@@ -336,11 +336,11 @@ public class PrestigeExemptionManager {
 
         if(newStatus) {
             // Send island member messages
-            Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + optOutMessages.islandMemberMessage(), placeholders);
+            Component islandMemberMessage = AdventureUtility.deserialize(locale.prefix() + optOutMessages.islandMemberMessage(), placeholders);
             onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
         } else {
             // Send island member messages
-            Component islandMemberMessage = AdventureUtil.deserialize(locale.prefix() + optInMessages.islandMemberMessage(), placeholders);
+            Component islandMemberMessage = AdventureUtility.deserialize(locale.prefix() + optInMessages.islandMemberMessage(), placeholders);
             onlineIslandMembers.forEach(islandMember -> islandMember.sendMessage(islandMemberMessage));
         }
 
@@ -400,24 +400,24 @@ public class PrestigeExemptionManager {
         // Create the GUI
         boolean creationResult = gui.create();
         if(!creationResult) {
-            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to create the InventoryView for the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Update the GUI
         boolean updateResult = gui.update();
         if(!updateResult) {
-            logger.error(AdventureUtil.deserialize("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to decorate the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         // Open the GUI
         boolean openResult = gui.open();
         if(!openResult) {
-            logger.error(AdventureUtil.deserialize("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to open the blueprint GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 
@@ -472,22 +472,22 @@ public class PrestigeExemptionManager {
 
         boolean creationResult = confirmGUI.create();
         if (!creationResult) {
-            logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to create the InventoryView for the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean updateResult = confirmGUI.update();
         if (!updateResult) {
-            logger.error(AdventureUtil.deserialize("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to decorate the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             return;
         }
 
         boolean openResult = confirmGUI.open();
         if (!openResult) {
-            logger.error(AdventureUtil.deserialize("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error."));
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+            logger.error(AdventureUtility.plain("Unable to open the confirm GUI for player " + player.getName() + " due to a configuration error."));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
         }
     }
 }

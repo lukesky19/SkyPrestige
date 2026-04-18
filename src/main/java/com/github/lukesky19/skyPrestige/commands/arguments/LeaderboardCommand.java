@@ -22,7 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.Position;
 import com.github.lukesky19.skyPrestige.data.data.leaderboard.TopTen;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -68,7 +68,7 @@ public class LeaderboardCommand {
                     CommandSender sender = ctx.getSource().getSender();
                     TopTen topTen = leaderboardManager.getTopTenNotExempt();
 
-                    sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardTitle()));
+                    sender.sendMessage(AdventureUtility.deserialize(leaderboardMessages.leaderboardTitle()));
 
                     int positionNumber = 1;
                     for(Position position : topTen.getPositions()) {
@@ -78,7 +78,7 @@ public class LeaderboardCommand {
                                 Placeholder.parsed("prestige_level", String.valueOf(position.prestigeLevel())),
                                 Placeholder.parsed("prestige_points", String.valueOf(decimalFormat.format(position.prestigePoints()))));
 
-                        sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardPosition(), placeholders));
+                        sender.sendMessage(AdventureUtility.deserialize(leaderboardMessages.leaderboardPosition(), placeholders));
 
                         positionNumber++;
                     }
@@ -86,7 +86,7 @@ public class LeaderboardCommand {
                     while(positionNumber <= 10) {
                         List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("position", String.valueOf(positionNumber)));
 
-                        sender.sendMessage(AdventureUtil.deserialize(leaderboardMessages.leaderboardPositionEmpty(), placeholders));
+                        sender.sendMessage(AdventureUtility.deserialize(leaderboardMessages.leaderboardPositionEmpty(), placeholders));
 
                         positionNumber++;
                     }

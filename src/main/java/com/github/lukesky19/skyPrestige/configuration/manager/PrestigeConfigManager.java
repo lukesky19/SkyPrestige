@@ -18,14 +18,13 @@
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.prestige.PrestigeConfig;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.KeyValueConfigManager;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.KeyValueConfigManager;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.serialize.SerializationException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -75,9 +74,9 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
     public void loadConfigurations() {
         clearData();
 
-        saveBundledConfig();
+        saveDefaultConfiguration();
 
-        try(Stream<Path> paths = Files.walk(Paths.get(plugin.getDataFolder() + File.separator + "prestige"))) {
+        try(Stream<Path> paths = Files.walk(Paths.get(plugin.getDirectoryFile() + File.separator + "prestige"))) {
             paths.filter(Files::isRegularFile)
                     .forEach(path -> loadConfiguration(-1, PrestigeConfig.class, path));
         } catch (IOException e) {
@@ -89,7 +88,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
     public void loadConfiguration(@NonNull Integer identifier, @NonNull Class<PrestigeConfig> configClass, @NonNull Path configurationPath) {
         PrestigeConfig configuration;
 
-        YamlConfigurationLoader yamlConfigurationLoader = ConfigurationUtility.getYamlConfigurationLoader(configurationPath);
+        YamlConfigurationLoader yamlConfigurationLoader = createLoader(configurationPath);
         try {
             ConfigurationNode root = yamlConfigurationLoader.load();
             migrateVersion(root);
@@ -99,7 +98,10 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
             if(configuration == null) return;
 
             PrestigeConfig migratedConfiguration = migrateConfiguration(configuration);
-            if(migratedConfiguration == null) return;
+            if(migratedConfiguration == null) {
+                logger.info(AdventureUtility.plain("Prestige Configuration migration failed for file " + configurationPath));
+                return;
+            }
 
             if(!validateConfiguration(migratedConfiguration)) return;
 
@@ -111,7 +113,7 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
             // Store the configuration
             setData(migratedConfiguration.prestigeLevel(), migratedConfiguration);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load the configuration file at " + configurationPath + ". Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtility.plain("Failed to load the configuration file at " + configurationPath + ". Error: " + configurateException.getMessage()));
         }
     }
 
@@ -119,8 +121,8 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
      * Save the default prestige config for level 1 if it doesn't exist.
      */
     @Override
-    protected void saveBundledConfig() {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + "prestige" + File.separator + "1.yml");
+    public void saveDefaultConfiguration() {
+        Path path = Path.of(plugin.getDirectoryFile() + File.separator + "prestige" + File.separator + "1.yml");
         if(!path.toFile().exists()) {
             plugin.saveResource("prestige" + File.separator + "1.yml", false);
         }
@@ -140,15 +142,15 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
             }
 
             case 1 -> {
-                logger.error(AdventureUtil.deserialize("A prestige config file is from version 1 and cannot be migrated."));
-                logger.error(AdventureUtil.deserialize("Please regenerate or update your files."));
+                logger.error(AdventureUtility.plain("A prestige config file is from version 1 and cannot be migrated."));
+                logger.error(AdventureUtility.plain("Please regenerate or update your files."));
 
                 return null;
             }
 
             default -> {
-                logger.error(AdventureUtil.deserialize("A prestige config file version is unrecognized and cannot be migrated."));
-                logger.error(AdventureUtil.deserialize("Please regenerate or update your files to version 2."));
+                logger.error(AdventureUtility.plain("A prestige config file version is unrecognized and cannot be migrated. Version: " + configuration.version()));
+                logger.error(AdventureUtility.plain("Please regenerate or update your files to version 2."));
 
                 return null;
             }
@@ -177,10 +179,10 @@ public class PrestigeConfigManager extends KeyValueConfigManager<Integer, Presti
 
                 case "1.0.0.0" -> versionNode.set(1);
 
-                case null, default -> logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version due to an unrecognized version."));
+                case null, default -> logger.warn(AdventureUtility.plain("Failed to convert String-based version to numeric version due to an unrecognized version."));
             }
         } catch (SerializationException e) {
-            logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
+            logger.warn(AdventureUtility.plain("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
         }
     }
 }

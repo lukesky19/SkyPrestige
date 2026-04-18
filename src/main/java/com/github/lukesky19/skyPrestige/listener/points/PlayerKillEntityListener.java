@@ -28,8 +28,8 @@ import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skyPrestige.util.entity.EntityUtils;
 import com.github.lukesky19.skyPrestige.util.enums.ActionType;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import dev.rosewood.rosestacker.stack.StackedEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -75,7 +75,7 @@ public class PlayerKillEntityListener extends PointsListener {
         // Config
         PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();
         if(prestigePointsConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to process prestige points due to invalid prestige points config."));
+            logger.warn(AdventureUtility.plain("Unable to process prestige points due to invalid prestige points config."));
             return;
         }
 

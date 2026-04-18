@@ -22,10 +22,10 @@ import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.time.Time;
-import com.github.lukesky19.skylib.api.time.TimeUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.time.Time;
+import com.github.lukesky19.skylib.common.api.time.TimeUtil;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -456,7 +456,7 @@ public class MultiplierManager {
                 Placeholder.parsed("minutes", String.valueOf(timeRecord.minutes())),
                 Placeholder.parsed("seconds", String.valueOf(timeRecord.seconds())));
 
-        return AdventureUtil.deserialize(messageBuilder.toString(), placeholders);
+        return AdventureUtility.deserialize(messageBuilder.toString(), placeholders);
     }
 
     /**
@@ -480,8 +480,8 @@ public class MultiplierManager {
         // Send notice to online players
         if(notice) {
             Component message = time != -1 ?
-                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedTimeLimit(), placeholders) :
-                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedNoTimeLimit(), placeholders);
+                    AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierChangedNoTimeLimit(), placeholders);
 
             plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
@@ -491,8 +491,8 @@ public class MultiplierManager {
 
         // Send feedback to Player
         Component message = time != -1 ?
-                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
-                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
+                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
         player.sendMessage(message);
     }
 
@@ -509,7 +509,7 @@ public class MultiplierManager {
 
         // Send notice to online players
         if(notice) {
-            Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierClearedNotice());
+            Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierClearedNotice());
 
             plugin.getServer().getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
         }
@@ -518,7 +518,7 @@ public class MultiplierManager {
         if(player == null) return;
 
         // Send feedback to Player
-        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierCleared());
+        Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierCleared());
         player.sendMessage(message);
     }
 
@@ -546,8 +546,8 @@ public class MultiplierManager {
         // Send notice to island members
         if(notice) {
             Component message = time != -1 ?
-                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedTimeLimit(), placeholders) :
-                    AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedNoTimeLimit(), placeholders);
+                    AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedTimeLimit(), placeholders) :
+                    AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierChangedNoTimeLimit(), placeholders);
 
             island.getMemberSet().stream()
                     .map(memberId -> plugin.getServer().getPlayer(memberId))
@@ -560,8 +560,8 @@ public class MultiplierManager {
 
         // Send feedback to Player
         Component message = time != -1 ?
-                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
-                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
+                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
         player.sendMessage(message);
     }
 
@@ -580,7 +580,7 @@ public class MultiplierManager {
 
         // Send notice to island members
         if(notice) {
-            Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierClearedNotice());
+            Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierClearedNotice());
 
             island.getMemberSet().stream()
                     .map(memberId -> plugin.getServer().getPlayer(memberId))
@@ -592,7 +592,7 @@ public class MultiplierManager {
         if(player == null) return;
 
         // Send feedback to Player
-        Component message = AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierCleared());
+        Component message = AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierCleared());
         player.sendMessage(message);
     }
 }

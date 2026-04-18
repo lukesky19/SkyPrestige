@@ -20,8 +20,8 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.player.PlayerUtil;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -71,9 +71,9 @@ public class ProtectionOrbCommand {
 
                                             if(protectionOrbStack == null) {
                                                 if(commandSender instanceof Player) {
-                                                    commandSender.sendMessage(AdventureUtil.deserialize(locale.prefix() + "<red>Unable to give player " + player.getName() + " a protection orb due to invalid plugin settings."));
+                                                    commandSender.sendMessage(AdventureUtility.deserialize(locale.prefix() + "<red>Unable to give player " + player.getName() + " a protection orb due to invalid plugin settings."));
                                                 } else {
-                                                    commandSender.sendMessage(AdventureUtil.deserialize("<red>Unable to give player " + player.getName() + " a protection orb due to invalid plugin settings."));
+                                                    commandSender.sendMessage(AdventureUtility.deserialize("<red>Unable to give player " + player.getName() + " a protection orb due to invalid plugin settings."));
                                                 }
 
                                                 return 0;
@@ -81,12 +81,12 @@ public class ProtectionOrbCommand {
 
                                             // Give the Protection Orb
                                             PlayerUtil.giveItem(player.getInventory(), protectionOrbStack, amount, player.getLocation());
-                                            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + "<green>You have been given a protection orb.</green>"));
+                                            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + "<green>You have been given a protection orb.</green>"));
 
                                             if(commandSender instanceof Player) {
-                                                commandSender.sendMessage(AdventureUtil.deserialize(locale.prefix() + "<green>Gave player " + player.getName() + " " + amount + " protection orb(s)."));
+                                                commandSender.sendMessage(AdventureUtility.deserialize(locale.prefix() + "<green>Gave player " + player.getName() + " " + amount + " protection orb(s)."));
                                             } else {
-                                                commandSender.sendMessage(AdventureUtil.deserialize("<green>Gave player " + player.getName() + " " + amount + " protection orb(s)."));
+                                                commandSender.sendMessage(AdventureUtility.deserialize("<green>Gave player " + player.getName() + " " + amount + " protection orb(s)."));
                                             }
 
                                             return 1;

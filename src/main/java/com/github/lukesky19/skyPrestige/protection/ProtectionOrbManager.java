@@ -20,9 +20,9 @@ package com.github.lukesky19.skyPrestige.protection;
 import com.github.lukesky19.skyPrestige.configuration.data.protection_orb.ProtectionOrbConfig;
 import com.github.lukesky19.skyPrestige.configuration.manager.ProtectionOrbConfigManager;
 import com.github.lukesky19.skyPrestige.util.enums.SkyPrestigeNamespacedKeys;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.NamespacedKey;
@@ -200,7 +200,7 @@ public class ProtectionOrbManager {
 
         String protectedLoreString = protectionOrbConfig.protectedLore();
         if(protectedLoreString != null && !protectedLoreString.isEmpty()) {
-            loreComponent = AdventureUtil.deserialize(protectedLoreString);
+            loreComponent = AdventureUtility.deserialize(protectedLoreString);
         }
     }
 }

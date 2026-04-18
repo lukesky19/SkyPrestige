@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyPrestige.database.connection;
 
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.database.connection.AbstractConnectionManager;
+import com.github.lukesky19.skylib.common.api.database.connection.AbstractConnectionManager;
+import com.github.lukesky19.skylib.common.api.plugin.ISkyPlugin;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariConfig;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariDataSource;
-import org.bukkit.plugin.Plugin;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
@@ -40,13 +40,13 @@ public class ConnectionManager extends AbstractConnectionManager {
 
     /**
      * Creates the required {@link HikariConfig} to access the database and returns the {@link HikariDataSource}.
-     * @param plugin The {@link Plugin} implementing and making use of this class.
+     * @param plugin The {@link ISkyPlugin} implementing and making use of this class.
      * @return A {@link HikariDataSource} object.
      */
     @Override
-    protected @NonNull HikariDataSource createHikariDataSource(@NonNull Plugin plugin) {
+    protected @NonNull HikariDataSource createHikariDataSource(@NonNull ISkyPlugin plugin) {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" +  plugin.getDataFolder().getAbsolutePath() + File.separator + "database.db");
+        config.setJdbcUrl("jdbc:sqlite:" +  plugin.getDirectoryFile().getAbsolutePath() + File.separator + "database.db");
         config.setAutoCommit(false);
 
         return new HikariDataSource(config);

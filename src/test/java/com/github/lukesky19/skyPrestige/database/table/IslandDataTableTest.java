@@ -26,7 +26,7 @@ import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -35,8 +35,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -63,7 +62,7 @@ import static org.mockito.Mockito.*;
  * {@link IslandDataTable#serializeItemMap(Map)} and {@link IslandDataTable#deserializeItemMap(String, byte[])}
  * errors aren't fully tested as there isn't an easy way to force the errors to occur to my knowledge.
  */
-@Execution(ExecutionMode.SAME_THREAD)
+@ExtendWith({MockBukkitExtension.class})
 public class IslandDataTableTest extends AbstractTableTest {
     @Mock
     private ComponentLogger logger;
@@ -95,7 +94,7 @@ public class IslandDataTableTest extends AbstractTableTest {
 
         // Create tables
         versionsTable.createTable()
-                .thenCompose(v1 -> islandIdsTable.createTable()).join();
+                .thenCompose(_ -> islandIdsTable.createTable()).join();
 
         // Setup classes for tests
         liveIslandDataTable = new IslandDataTable(skyPrestige, liveQueueManager, hookManager, versionsTable);
@@ -128,9 +127,9 @@ public class IslandDataTableTest extends AbstractTableTest {
 
         // Check that the table creation errored
         islandDataTableWithMockedQueueManager.createTable()
-                .thenAccept(v -> fail("Table creation should of failed exceptionally."))
-                .exceptionally(ex -> {
-                    verify(logger).error(AdventureUtil.deserialize("Island Data Table creation failed: java.lang.RuntimeException: Test Error"));
+                .thenAccept(_ -> fail("Table creation should of failed exceptionally."))
+                .exceptionally(_ -> {
+                    verify(logger).error(AdventureUtility.plain("Island Data Table creation failed: java.lang.RuntimeException: Test Error"));
                     return null;
                 })
                 .join();
@@ -147,11 +146,11 @@ public class IslandDataTableTest extends AbstractTableTest {
         IslandData islandData = new IslandData(islandId);
 
         // Insert the island id into the island ids table
-        islandIdsTable.insertIslandId(islandId).thenCompose(v1 -> {
+        islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
             // Create the table
-            return liveIslandDataTable.createTable().thenCompose(v2 -> {
+            return liveIslandDataTable.createTable().thenCompose(_ -> {
                 // Save the IslandData to the database
-                return liveIslandDataTable.saveIslandData(islandId, islandData).thenCompose(v3 -> {
+                return liveIslandDataTable.saveIslandData(islandId, islandData).thenCompose(_ -> {
                     // Load the island data
                     return liveIslandDataTable.loadIslandData(islandId, new IslandData(islandId))
                             .thenApply(databaseIslandData -> {
@@ -192,12 +191,12 @@ public class IslandDataTableTest extends AbstractTableTest {
         islandData.setVaultItems(vaultItems);
 
         // Insert the island id into the island ids table
-        islandIdsTable.insertIslandId(islandId).thenCompose(v1 -> {
+        islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
             // Create the table
-            return liveIslandDataTable.createTable().thenCompose(v2 -> {
+            return liveIslandDataTable.createTable().thenCompose(_ -> {
                 // Save the IslandData to the database
                 return liveIslandDataTable.saveIslandData(islandId, islandData)
-                        .thenCompose(v3 -> {
+                        .thenCompose(_ -> {
                             // Load the island data
                             return liveIslandDataTable.loadIslandData(islandId, new IslandData(islandId))
                                     .thenApply(databaseIslandData -> {
@@ -225,9 +224,9 @@ public class IslandDataTableTest extends AbstractTableTest {
         IslandData islandData = new IslandData(islandId);
 
         // Insert the island id into the island ids table
-        islandIdsTable.insertIslandId(islandId).thenCompose(v1 -> {
+        islandIdsTable.insertIslandId(islandId).thenCompose(_ -> {
             // Create the table
-            return liveIslandDataTable.createTable().thenCompose(v2 -> {
+            return liveIslandDataTable.createTable().thenCompose(_ -> {
                 // Attempt to load the IslandData to the database
                 return liveIslandDataTable.loadIslandData(islandId, new IslandData(islandId))
                         .thenApply(databaseIslandData -> {
@@ -309,15 +308,15 @@ public class IslandDataTableTest extends AbstractTableTest {
         islandDataMap.put(islandId5, islandData5);
 
         // Insert the island id into the island ids table
-        islandIdsTable.insertIslandId(islandId1).thenCompose(v1 -> {
-            return islandIdsTable.insertIslandId(islandId2).thenCompose(v2 -> {
-                return islandIdsTable.insertIslandId(islandId3).thenCompose(v3 -> {
-                    return islandIdsTable.insertIslandId(islandId4).thenCompose(v4 -> {
-                        return islandIdsTable.insertIslandId(islandId5).thenCompose(v5 -> {
+        islandIdsTable.insertIslandId(islandId1).thenCompose(_ -> {
+            return islandIdsTable.insertIslandId(islandId2).thenCompose(_ -> {
+                return islandIdsTable.insertIslandId(islandId3).thenCompose(_ -> {
+                    return islandIdsTable.insertIslandId(islandId4).thenCompose(_ -> {
+                        return islandIdsTable.insertIslandId(islandId5).thenCompose(_ -> {
                             // Create the island data table
-                            return liveIslandDataTable.createTable().thenCompose(v6 -> {
+                            return liveIslandDataTable.createTable().thenCompose(_ -> {
                                 // Save the island data
-                                return liveIslandDataTable.saveIslandData(islandDataMap).thenCompose(v7 -> {
+                                return liveIslandDataTable.saveIslandData(islandDataMap).thenCompose(_ -> {
                                     // Load the island data for each island id and validate it was saved properly.
                                     return liveIslandDataTable.loadIslandData(islandId1, new IslandData(islandId1)).thenCompose(databaseIslandData1 -> {
                                         assertEquals(islandData1, databaseIslandData1);
@@ -410,15 +409,15 @@ public class IslandDataTableTest extends AbstractTableTest {
         islandDataMap.put(islandId5, islandData5);
 
         // Insert the island ids into the island ids table
-        islandIdsTable.insertIslandId(islandId1).thenCompose(v1 -> {
-            return islandIdsTable.insertIslandId(islandId2).thenCompose(v2 -> {
-                return islandIdsTable.insertIslandId(islandId3).thenCompose(v3 -> {
-                    return islandIdsTable.insertIslandId(islandId4).thenCompose(v4 -> {
-                        return islandIdsTable.insertIslandId(islandId5).thenCompose(v5 -> {
+        islandIdsTable.insertIslandId(islandId1).thenCompose(_ -> {
+            return islandIdsTable.insertIslandId(islandId2).thenCompose(_ -> {
+                return islandIdsTable.insertIslandId(islandId3).thenCompose(_ -> {
+                    return islandIdsTable.insertIslandId(islandId4).thenCompose(_ -> {
+                        return islandIdsTable.insertIslandId(islandId5).thenCompose(_ -> {
                             // Create the island data table
-                            return liveIslandDataTable.createTable().thenCompose(v6 -> {
+                            return liveIslandDataTable.createTable().thenCompose(_ -> {
                                 // Save island data
-                                return liveIslandDataTable.saveIslandData(islandDataMap).thenCompose(v7 -> {
+                                return liveIslandDataTable.saveIslandData(islandDataMap).thenCompose(_ -> {
                                     // Get the top ten
                                     return liveIslandDataTable.getTopTenByPrestigeLevelAndPointsNotExempt().thenApply(topTen -> {
                                         Position position1 = topTen.getPosition(1);
@@ -573,7 +572,7 @@ public class IslandDataTableTest extends AbstractTableTest {
         assertTrue(result.isEmpty());
 
         // Verify the logger logged the appropriate error message
-        verify(logger).warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+        verify(logger).warn(AdventureUtility.plain("The vault data for island id " + islandId + " is not in a valid or recognized format."));
     }
 
     /**
@@ -597,7 +596,7 @@ public class IslandDataTableTest extends AbstractTableTest {
         assertTrue(result.isEmpty());
 
         // Verify the logger logged the appropriate error message
-        verify(logger).warn(AdventureUtil.deserialize("The vault data for island id " + islandId + " is not in a valid or recognized format."));
+        verify(logger).warn(AdventureUtility.plain("The vault data for island id " + islandId + " is not in a valid or recognized format."));
     }
 
     /**

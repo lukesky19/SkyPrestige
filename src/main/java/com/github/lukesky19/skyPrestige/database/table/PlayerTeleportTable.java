@@ -19,8 +19,7 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +38,7 @@ public class PlayerTeleportTable {
 
     /**
      * Constructor
-     * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param queueManager A {@link QueueManager} instance.
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public PlayerTeleportTable(

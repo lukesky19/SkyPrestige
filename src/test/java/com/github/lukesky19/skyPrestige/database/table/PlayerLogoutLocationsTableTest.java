@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.common.MockBukkitExtension;
 import com.github.lukesky19.skyPrestige.database.table.abstracts.AbstractTableTest;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jspecify.annotations.NonNull;
@@ -28,8 +28,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
@@ -48,7 +47,7 @@ import static org.mockito.Mockito.when;
  * This class tests the {@link PlayerLogoutLocationsTable} class.
  * Most code is tested against a live database except for errors.
  */
-@Execution(ExecutionMode.SAME_THREAD)
+@ExtendWith({MockBukkitExtension.class})
 public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
     // Other Tables
     private PlayerIdsTable playerIdsTable;
@@ -71,7 +70,7 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
 
         // Create tables
         versionsTable.createTable()
-                .thenCompose(v1 -> playerIdsTable.createTable()).join();
+                .thenCompose(_ -> playerIdsTable.createTable()).join();
 
         // Setup classes for tests
         livePlayerLogoutLocationsTables = new PlayerLogoutLocationsTable(liveQueueManager, versionsTable);
@@ -108,9 +107,9 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
         UUID playerId = UUID.randomUUID();
         Location testLocation = new Location(world, 100, 0, 100);
 
-        playerIdsTable.insertPlayerId(playerId).thenCompose(v1 -> {
-            return livePlayerLogoutLocationsTables.createTable().thenCompose(v2 -> {
-                return livePlayerLogoutLocationsTables.setPlayerLogoutLocation(playerId, testLocation).thenCompose(v3 -> {
+        playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+            return livePlayerLogoutLocationsTables.createTable().thenCompose(_ -> {
+                return livePlayerLogoutLocationsTables.setPlayerLogoutLocation(playerId, testLocation).thenCompose(_ -> {
                     return getPlayerLogoutLocation(playerId).thenApply(databaseLocation -> {
                         assertEquals(testLocation, databaseLocation);
                         return null;
@@ -135,9 +134,9 @@ public class PlayerLogoutLocationsTableTest extends AbstractTableTest {
         UUID playerId = UUID.randomUUID();
         Location testLocation = new Location(world, 100, 0, 100);
 
-        playerIdsTable.insertPlayerId(playerId).thenCompose(v1 -> {
-            return livePlayerLogoutLocationsTables.createTable().thenCompose(v2 -> {
-                return livePlayerLogoutLocationsTables.setPlayerLogoutLocation(playerId, testLocation).thenCompose(v3 -> {
+        playerIdsTable.insertPlayerId(playerId).thenCompose(_ -> {
+            return livePlayerLogoutLocationsTables.createTable().thenCompose(_ -> {
+                return livePlayerLogoutLocationsTables.setPlayerLogoutLocation(playerId, testLocation).thenCompose(_ -> {
                     return livePlayerLogoutLocationsTables.getPlayerIdsWithinByBounds("world", 0, 200, 0, 200).thenApply(list -> {
                         assertTrue(list.contains(playerId));
                         return null;

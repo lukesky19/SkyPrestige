@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -88,12 +88,12 @@ public class PrestigeLevelCommand {
 
                             IslandData islandData = islandDataManager.getData(islandId);
                             if(islandData == null) {
-                                logger.error(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
+                                logger.error(AdventureUtility.plain("No island data found for the island " + islandId + "."));
 
                                 if(sender instanceof Player player) {
-                                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
                                 } else {
-                                    logger.error(AdventureUtil.deserialize(locale.islandDataNotFound()));
+                                    logger.error(AdventureUtility.deserialize(locale.islandDataNotFound()));
                                 }
 
                                 return 0;
@@ -106,9 +106,9 @@ public class PrestigeLevelCommand {
                                     Placeholder.parsed("prestige_level", String.valueOf(islandData.getPrestigeLevel())));
 
                             if(sender instanceof Player player) {
-                                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeLevelUpdated(), placeholders));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeLevelUpdated(), placeholders));
                             } else {
-                                logger.error(AdventureUtil.deserialize(locale.prestigeLevelUpdated(), placeholders));
+                                logger.error(AdventureUtility.deserialize(locale.prestigeLevelUpdated(), placeholders));
                             }
 
                             return 1;

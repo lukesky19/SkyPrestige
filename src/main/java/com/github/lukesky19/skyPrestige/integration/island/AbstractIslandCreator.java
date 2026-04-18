@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.processor.island.IslandSettingsProcessor;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -299,14 +299,14 @@ public abstract class AbstractIslandCreator {
     protected void createIslandAtNextAvailableLocation() {
         Location islandLocation = this.locationStrategy.getNextLocation(world);
         if(islandLocation == null) {
-            logger.error(AdventureUtil.deserialize("No unoccupied location was found to create an island at."));
+            logger.error(AdventureUtility.plain("No unoccupied location was found to create an island at."));
             return;
         }
 
         // Create the new island
         newIsland = islandsManager.createIsland(islandLocation, user.getUniqueId());
         if(newIsland == null) {
-            logger.error(AdventureUtil.deserialize("Failed to create a new island at unoccupied location."));
+            logger.error(AdventureUtility.plain("Failed to create a new island at unoccupied location."));
         }
     }
 

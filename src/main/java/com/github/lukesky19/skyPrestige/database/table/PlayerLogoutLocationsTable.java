@@ -18,12 +18,11 @@
 package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
-import com.github.lukesky19.skylib.api.database.parameter.Parameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.LongParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.common.api.database.parameter.Parameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.LongParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.StringParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
 import org.bukkit.Location;
 import org.jspecify.annotations.NonNull;
 
@@ -43,7 +42,7 @@ public class PlayerLogoutLocationsTable {
 
     /**
      * Constructor
-     * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param queueManager A {@link QueueManager} instance.
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public PlayerLogoutLocationsTable(

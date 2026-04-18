@@ -20,10 +20,10 @@ package com.github.lukesky19.skyPrestige.configuration.manager;
 import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsConfig;
 import com.github.lukesky19.skyPrestige.configuration.data.points.PrestigePointsMapping;
 import com.github.lukesky19.skyPrestige.util.number.NumberUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import com.github.lukesky19.skylib.api.format.FormatUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
+import com.github.lukesky19.skylib.paper.api.format.FormatUtil;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jspecify.annotations.NonNull;
@@ -798,7 +798,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
             }
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Unknown config version for the prestige points config. Unable to update config."));
+                logger.warn(AdventureUtility.plain("Unknown config version for the prestige points config. Unable to update config."));
                 return null;
             }
         }
@@ -810,7 +810,7 @@ public class PrestigePointsConfigManager extends SimpleConfigManager<PrestigePoi
     }
 
     @Override
-    public void saveBundledConfig() {
+    public void saveDefaultConfiguration() {
         plugin.saveResource("points.yml", false);
     }
 }

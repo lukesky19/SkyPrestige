@@ -30,8 +30,8 @@ import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -147,7 +147,7 @@ public class SkyPrestigeCommand {
 
                     return 1;
                 } else {
-                    logger.error(AdventureUtil.deserialize(locale.prestigeMessages().prestigePlayerOnly()));
+                    logger.error(AdventureUtility.deserialize(locale.prestigeMessages().prestigePlayerOnly()));
                     return 0;
                 }
             });

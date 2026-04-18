@@ -19,8 +19,8 @@ package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skyPrestige.configuration.data.placeholder.PlaceholderConfig;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -69,7 +69,7 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
     }
 
     @Override
-    public void saveBundledConfig() {
+    public void saveDefaultConfiguration() {
         plugin.saveResource("placeholders.yml", false);
     }
 

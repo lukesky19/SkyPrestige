@@ -21,8 +21,8 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.common.abstracts.data.HashMapDataManager;
-import com.github.lukesky19.skylib.api.common.interfaces.data.IPersistentDataManager;
+import com.github.lukesky19.skylib.common.api.data.abstracts.HashMapDataManager;
+import com.github.lukesky19.skylib.common.api.data.interfaces.IPersistentDataManager;
 import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 

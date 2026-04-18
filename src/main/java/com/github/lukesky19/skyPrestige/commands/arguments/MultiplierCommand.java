@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -84,13 +84,13 @@ public class MultiplierCommand {
             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
             Island island = bentoBoxHook.getIslandAtLocation(player.getLocation()).orElse(null);
             if(island == null) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
                 return 0;
             }
 
             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("multiplier", String.valueOf(multiplierManager.getMultiplier(island))));
             
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.effectiveMultiplier(), placeholders));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + multiplierMessages.effectiveMultiplier(), placeholders));
             
             return 1;
         });
@@ -179,8 +179,8 @@ public class MultiplierCommand {
                     if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                     Component message = time != -1 ?
-                            AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
-                            AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
+                            AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                            AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
 
                     initiator.sendMessage(message);
 
@@ -200,8 +200,8 @@ public class MultiplierCommand {
                 if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                 Component message = time != -1 ?
-                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
-                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
+                        AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierTimeLimit(), placeholders) :
+                        AdventureUtility.deserialize(locale.prefix() + multiplierMessages.serverMultiplierNoTimeLimit(), placeholders);
 
                 initiator.sendMessage(message);
 
@@ -303,8 +303,8 @@ public class MultiplierCommand {
                         if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                         Component message = time != -1 ?
-                                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
-                                AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
+                                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                                AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
 
                         initiator.sendMessage(message);
 
@@ -321,7 +321,7 @@ public class MultiplierCommand {
                 BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
                 Island island = bentoBoxHook.getIslandAtLocation(initiator.getLocation()).orElse(null);
                 if(island == null) {
-                    initiator.sendMessage(AdventureUtil.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
+                    initiator.sendMessage(AdventureUtility.deserialize(locale.prefix() + multiplierMessages.multiplierNotOnIsland()));
                     return 0;
                 }
                 double multiplier = multiplierManager.getIslandMultiplier(island);
@@ -332,8 +332,8 @@ public class MultiplierCommand {
                 if(time > -1) placeholders.add(Placeholder.component("time", multiplierManager.getTimePlaceholder(multiplierMessages.multiplierTimePlaceholder(), time)));
 
                 Component message = time != -1 ?
-                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
-                        AdventureUtil.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
+                        AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierTimeLimit(), placeholders) :
+                        AdventureUtility.deserialize(locale.prefix() + multiplierMessages.islandMultiplierNoTimeLimit(), placeholders);
 
                 initiator.sendMessage(message);
 

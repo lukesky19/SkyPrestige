@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
 import com.github.lukesky19.skyPrestige.configuration.interfaces.IReward;
 import com.github.lukesky19.skyPrestige.integration.hooks.LuckPermsHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.luckperms.api.model.data.DataMutateResult;
@@ -316,14 +316,14 @@ public class LuckPermsRewardsProcessor {
                                 removedNodes.add(permissionNode);
                             }
 
-                            logger.info(AdventureUtil.deserialize("Removed permission " + permissionReward.permission() + " from user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Removed permission " + permissionReward.permission() + " from user " + user.getUsername() + "."));
                         }
 
-                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Failed to remove permission " + permissionReward.permission() + " from user " + user.getUsername() + "."));
+                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Failed to remove permission " + permissionReward.permission() + " from user " + user.getUsername() + "."));
 
-                        case FAIL_LACKS -> logger.info(AdventureUtil.deserialize("User " + user.getUsername() + " does not have permission " + permissionReward.permission() + " to remove."));
+                        case FAIL_LACKS -> logger.info(AdventureUtility.plain("User " + user.getUsername() + " does not have permission " + permissionReward.permission() + " to remove."));
 
-                        case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to remove permission."));
+                        case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to remove permission."));
                     }
                 }
             } else {
@@ -337,14 +337,14 @@ public class LuckPermsRewardsProcessor {
                             addedNodes.add(permissionNode);
                         }
 
-                        logger.info(AdventureUtil.deserialize("Added permission " + permissionReward.permission() + " to user " + user.getUsername() + "."));
+                        logger.info(AdventureUtility.plain("Added permission " + permissionReward.permission() + " to user " + user.getUsername() + "."));
                     }
 
-                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtil.deserialize("Failed to add permission " + permissionReward.permission() + " to user " + user.getUsername() + "."));
+                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtility.plain("Failed to add permission " + permissionReward.permission() + " to user " + user.getUsername() + "."));
 
-                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Unable to add permission " + permissionReward.permission() + " because user " + user.getUsername() + " already the permission."));
+                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Unable to add permission " + permissionReward.permission() + " because user " + user.getUsername() + " already the permission."));
 
-                    case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to add permission."));
+                    case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to add permission."));
                 }
             }
         }
@@ -365,14 +365,14 @@ public class LuckPermsRewardsProcessor {
                                 removedNodes.add(inheritanceNode);
                             }
 
-                            logger.info(AdventureUtil.deserialize("Removed group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Removed group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
                         }
 
-                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Failed to remove group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
+                        case FAIL, FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Failed to remove group " + inheritanceNode.getGroupName() + " from user " + user.getUsername() + "."));
 
-                        case FAIL_LACKS -> logger.info(AdventureUtil.deserialize("User " + user.getUsername() + " does not have the group " + inheritanceNode.getGroupName() + " to remove."));
+                        case FAIL_LACKS -> logger.info(AdventureUtility.plain("User " + user.getUsername() + " does not have the group " + inheritanceNode.getGroupName() + " to remove."));
 
-                        case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to remove group."));
+                        case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to remove group."));
                     }
                 }
             } else {
@@ -386,14 +386,14 @@ public class LuckPermsRewardsProcessor {
                             addedNodes.add(inheritanceNode);
                         }
 
-                        logger.info(AdventureUtil.deserialize("Added group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
+                        logger.info(AdventureUtility.plain("Added group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
                     }
 
-                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtil.deserialize("Failed to add group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
+                    case FAIL, FAIL_LACKS -> logger.info(AdventureUtility.plain("Failed to add group " + inheritanceNode.getGroupName() + " to user " + user.getUsername() + "."));
 
-                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtil.deserialize("Unable to add group " + inheritanceNode.getGroupName() + " because user " + user.getUsername() + " already the group."));
+                    case FAIL_ALREADY_HAS -> logger.info(AdventureUtility.plain("Unable to add group " + inheritanceNode.getGroupName() + " because user " + user.getUsername() + " already the group."));
 
-                    case null -> logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to add group."));
+                    case null -> logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to add group."));
                 }
             }
         }
@@ -414,7 +414,7 @@ public class LuckPermsRewardsProcessor {
         List<Node> removedNodes = this.removedNodes.get(userId);
         List<Node> addedNodes = this.addedNodes.get(userId);
 
-        logger.info(AdventureUtil.deserialize("Reverting early permission/group rewards."));
+        logger.info(AdventureUtility.plain("Reverting early permission/group rewards."));
 
         if(removedNodes != null && !removedNodes.isEmpty()) {
             for(Node removedNode : removedNodes) {
@@ -422,16 +422,16 @@ public class LuckPermsRewardsProcessor {
 
                 switch (result) {
                     case SUCCESS ->
-                            logger.info(AdventureUtil.deserialize("Re-added node " + removedNode.getKey() + " to user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Re-added node " + removedNode.getKey() + " to user " + user.getUsername() + "."));
 
                     case FAIL, FAIL_LACKS ->
-                            logger.info(AdventureUtil.deserialize("Failed to re-add node " + removedNode.getKey() + " to user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Failed to re-add node " + removedNode.getKey() + " to user " + user.getUsername() + "."));
 
                     case FAIL_ALREADY_HAS ->
-                            logger.info(AdventureUtil.deserialize("Unable to re-add node " + removedNode.getKey() + " because user " + user.getUsername() + " already the permission."));
+                            logger.info(AdventureUtility.plain("Unable to re-add node " + removedNode.getKey() + " because user " + user.getUsername() + " already the permission."));
 
                     case null ->
-                            logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to re-add nodes."));
+                            logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to re-add nodes."));
                 }
             }
         }
@@ -442,16 +442,16 @@ public class LuckPermsRewardsProcessor {
 
                 switch (result) {
                     case SUCCESS ->
-                            logger.info(AdventureUtil.deserialize("Removed node " + addedNode.getKey() + " from user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Removed node " + addedNode.getKey() + " from user " + user.getUsername() + "."));
 
                     case FAIL, FAIL_ALREADY_HAS ->
-                            logger.info(AdventureUtil.deserialize("Failed to remove node " + addedNode.getKey() + " from user " + user.getUsername() + "."));
+                            logger.info(AdventureUtility.plain("Failed to remove node " + addedNode.getKey() + " from user " + user.getUsername() + "."));
 
                     case FAIL_LACKS ->
-                            logger.info(AdventureUtil.deserialize("User " + user.getUsername() + " does not have node " + addedNode.getKey() + " to remove."));
+                            logger.info(AdventureUtility.plain("User " + user.getUsername() + " does not have node " + addedNode.getKey() + " to remove."));
 
                     case null ->
-                            logger.info(AdventureUtil.deserialize("LuckPerms not hooked into. Unable to remove node."));
+                            logger.info(AdventureUtility.plain("LuckPerms not hooked into. Unable to remove node."));
                 }
             }
         }

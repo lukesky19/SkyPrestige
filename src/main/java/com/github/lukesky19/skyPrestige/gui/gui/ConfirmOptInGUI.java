@@ -32,13 +32,13 @@ import com.github.lukesky19.skyPrestige.gui.abstracts.ConfirmGUI;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.processor.reward.RewardsProcessor;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -136,18 +136,18 @@ public class ConfirmOptInGUI extends ConfirmGUI {
     @Override
     public boolean create() {
         if(confirmOptInGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
             return false;
         }
 
         if(optInConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid opt in config."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the confirm opt-in GUI due to invalid opt in config."));
             return false;
         }
 
         GUIType guiType = confirmOptInGUIConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the confirm opt-in GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -155,7 +155,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
             case CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54 -> {}
 
             default -> {
-                logger.error(AdventureUtil.deserialize("Unsupported GUI Type in confirm opt-in GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
+                logger.error(AdventureUtility.plain("Unsupported GUI Type in confirm opt-in GUI config. Allowed Types: CHEST_9, CHEST_18, CHEST_27, CHEST_36, CHEST_45, CHEST_54"));
                 return false;
             }
         }
@@ -172,13 +172,13 @@ public class ConfirmOptInGUI extends ConfirmGUI {
     @Override
     public boolean update() {
         if(confirmOptInGUIConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the confirm opt-in GUI due to invalid gui configuration."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -289,7 +289,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
         ButtonConfig confirmConfig = confirmOptInGUIConfig.confirmButton();
 
         if(confirmConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the confirm button to the confirm opt-in GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the confirm button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -308,7 +308,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
         ButtonConfig cancelConfig = confirmOptInGUIConfig.cancelButton();
 
         if(cancelConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the cancel button to the confirm opt-in GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the cancel button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -325,8 +325,8 @@ public class ConfirmOptInGUI extends ConfirmGUI {
 
         ItemStack itemStack = ItemStack.of(blueprint.getIcon());
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.displayName(AdventureUtil.deserialize(blueprint.getDisplayName()));
-        List<Component> lore = blueprint.getDescription().stream().map(AdventureUtil::deserialize).toList();
+        itemMeta.displayName(AdventureUtility.deserialize(blueprint.getDisplayName()));
+        List<Component> lore = blueprint.getDescription().stream().map(AdventureUtility::deserialize).toList();
         itemMeta.lore(lore);
         itemStack.setItemMeta(itemMeta);
 
@@ -342,7 +342,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
         ButtonConfig rewardsConfig = confirmOptInGUIConfig.rewardsButton();
 
         if(rewardsConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add the rewards button to the confirm opt-in GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add the rewards button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -355,22 +355,22 @@ public class ConfirmOptInGUI extends ConfirmGUI {
 
             boolean creationResult = rewardsGUI.create();
             if(!creationResult) {
-                logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtility.plain("Unable to create the InventoryView for the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 return;
             }
 
             boolean updateResult = rewardsGUI.update();
             if(!updateResult) {
-                logger.error(AdventureUtil.deserialize("Unable to decorate the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtility.plain("Unable to decorate the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 return;
             }
 
             boolean openResult = rewardsGUI.open();
             if(!openResult) {
-                logger.error(AdventureUtil.deserialize("Unable to open the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                logger.error(AdventureUtility.plain("Unable to open the opt-out rewards GUI for player " + player.getName() + " due to a configuration error."));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
             }
         });
     }
@@ -498,7 +498,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
 
         confirmOptInGUIConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the confirm opt-in GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the confirm opt-in GUI due to an invalid slot."));
                 return;
             }
 
@@ -513,7 +513,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
      */
     private void createActionButton(@NonNull ButtonConfig buttonConfig, @NonNull Consumer<InventoryClickEvent> action) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add an action button to the confirm opt-in GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add an action button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 
@@ -539,7 +539,7 @@ public class ConfirmOptInGUI extends ConfirmGUI {
      */
     private void createDisplayButton(@NonNull ButtonConfig buttonConfig, @NonNull List<TagResolver.Single> placeholders) {
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add a display button to the confirm opt-in GUI due to an invalid slot."));
+            logger.warn(AdventureUtility.plain("Unable to add a display button to the confirm opt-in GUI due to an invalid slot."));
             return;
         }
 

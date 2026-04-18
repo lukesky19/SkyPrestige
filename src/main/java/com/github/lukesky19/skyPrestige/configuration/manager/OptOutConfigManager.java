@@ -18,9 +18,9 @@
 package com.github.lukesky19.skyPrestige.configuration.manager;
 
 import com.github.lukesky19.skyPrestige.configuration.data.opt_in_out.OptInOutConfig;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -48,7 +48,7 @@ public class OptOutConfigManager extends SimpleConfigManager<OptInOutConfig> {
             }
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Unknown config version for the opt-out config. Unable to update config."));
+                logger.warn(AdventureUtility.plain("Unknown config version for the opt-out config. Unable to update config."));
                 return null;
             }
         }
@@ -60,7 +60,7 @@ public class OptOutConfigManager extends SimpleConfigManager<OptInOutConfig> {
     }
 
     @Override
-    public void saveBundledConfig() {
+    public void saveDefaultConfiguration() {
         plugin.saveResource("opt-out.yml", false);
     }
 }

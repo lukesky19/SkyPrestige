@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.task.tasks;
 
-import com.github.lukesky19.skylib.api.common.interfaces.data.IPersistentDataManager;
+import com.github.lukesky19.skylib.common.api.data.interfaces.IPersistentDataManager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jspecify.annotations.NonNull;
 

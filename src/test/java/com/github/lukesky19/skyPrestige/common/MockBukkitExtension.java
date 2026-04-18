@@ -29,26 +29,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This extension setups the required data for all tests requiring MockBukkit.
  */
 public class MockBukkitExtension implements BeforeAllCallback, AfterAllCallback {
-    private static ServerMock server;
+    private static volatile ServerMock server;
     private static final AtomicInteger testClassCounter = new AtomicInteger(0);
+    private static final AtomicInteger initFlag = new AtomicInteger(0);
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        // Setup mocked server
-        if(testClassCounter.get() == 0) {
+        testClassCounter.incrementAndGet();
+
+        if(initFlag.compareAndSet(0, 1)) {
             server = MockBukkit.mock();
             server.addSimpleWorld("world");
             server.addPlayer("lukeskywlker19");
+        } else {
+            while(server == null) {
+                Thread.onSpinWait();
+            }
         }
     }
 
     @Override
     public void afterAll(ExtensionContext context) {
-        // Decrement the counter
-        int remainingClasses = testClassCounter.decrementAndGet();
-
-        if(remainingClasses == 0) {
+        int remaining = testClassCounter.decrementAndGet();
+        if(remaining == 0 && initFlag.compareAndSet(1, 0)) {
             MockBukkit.unmock();
+            server = null;
         }
     }
 

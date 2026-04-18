@@ -19,7 +19,8 @@ package com.github.lukesky19.skyPrestige.commands.arguments;
 
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.adventure.PaperAdventureUtility;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -56,11 +57,11 @@ public class HelpCommand {
 
                 if(ctx.getSource().getSender() instanceof Player player) {
                     for(String msg : locale.help()) {
-                        player.sendMessage(AdventureUtil.deserialize(player, msg));
+                        player.sendMessage(PaperAdventureUtility.deserialize(player, msg));
                     }
                 } else {
                     for(String msg : locale.help()) {
-                        logger.info(AdventureUtil.deserialize(msg));
+                        logger.info(AdventureUtility.deserialize(msg));
                     }
                 }
 

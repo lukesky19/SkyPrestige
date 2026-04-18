@@ -23,8 +23,8 @@ import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.gui.gui.InfoGUI;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -79,22 +79,22 @@ public class InfoCommand {
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the info GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to create the InventoryView for the info GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean updateResult = gui.update();
                     if(!updateResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to decorate the info GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to decorate the info GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean openResult = gui.open();
                     if(!openResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to open the info GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to open the info GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 

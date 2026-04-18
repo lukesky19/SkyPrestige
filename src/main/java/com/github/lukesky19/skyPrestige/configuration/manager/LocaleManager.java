@@ -20,14 +20,13 @@ package com.github.lukesky19.skyPrestige.configuration.manager;
 import com.github.lukesky19.skyPrestige.configuration.data.common.TimeFormat;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.serialize.SerializationException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -70,19 +69,19 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
 
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.error(AdventureUtil.deserialize("Failed to load plugin's locale due to plugin settings being null."));
+            logger.error(AdventureUtility.plain("Failed to load plugin's locale due to plugin settings being null."));
             return;
         }
         if(settings.locale() == null) {
-            logger.error(AdventureUtil.deserialize("Failed to load plugin's locale to use in settings.yml is null."));
+            logger.error(AdventureUtility.plain("Failed to load plugin's locale to use in settings.yml is null."));
             return;
         }
 
-        saveBundledConfig();
+        saveDefaultConfiguration();
 
-        this.configurationPath = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (settings.locale() + ".yml"));
+        this.configurationPath = Path.of(plugin.getDirectoryFile() + File.separator + "locale" + File.separator + (settings.locale() + ".yml"));
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(configurationPath);
+        YamlConfigurationLoader loader = createLoader(configurationPath);
         try {
             ConfigurationNode root = loader.load();
             migrateVersion(root);
@@ -90,31 +89,31 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
 
             Locale locale = root.get(Locale.class);
             if(locale == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to load " + settings.locale() + ".yml."));
+                logger.warn(AdventureUtility.plain("Failed to load " + settings.locale() + ".yml."));
                 return;
             }
 
             Locale migratedConfiguration = migrateConfiguration(locale);
             if(migratedConfiguration == null) {
-                logger.warn(AdventureUtil.deserialize("Failed to migrate " + settings.locale() + ".yml."));
+                logger.warn(AdventureUtility.plain("Failed to migrate " + settings.locale() + ".yml."));
                 return;
             }
 
             // Check if the configuration is invalid
             if(!validateConfiguration(migratedConfiguration)) {
-                logger.warn(AdventureUtil.deserialize("Locale " + settings.locale() + ".yml configuration validation failed."));
+                logger.warn(AdventureUtility.plain("Locale " + settings.locale() + ".yml configuration validation failed."));
                 return;
             }
 
             this.configuration = migratedConfiguration;
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Failed to load " + settings.locale() + ".yml configuration. Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtility.plain("Failed to load " + settings.locale() + ".yml configuration. Error: " + configurateException.getMessage()));
         }
     }
 
     @Override
-    public void saveBundledConfig() {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
+    public void saveDefaultConfiguration() {
+        Path path = Path.of(plugin.getDirectoryFile() + File.separator + "locale" + File.separator + "en_US.yml");
         if(!path.toFile().exists()) {
             plugin.saveResource("locale" + File.separator + "en_US.yml", false);
         }
@@ -134,12 +133,12 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
             }
 
             case 1 -> {
-                logger.warn(AdventureUtil.deserialize("Unable to migrate version 1 config versions for locale config. Please regenerate or manually migrate your configuration."));
+                logger.warn(AdventureUtility.plain("Unable to migrate version 1 config versions for locale config. Please regenerate or manually migrate your configuration."));
                 return null;
             }
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Unknown config version for locale config. Unable to update config."));
+                logger.warn(AdventureUtility.plain("Unknown config version for locale config. Unable to update config."));
                 return null;
             }
         }
@@ -264,8 +263,8 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || configuration.finalDelimiter() == null) {
             this.configuration = null;
 
-            logger.error(AdventureUtil.deserialize("Your locale is missing one of the plugin's messages. The default locale will be used."));
-            logger.info(AdventureUtil.deserialize("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
+            logger.error(AdventureUtility.plain("Your locale is missing one of the plugin's messages. The default locale will be used."));
+            logger.info(AdventureUtility.plain("You can regenerate your locale file by deleting it or adding the missing messages to resolve the issue."));
 
             return false;
         }
@@ -447,10 +446,10 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
 
                 case "1.0.0.0" -> versionNode.set(1);
 
-                case null, default -> logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version due to an unrecognized version."));
+                case null, default -> logger.warn(AdventureUtility.plain("Failed to convert String-based version to numeric version due to an unrecognized version."));
             }
         } catch (SerializationException e) {
-            logger.warn(AdventureUtil.deserialize("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
+            logger.warn(AdventureUtility.plain("Failed to convert String-based version to numeric version. Error: " + e.getMessage()));
         }
     }
 }

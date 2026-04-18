@@ -1,13 +1,12 @@
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
 import com.github.lukesky19.skySellWands.SkySellWandsAPI;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.integration.Hook;
+import com.github.lukesky19.skylib.common.api.integration.Hook;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.github.lukesky19.skyplaytime.SkyPlayTimeAPI;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -20,7 +19,7 @@ public class SkySellWandsHook implements Hook {
 
     /**
      * Constructor
-     * @param plugin A {@link JavaPlugin} instance.
+     * @param plugin A {@link SkyPlugin} instance.
      */
     public SkySellWandsHook(@NonNull SkyPlugin plugin) {
         this.plugin = plugin;

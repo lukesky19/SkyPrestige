@@ -17,10 +17,10 @@
 */
 package com.github.lukesky19.skyPrestige.configuration.data.points.points;
 
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
@@ -75,8 +75,8 @@ public record TimePoints(
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
         itemStackBuilder.setItemType(fallback);
-        itemStackBuilder.setName(AdventureUtil.deserialize(name));
-        itemStackBuilder.setLore(lore.stream().map(AdventureUtil::deserialize).toList());
+        itemStackBuilder.setName(AdventureUtility.deserialize(name));
+        itemStackBuilder.setLore(lore.stream().map(AdventureUtility::deserialize).toList());
 
         return itemStackBuilder.buildItemStack().orElse(null);
     }

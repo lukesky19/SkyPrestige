@@ -31,8 +31,8 @@ import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeExemptionManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigeManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -111,41 +111,41 @@ public class ExchangeCommand {
 
                     Island island = bentoBoxHook.getIsland(player.getWorld(), uuid);
                     if(island == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.playerNotOnIsland()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + exchangeMessages.playerNotOnIsland()));
                         return 0;
                     }
                     String islandId = island.getUniqueId();
 
                     IslandData islandData = islandDataManager.getData(islandId);
                     if(islandData == null) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandDataNotFound()));
-                        logger.warn(AdventureUtil.deserialize("No island data found for the island " + islandId + "."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
+                        logger.warn(AdventureUtility.plain("No island data found for the island " + islandId + "."));
                         return 0;
                     }
 
                     if(settings == null) {
-                        logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the exchange GUI for player " + player.getName() + " due to invalid plugin settings."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to create the InventoryView for the exchange GUI for player " + player.getName() + " due to invalid plugin settings."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     if(islandData.isPrestigeExempt()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeExempt()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + exchangeMessages.prestigeExempt()));
                         return 0;
                     }
 
                     // Prevent exchanging prestige points if the island is in the process of prestiging or opting in/out of prestige.
                     if(prestigeManager.isIslandPrestiging(islandId)) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeInProgress()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + exchangeMessages.prestigeInProgress()));
                         return 0;
                     }
                     if(prestigeExemptionManager.isIslandExempting(islandId)) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.optOutInProgress()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + exchangeMessages.optOutInProgress()));
                         return 0;
                     }
 
                     if(islandData.getPrestigeLevel() < settings.exchangePrestigeLevel()) {
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + exchangeMessages.prestigeLevelNotMet()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + exchangeMessages.prestigeLevelNotMet()));
                         return 0;
                     }
 
@@ -155,22 +155,22 @@ public class ExchangeCommand {
 
                     boolean creationResult = gui.create();
                     if(!creationResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to create the InventoryView for the exchange GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to create the InventoryView for the exchange GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean updateResult = gui.update();
                     if(!updateResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to decorate the exchange GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to decorate the exchange GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 
                     boolean openResult = gui.open();
                     if(!openResult) {
-                        logger.error(AdventureUtil.deserialize("Unable to open the exchange GUI for player " + player.getName() + " due to a configuration error."));
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                        logger.error(AdventureUtility.plain("Unable to open the exchange GUI for player " + player.getName() + " due to a configuration error."));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                         return 0;
                     }
 

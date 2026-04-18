@@ -21,11 +21,10 @@ import com.github.lukesky19.skyPrestige.data.data.reset.QueuedSettings;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.enums.SettingsType;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.StringParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
@@ -48,7 +47,7 @@ public class QueuedSettingsTable {
     /**
      * Constructor
      * @param logger The plugin's {@link ComponentLogger}.
-     * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param queueManager A {@link QueueManager} instance.
      * @param versionsTable A {@link VersionsTable} instance.
      */
     public QueuedSettingsTable(
@@ -82,7 +81,7 @@ public class QueuedSettingsTable {
         return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql))
                 .thenCompose(v -> versionsTable.updateVersion(tableName, 1))
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Queued Settings Table creation failed: " + ex.getMessage()));
+                    logger.error(AdventureUtility.plain("Queued Settings Table creation failed: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -111,7 +110,7 @@ public class QueuedSettingsTable {
         return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter, settingsTypeParameter, prestigeLevelParameter))
                 .thenRun(() -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Failed to queue settings: " + ex.getMessage()));
+                    logger.error(AdventureUtility.plain("Failed to queue settings: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -129,7 +128,7 @@ public class QueuedSettingsTable {
         return queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter))
                 .thenRun(() -> {})
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Failed to remove queued settings: " + ex.getMessage()));
+                    logger.error(AdventureUtility.plain("Failed to remove queued settings: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -162,7 +161,7 @@ public class QueuedSettingsTable {
                     return queuedSettingsList;
                 })
                 .exceptionally(ex -> {
-                    logger.error(AdventureUtil.deserialize("Failed to get queued settings: " + ex.getMessage()));
+                    logger.error(AdventureUtility.plain("Failed to get queued settings: " + ex.getMessage()));
                     return null;
                 });
     }

@@ -26,10 +26,10 @@ import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.integration.hooks.*;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.inventory.InventoryUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.math.EquationUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.math.EquationUtil;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.leonardobishop.quests.common.player.QPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -115,20 +115,12 @@ public class RequirementsManager {
             int playersAmount = playerList.stream()
                     .filter(Objects::nonNull)
                     .filter(member -> member.isOnline() && member.isConnected())
-                    .map(member -> {
-                        int count = InventoryUtils.getItemAmountInInventory(roseStackerHook, skyHoppersHook, skySellWandsHook, excellentCratesHook, requiredStack, member.getInventory());
-
-                        System.out.println("Player has: " + count);
-
-                        return count;
-                    })
+                    .map(member -> InventoryUtils.getItemAmountInInventory(roseStackerHook, skyHoppersHook, skySellWandsHook, excellentCratesHook, requiredStack, member.getInventory()))
                     .reduce(Integer::sum)
                     .orElse(0);
 
-            System.out.println(playersAmount + "/" + requiredStack.getAmount());
-
             if(playersAmount < requiredStack.getAmount()) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughItems()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughItems()));
                 return false;
             }
         }
@@ -156,7 +148,7 @@ public class RequirementsManager {
                 .orElse(0.0);
 
         if(balance < requiredMoney) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughMoney()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughMoney()));
             return false;
         }
 
@@ -177,7 +169,7 @@ public class RequirementsManager {
         Locale locale = localeManager.getConfiguration();
 
         if(islandData.getPrestigePoints() < requiredPrestigePoints) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughPrestigePoints()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().notEnoughPrestigePoints()));
             return false;
         }
 
@@ -200,16 +192,16 @@ public class RequirementsManager {
 
         Locale locale = localeManager.getConfiguration();
         LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
-        Component requirementError = AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().requirementError());
+        Component requirementError = AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().requirementError());
         if(!lmbQuestHook.isHooked()) {
             player.sendMessage(requirementError);
-            logger.error(AdventureUtil.deserialize("The quest plugin isn't hooked into, but required quests are configured."));
+            logger.error(AdventureUtility.plain("The quest plugin isn't hooked into, but required quests are configured."));
             return false;
         }
 
         for(String questId : requiredQuesIds) {
             if(!lmbQuestHook.isQuestComplete(playerList, questId)) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.prestigeMessages().questIncomplete(),
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.prestigeMessages().questIncomplete(),
                         List.of(Placeholder.parsed("quest_id", questId))));
                 return false;
             }
@@ -368,7 +360,7 @@ public class RequirementsManager {
 
             Optional<ItemStack> optionalRequiredItem = requiredItemBuilder.buildItemStack();
             if(optionalRequiredItem.isEmpty()) {
-                logger.warn(AdventureUtil.deserialize("Failed to create a required ItemStack for an inventory requirement."));
+                logger.warn(AdventureUtility.plain("Failed to create a required ItemStack for an inventory requirement."));
                 continue;
             }
 
@@ -441,7 +433,7 @@ public class RequirementsManager {
             try {
                 return EquationUtil.evaluateEquation(formula, variables).intValue();
             } catch (RuntimeException e) {
-                logger.warn(AdventureUtil.deserialize("Failed to scale amount. The non-scaled value will be returned. Error: " + e.getMessage()));
+                logger.warn(AdventureUtility.plain("Failed to scale amount. The non-scaled value will be returned. Error: " + e.getMessage()));
                 return amount;
             }
         } else {
@@ -468,7 +460,7 @@ public class RequirementsManager {
             try {
                 return EquationUtil.evaluateEquation(formula, variables);
             } catch (RuntimeException e) {
-                logger.warn(AdventureUtil.deserialize("Failed to scale amount. The non-scaled value will be returned. Error: " + e.getMessage()));
+                logger.warn(AdventureUtility.plain("Failed to scale amount. The non-scaled value will be returned. Error: " + e.getMessage()));
                 return amount;
             }
         } else {

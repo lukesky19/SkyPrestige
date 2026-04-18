@@ -21,7 +21,7 @@ import com.github.lukesky19.skyPrestige.integration.hooks.ExcellentCratesHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.RoseStackerHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkyHoppersHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.SkySellWandsHook;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -103,7 +103,7 @@ public class InventoryUtils {
         Inventory playerInventory = player.getInventory();
         ItemType itemType = itemStack.getType().asItemType();
         if(itemType == null) {
-            logger.error(AdventureUtil.deserialize("Unable to remove a required item due to a null item type name."));
+            logger.error(AdventureUtility.plain("Unable to remove a required item due to a null item type name."));
             return 0;
         }
 

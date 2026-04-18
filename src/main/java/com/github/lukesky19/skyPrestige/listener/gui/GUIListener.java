@@ -21,8 +21,7 @@ import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.util.key.IslandIdUUIDKey;
-import com.github.lukesky19.skylib.api.common.abstracts.data.HashMapDataManager;
-import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.BaseGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,7 +46,7 @@ public class GUIListener implements Listener {
     /**
      * Constructor
      * @param guiManager A {@link GUIManager} instance.
-     * @param hookManager A {@link HashMapDataManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public GUIListener(@NonNull GUIManager guiManager, @NonNull HookManager hookManager) {
         this.guiManager = guiManager;

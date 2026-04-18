@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.integration.hooks;
 
-import com.github.lukesky19.skylib.api.integration.Hook;
+import com.github.lukesky19.skylib.common.api.integration.Hook;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jspecify.annotations.NonNull;
