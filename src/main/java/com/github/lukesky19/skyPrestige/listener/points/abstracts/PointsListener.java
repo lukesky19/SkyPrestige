@@ -112,7 +112,7 @@ public abstract class PointsListener implements Listener {
         if(player.getGameMode().equals(GameMode.CREATIVE)) return true;
 
         SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
-        return skyPlayTimeHook.isHooked() && prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(player);
+        return skyPlayTimeHook.isHooked() && !prestigePointsConfig.awardPointsWhileAfk() && skyPlayTimeHook.isPlayerAFK(player);
     }
 
     /**
