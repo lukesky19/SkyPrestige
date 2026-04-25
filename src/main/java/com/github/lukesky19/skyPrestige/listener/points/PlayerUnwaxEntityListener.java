@@ -105,7 +105,7 @@ public class PlayerUnwaxEntityListener extends PointsListener {
             if(copperGolem.getOxidizing().equals(CopperGolem.Oxidizing.waxed())) return;
 
             // Points
-            double points = prestigePointsManager.getEntityPoints(ActionType.UNWAX_ENTITY, prestigePointsConfig.prestigePointsMapping().tame(), entityType);
+            double points = prestigePointsManager.getEntityPoints(ActionType.UNWAX_ENTITY, prestigePointsConfig.prestigePointsMapping().unWaxEntity(), entityType);
             if(points <= 0) return;
 
             // Add points
