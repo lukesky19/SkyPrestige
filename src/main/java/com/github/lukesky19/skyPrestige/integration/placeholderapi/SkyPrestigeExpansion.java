@@ -157,6 +157,19 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return String.valueOf(islandData.getPrestigeLevel());
             }
 
+            case "legacy_prestige_level" -> {
+                // Get the player's island
+                Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return placeholderConfig.legacyPrestigeLevel().noIslandText();
+                // Get the IslandData
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.legacyPrestigeLevel().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.legacyPrestigeLevel().optedOutText();
+
+                // Return the island's prestige level
+                return String.valueOf(islandData.getPrestigeLevel());
+            }
+
             case "prestige_points" -> {
                 // Get the player's island
                 Island island = getIsland(bentoBoxHook, player);
@@ -170,6 +183,19 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return NumberUtils.formatDecimal(islandData.getPrestigePoints());
             }
 
+            case "legacy_prestige_points" -> {
+                // Get the player's island
+                Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return placeholderConfig.legacyPrestigePoints().noIslandText();
+                // Get the IslandData
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.legacyPrestigePoints().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.legacyPrestigePoints().optedOutText();
+
+                // Return the island's prestige points
+                return NumberUtils.formatDecimal(islandData.getPrestigePoints());
+            }
+
             case "required_prestige_points" -> {
                 // Get the player's island
                 Island island = getIsland(bentoBoxHook, player);
@@ -178,6 +204,21 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 IslandData islandData = islandDataManager.getData(island.getUniqueId());
                 if(islandData == null) return placeholderConfig.requiredPrestigePoints().noIslandText();
                 if(islandData.isPrestigeExempt()) return placeholderConfig.requiredPrestigePoints().optedOutText();
+                PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
+                if(prestigeConfig == null) return "0.0";
+
+                // Return the prestige points required to prestige
+                return NumberUtils.formatDecimal(requirementsManager.calculateRequiredPrestigePoints(island.getMemberSet().size(), islandData, prestigeConfig.prestigePointsRequirement()));
+            }
+
+            case "legacy_required_prestige_points" -> {
+                // Get the player's island
+                Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return placeholderConfig.legacyRequiredPrestigePoints().noIslandText();
+                // Get the IslandData
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.legacyRequiredPrestigePoints().noIslandText();
+                if(islandData.isPrestigeExempt()) return placeholderConfig.legacyRequiredPrestigePoints().optedOutText();
                 PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
                 if(prestigeConfig == null) return "0.0";
 
@@ -266,7 +307,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return bar.toString();
             }
 
-            case "progress_bar_legacy" -> {
+            case "legacy_progress_bar" -> {
                 Island island = getIsland(bentoBoxHook, player);
                 if(island == null) return placeholderConfig.legacyProgressBar().noIslandText();
                 IslandData islandData = islandDataManager.getData(island.getUniqueId());
@@ -356,12 +397,25 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 return String.valueOf(multiplierManager.getMultiplier(island));
             }
 
+            case "legacy_multiplier" -> {
+                Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return placeholderConfig.legacyMultiplier().noIslandText();
+                IslandData islandData = islandDataManager.getData(island.getUniqueId());
+                if(islandData == null) return placeholderConfig.legacyMultiplier().noIslandText();
+
+                return String.valueOf(multiplierManager.getMultiplier(island));
+            }
+
             case "server_multiplier" -> {
                 return String.valueOf(multiplierManager.getServerMultiplier());
             }
 
             case "server_multiplier_time" -> {
                 return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
+            }
+
+            case "legacy_server_multiplier_time" -> {
+                return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.legacyMultiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
             }
 
             case "server_multiplier_time_raw" -> {
@@ -380,6 +434,13 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(island == null) return "0";
 
                 return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.multiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
+            }
+
+            case "legacy_island_multiplier_time" -> {
+                Island island = getIsland(bentoBoxHook, player);
+                if(island == null) return "0";
+
+                return AdventureUtility.serialize(multiplierManager.getTimePlaceholder(placeholderConfig.legacyMultiplier().timeFormat(), multiplierManager.getServerMultiplierTime()));
             }
 
             default -> {

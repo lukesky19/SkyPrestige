@@ -87,8 +87,17 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
                         "0",
                         "0"),
                 new PlaceholderConfig.PrestigeNumberConfig(
+                        "0",
+                        "0"),
+                new PlaceholderConfig.PrestigeNumberConfig(
                         "0.0",
                         "0.0"),
+                new PlaceholderConfig.PrestigeNumberConfig(
+                        "0",
+                        "0"),
+                new PlaceholderConfig.PrestigeNumberConfig(
+                        "0",
+                        "0"),
                 new PlaceholderConfig.ProgressBarConfig(
                         0.20,
                         0.20,
@@ -110,6 +119,20 @@ public class PlaceholderConfigManager extends SimpleConfigManager<PlaceholderCon
                         "&7Max Level",
                         "&a|",
                         "&c|"
+                ),
+                new PlaceholderConfig.MultiplierConfig(
+                        "0.0",
+                        "0.0",
+                        new TimeFormat(
+                                "",
+                                "<years> year(s)",
+                                "<months> month(s)",
+                                "<weeks> week(s)",
+                                "<days> day(s)",
+                                "<hours> hour(s)",
+                                "<minutes> minute(s)",
+                                "<seconds> second(s)",
+                                "")
                 ),
                 new PlaceholderConfig.MultiplierConfig(
                         "0.0",

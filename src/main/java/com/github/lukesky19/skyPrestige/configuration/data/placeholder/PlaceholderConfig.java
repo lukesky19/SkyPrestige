@@ -26,21 +26,29 @@ import org.jspecify.annotations.Nullable;
  * This record contains the configuration for PlaceholderAPI placeholders.
  * @param version The config version.
  * @param prestigeLevel The configuration for the prestige level placeholder.
+ * @param legacyPrestigeLevel The configuration for the prestige level placeholder that uses legacy color codes.
  * @param prestigePoints The configuration for the prestige points placeholder.
+ * @param legacyPrestigePoints The configuration for the prestige points placeholder that uses legacy color codes.
  * @param requiredPrestigePoints The configuration for the required prestige points placeholder.
+ * @param legacyRequiredPrestigePoints The configuration for the required prestige points placeholder that uses legacy color codes.
  * @param progressBar The configuration for the progress bar.
  * @param legacyProgressBar The configuration for the progress bar that uses legacy color codes.
  * @param multiplier The configuration for multiplier placeholders.
+ * @param legacyMultiplier The configuration for multiplier placeholders that uses legacy color codes.
  */
 @ConfigSerializable
 public record PlaceholderConfig(
         int version,
         @NonNull PrestigeNumberConfig prestigeLevel,
+        @NonNull PrestigeNumberConfig legacyPrestigeLevel,
         @NonNull PrestigeNumberConfig prestigePoints,
+        @NonNull PrestigeNumberConfig legacyPrestigePoints,
         @NonNull PrestigeNumberConfig requiredPrestigePoints,
+        @NonNull PrestigeNumberConfig legacyRequiredPrestigePoints,
         @NonNull ProgressBarConfig progressBar,
         @NonNull ProgressBarConfig legacyProgressBar,
-        @NonNull MultiplierConfig multiplier) {
+        @NonNull MultiplierConfig multiplier,
+        @NonNull MultiplierConfig legacyMultiplier) {
     /**
      * This record contains configuration related to prestige level and prestige points placeholders.
      * @param noIslandText The text to display when there is no island.
