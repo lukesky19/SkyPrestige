@@ -153,13 +153,19 @@ public class SettingsProcessor {
         offlineIslandMembers.forEach(memberId -> queuedSettingsTable.queueSettings(
                 memberId, newIsland.getUniqueId(), SettingsType.ISLAND_RESET, -1));
 
+        // Create Island Data
+        IslandData islandData = new IslandData(newIsland.getUniqueId());
+
+        // Set initial prestige exempt (opt-in/opt-out) value
+        islandData.setPrestigeExempt(settings.startOptedOut());
+
         // Process island settings
         islandSettingsProcessor.processIslandSettings(
                 initiator,
                 islandSettings,
                 oldIsland,
                 newIsland,
-                new IslandData(newIsland.getUniqueId()));
+                islandData);
 
         // Process player settings
         playerSettingsProcessor.processPlayerSettings(
