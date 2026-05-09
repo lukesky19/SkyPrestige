@@ -29,6 +29,7 @@ import org.jspecify.annotations.NonNull;
  * @param resetExp Whether to reset player experience or not.
  * @param resetMoney Whether to reset the player's money or not.
  * @param resetAuctionItems Whether to reset the player's auction house items or not.
+ * @param resetQuestProgress Whether to reset quest progress or not.
  * @param playTimeSettings The {@link PlayTimeSettings}.
  */
 @ConfigSerializable
@@ -38,4 +39,5 @@ public record PlayerSettings(
         boolean resetExp,
         boolean resetMoney,
         boolean resetAuctionItems,
+        boolean resetQuestProgress,
         @NonNull PlayTimeSettings playTimeSettings) {}

@@ -73,6 +73,8 @@ public record ConfirmGUIConfig(
      * @param resetMoney The {@link ButtonConfig} for the button shown when island member's balance is reset on prestige/opt-in/opt-out.
      * @param keepAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are carried over on prestige/opt-in/opt-out.
      * @param resetAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are reset on prestige/opt-in/opt-out.
+     * @param keepQuestProgress The {@link ButtonConfig} for the button shown when an island member's quest progress is carried over on prestige/opt-in/opt-out.
+     * @param resetQuestProgress The {@link ButtonConfig} for the button shown when an island member's quest progress is reset on prestige/opt-in/opt-out.
      * @param keepGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades carry over on prestige/opt-in/opt-out.
      * @param resetGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades are reset on prestige/opt-in/opt-out.
      * @param keepVaultItems The {@link ButtonConfig} for the button shown when the island's vault is carried over on prestige/opt-in/opt-out.
@@ -110,6 +112,8 @@ public record ConfirmGUIConfig(
             @NonNull ButtonConfig resetMoney,
             @NonNull ButtonConfig keepAuctionItems,
             @NonNull ButtonConfig resetAuctionItems,
+            @NonNull ButtonConfig keepQuestProgress,
+            @NonNull ButtonConfig resetQuestProgress,
             @NonNull ButtonConfig keepGeneratorUpgrades,
             @NonNull ButtonConfig resetGeneratorUpgrades,
             @NonNull ButtonConfig keepVaultItems,

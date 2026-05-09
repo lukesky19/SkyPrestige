@@ -25,6 +25,7 @@ prestige-settings:
         reset-exp: true
         reset-money: true
         reset-auction-items: true
+        reset-quest-progress: true
         play-time-settings:
             reset-session: false
             reset-daily: false

@@ -453,6 +453,12 @@ public class ConfirmOptInGUI extends ConfirmGUI {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
         }
 
+        if(!resetSettings.playerSettings().resetQuestProgress()) {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepQuestProgress(), emptyList);
+        } else {
+            createDisplayButton(confirmOptInGUIConfig.conditionalButtons().resetQuestProgress(), emptyList);
+        }
+
         if(!playTimeSettings.resetSession()) {
             createDisplayButton(confirmOptInGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);
         } else {

@@ -228,6 +228,22 @@ conditional-buttons:
                 - "<gray>Your auction house items will be reset on prestige."
             amount: 1
         slot: 24
+    keep-quest-progress:
+        item:
+            item-type: name_tag
+            name: "<white>Quest Progress</white>"
+            lore:
+                - "<gray>Your quest progress will be carried over on prestige.</gray>"
+            amount: 1
+        slot: 25
+    reset-quest-progress:
+        item:
+            item-type: name_tag
+            name: "<white>Quest Progress</white>"
+            lore:
+                - "<gray>Your quest progress will be reset on prestige.</gray>"
+            amount: 1
+        slot: 25
     keep-session-play-time:
         item:
             item-type: clock
@@ -235,7 +251,7 @@ conditional-buttons:
             lore:
                 - "<gray>Your session play time will be carried over on prestige."
             amount: 1
-        slot: 25
+        slot: 28
     reset-session-play-time:
         item:
             item-type: clock
@@ -243,7 +259,7 @@ conditional-buttons:
             lore:
                 - "<gray>Your session play time will be reset on prestige."
             amount: 1
-        slot: 25
+        slot: 28
     keep-daily-play-time:
         item:
             item-type: clock

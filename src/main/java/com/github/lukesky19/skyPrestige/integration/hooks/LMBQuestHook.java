@@ -24,6 +24,7 @@ import com.leonardobishop.quests.bukkit.BukkitQuestsPlugin;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.player.QPlayerManager;
 import com.leonardobishop.quests.common.player.questprogressfile.QuestProgress;
+import com.leonardobishop.quests.common.player.questprogressfile.QuestProgressFile;
 import com.leonardobishop.quests.common.quest.Quest;
 import com.leonardobishop.quests.common.quest.QuestManager;
 import net.milkbowl.vault.economy.Economy;
@@ -168,5 +169,25 @@ public class LMBQuestHook implements Hook {
         if(playerManager == null) return;
 
         playerIds.forEach(qPlayerMap::remove);
+    }
+
+    /**
+     * Reset the quest progress for the {@link UUID} provided.
+     * @param playerId The {@link UUID}.
+     */
+    public void resetQuestProgress(@NonNull UUID playerId) {
+        QPlayer qPlayer = qPlayerMap.get(playerId);
+        if(qPlayer == null) return;
+
+        resetQuestProgress(qPlayer);
+    }
+
+    /**
+     * Reset the quest progress for the {@link QPlayer} provided.
+     * @param qPlayer The {@link QPlayer}.
+     */
+    public void resetQuestProgress(@NonNull QPlayer qPlayer) {
+        QuestProgressFile progress = qPlayer.getQuestProgressFile();
+        progress.reset();
     }
 }

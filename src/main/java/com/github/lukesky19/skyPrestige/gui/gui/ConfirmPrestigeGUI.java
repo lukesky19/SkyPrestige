@@ -451,6 +451,12 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetAuctionItems(), emptyList);
         }
 
+        if(!resetSettings.playerSettings().resetQuestProgress()) {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepQuestProgress(), emptyList);
+        } else {
+            createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().resetQuestProgress(), emptyList);
+        }
+
         if(!playTimeSettings.resetSession()) {
             createDisplayButton(confirmPrestigeGUIConfig.conditionalButtons().keepSessionPlayTime(), emptyList);
         } else {

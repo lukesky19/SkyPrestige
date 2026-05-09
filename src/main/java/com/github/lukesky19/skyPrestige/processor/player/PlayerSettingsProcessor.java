@@ -20,10 +20,7 @@ package com.github.lukesky19.skyPrestige.processor.player;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.inventory.InventorySettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.player.PlayerSettings;
 import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
-import com.github.lukesky19.skyPrestige.integration.hooks.EconomyHook;
-import com.github.lukesky19.skyPrestige.integration.hooks.PlayerAuctionsHook;
-import com.github.lukesky19.skyPrestige.integration.hooks.SkyPlayTimeHook;
-import com.github.lukesky19.skyPrestige.integration.hooks.SkySellWandsHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.*;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
 import org.bukkit.entity.Player;
@@ -74,7 +71,7 @@ public class PlayerSettingsProcessor {
         onlinePlayerList.forEach(player -> processPlayerSettings(playerSettings, player, initiatingPlayer.equals(player), startingMoney, giveToAll));
 
         // Offline Player Settings
-        offlinePlayerIds.forEach(this::resetAuctionHouse);
+        offlinePlayerIds.forEach(playerId -> processPlayerSettings(playerSettings, playerId));
     }
 
     /**
@@ -114,6 +111,8 @@ public class PlayerSettingsProcessor {
             boolean isPlayerInitiator,
             double startingMoney,
             boolean giveToAll) {
+        UUID playerId = player.getUniqueId();
+
         processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
 
         if(playerSettings.resetExp()) {
@@ -123,10 +122,31 @@ public class PlayerSettingsProcessor {
         processEconomySettings(player, isPlayerInitiator, playerSettings.resetMoney(), startingMoney, giveToAll);
 
         if(playerSettings.resetAuctionItems()) {
-            resetAuctionHouse(player.getUniqueId());
+            resetAuctionHouse(playerId);
+        }
+
+        if(playerSettings.resetQuestProgress()) {
+            resetQuestProgress(playerId);
         }
 
         resetPlayTime(player, playerSettings.playTimeSettings());
+    }
+
+    /**
+     * Process the player settings.
+     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param playerId The {@link UUID} to process the settings for.
+     */
+    public void processPlayerSettings(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull UUID playerId) {
+        if(playerSettings.resetAuctionItems()) {
+            resetAuctionHouse(playerId);
+        }
+
+        if(playerSettings.resetQuestProgress()) {
+            resetQuestProgress(playerId);
+        }
     }
 
     /**
@@ -218,6 +238,18 @@ public class PlayerSettingsProcessor {
 
         if(playerAuctionsHook.isHooked()) {
             playerAuctionsHook.clearPlayerAuctions(playerId);
+        }
+    }
+
+    /**
+     * Reset the quest progress for the player id provided.
+     * @param playerId The {@link UUID}.
+     */
+    private void resetQuestProgress(@NonNull UUID playerId) {
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+
+        if(lmbQuestHook.isHooked()) {
+            lmbQuestHook.resetQuestProgress(playerId);
         }
     }
 
