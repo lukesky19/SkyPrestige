@@ -17,8 +17,6 @@
 */
 package com.github.lukesky19.skyPrestige.teleportation;
 
-import com.github.lukesky19.skyPrestige.configuration.data.settings.Settings;
-import com.github.lukesky19.skyPrestige.configuration.manager.SettingsManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
@@ -42,24 +40,20 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TeleportationManager {
     private final @NonNull ComponentLogger logger;
-    private final @NonNull SettingsManager settingsManager;
     private final @NonNull DatabaseManager databaseManager;
     private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
      * @param plugin A {@link JavaPlugin} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public TeleportationManager(
             @NonNull SkyPlugin plugin,
-            @NonNull SettingsManager settingsManager,
             @NonNull DatabaseManager databaseManager,
             @NonNull HookManager hookManager) {
         this.logger = plugin.getComponentLogger();
-        this.settingsManager = settingsManager;
         this.databaseManager = databaseManager;
         this.hookManager = hookManager;
     }
@@ -74,23 +68,23 @@ public class TeleportationManager {
         islandIdFuture.thenAccept(islandId -> {
             if(!player.isOnline() || !player.isConnected()) return;
             if(islandId == null) return;
-            Settings settings = settingsManager.getConfiguration();
-            if(settings == null) {
-                logger.error(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to invalid plugin settings."));
-                return;
-            }
 
             BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
             if(!bentoBoxHook.isHooked()) return;
             Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
             if(optionalIsland.isEmpty()) {
-                logger.error(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
+                logger.warn(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to no island found for island id " + islandId + "."));
                 return;
             }
 
             Island island = optionalIsland.get();
+            Location playerLocation = player.getLocation();
             Location spawnPoint = island.getSpawnPoint(World.Environment.NORMAL);
             if(spawnPoint != null) {
+                logger.info(AdventureUtility.plain("Teleporting player " + player.getName() + " to their new island's spawn point."));
+                logger.info(AdventureUtility.plain("Previous Location: World: " + playerLocation.getWorld().getName() + " X: " + playerLocation.getBlockX() + " Y: " + playerLocation.getBlockY() + " Z: " + playerLocation.getBlockZ()));
+                logger.info(AdventureUtility.plain("New Location: World: " + spawnPoint.getWorld().getName() + " X: " + spawnPoint.getBlockX() + " Y: " + spawnPoint.getBlockY() + " Z: " + spawnPoint.getBlockZ()));
+
                 player.teleportAsync(spawnPoint);
             } else {
                 logger.warn(AdventureUtility.plain("Unable to teleport player " + player.getName() + " due to now island spawn point set for island id " + islandId + "."));
