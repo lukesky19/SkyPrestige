@@ -16,9 +16,108 @@ apply-opt-in-rewards-for-initial-islands: false
 apply-opt-out-rewards-for-initial-islands: false
 # These settings apply when an island is reset outside of prestige, opt-in, or opt-out.
 island-reset-settings:
-    keep-island-size: true
-    keep-generator-upgrades: true
-    keep-island-flags: true
-    reset-prestige-points: true
-    reset-prestige-level: false
-    clear-vault: false
+    island-settings:
+        keep-island-size: true
+        keep-generator-upgrades: true
+        keep-island-flags: true
+        reset-prestige-points: true
+        reset-prestige-level: false
+        clear-vault: false
+    player-settings:
+        inventory-settings:
+            reset-inventory: true
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-inventory: false
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        reset-exp: true
+        reset-money: true
+        reset-auction-items: true
+        reset-quest-progress: true
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-yearly: false
+            reset-total: false
+    commands: []
+    permissions: []
+    groups: []
+# These settings apply when a player joins an island.
+team-join-settings:
+    player-settings:
+        inventory-settings:
+            reset-inventory: false
+            keep-protected-items: true
+            keep-infinite-sell-wands: true
+        ender-chest-settings:
+            reset-inventory: false
+            keep-protected-items: true
+            keep-infinite-sell-wands: true
+        reset-exp: false
+        reset-money: false
+        reset-auction-items: false
+        reset-quest-progress: false
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-yearly: false
+            reset-total: false
+    commands: []
+    permissions: []
+    groups: []
+# These settings apply when a player leaves an island.
+team-leave-settings:
+    player-settings:
+        inventory-settings:
+            reset-inventory: false
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-inventory: false
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        reset-exp: false
+        reset-money: false
+        reset-auction-items: false
+        reset-quest-progress: false
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-yearly: false
+            reset-total: false
+    commands: []
+    permissions: []
+    groups: []
+# These settings apply when a player is kicked from an island.
+team-kick-settings:
+    player-settings:
+        inventory-settings:
+            reset-inventory: false
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        ender-chest-settings:
+            reset-inventory: false
+            keep-protected-items: false
+            keep-infinite-sell-wands: false
+        reset-exp: false
+        reset-money: false
+        reset-auction-items: false
+        reset-quest-progress: false
+        play-time-settings:
+            reset-session: false
+            reset-daily: false
+            reset-weekly: false
+            reset-monthly: false
+            reset-yearly: false
+            reset-total: false
+    commands: []
+    permissions: []
+    groups: []
