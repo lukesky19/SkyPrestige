@@ -22,6 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.manager.*;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.dialog.manager.DialogManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
 import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
@@ -52,6 +53,7 @@ import com.github.lukesky19.skyPrestige.requirements.RequirementsManager;
 import com.github.lukesky19.skyPrestige.task.TaskManager;
 import com.github.lukesky19.skyPrestige.teleportation.TeleportationManager;
 import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.version.VersionUtil;
 import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import com.github.lukesky19.skyshop.api.SkyShopAPI;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -84,6 +86,7 @@ public class SkyPrestige extends SkyPlugin {
     private VaultConfigManager vaultConfigManager;
 
     private GUIManager guiManager;
+    private DialogManager dialogManager;
     private DatabaseManager databaseManager;
     private IslandDataManager islandDataManager;
     private LeaderboardManager leaderboardManager;
@@ -106,9 +109,9 @@ public class SkyPrestige extends SkyPlugin {
     @Override
     public void onEnable() {
         // Check SkyLib version
-        if(!checkSkyLibVersion()) {
-            return;
-        }
+        if(!checkSkyLibVersion()) return;
+        // Check server version
+        if(!checkServerVersion()) return;
 
         // Hooks
         HookManager hookManager = new HookManager(this);
@@ -129,6 +132,7 @@ public class SkyPrestige extends SkyPlugin {
         vaultConfigManager = new VaultConfigManager(this);
 
         guiManager = new GUIManager();
+        dialogManager = new DialogManager(this);
         islandDataManager = new IslandDataManager(databaseManager, hookManager);
         leaderboardManager = new LeaderboardManager(this, islandDataManager, databaseManager, hookManager);
         MultiplierManager multiplierManager = new MultiplierManager(this, localeManager, islandDataManager);
@@ -146,7 +150,7 @@ public class SkyPrestige extends SkyPlugin {
         TeleportationManager teleportationManager = new TeleportationManager(this, databaseManager, hookManager);
 
         // Register Commands
-        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigePointsConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, requirementsManager, islandDataManager, leaderboardManager, guiManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
+        SkyPrestigeCommand skyPrestigeCommand = new SkyPrestigeCommand(this, settingsManager, localeManager, guiConfigManager, prestigePointsConfigManager, prestigeConfigManager, optInConfigManager, optOutConfigManager, prestigeManager, prestigeExemptionManager, requirementsManager, islandDataManager, leaderboardManager, guiManager, dialogManager, databaseManager, vaultConfigManager, protectionOrbManager, multiplierManager, hookManager);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
                 commands ->
                         commands.registrar().register(skyPrestigeCommand.createCommand(),
@@ -262,7 +266,7 @@ public class SkyPrestige extends SkyPlugin {
             });
         }
 
-        databaseFuture.thenAccept(v -> {
+        databaseFuture.thenAccept(_ -> {
             // Load player data for any online players.
             this.getServer().getOnlinePlayers().forEach(player -> {
                 UUID uuid = player.getUniqueId();
@@ -305,6 +309,8 @@ public class SkyPrestige extends SkyPlugin {
         // Close any open GUIs
         if(guiManager != null) guiManager.closeOpenGUIs(true);
 
+        if(dialogManager != null) dialogManager.closeOpenDialogs();
+
         // Stop the running tasks
         if(taskManager != null) taskManager.stopTasks();
 
@@ -315,7 +321,7 @@ public class SkyPrestige extends SkyPlugin {
                 saveFuture.join();
 
                 saveFuture
-                        .thenAccept(v -> this.getComponentLogger().info(
+                        .thenAccept(_ -> this.getComponentLogger().info(
                                 AdventureUtility.deserialize("Successfully saved island data on plugin disable.")))
                         .exceptionally(ex -> {
                             this.getComponentLogger().error(
@@ -338,6 +344,9 @@ public class SkyPrestige extends SkyPlugin {
     public void reload() {
         // Close any open GUIs
         guiManager.closeOpenGUIs(false);
+
+        // Close any open Dialogs
+        dialogManager.closeOpenDialogs();
 
         // Clear caches
         prestigePointsManager.clearCaches();
@@ -379,6 +388,24 @@ public class SkyPrestige extends SkyPlugin {
         }
 
         this.getComponentLogger().error(AdventureUtility.deserialize("SkyLib Version 2.0.0.0 or newer is required to run this plugin."));
+        this.getServer().getPluginManager().disablePlugin(this);
+        return false;
+    }
+
+    /**
+     * Checks if the Server's version is supported.
+     * @return true if it is, false if not.
+     */
+    private boolean checkServerVersion() {
+        if(VersionUtil.isLegacy()) {
+            if(VersionUtil.getMajorVersion() >= 21 && VersionUtil.getMinorVersion() >= 6) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+
+        this.getComponentLogger().error(AdventureUtility.deserialize("SkyPrestige requires the server to run Minecraft 1.21.6 or newer. Server version: " + VersionUtil.getMinecraftVersion()));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

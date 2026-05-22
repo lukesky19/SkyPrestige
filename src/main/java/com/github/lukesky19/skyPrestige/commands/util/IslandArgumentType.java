@@ -32,9 +32,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.database.objects.Island;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -59,22 +62,29 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
     /**
      * The error to use when no island is found for an island id.
      */
-    private static final DynamicCommandExceptionType ERROR_NO_ISLAND_FOUND = new DynamicCommandExceptionType(islandId ->
-            MessageComponentSerializer.message().serialize(Component.text("No island found for island id " + islandId + ".")));
+    private static final DynamicCommandExceptionType ERROR_NO_ISLAND_FOUND = new DynamicCommandExceptionType(input ->
+            MessageComponentSerializer.message().serialize(Component.text("No island found for island id or player name " + input + ".")));
 
     /**
      * Convert the island id to an island.
-     * @param islandId The island id.
+     * @param input The island id or player name.
      * @return The {@link Island}.
-     * @throws CommandSyntaxException If no island was found for the island id.
+     * @throws CommandSyntaxException If no island was found for the island id or player name.
      */
     @Override
-    public @NonNull Island convert(@NonNull String islandId) throws CommandSyntaxException {
-        Optional<Island> optionalIsland = bentoBoxHook.getIslandById(islandId);
+    public @NonNull Island convert(@NonNull String input) throws CommandSyntaxException {
+        Optional<Island> optionalIsland = bentoBoxHook.getIslandById(input);
         if(optionalIsland.isPresent()) {
             return optionalIsland.get();
-        } else {
-            throw ERROR_NO_ISLAND_FOUND.create(islandId);
+        } else { // Fallback to island resolution by player name
+            Player player = plugin.getServer().getPlayer(input);
+            if(player == null || !player.isOnline() || !player.isConnected())
+                throw ERROR_NO_ISLAND_FOUND.create(input);
+
+            List<Island> islandList = bentoBoxHook.getIslands(player.getUniqueId());
+            if(islandList.isEmpty()) throw ERROR_NO_ISLAND_FOUND.create(input);
+
+            return islandList.getFirst();
         }
     }
 
@@ -88,7 +98,17 @@ public class IslandArgumentType implements CustomArgumentType.Converted<Island, 
     @Override
     public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, @NonNull SuggestionsBuilder builder) {
         bentoBoxHook.getIslandsManager().getIslands().stream()
-                .filter(island -> island.getUniqueId().startsWith(builder.getRemaining()))
+                .filter(island -> {
+                    String input = builder.getRemainingLowerCase();
+
+                    Server server = plugin.getServer();
+                    boolean matchesMember = island.getMemberSet().stream()
+                            .map(server::getPlayer)
+                            .filter(player -> player != null && player.isOnline() && player.isConnected())
+                            .anyMatch(player -> player.getName().toLowerCase().startsWith(input) || player.getUniqueId().toString().startsWith(input));
+
+                    return island.getUniqueId().startsWith(input) || matchesMember;
+                })
                 .forEach(island -> {
                     String islandMembersNames = island.getMemberSet().stream().map(memberId ->
                                     plugin.getServer().getOfflinePlayer(memberId).getName())

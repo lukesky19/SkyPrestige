@@ -38,9 +38,13 @@
 * /skyprestige info - Open the info GUI.
 * /skyprestige leaderboard - View the prestige leaderboard.
 * /skyprestige level set <island_id> <level>
-* /skyprestige multiplier event
-* /skyprestige multiplier <add | remove | set> <multiplier>
-* /skyprestige multiplier get [additional | event | total]
+* /skyprestige manage <island_id> - Manage the island's data through dialogs.
+* /skyprestige multiplier - Get the current effective multiplier.
+* /skyprestige multiplier server <add | remove | set> <multiplier> <time> <notice> - Add to, remove from, or set the server's prestige point multiplier.
+* /skyprestige multiplier island <add | remove | set> <island_id> <multiplier> <time> <notice> - Add to, remove from, or set the island's prestige point multiplier.
+* /skyprestige multiplier server get - Get the server's prestige point multiplier.
+* /skyprestige multiplier island get \[island_id] - Get the island's prestige point multiplier.
+* /skyprestige multiplier server dialog - Manage the server's prestige point multiplier through a dialog.  
 * /skyprestige opt-in - Opts the player's island in of prestige.
 * /skyprestige opt-out - Opts the player's island out of prestige.
 * /skyprestige points <add | remove | set> <island_id> <prestige_points>
@@ -65,15 +69,18 @@
 * `skyprestige.commands.skyprestige.info` - The permission to open the info GUI.
 * `skyprestige.commands.skyprestige.leaderboard` - The permission to view the prestige leaderboard.
 * `skyprestige.commands.skyprestige.level` - The permission to set an island's prestige level.
-* `skyprestige.commands.skyprestige.multiplier` - The permission to manage and view information related to the prestige points' multiplier.
-* `skyprestige.commands.skyprestige.multiplier.event` - The permission to view either the remaining event time, the time until the next event, or if the event is disabled.
-* `skyprestige.commands.skyprestige.multiplier.add` - The permission to add to the current additional multiplier.
-* `skyprestige.commands.skyprestige.multiplier.remove` - The permission to remove from the current additional multiplier.
-* `skyprestige.commands.skyprestige.multiplier.set` - The permission to set the current additional multiplier.
-* `skyprestige.commands.skyprestige.multiplier.get` - The permission to get the current multipliers.
-* `skyprestige.commands.skyprestige.multiplier.get.additional` - The permission to get the current additional multiplier.
-* `skyprestige.commands.skyprestige.multiplier.get.event` - The permission to get the current event multiplier.
-* `skyprestige.commands.skyprestige.multiplier.get.total` - The permission to get the current total multiplier.
+* `skyprestige.commands.skyprestige.multiplier` - The permission to manage and view information related to prestige point multipliers.
+* `skyprestige.commands.skyprestige.multiplier.server` - The permission to manage and view information related to the server's prestige point multiplier.
+* `skyprestige.commands.skyprestige.multiplier.island` - The permission to manage and view information related to the island's prestige point multiplier.
+* `skyprestige.commands.skyprestige.multiplier.server.add` - The permission to add to the current server multiplier.
+* `skyprestige.commands.skyprestige.multiplier.server.remove` - The permission to remove from the current server multiplier.
+* `skyprestige.commands.skyprestige.multiplier.server.set` - The permission to set the current server multiplier.
+* `skyprestige.commands.skyprestige.multiplier.server.get` - The permission to get the current server multiplier.
+* `skyprestige.commands.skyprestige.multiplier.server.dialog` - The permission to open the dialog to manage the server's multiplier data.
+* `skyprestige.commands.skyprestige.multiplier.island.add` - The permission to add to the current island multiplier.
+* `skyprestige.commands.skyprestige.multiplier.island.remove` - The permission to remove from the current island multiplier.
+* `skyprestige.commands.skyprestige.multiplier.island.set` - The permission to set the current island multiplier.
+* `skyprestige.commands.skyprestige.multiplier.island.get` - The permission to get the current island multiplier.
 * `skyprestige.commands.skyprestige.points` - The permission to use the `/skyprestige points` command.
 * `skyprestige.commands.skyprestige.points.add` - The permission to use the `/skyprestige points add` command.
 * `skyprestige.commands.skyprestige.points.remove` - The permission to use the `/skyprestige points remove` command.
@@ -90,7 +97,7 @@
 ## FAQ
 Q: What versions does this plugin support?
 
-A: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1, 26.1.1, and 26.1.2.
+A: 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1, 26.1.1, and 26.1.2.
 Note: Java 25 is required even on versions older than 26.1.
 
 Q: I get the following error: "SkyPrestige has been compiled by a more recent version of the Java Runtime

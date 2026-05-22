@@ -17,7 +17,9 @@
 */
 package com.github.lukesky19.skyPrestige.multiplier;
 
+import com.github.lukesky19.skyPrestige.util.enums.Operation;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This class stores the data for a multiplier.
@@ -133,5 +135,43 @@ public class Multiplier {
 
         this.time = Math.max(0, (this.time - time));
         if(this.time == 0) multiplier = 0;
+    }
+
+    /**
+     * Modify the multiplier based on the inputs.
+     * @param multiplier The multiplier or null.
+     * @param multiplierOperation The multiplier operation or null.
+     * @param time The multiplier time or null.
+     * @param timeOperation The multiplier time operation or null.
+     * @return true if successful, false if not.
+     */
+    public boolean modifyMultiplier(
+            @Nullable Double multiplier,
+            @Nullable Operation multiplierOperation,
+            @Nullable Long time,
+            @Nullable Operation timeOperation) {
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        // Update the multiplier
+        if(multiplier != null && multiplierOperation != null) {
+            switch(multiplierOperation) {
+                case NONE -> {}
+                case ADD -> this.addMultiplier(multiplier);
+                case REMOVE -> this.removeMultiplier(multiplier);
+                case SET -> this.setMultiplier(multiplier);
+            }
+        }
+
+        if(time != null && timeOperation != null) {
+            switch(timeOperation) {
+                case NONE -> {}
+                case ADD -> this.addTime(time);
+                case REMOVE -> this.removeTime(time);
+                case SET -> this.setTime(time);
+            }
+        }
+
+        return true;
     }
 }

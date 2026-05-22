@@ -22,6 +22,7 @@ import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.LocaleManager;
 import com.github.lukesky19.skyPrestige.data.data.island.IslandData;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.util.enums.Operation;
 import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.common.api.time.Time;
 import com.github.lukesky19.skylib.common.api.time.TimeUtil;
@@ -84,6 +85,34 @@ public class MultiplierManager {
      */
     public double getMultiplier(@NonNull IslandData islandData) {
         return 1.0 + getServerMultiplier() + getIslandMultiplier(islandData);
+    }
+
+    /**
+     * Modify the server multiplier based on the inputs.
+     * @param player The {@link Player} modifying the multiplier.
+     * @param multiplier The multiplier or null.
+     * @param multiplierOperation The multiplier operation or null.
+     * @param time The multiplier time or null.
+     * @param timeOperation The multiplier time operation or null.
+     * @param notice Whether to notify online players of the change or not.
+     * @return true if successful, false if not.
+     */
+    public boolean modifyServerMultiplier(
+            @NonNull Player player,
+            @Nullable Double multiplier,
+            @Nullable Operation multiplierOperation,
+            @Nullable Long time,
+            @Nullable Operation timeOperation,
+            boolean notice) {
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        boolean result = serverMultiplier.modifyMultiplier(multiplier, multiplierOperation, time, timeOperation);
+
+        // Send relevant messages
+        sendServerMultiplierChangedNotice(player, serverMultiplier.getMultiplier(), serverMultiplier.getTime(), notice);
+
+        return result;
     }
 
     /**
@@ -243,6 +272,40 @@ public class MultiplierManager {
     }
 
     /**
+     * Modify the island multiplier based on the inputs.
+     * @param player The {@link Player} modifying the multiplier.
+     * @param island The {@link Island}.
+     * @param multiplier The multiplier or null.
+     * @param multiplierOperation The multiplier operation or null.
+     * @param time The multiplier time or null.
+     * @param timeOperation The multiplier time operation or null.
+     * @param notice Whether to notify online players of the change or not.
+     * @return true if successful, false if not.
+     */
+    public boolean modifyIslandMultiplier(
+            @NonNull Player player,
+            @NonNull Island island,
+            @Nullable Double multiplier,
+            @Nullable Operation multiplierOperation,
+            @Nullable Long time,
+            @Nullable Operation timeOperation,
+            boolean notice) {
+        // Get the Island's IslandData
+        IslandData islandData = islandDataManager.getData(island.getUniqueId());
+        // If the IslandData is null, return false
+        if(islandData == null) return false;
+        // If no change, return false
+        if(multiplier == null && time == null) return false;
+
+        boolean result = islandData.modifyMultiplier(multiplier, multiplierOperation, time, timeOperation);
+
+        // Send relevant messages
+        sendIslandMultiplierChangedNotice(player, island, serverMultiplier.getMultiplier(), serverMultiplier.getTime(), notice);
+
+        return result;
+    }
+
+    /**
      * Set the multiplier for the island.
      * @apiNote This multiplier is added to the base and server multiplier.<br>
      * Example: 1.0 (Base) + 0.0 (Server) + 1.0 (Island) is a 2.0 multiplier.<br>
@@ -380,8 +443,7 @@ public class MultiplierManager {
      * @param timeInSeconds The time in seconds to format.
      * @return A {@link Component}.
      */
-    @NonNull
-    public Component getTimePlaceholder(@NonNull TimeFormat timeMessage, long timeInSeconds) {
+    public @NonNull Component getTimePlaceholder(@NonNull TimeFormat timeMessage, long timeInSeconds) {
         boolean firstUnit = true;
         Time timeRecord = TimeUtil.millisToTime(timeInSeconds * 1000L);
         StringBuilder messageBuilder = new StringBuilder();
@@ -466,7 +528,7 @@ public class MultiplierManager {
      * @param time The time.
      * @param notice If online players should be informed of the change.
      */
-    private void sendServerMultiplierChangedNotice(
+    void sendServerMultiplierChangedNotice(
             @Nullable Player player,
             double multiplier,
             long time,

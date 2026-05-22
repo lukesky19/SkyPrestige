@@ -18,10 +18,12 @@
 package com.github.lukesky19.skyPrestige.util.number;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 /**
  * This contains utility methods used throughout the plugin.
@@ -47,6 +49,36 @@ public class NumberUtils {
 
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return decimalFormat.format(value);
+    }
+
+    /**
+     * Parse the text to get a {@link Double}.
+     * @param text The text or null.
+     * @return An {@link Optional} containing the {@link Double} or empty.
+     */
+    public static @NonNull Optional<Double> getDouble(@Nullable String text) {
+        if(text == null) return Optional.empty();
+
+        try {
+            return Optional.of(Double.parseDouble(text));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Parse the text to get a {@link Long}.
+     * @param text The text or null.
+     * @return An {@link Optional} containing the {@link Long} or empty.
+     */
+    public static @NonNull Optional<Long> getLong(@Nullable String text) {
+        if(text == null) return Optional.empty();
+
+        try {
+            return Optional.of(Long.parseLong(text));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     /**

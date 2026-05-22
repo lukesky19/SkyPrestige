@@ -18,9 +18,11 @@
 package com.github.lukesky19.skyPrestige.data.data.island;
 
 import com.github.lukesky19.skyPrestige.multiplier.Multiplier;
+import com.github.lukesky19.skyPrestige.util.enums.Operation;
 import com.github.lukesky19.skyPrestige.util.key.PageSlotKey;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -180,6 +182,22 @@ public class IslandData {
      */
     public double getPrestigePoints() {
         return prestigePoints;
+    }
+
+    /**
+     * Modify the multiplier for the island based on the inputs.
+     * @param multiplier The multiplier or null.
+     * @param multiplierOperation The multiplier operation or null.
+     * @param time The multiplier time or null.
+     * @param multiplierTimeOperation The multiplier time operation or null.
+     * @return true if successful, false if not.
+     */
+    public boolean modifyMultiplier(
+            @Nullable Double multiplier,
+            @Nullable Operation multiplierOperation,
+            @Nullable Long time,
+            @Nullable Operation multiplierTimeOperation) {
+        return this.multiplier.modifyMultiplier(multiplier, multiplierOperation, time, multiplierTimeOperation);
     }
 
     /**

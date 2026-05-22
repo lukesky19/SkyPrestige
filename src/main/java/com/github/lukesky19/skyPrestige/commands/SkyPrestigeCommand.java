@@ -17,12 +17,15 @@
 */
 package com.github.lukesky19.skyPrestige.commands;
 
-import com.github.lukesky19.skyPrestige.commands.arguments.*;
+import com.github.lukesky19.skyPrestige.commands.admin.*;
+import com.github.lukesky19.skyPrestige.commands.shared.MultiplierCommand;
+import com.github.lukesky19.skyPrestige.commands.user.*;
 import com.github.lukesky19.skyPrestige.configuration.data.locale.Locale;
 import com.github.lukesky19.skyPrestige.configuration.manager.*;
 import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
 import com.github.lukesky19.skyPrestige.data.manager.LeaderboardManager;
 import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.dialog.manager.DialogManager;
 import com.github.lukesky19.skyPrestige.gui.manager.GUIManager;
 import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
 import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
@@ -62,6 +65,7 @@ public class SkyPrestigeCommand {
     private final @NonNull IslandDataManager islandDataManager;
     private final @NonNull LeaderboardManager leaderboardManager;
     private final @NonNull GUIManager guiManager;
+    private final @NonNull DialogManager dialogManager;
     private final @NonNull DatabaseManager databaseManager;
     private final @NonNull ProtectionOrbManager protectionOrbManager;
     private final @NonNull MultiplierManager multiplayerManager;
@@ -83,6 +87,7 @@ public class SkyPrestigeCommand {
      * @param islandDataManager A {@link IslandDataManager} instance.
      * @param leaderboardManager A {@link LeaderboardManager} instance.
      * @param guiManager A {@link GUIManager} instance.
+     * @param dialogManager A {@link DialogManager} instance.
      * @param databaseManager A {@link DatabaseManager} instance.
      * @param vaultConfigManager A {@link VaultConfigManager} instance.
      * @param protectionOrbManager A {@link ProtectionOrbManager}.
@@ -104,6 +109,7 @@ public class SkyPrestigeCommand {
             @NonNull IslandDataManager islandDataManager,
             @NonNull LeaderboardManager leaderboardManager,
             @NonNull GUIManager guiManager,
+            @NonNull DialogManager dialogManager,
             @NonNull DatabaseManager databaseManager,
             @NonNull VaultConfigManager vaultConfigManager,
             @NonNull ProtectionOrbManager protectionOrbManager,
@@ -123,6 +129,7 @@ public class SkyPrestigeCommand {
         this.islandDataManager = islandDataManager;
         this.leaderboardManager = leaderboardManager;
         this.guiManager = guiManager;
+        this.dialogManager = dialogManager;
         this.databaseManager = databaseManager;
         this.vaultConfigManager = vaultConfigManager;
         this.protectionOrbManager = protectionOrbManager;
@@ -157,7 +164,8 @@ public class SkyPrestigeCommand {
         HelpCommand helpCommand = new HelpCommand(logger, localeManager);
         InfoCommand infoCommand = new InfoCommand(plugin, localeManager, guiConfigManager, guiManager);
         LeaderboardCommand leaderboardCommand = new LeaderboardCommand(localeManager, leaderboardManager);
-        MultiplierCommand multiplierCommand = new MultiplierCommand(plugin, localeManager, multiplayerManager, hookManager);
+        ManageIslandCommand manageIslandCommand = new ManageIslandCommand(plugin, localeManager, prestigeConfigManager, islandDataManager, multiplayerManager, hookManager, dialogManager);
+        MultiplierCommand multiplierCommand = new MultiplierCommand(plugin, localeManager, multiplayerManager, dialogManager, hookManager);
         OptInCommand optInCommand = new OptInCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
         OptOutCommand optOutCommand = new OptOutCommand(localeManager, islandDataManager, hookManager, prestigeExemptionManager);
         PrestigeLevelCommand prestigeLevelCommand = new PrestigeLevelCommand(plugin, localeManager, islandDataManager, hookManager);
@@ -176,6 +184,7 @@ public class SkyPrestigeCommand {
         builder.then(helpCommand.createCommand());
         builder.then(infoCommand.createCommand());
         builder.then(leaderboardCommand.createCommand());
+        builder.then(manageIslandCommand.createCommand());
         builder.then(multiplierCommand.createCommand());
         builder.then(optInCommand.createCommand());
         builder.then(optOutCommand.createCommand());
