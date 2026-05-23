@@ -371,6 +371,10 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             if(prestigeManager != null) {
                 prestigeManager.removePrestige(oldIsland.getUniqueId());
             }
+
+            if(prestigeExemptionManager != null) {
+                prestigeExemptionManager.removeExempting(oldIsland.getUniqueId());
+            }
         }, 1L);
     }
 
