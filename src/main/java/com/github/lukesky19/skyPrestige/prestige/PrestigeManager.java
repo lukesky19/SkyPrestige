@@ -249,7 +249,7 @@ public class PrestigeManager {
             return;
         }
 
-        // Process early rewards (will be undone if cancelled)
+        // Process early rewards (will be undone if canceled)
         rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembersIds, prestigeConfig.rewardConfig());
 
         if(prestigeConfig.prestigeSettings().islandSettings().keepIsland()) {

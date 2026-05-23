@@ -210,7 +210,7 @@ public class InfoGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(nextPageButtonConfig, _ -> {
             pageNum++;
 
             this.update();
@@ -238,7 +238,7 @@ public class InfoGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(prevPageButtonConfig, _ -> {
             pageNum--;
 
             this.update();
@@ -258,7 +258,7 @@ public class InfoGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**

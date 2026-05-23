@@ -214,7 +214,7 @@ public abstract class AbstractIslandCreator {
         Location newIslandSpawnPoint = newIsland.getSpawnPoint(World.Environment.NORMAL);
         if(newIslandSpawnPoint != null) {
             // Set the home location for each island member
-            islandMembers.forEach(islandMemberUser -> newIsland.addHome("", newIslandSpawnPoint));
+            islandMembers.forEach(_ -> newIsland.addHome("", newIslandSpawnPoint));
 
             // Old island bounds
             String worldName = oldIsland.getWorld().getName();

@@ -268,7 +268,7 @@ public class PrestigeRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageConfig, inventoryClickEvent -> {
+        createActionButton(nextPageConfig, _ -> {
             pageNum++;
             numOfRewardsAdded = 0;
             numOfRewardsErrored = 0;
@@ -289,7 +289,7 @@ public class PrestigeRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageConfig, inventoryClickEvent -> {
+        createActionButton(prevPageConfig, _ -> {
             currentRewardKey = currentRewardKey - ((errorCountsPerPage.get(pageNum) + rewardsAddedPerPage.get(pageNum) + (errorCountsPerPage.get(pageNum - 1) + rewardsAddedPerPage.get(pageNum - 1))));
 
             numOfRewardsAdded = 0;
@@ -312,7 +312,7 @@ public class PrestigeRewardsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent ->
+        createActionButton(exitConfig, _ ->
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 

@@ -51,7 +51,7 @@ public class EntityPointsCache {
             PrestigePointsMapping.@NonNull Entity config,
             @NonNull EntityType entityType) {
         EntityKey entityKey = new EntityKey(entityType);
-        LRUCache<EntityKey, Double> cache = entityMap.computeIfAbsent(actionType, k -> new LRUCache<>(200));
+        LRUCache<EntityKey, Double> cache = entityMap.computeIfAbsent(actionType, _ -> new LRUCache<>(200));
 
         Double cachedPoints = cache.get(entityKey);
         if(cachedPoints != null) {

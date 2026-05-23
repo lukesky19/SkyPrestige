@@ -381,7 +381,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageConfig, inventoryClickEvent -> {
+        createActionButton(nextPageConfig, _ -> {
             pageNum++;
 
             this.update();
@@ -401,7 +401,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageConfig, inventoryClickEvent -> {
+        createActionButton(prevPageConfig, _ -> {
             pageNum--;
 
             this.update();
@@ -420,7 +420,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**
@@ -530,7 +530,7 @@ public class VaultGUI extends ChestGUI<IslandIdUUIDKey> {
             @NonNull ItemStackConfig unlockedItem,
             int slot) {
         // Create a button for the vault item
-        createActionButton(vaultItemStack, slot, inventoryClickEvent -> {
+        createActionButton(vaultItemStack, slot, _ -> {
             // Update the GUI with the unlocked placeholder button for the slot
             createUnlockedButton(unlockedItem, slot);
 

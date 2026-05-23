@@ -293,7 +293,7 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(confirmConfig, inventoryClickEvent -> {
+        createActionButton(confirmConfig, _ -> {
             prestigeExemptionManager.toggleIslandPrestigeStatus(player, oldIsland, oldIslandData, gameModeAddon, blueprint != null ? blueprint.getUniqueId() : null);
 
             close();
@@ -312,7 +312,7 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(cancelConfig, inventoryClickEvent -> this.close());
+        createActionButton(cancelConfig, _ -> this.close());
     }
 
     /**
@@ -346,7 +346,7 @@ public class ConfirmOptOutGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(rewardsConfig, inventoryClickEvent -> {
+        createActionButton(rewardsConfig, _ -> {
             Locale locale = localeManager.getConfiguration();
 
             close();

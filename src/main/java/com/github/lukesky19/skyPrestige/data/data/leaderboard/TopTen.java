@@ -59,7 +59,6 @@ public class TopTen {
      * @return A {@link List} of all non-null {@link Position}s.
      */
     public @NonNull List<@NonNull Position> getPositions() {
-        //noinspection NullableProblems
         return Arrays.stream(positions)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

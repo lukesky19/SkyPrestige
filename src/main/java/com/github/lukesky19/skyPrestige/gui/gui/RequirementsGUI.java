@@ -280,7 +280,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageConfig, inventoryClickEvent -> {
+        createActionButton(nextPageConfig, _ -> {
             pageNum++;
             numOfRequirementsAdded = 0;
             numOfRequirementsErrored = 0;
@@ -301,7 +301,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageConfig, inventoryClickEvent -> {
+        createActionButton(prevPageConfig, _ -> {
             currentRequirementKey = currentRequirementKey - ((errorCountsPerPage.get(pageNum) + requirementsAddedPerPage.get(pageNum) + (errorCountsPerPage.get(pageNum - 1) + requirementsAddedPerPage.get(pageNum - 1))));
 
             numOfRequirementsAdded = 0;
@@ -324,7 +324,7 @@ public class RequirementsGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**

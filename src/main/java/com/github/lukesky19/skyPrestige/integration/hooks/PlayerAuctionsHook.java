@@ -73,7 +73,7 @@ public class PlayerAuctionsHook implements Hook {
         if(playerAuctionsAPI == null) return;
 
         APlayer auctionPlayer = playerAuctionsAPI.getAuctionPlayer(uuid);
-        auctionPlayer.getPlayerAuctions().forEach(auction -> auction.removeAuction(PlayerAuctionRemoveEvent.Cause.PURGED, auctionResponse -> {}, null));
+        auctionPlayer.getPlayerAuctions().forEach(auction -> auction.removeAuction(PlayerAuctionRemoveEvent.Cause.PURGED, _ -> {}, null));
         auctionPlayer.setBackpack(List.of());
     }
 }

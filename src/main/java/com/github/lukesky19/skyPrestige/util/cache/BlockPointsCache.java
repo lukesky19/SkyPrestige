@@ -59,7 +59,7 @@ public class BlockPointsCache {
             @Nullable Integer age,
             @Nullable Boolean waterLogged) {
         BlockKey blockKey = new BlockKey(blockType, entityType, age, waterLogged);
-        LRUCache<BlockKey, Double> cache = blockMap.computeIfAbsent(actionType, k -> new LRUCache<>(250));
+        LRUCache<BlockKey, Double> cache = blockMap.computeIfAbsent(actionType, _ -> new LRUCache<>(250));
 
         Double cachedPoints = cache.get(blockKey);
         if(cachedPoints != null) {

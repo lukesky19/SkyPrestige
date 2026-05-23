@@ -233,7 +233,7 @@ public class ExchangeGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(nextPageButtonConfig, _ -> {
             pageNum++;
 
             this.update();
@@ -261,7 +261,7 @@ public class ExchangeGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(prevPageButtonConfig, _ -> {
             pageNum--;
 
             this.update();
@@ -281,7 +281,7 @@ public class ExchangeGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**
@@ -303,7 +303,7 @@ public class ExchangeGUI extends ChestGUI<IslandIdUUIDKey> {
                 continue;
             }
 
-            createActionButton(exchangeButtonConfig, inventoryClickEvent -> {
+            createActionButton(exchangeButtonConfig, _ -> {
                 double exchangePoints = exchangeButtonConfig.exchangePoints();
 
                 if(islandData.getPrestigePoints() < exchangePoints) {

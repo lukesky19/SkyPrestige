@@ -231,7 +231,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(nextPageButtonConfig, _ -> {
             pageNum++;
 
             currentIndex = pageNum * amountPerPage;
@@ -253,7 +253,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageButtonConfig, inventoryClickEvent -> {
+        createActionButton(prevPageButtonConfig, _ -> {
             pageNum--;
 
             currentIndex = pageNum * amountPerPage;
@@ -294,7 +294,7 @@ public class ValuesGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**

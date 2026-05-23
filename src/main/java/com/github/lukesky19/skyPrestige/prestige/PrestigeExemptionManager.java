@@ -208,7 +208,7 @@ public class PrestigeExemptionManager {
                 .map(OfflinePlayer::getUniqueId)
                 .toList();
 
-        // Process early rewards (will be undone if cancelled)
+        // Process early rewards (will be undone if canceled)
         rewardsProcessor.processEarlyRewards(player, onlineIslandMembers, offlineIslandMembers, optInOutConfig.rewardConfig());
 
         if(optInOutConfig.resetSettings().islandSettings().keepIsland()) {
@@ -308,7 +308,7 @@ public class PrestigeExemptionManager {
         // Insert players that were offline on prestige opt out to process player settings later
         QueuedSettingsTable queuedSettingsTable = databaseManager.getQueuedSettingsTable();
         offlineIslandMembers.forEach(offlineMemberId ->
-                queuedSettingsTable.clearQueuedSettings(offlineMemberId).thenAccept(v ->
+                queuedSettingsTable.clearQueuedSettings(offlineMemberId).thenAccept(_ ->
                         queuedSettingsTable.queueSettings(
                                 offlineMemberId,
                                 island.getUniqueId(),

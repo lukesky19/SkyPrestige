@@ -61,7 +61,7 @@ public class ItemPointsCache {
             @Nullable PotionType potionType,
             @Nullable Map<Enchantment, Integer> enchantments) {
         ItemKey itemKey = new ItemKey(itemType, entityType, potionType, enchantments);
-        LRUCache<ItemKey, Double> cache = itemMap.computeIfAbsent(actionType, k -> new LRUCache<>(1000));
+        LRUCache<ItemKey, Double> cache = itemMap.computeIfAbsent(actionType, _ -> new LRUCache<>(1000));
 
         Double cachedPoints = cache.get(itemKey);
         if(cachedPoints != null) {

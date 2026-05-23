@@ -234,7 +234,7 @@ public class SkyPrestigeExpansion extends PlaceholderExpansion {
                 if(islandData.isPrestigeExempt()) return placeholderConfig.progressBar().optedOutText();
                 PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(islandData.getPrestigeLevel() + 1);
                 if(prestigeConfig == null) {
-                    return placeholderConfig.legacyProgressBar().maxLevelText() != null ? placeholderConfig.legacyProgressBar().maxLevelText() : "Max Level";
+                    return placeholderConfig.progressBar().maxLevelText() != null ? placeholderConfig.progressBar().maxLevelText() : "Max Level";
                 }
 
                 int progressBarSize = settingsManager.getConfiguration() != null ?

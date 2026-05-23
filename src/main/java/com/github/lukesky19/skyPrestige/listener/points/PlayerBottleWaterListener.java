@@ -73,7 +73,7 @@ public class PlayerBottleWaterListener extends PointsListener {
      * Listens for when a player produces a bottle of water from a cauldron on an island and increments prestige points.
      * @param playerInteractEvent A {@link PlayerInteractEvent}.
      */
-    @EventHandler(priority = EventPriority.MONITOR) // Cancelled events are purposely not ignored here.
+    @EventHandler(priority = EventPriority.MONITOR) // Canceled events are purposely not ignored here.
     public void onPlayerBottleWater(PlayerInteractEvent playerInteractEvent) {
         // Config
         PrestigePointsConfig prestigePointsConfig = prestigePointsConfigManager.getConfiguration();

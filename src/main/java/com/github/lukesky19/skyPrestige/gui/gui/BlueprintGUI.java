@@ -474,7 +474,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
 
             builder.setItemStack(itemStack);
 
-            builder.setAction(inventoryClickEvent -> {
+            builder.setAction(_ -> {
                 Locale locale = localeManager.getConfiguration();
 
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -534,7 +534,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(nextPageConfig, inventoryClickEvent -> {
+        createActionButton(nextPageConfig, _ -> {
             numOfBlueprintsAdded = 0;
             pageNum++;
 
@@ -555,7 +555,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(prevPageConfig, inventoryClickEvent -> {
+        createActionButton(prevPageConfig, _ -> {
             currentBlueprintKey = currentBlueprintKey - (numOfBlueprintsAdded + blueprintsPerPage);
             if (currentBlueprintKey < 0) currentBlueprintKey = 0;
 
@@ -578,7 +578,7 @@ public class BlueprintGUI extends ChestGUI<IslandIdUUIDKey> {
             return;
         }
 
-        createActionButton(exitConfig, inventoryClickEvent -> close());
+        createActionButton(exitConfig, _ -> close());
     }
 
     /**

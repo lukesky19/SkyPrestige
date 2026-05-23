@@ -83,7 +83,7 @@ public class PlayerJoinListener implements Listener {
         teleportationManager.handleQueuedTeleports(player);
 
         CompletableFuture<Void> loadFuture = islandDataManager.loadDataByPlayerIdentifier(uuid);
-        loadFuture.thenAccept(v -> queuedSettingsProcessor.processQueuedSettings(player));
+        loadFuture.thenAccept(_ -> queuedSettingsProcessor.processQueuedSettings(player));
 
         // Load player quest data
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);

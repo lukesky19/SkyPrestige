@@ -291,7 +291,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(confirmConfig, inventoryClickEvent -> {
+        createActionButton(confirmConfig, _ -> {
             close();
 
             prestigeManager.prestigeIsland(player, oldIsland, oldIslandData, gameModeAddon, blueprint != null ? blueprint.getUniqueId() : null, prestigeConfig, prestigeLevel);
@@ -310,7 +310,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(cancelConfig, inventoryClickEvent -> this.cancel());
+        createActionButton(cancelConfig, _ -> this.cancel());
     }
 
     /**
@@ -344,7 +344,7 @@ public class ConfirmPrestigeGUI extends ConfirmGUI {
             return;
         }
 
-        createActionButton(rewardsConfig, inventoryClickEvent -> {
+        createActionButton(rewardsConfig, _ -> {
             Locale locale = localeManager.getConfiguration();
 
             close();

@@ -81,7 +81,7 @@ public class PlayerQuitListener implements Listener {
                 .forEach(island -> {
                     String islandId = island.getUniqueId();
                     islandDataManager.saveData(islandId)
-                            .whenComplete((v, t) -> islandDataManager.removeDataByIdentifier(islandId));
+                            .whenComplete((_, _) -> islandDataManager.removeDataByIdentifier(islandId));
 
                     if(lmbQuestHook.isHooked()) {
                         lmbQuestHook.unloadPlayerData(island.getMemberSet());
