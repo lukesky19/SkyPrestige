@@ -27,7 +27,7 @@ import com.github.lukesky19.skyPrestige.multiplier.MultiplierManager;
 import com.github.lukesky19.skyPrestige.prestige.PrestigePointsManager;
 import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
-import com.github.lukesky19.skyplaytime.event.PlayTimeGainedEvent;
+import com.github.lukesky19.skyplaytime.api.event.PlayTimeGainedEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

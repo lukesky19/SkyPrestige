@@ -57,7 +57,6 @@ dependencies {
 
     // Integration
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
-    testImplementation("world.bentobox:bentobox:2.7.0-SNAPSHOT")
 
     compileOnly("world.bentobox:magiccobblestonegenerator:2.6.0-SNAPSHOT") {
         exclude("org.bukkit", "bukkit")
@@ -72,7 +71,7 @@ dependencies {
     compileOnly("com.olziedev:playerauctions-api:1.32.1")
     compileOnly("com.leonardobishop:quests:3.14.2")
     compileOnly("net.luckperms:api:5.4")
-    compileOnly("com.github.lukesky19:SkyPlayTime:0.2.0.0")
+    compileOnly("com.github.lukesky19:SkyPlayTime:0.4.0.0")
     compileOnly("com.github.lukesky19:SkyShop:3.3.0.0")
     compileOnly("com.github.lukesky19:SkySellWands:1.5.1.0")
     compileOnly("com.github.lukesky19:SkyHoppers:1.2.0.0")

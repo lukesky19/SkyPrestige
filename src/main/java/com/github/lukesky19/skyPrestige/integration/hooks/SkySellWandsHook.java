@@ -3,7 +3,6 @@ package com.github.lukesky19.skyPrestige.integration.hooks;
 import com.github.lukesky19.skySellWands.SkySellWandsAPI;
 import com.github.lukesky19.skylib.common.api.integration.Hook;
 import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
-import com.github.lukesky19.skyplaytime.SkyPlayTimeAPI;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -26,7 +25,7 @@ public class SkySellWandsHook implements Hook {
     }
 
     /**
-     * Attempt to get the {@link SkyPlayTimeAPI} from SkyPlayTime.
+     * Attempt to get the {@link SkySellWandsAPI} from SkyPlayTime.
      */
     @Override
     public void initialize() {

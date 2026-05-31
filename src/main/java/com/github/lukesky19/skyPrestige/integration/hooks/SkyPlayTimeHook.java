@@ -19,7 +19,7 @@ package com.github.lukesky19.skyPrestige.integration.hooks;
 
 import com.github.lukesky19.skylib.common.api.integration.Hook;
 import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
-import com.github.lukesky19.skyplaytime.SkyPlayTimeAPI;
+import com.github.lukesky19.skyplaytime.api.SkyPlayTimeAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
