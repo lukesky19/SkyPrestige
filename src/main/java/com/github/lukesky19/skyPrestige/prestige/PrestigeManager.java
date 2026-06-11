@@ -188,6 +188,8 @@ public class PrestigeManager {
 
         // Check if the player attempting to toggle the island's prestige status is not the owner or an island member.
         if((island.getOwner() == null || !island.getOwner().equals(playerId)) && !island.getMemberSet().contains(playerId)) {
+            inProgressPrestiges.remove(islandId);
+
             player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.playerNotMemberOrOwner()));
             return;
         }
@@ -195,12 +197,16 @@ public class PrestigeManager {
         // Get the island data for the island.
         IslandData islandData = islandDataManager.getData(islandId);
         if(islandData == null) {
+            inProgressPrestiges.remove(islandId);
+
             player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandDataNotFound()));
             logger.error(AdventureUtility.plain("No Island data found for player " + player.getName() + "'s island. Island Id: " + islandId));
             return;
         }
 
         if(islandData.isPrestigeExempt()) {
+            inProgressPrestiges.remove(islandId);
+
             player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.islandOptedOut()));
             return;
         }
@@ -210,6 +216,8 @@ public class PrestigeManager {
         // If the prestige config is null, the player is at the max prestige level
         PrestigeConfig prestigeConfig = prestigeConfigManager.getConfiguration(nextPrestigeLevel);
         if(prestigeConfig == null) {
+            inProgressPrestiges.remove(islandId);
+
             player.sendMessage(AdventureUtility.deserialize(locale.prefix() + prestigeMessages.prestigeLevelMax()));
             return;
         }
