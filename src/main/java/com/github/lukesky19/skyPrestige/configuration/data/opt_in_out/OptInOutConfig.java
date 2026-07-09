@@ -1,0 +1,35 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package com.github.lukesky19.skyPrestige.configuration.data.opt_in_out;
+
+import com.github.lukesky19.skyPrestige.configuration.data.reset.PrestigeResetSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reward.RewardConfig;
+import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.jspecify.annotations.NonNull;
+
+/**
+ * This record contains the plugin's configuration settings for prestige opt in or out.
+ * @param version The file's config version.
+ * @param resetSettings The {@link PrestigeResetSettings}.
+ * @param rewardConfig The {@link RewardConfig}.
+ */
+@ConfigSerializable
+public record OptInOutConfig(
+        int version,
+        @NonNull PrestigeResetSettings resetSettings,
+        @NonNull RewardConfig rewardConfig) {}

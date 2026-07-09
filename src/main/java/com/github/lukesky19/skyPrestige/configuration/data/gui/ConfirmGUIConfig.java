@@ -1,0 +1,135 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package com.github.lukesky19.skyPrestige.configuration.data.gui;
+
+import com.github.lukesky19.skyPrestige.configuration.data.gui.common.ButtonConfig;
+import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+import java.util.List;
+
+/**
+ * This record contains the configuration for a confirmation gui.
+ * @param version The config version.
+ * @param guiName The name to use in the GUI.
+ * @param guiType The {@link GUIType}.
+ * @param blueprintButtonSlot The slot to place the blueprint bundle that was selected in.
+ * @param filler The {@link ItemStackConfig} to fill the GUI with.
+ * @param confirmButton The {@link ButtonConfig} for the confirm button.
+ * @param cancelButton The {@link ButtonConfig} for the cancel button.
+ * @param rewardsButton The {@link ButtonConfig} to open the rewards GUI.
+ * @param keepMembers The {@link ButtonConfig} for the button that says island members are carried over on prestige/opt-in/opt-out.
+ * @param keepCommandRanks The {@link ButtonConfig} for the button that says command ranks are carried over on prestige/opt-in/opt-out.
+ * @param conditionalButtons The {@link ConditionalButtons} config for the GUI.
+ * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
+ */
+@ConfigSerializable
+public record ConfirmGUIConfig(
+        int version,
+        @Nullable String guiName,
+        @Nullable GUIType guiType,
+        int blueprintButtonSlot,
+        @NonNull ItemStackConfig filler,
+        @NonNull ButtonConfig confirmButton,
+        @NonNull ButtonConfig cancelButton,
+        @NonNull ButtonConfig rewardsButton,
+        @NonNull ButtonConfig keepMembers,
+        @NonNull ButtonConfig keepCommandRanks,
+        @NonNull ConditionalButtons conditionalButtons,
+        @NonNull List<ButtonConfig> dummyButtons) {
+    /**
+     * This record contains the configuration for the buttons displayed depending on the prestige level config.
+     * @param keepIsland The {@link ButtonConfig} for the button that says the island isn't reset on prestige/opt-in/opt-out.
+     * @param resetIsland The {@link ButtonConfig} for the button that says the island is reset on prestige/opt-in/opt-out.
+     * @param keepIslandSize The {@link ButtonConfig} for the button that says the island size is carried over on prestige/opt-in/opt-out.
+     * @param resetIslandSize The {@link ButtonConfig} for the button that says the island size is reset to the default on prestige/opt-in/opt-out.
+     * @param keepFlags The {@link ButtonConfig} for the button that says island flags are carried over on prestige/opt-in/opt-out.
+     * @param resetFlags The {@link ButtonConfig} for the button that says island flags are carried reset on prestige/opt-in/opt-out.
+     * @param keepInventory The {@link ButtonConfig} for the button shown when island member's inventories are carried over on prestige/opt-in/opt-out.
+     * @param clearInventory The {@link ButtonConfig} for the button shown when island member's inventories are reset on prestige/opt-in/opt-out.
+     * @param keepEnderChest The {@link ButtonConfig} for the button shown when island member's ender chests are carried over prestige.
+     * @param clearEnderChest The {@link ButtonConfig} for the button shown when island member's ender chests are reset on prestige/opt-in/opt-out.
+     * @param keepExp The {@link ButtonConfig} for the button shown when island member's ender chests is carried over on prestige/opt-in/opt-out.
+     * @param resetExp The {@link ButtonConfig} for the button shown when island member's experience is reset on prestige/opt-in/opt-out.
+     * @param keepMoney The {@link ButtonConfig} for the button shown when island member's balance is carried over on prestige/opt-in/opt-out.
+     * @param resetMoney The {@link ButtonConfig} for the button shown when island member's balance is reset on prestige/opt-in/opt-out.
+     * @param keepAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are carried over on prestige/opt-in/opt-out.
+     * @param resetAuctionItems The {@link ButtonConfig} for the button shown when an island member's auction house items are reset on prestige/opt-in/opt-out.
+     * @param keepQuestProgress The {@link ButtonConfig} for the button shown when an island member's quest progress is carried over on prestige/opt-in/opt-out.
+     * @param resetQuestProgress The {@link ButtonConfig} for the button shown when an island member's quest progress is reset on prestige/opt-in/opt-out.
+     * @param keepGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades carry over on prestige/opt-in/opt-out.
+     * @param resetGeneratorUpgrades The {@link ButtonConfig} for the button shown when an island's generator upgrades are reset on prestige/opt-in/opt-out.
+     * @param keepVaultItems The {@link ButtonConfig} for the button shown when the island's vault is carried over on prestige/opt-in/opt-out.
+     * @param clearVaultItems The {@link ButtonConfig} for the button shown when the island's vault is reset on prestige/opt-in/opt-out.
+     * @param startingMoney The {@link ButtonConfig} for the button shown when one or more island members receive starting money on prestige/opt-in/opt-out.
+     * @param noStartingMoney The {@link ButtonConfig} for the button shown when no starting money is given on prestige/opt-in/opt-out.
+     * @param keepSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is carried over on prestige/opt-in/opt-out.
+     * @param resetSessionPlayTime The {@link ButtonConfig} for the button shown when session play time is reset on prestige/opt-in/opt-out.
+     * @param keepDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is carried over on prestige/opt-in/opt-out.
+     * @param resetDailyPlayTime The {@link ButtonConfig} for the button shown when daily play time is reset on prestige/opt-in/opt-out.
+     * @param keepWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetWeeklyPlayTime The {@link ButtonConfig} for the button shown when weekly play time is reset on prestige/opt-in/opt-out.
+     * @param keepMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetMonthlyPlayTime The {@link ButtonConfig} for the button shown when monthly play time is reset on prestige/opt-in/opt-out.
+     * @param keepYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is carried over on prestige/opt-in/opt-out.
+     * @param resetYearlyPlayTime The {@link ButtonConfig} for the button shown when yearly play time is reset on prestige/opt-in/opt-out.
+     * @param keepTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is carried over on prestige/opt-in/opt-out.
+     * @param resetTotalPlayTime The {@link ButtonConfig} for the button shown when total play time is reset on prestige/opt-in/opt-out.
+     */
+    @ConfigSerializable
+    public record ConditionalButtons(
+            @NonNull ButtonConfig keepIsland,
+            @NonNull ButtonConfig resetIsland,
+            @NonNull ButtonConfig keepIslandSize,
+            @NonNull ButtonConfig resetIslandSize,
+            @NonNull ButtonConfig keepFlags,
+            @NonNull ButtonConfig resetFlags,
+            @NonNull ButtonConfig keepInventory,
+            @NonNull ButtonConfig clearInventory,
+            @NonNull ButtonConfig keepEnderChest,
+            @NonNull ButtonConfig clearEnderChest,
+            @NonNull ButtonConfig keepExp,
+            @NonNull ButtonConfig resetExp,
+            @NonNull ButtonConfig keepMoney,
+            @NonNull ButtonConfig resetMoney,
+            @NonNull ButtonConfig keepAuctionItems,
+            @NonNull ButtonConfig resetAuctionItems,
+            @NonNull ButtonConfig keepQuestProgress,
+            @NonNull ButtonConfig resetQuestProgress,
+            @NonNull ButtonConfig keepGeneratorUpgrades,
+            @NonNull ButtonConfig resetGeneratorUpgrades,
+            @NonNull ButtonConfig keepVaultItems,
+            @NonNull ButtonConfig clearVaultItems,
+            @NonNull ButtonConfig startingMoney,
+            @NonNull ButtonConfig noStartingMoney,
+            @NonNull ButtonConfig keepSessionPlayTime,
+            @NonNull ButtonConfig resetSessionPlayTime,
+            @NonNull ButtonConfig keepDailyPlayTime,
+            @NonNull ButtonConfig resetDailyPlayTime,
+            @NonNull ButtonConfig keepWeeklyPlayTime,
+            @NonNull ButtonConfig resetWeeklyPlayTime,
+            @NonNull ButtonConfig keepMonthlyPlayTime,
+            @NonNull ButtonConfig resetMonthlyPlayTime,
+            @NonNull ButtonConfig keepYearlyPlayTime,
+            @NonNull ButtonConfig resetYearlyPlayTime,
+            @NonNull ButtonConfig keepTotalPlayTime,
+            @NonNull ButtonConfig resetTotalPlayTime) {}
+}

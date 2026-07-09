@@ -1,0 +1,341 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+version: 1
+gui-name: "Confirm Prestige Opt-In"
+gui-type: CHEST_54
+# The slot to display the blueprint bundle at.
+blueprint-button-slot: 45
+filler:
+    item-type: gray_stained_glass_pane
+    name: " "
+    amount: 1
+confirm-button:
+    item:
+        item-type: emerald_block
+        name: "<green>Click to confirm opting into prestige.</green>"
+        lore:
+            - "<gray>The effects of opting in will apply to offline players when they log on next.</gray>"
+        amount: 1
+    slot: 48
+cancel-button:
+    item:
+        item-type: redstone_block
+        name: "<red>Click to cancel opting in.</red>"
+        lore:
+            - "<gray>By cancelling opting in, nothing will be reset.</gray>"
+        amount: 1
+    slot: 50
+rewards-button:
+    item:
+        item-type: barrel
+        name: "<white>Click to view opt-in rewards.</white>"
+        lore:
+            - "<gray>These are the rewards given after you opt-in your island.</gray>"
+            - "<gray>Rewards are given to each island member.</gray>"
+        amount: 1
+    slot: 53
+keep-members:
+    item:
+        item-type: armor_stand
+        name: "<white>Island Members</white>"
+        lore:
+            - "<gray>Island Members will be carried over on opt-in.</gray>"
+        amount: 1
+    slot: 13
+keep-command-ranks:
+    item:
+        item-type: tripwire_hook
+        name: "<white>Island Ranks</white>"
+        lore:
+            - "<gray>Island Ranks will be carried over on opt-in.</gray>"
+        amount: 1
+    slot: 14
+# Buttons that changed depending on conditions.
+conditional-buttons:
+    keep-island:
+        item:
+            item-type: minecraft:grass_block
+            name: "<white>Island</white>"
+            lore:
+                - "<gray>The island will not be reset on opt-in.</gray>"
+            amount: 1
+        slot: 10
+    reset-island:
+        item:
+            item-type: minecraft:grass_block
+            name: "<white>Island</white>"
+            lore:
+                - "<gray>The island will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 10
+    keep-island-size:
+        item:
+            item-type: minecraft:glass
+            name: "<white>Island Size</white>"
+            lore:
+                - "<gray>The island size will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 11
+    reset-island-size:
+        item:
+            item-type: minecraft:glass
+            name: "<white>Island Size</white>"
+            lore:
+                - "<gray>The island size will be reset to the default size on opt-in.</gray>"
+            amount: 1
+        slot: 11
+    keep-flags:
+        item:
+            item-type: red_banner
+            name: "<white>Island Settings</white>"
+            lore:
+                - "<gray>Island settings will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 12
+    reset-flags:
+        item:
+            item-type: red_banner
+            name: "<white>Island Settings</white>"
+            lore:
+                - "<gray>Island settings will be reset over on opt-in.</gray>"
+            amount: 1
+        slot: 12
+    keep-vault-items:
+        item:
+            item-type: minecraft:green_shulker_box
+            name: "<white>Island Vault</white>"
+            lore:
+                - "<gray>The island's vault will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 15
+    clear-vault-items:
+        item:
+            item-type: minecraft:green_shulker_box
+            name: "<white>Island Vault</white>"
+            lore:
+                - "<gray>The island's vault will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 15
+    keep-generator-upgrades:
+        item:
+            item-type: coal_ore
+            name: "<white>Generator Upgrades</white>"
+            lore:
+                - "<gray>Your generator upgrades will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 16
+    reset-generator-upgrades:
+        item:
+            item-type: coal_ore
+            name: "<white>Generator Upgrades</white>"
+            lore:
+                - "<gray>Your generator upgrades will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 16
+    keep-inventory:
+        item:
+            item-type: chest
+            name: "<white>Player Inventory</white>"
+            lore:
+                - "<gray>Your inventory will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 19
+    clear-inventory:
+        item:
+            item-type: chest
+            name: "<white>Player Inventory</white>"
+            lore:
+                - "<gray>Your inventory will be cleared on opt-in.</gray>"
+            amount: 1
+        slot: 19
+    keep-ender-chest:
+        item:
+            item-type: ender_chest
+            name: "<white>Player Ender Chest</white>"
+            lore:
+                - "<gray>Your ender chest will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 20
+    clear-ender-chest:
+        item:
+            item-type: ender_chest
+            name: "<white>Player Ender Chest</white>"
+            lore:
+                - "<gray>Your ender chest will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 20
+    keep-exp:
+        item:
+            item-type: experience_bottle
+            name: "<white>Player Experience</white>"
+            lore:
+                - "<gray>Your experience levels will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 21
+    reset-exp:
+        item:
+            item-type: experience_bottle
+            name: "<white>Player Experience</white>"
+            lore:
+                - "<gray>Your experience levels will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 21
+    keep-money:
+        item:
+            item-type: paper
+            name: "<white>Player Balance</white>"
+            lore:
+                - "<gray>Your balance will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 22
+    reset-money:
+        item:
+            item-type: paper
+            name: "<white>Player Balance</white>"
+            lore:
+                - "<gray>Your balance will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 22
+    starting-money:
+        item:
+            item-type: emerald
+            name: "<white>Starting Money</white>"
+            lore:
+                - "<gray>You will start with $<amount> on opt-in.</gray>"
+            amount: 1
+        slot: 23
+    no-starting-money:
+        item:
+            item-type: emerald
+            name: "<white>Starting Money</white>"
+            lore:
+                - "<gray>You will start with no extra money on opt-in.</gray>"
+            amount: 1
+        slot: 23
+    keep-auction-items:
+        item:
+            item-type: orange_shulker_box
+            name: "<white>Auction House Items</white>"
+            lore:
+                - "<gray>Your auction house items will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 24
+    reset-auction-items:
+        item:
+            item-type: orange_shulker_box
+            name: "<white>Auction House Items</white>"
+            lore:
+                - "<gray>Your auction house items will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 24
+    keep-quest-progress:
+        item:
+            item-type: name_tag
+            name: "<white>Quest Progress</white>"
+            lore:
+                - "<gray>Your quest progress will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 25
+    reset-quest-progress:
+        item:
+            item-type: name_tag
+            name: "<white>Quest Progress</white>"
+            lore:
+                - "<gray>Your quest progress will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 25
+    keep-session-play-time:
+        item:
+            item-type: clock
+            name: "<white>Session Play Time</white>"
+            lore:
+                - "<gray>Your session play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 28
+    reset-session-play-time:
+        item:
+            item-type: clock
+            name: "<white>Session Play Time</white>"
+            lore:
+                - "<gray>Your session play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 28
+    keep-daily-play-time:
+        item:
+            item-type: clock
+            name: "<white>Daily Play Time</white>"
+            lore:
+                - "<gray>Your daily play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 29
+    reset-daily-play-time:
+        item:
+            item-type: clock
+            name: "<white>Daily Play Time</white>"
+            lore:
+                - "<gray>Your daily play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 29
+    keep-weekly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Weekly Play Time</white>"
+            lore:
+                - "<gray>Your weekly play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 30
+    reset-weekly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Weekly Play Time</white>"
+            lore:
+                - "<gray>Your weekly play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 30
+    keep-monthly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Monthly Play Time</white>"
+            lore:
+                - "<gray>Your monthly play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 31
+    reset-monthly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Monthly Play Time</white>"
+            lore:
+                - "<gray>Your monthly play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 31
+    keep-yearly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Yearly Play Time</white>"
+            lore:
+                - "<gray>Your yearly play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 32
+    reset-yearly-play-time:
+        item:
+            item-type: clock
+            name: "<white>Yearly Play Time</white>"
+            lore:
+                - "<gray>Your yearly play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 32
+    keep-total-play-time:
+        item:
+            item-type: clock
+            name: "<white>Total Play Time</white>"
+            lore:
+                - "<gray>Your total play time will be carried over on opt-in.</gray>"
+            amount: 1
+        slot: 33
+    reset-total-play-time:
+        item:
+            item-type: clock
+            name: "<white>Total Play Time</white>"
+            lore:
+                - "<gray>Your total play time will be reset on opt-in.</gray>"
+            amount: 1
+        slot: 33

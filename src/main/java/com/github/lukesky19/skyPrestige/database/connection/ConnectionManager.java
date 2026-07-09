@@ -17,12 +17,12 @@
 */
 package com.github.lukesky19.skyPrestige.database.connection;
 
-import com.github.lukesky19.skyPrestige.SkyPrestige;
-import com.github.lukesky19.skylib.api.database.connection.AbstractConnectionManager;
+import com.github.lukesky19.skylib.common.api.database.connection.AbstractConnectionManager;
+import com.github.lukesky19.skylib.common.api.plugin.ISkyPlugin;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariConfig;
 import com.github.lukesky19.skylib.libs.hikaricp.HikariDataSource;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 
@@ -32,21 +32,21 @@ import java.io.File;
 public class ConnectionManager extends AbstractConnectionManager {
     /**
      * Constructor
-     * @param skyPrestige The plugin's main instance.
+     * @param plugin A {@link SkyPlugin}.
      */
-    public ConnectionManager(@NotNull SkyPrestige skyPrestige) {
-        super(skyPrestige);
+    public ConnectionManager(@NonNull SkyPlugin plugin) {
+        super(plugin);
     }
 
     /**
      * Creates the required {@link HikariConfig} to access the database and returns the {@link HikariDataSource}.
-     * @param plugin The {@link Plugin} implementing and making use of this class.
+     * @param plugin The {@link ISkyPlugin} implementing and making use of this class.
      * @return A {@link HikariDataSource} object.
      */
     @Override
-    protected @NotNull HikariDataSource createHikariDataSource(@NotNull Plugin plugin) {
+    protected @NonNull HikariDataSource createHikariDataSource(@NonNull ISkyPlugin plugin) {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" +  plugin.getDataFolder().getAbsolutePath() + File.separator + "database.db");
+        config.setJdbcUrl("jdbc:sqlite:" +  plugin.getDirectoryFile().getAbsolutePath() + File.separator + "database.db");
         config.setAutoCommit(false);
 
         return new HikariDataSource(config);

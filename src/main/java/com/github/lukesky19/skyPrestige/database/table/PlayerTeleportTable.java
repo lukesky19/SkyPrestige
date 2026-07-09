@@ -19,10 +19,9 @@ package com.github.lukesky19.skyPrestige.database.table;
 
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.util.parameter.CaseSensitiveStringParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.UUIDParameter;
-import com.github.lukesky19.skylib.api.database.queue.MultiThreadQueueManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.UUIDParameter;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -33,22 +32,28 @@ import java.util.concurrent.CompletableFuture;
  * This class creates a table to store player ids (UUIDs) that should be teleported on login.
  */
 public class PlayerTeleportTable {
-    private final @NotNull QueueManager queueManager;
-    private final @NotNull String tableName = "skyprestige_player_teleports";
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull VersionsTable versionsTable;
+    private final @NonNull String tableName = "skyprestige_player_teleports";
 
     /**
      * Constructor
-     * @param queueManager A class instance that extends {@link MultiThreadQueueManager}
+     * @param queueManager A {@link QueueManager} instance.
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public PlayerTeleportTable(@NotNull QueueManager queueManager) {
+    public PlayerTeleportTable(
+            @NonNull QueueManager queueManager,
+            @NonNull VersionsTable versionsTable) {
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates a table to store player ids (UUIDs) that should be teleported on login.
      * Queues the table creation and index creation sql.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void createTable() {
+    public @NonNull CompletableFuture<Void> createTable() {
         String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 "player_id VARCHAR(36) NOT NULL UNIQUE, " +
                 "island_id TEXT NOT NULL, " +
@@ -57,33 +62,35 @@ public class PlayerTeleportTable {
         String playerIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_teleports_player_id ON " + tableName + "(player_id)";
         String islandIdIndexCreationSql = "CREATE INDEX IF NOT EXISTS idx_player_teleports_island_id ON " + tableName + "(island_id)";
 
-        queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql));
+        return queueManager.queueBulkWriteTransaction(List.of(tableCreationSql, playerIdIndexCreationSql, islandIdIndexCreationSql)).thenCompose(list -> versionsTable.updateVersion(tableName, 1));
     }
 
     /**
      * Store the {@link UUID} and island id to teleport them to.
      * @param playerId The {@link UUID} of the player.
      * @param islandId The island id to teleport the player to.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void insertPlayerIdAndIslandId(@NotNull UUID playerId, @NotNull String islandId) {
+    public @NonNull CompletableFuture<Void> insertPlayerIdAndIslandId(@NonNull UUID playerId, @NonNull String islandId) {
         String insertSql = "INSERT INTO " + tableName + " (player_id, island_id) VALUES (?, ?) ON CONFLICT (player_id) DO NOTHING";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
         CaseSensitiveStringParameter islandIdParameter = new CaseSensitiveStringParameter(islandId);
 
-        queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter));
+        return queueManager.queueWriteTransaction(insertSql, List.of(playerIdParameter, islandIdParameter)).thenRun(() -> {});
     }
 
     /**
      * Delete any data associated with the player id provided.
      * @param playerId The {@link UUID} of the player.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public void deletePlayerIdAndIslandId(@NotNull UUID playerId) {
+    public @NonNull CompletableFuture<Void> deletePlayerIdAndIslandId(@NonNull UUID playerId) {
         String deleteSql = "DELETE FROM " +  tableName + " WHERE player_id = ?";
 
         UUIDParameter playerIdParameter = new UUIDParameter(playerId);
 
-        queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter));
+        return queueManager.queueWriteTransaction(deleteSql, List.of(playerIdParameter)).thenRun(() -> {});
     }
 
     /**
@@ -91,7 +98,7 @@ public class PlayerTeleportTable {
      * @param uuid The {@link UUID} of the player.
      * @return A {@link CompletableFuture} containing the island id or null.
      */
-    public @NotNull CompletableFuture<@Nullable String> getIslandId(@NotNull UUID uuid) {
+    public @NonNull CompletableFuture<@Nullable String> getIslandId(@NonNull UUID uuid) {
         String selectSql = "SELECT island_id FROM " + tableName + " WHERE player_id = ?";
 
         UUIDParameter playerIdParameter = new UUIDParameter(uuid);

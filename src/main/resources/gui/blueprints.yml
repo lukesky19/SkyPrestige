@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-config-version: 1.0.0.0
+version: 1
 gui-name: "Select a Blueprint"
 gui-type: CHEST_27
 filler:
@@ -21,9 +21,8 @@ prev-page:
 exit:
     item:
         item-type: barrier
-        name: "<red>Click to cancel the prestige.</red>"
+        name: "<red>Click to cancel the selection.</red>"
         lore:
-            - "<gray>By cancelling the prestige, nothing will be reset"
-            - "<gray>and you will not prestige."
+            - "<gray>By cancelling, nothing will be reset."
         amount: 1
     slot: 22

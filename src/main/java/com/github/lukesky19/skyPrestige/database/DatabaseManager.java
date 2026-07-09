@@ -17,34 +17,40 @@
 */
 package com.github.lukesky19.skyPrestige.database;
 
-import com.github.lukesky19.skyPrestige.SkyPrestige;
 import com.github.lukesky19.skyPrestige.database.connection.ConnectionManager;
 import com.github.lukesky19.skyPrestige.database.queue.QueueManager;
 import com.github.lukesky19.skyPrestige.database.table.*;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class manages the database for the plugin.
  */
 public class DatabaseManager {
-    private final ConnectionManager connectionManager;
-    private final QueueManager queueManager;
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull ConnectionManager connectionManager;
+    private final @NonNull QueueManager queueManager;
+    private final @NonNull HookManager hookManager;
 
-    private final IslandIdsTable islandIdsTable;
-    private final PlayerIdsTable playerIdsTable;
-    private final PrestigeLevelsTable prestigeLevelsTable;
-    private final PrestigePointsTable prestigePointsTable;
-    private final OfflinePrestigeTable offlinePrestigeTable;
-    private final PlayerLogoutLocationsTables playerLogoutLocationsTables;
-    private final PlayerTeleportTable playerTeleportTable;
-    private final IslandVaultsTable islandVaultsTable;
+    private IslandIdsTable islandIdsTable;
+    private PlayerIdsTable playerIdsTable;
+    private IslandDataTable islandDataTable;
+    private PlayerLogoutLocationsTable playerLogoutLocationsTables;
+    private PlayerTeleportTable playerTeleportTable;
+    private QueuedSettingsTable queuedSettingsTable;
 
     /**
      * Get the {@link IslandIdsTable}.
      * @return The {@link IslandIdsTable}
      */
-    public IslandIdsTable getIslandIdsTable() {
+    public @NonNull IslandIdsTable getIslandIdsTable() {
         return islandIdsTable;
     }
 
@@ -52,39 +58,23 @@ public class DatabaseManager {
      * Get the {@link PlayerIdsTable}.
      * @return The {@link PlayerIdsTable}
      */
-    public PlayerIdsTable getPlayerIdsTable() {
+    public @NonNull PlayerIdsTable getPlayerIdsTable() {
         return playerIdsTable;
     }
 
     /**
-     * Get the {@link PrestigeLevelsTable}.
-     * @return The {@link PrestigeLevelsTable}
+     * Get the {@link IslandDataTable}.
+     * @return The {@link IslandDataTable}
      */
-    public PrestigeLevelsTable getPrestigeLevelsTable() {
-        return prestigeLevelsTable;
+    public @NonNull IslandDataTable getIslandDataTable() {
+        return islandDataTable;
     }
 
     /**
-     * Get the {@link PrestigePointsTable}.
-     * @return The {@link PrestigePointsTable}
+     * Get the {@link PlayerLogoutLocationsTable}.
+     * @return The {@link PlayerLogoutLocationsTable}
      */
-    public PrestigePointsTable getPrestigePointsTable() {
-        return prestigePointsTable;
-    }
-
-    /**
-     * Get the {@link OfflinePrestigeTable}.
-     * @return The {@link OfflinePrestigeTable}
-     */
-    public OfflinePrestigeTable getOfflinePrestigeTable() {
-        return offlinePrestigeTable;
-    }
-
-    /**
-     * Get the {@link PlayerLogoutLocationsTables}.
-     * @return The {@link PlayerLogoutLocationsTables}
-     */
-    public PlayerLogoutLocationsTables getPlayerLogoutLocationsTables() {
+    public @NonNull PlayerLogoutLocationsTable getPlayerLogoutLocationsTables() {
         return playerLogoutLocationsTables;
     }
 
@@ -92,52 +82,61 @@ public class DatabaseManager {
      * Get the {@link PlayerTeleportTable}.
      * @return The {@link PlayerTeleportTable}
      */
-    public PlayerTeleportTable getPlayerTeleportTable() {
+    public @NonNull PlayerTeleportTable getPlayerTeleportTable() {
         return playerTeleportTable;
     }
 
     /**
-     * Get the {@link IslandVaultsTable}.
-     * @return The {@link IslandVaultsTable}
+     * Get the {@link QueuedSettingsTable}.
+     * @return The {@link QueuedSettingsTable}
      */
-    public IslandVaultsTable getIslandVaultsTable() {
-        return islandVaultsTable;
+    public @NonNull QueuedSettingsTable getQueuedSettingsTable() {
+        return queuedSettingsTable;
     }
 
     /**
      * Constructor
      * Initializes the {@link ConnectionManager}, {@link QueueManager}, and all tables.
-     * @param skyPrestige The main plugin's instance.
+     * @param plugin A {@link SkyPlugin}.
+     * @param hookManager A {@link HookManager} instance.
      */
-    public DatabaseManager(@NotNull SkyPrestige skyPrestige) {
-        ComponentLogger logger = skyPrestige.getComponentLogger();
-        connectionManager = new ConnectionManager(skyPrestige);
+    public DatabaseManager(@NonNull SkyPlugin plugin, @NonNull HookManager hookManager) {
+        this.plugin = plugin;
+        this.logger = plugin.getComponentLogger();
+        this.hookManager = hookManager;
+        connectionManager = new ConnectionManager(plugin);
         queueManager = new QueueManager(connectionManager);
+    }
 
-        islandIdsTable = new IslandIdsTable(logger, queueManager);
-        islandIdsTable.createTable();
+    /**
+     * Setup all database tables and run any migration as needed.
+     * @return A {@link CompletableFuture} of type {@link Void} when complete.
+     */
+    public @NonNull CompletableFuture<Void> setup() {
+        List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
-        playerIdsTable = new PlayerIdsTable(queueManager);
-        playerIdsTable.createTable();
+        VersionsTable versionsTable = new VersionsTable(queueManager);
+        futureList.add(versionsTable.createTable());
 
-        // Initialize Tables
-        prestigeLevelsTable = new PrestigeLevelsTable(logger, queueManager);
-        prestigeLevelsTable.createTable();
+        islandIdsTable = new IslandIdsTable(queueManager, versionsTable);
+        futureList.add(islandIdsTable.createTable());
 
-        prestigePointsTable = new PrestigePointsTable(logger, queueManager);
-        prestigePointsTable.createTable();
+        playerIdsTable = new PlayerIdsTable(queueManager, versionsTable);
+        futureList.add(playerIdsTable.createTable());
 
-        offlinePrestigeTable = new OfflinePrestigeTable(logger, queueManager);
-        offlinePrestigeTable.createTable();
+        islandDataTable = new IslandDataTable(plugin, queueManager, hookManager, versionsTable);
+        futureList.add(islandDataTable.createTable());
 
-        playerLogoutLocationsTables = new PlayerLogoutLocationsTables(queueManager);
-        playerLogoutLocationsTables.createTable();
+        playerLogoutLocationsTables = new PlayerLogoutLocationsTable(queueManager, versionsTable);
+        futureList.add(playerLogoutLocationsTables.createTable());
 
-        playerTeleportTable = new PlayerTeleportTable(queueManager);
-        playerTeleportTable.createTable();
+        playerTeleportTable = new PlayerTeleportTable(queueManager, versionsTable);
+        futureList.add(playerTeleportTable.createTable());
 
-        islandVaultsTable = new IslandVaultsTable(logger, queueManager);
-        islandVaultsTable.createTable();
+        queuedSettingsTable = new QueuedSettingsTable(logger, queueManager, versionsTable);
+        futureList.add(queuedSettingsTable.createTable());
+
+        return CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
     }
 
     /**

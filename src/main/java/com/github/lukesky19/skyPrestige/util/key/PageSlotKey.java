@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyPrestige.util.key;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -38,7 +38,7 @@ public record PageSlotKey(int page, int slot) implements Serializable {
      * @return true if the object is equal, otherwise false.
      */
     @Override
-    public boolean equals(@NotNull Object compareObject) {
+    public boolean equals(@NonNull Object compareObject) {
         if(this == compareObject) return true;
         if(!(compareObject instanceof PageSlotKey(int comparePage, int compareSlot))) return false;
         return this.page == comparePage && this.slot == compareSlot;

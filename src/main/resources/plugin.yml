@@ -4,34 +4,19 @@ main: com.github.lukesky19.skyPrestige.SkyPrestige
 api-version: '1.21'
 authors: [ lukeskywlker19 ]
 
-depend: [ BentoBox, SkyLib ]
-softdepend: [ PlaceholderAPI, RoseStacker, SkyPlayTime, Vault ]
-
-permissions:
-    skyprestige.commands.skyprestige:
-        description: Base Command Permission
-        default: op
-    skyprestige.command.skyprestige.help:
-        description: Permission to view the plugin's help message.
-        default: op
-    skyprestige.command.skyprestige.level:
-        description: Permission to view and manage prestige levels.
-        default: op
-    skyprestige.command.skyprestige.points:
-        description: Permission to view and manage prestige points.
-        default: op
-    skyprestige.command.skyprestige.progress:
-        description: Permission to view prestige progress.
-        default: op
-    skyprestige.command.skyprestige.reload:
-        description: Permission to reload the plugin.
-        default: op
-    skyprestige.command.skyprestige.rewards:
-        description: Permission to view rewards for the next prestige level.
-        default: op
-    skyprestige.command.skyprestige.exchange:
-        description: Permission to open the GUI to exchange prestige points.
-        default: op
-    skyprestige.command.skyprestige.vault:
-        description: Permission to open the island vault.
-        default: op
+depend:
+    - BentoBox
+    - SkyLib
+softdepend:
+    - ExcellentCrates
+    - LuckPerms
+    - PlaceholderAPI
+    - PlayerAuctions
+    - Quests
+    - RoseStacker
+    - SkyEnchants
+    - SkyHoppers
+    - SkyShop
+    - SkyPlayTime
+    - SkySellWands
+    - Vault

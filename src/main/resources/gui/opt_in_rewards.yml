@@ -1,0 +1,26 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+version: 1
+gui-name: "Opt-In Rewards"
+gui-type: CHEST_54
+filler:
+    item-type: gray_stained_glass_pane
+    name: " "
+    amount: 1
+next-page:
+    item:
+        item-type: arrow
+        name: "<white>Next Page"
+        amount: 1
+    slot: 47
+prev-page:
+    item:
+        item-type: arrow
+        name: "<white>Previous Page"
+        amount: 1
+    slot: 51
+exit:
+    item:
+        item-type: barrier
+        name: "<red>Click to close the GUI.</red>"
+        amount: 1
+    slot: 49

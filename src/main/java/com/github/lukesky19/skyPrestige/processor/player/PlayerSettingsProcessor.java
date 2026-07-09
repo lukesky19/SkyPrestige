@@ -1,0 +1,275 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package com.github.lukesky19.skyPrestige.processor.player;
+
+import com.github.lukesky19.skyPrestige.configuration.data.reset.inventory.InventorySettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.player.PlayerSettings;
+import com.github.lukesky19.skyPrestige.configuration.data.reset.playtime.PlayTimeSettings;
+import com.github.lukesky19.skyPrestige.integration.hooks.*;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skyPrestige.protection.ProtectionOrbManager;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
+import org.jspecify.annotations.NonNull;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * This class manages the processing of {@link PlayerSettings}.
+ */
+public class PlayerSettingsProcessor {
+    private final @NonNull HookManager hookManager;
+    private final @NonNull ProtectionOrbManager protectionOrbManager;
+
+    /**
+     * Constructor
+     * @param hookManager A {@link HookManager} instance.
+     * @param protectionOrbManager A {@link ProtectionOrbManager} instance.
+     */
+    public PlayerSettingsProcessor(
+            @NonNull HookManager hookManager,
+            @NonNull ProtectionOrbManager protectionOrbManager) {
+        this.hookManager = hookManager;
+        this.protectionOrbManager = protectionOrbManager;
+    }
+
+    /**
+     * Process the player settings.
+     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param initiatingPlayer The player that initiated the processing of the player settings.
+     * @param onlinePlayerList The list of online players to apply the settings to.
+     * @param offlinePlayerIds The list of offline player ids to apply the settings to.
+     * @param startingMoney The starting money.
+     * @param giveToAll Whether to give the starting money to all players.
+     */
+    public void processPlayerSettings(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player initiatingPlayer,
+            @NonNull List<Player> onlinePlayerList,
+            @NonNull List<UUID> offlinePlayerIds,
+            double startingMoney,
+            boolean giveToAll) {
+        // Online Player Settings
+        onlinePlayerList.forEach(player -> processPlayerSettings(playerSettings, player, initiatingPlayer.equals(player), startingMoney, giveToAll));
+
+        // Offline Player Settings
+        offlinePlayerIds.forEach(playerId -> processPlayerSettings(playerSettings, playerId));
+    }
+
+    /**
+     * Process the player settings.
+     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param player The {@link Player} to apply the settings to.
+     * @param startingMoney The starting money.
+     * @param giveToAll Whether to give the starting money to all players.
+     */
+    public void processPlayerSettingsOnLogin(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player player,
+            double startingMoney,
+            boolean giveToAll) {
+        processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
+
+        if(playerSettings.resetExp()) {
+            resetExperience(player);
+        }
+
+        processEconomySettings(player, false, playerSettings.resetMoney(), startingMoney, giveToAll);
+
+        resetPlayTime(player, playerSettings.playTimeSettings());
+    }
+
+    /**
+     * Process the player settings.
+     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param player The {@link Player} to process the settings for.
+     * @param isPlayerInitiator Is the player the initiator?
+     * @param startingMoney The starting money.
+     * @param giveToAll Whether to give the starting money to all players.
+     */
+    public void processPlayerSettings(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull Player player,
+            boolean isPlayerInitiator,
+            double startingMoney,
+            boolean giveToAll) {
+        UUID playerId = player.getUniqueId();
+
+        processInventorySettings(playerSettings.inventorySettings(), playerSettings.enderChestSettings(), player);
+
+        if(playerSettings.resetExp()) {
+            resetExperience(player);
+        }
+
+        processEconomySettings(player, isPlayerInitiator, playerSettings.resetMoney(), startingMoney, giveToAll);
+
+        if(playerSettings.resetAuctionItems()) {
+            resetAuctionHouse(playerId);
+        }
+
+        if(playerSettings.resetQuestProgress()) {
+            resetQuestProgress(playerId);
+        }
+
+        resetPlayTime(player, playerSettings.playTimeSettings());
+    }
+
+    /**
+     * Process the player settings.
+     * @param playerSettings The {@link PlayerSettings} to process.
+     * @param playerId The {@link UUID} to process the settings for.
+     */
+    public void processPlayerSettings(
+            @NonNull PlayerSettings playerSettings,
+            @NonNull UUID playerId) {
+        if(playerSettings.resetAuctionItems()) {
+            resetAuctionHouse(playerId);
+        }
+
+        if(playerSettings.resetQuestProgress()) {
+            resetQuestProgress(playerId);
+        }
+    }
+
+    /**
+     * Process the {@link InventorySettings} provided.
+     * @param playerInventorySettings The {@link InventorySettings} to apply to the player's Inventory.
+     * @param playerEnderChestInventorySettings The {@link InventorySettings} to apply to the player's Ender Chest.
+     * @param player The {@link Player} to process settings for.
+     */
+    private void processInventorySettings(
+            @NonNull InventorySettings playerInventorySettings,
+            @NonNull InventorySettings playerEnderChestInventorySettings,
+            @NonNull Player player) {
+        processInventorySettings(playerInventorySettings, player.getInventory());
+        processInventorySettings(playerEnderChestInventorySettings, player.getEnderChest());
+    }
+
+    /**
+     * Process the {@link InventorySettings} for the {@link Inventory} provided.
+     * @param inventorySettings The {@link InventorySettings}.
+     * @param inventory The {@link Inventory}.
+     */
+    private void processInventorySettings(
+            @NonNull InventorySettings inventorySettings,
+            @NonNull Inventory inventory) {
+        if(inventorySettings.resetInventory()) {
+            SkySellWandsHook skySellWandsHook = hookManager.getHook(SkySellWandsHook.class);
+            ItemStack emptyStack = ItemType.AIR.createItemStack();
+
+            int inventorySize = inventory.getSize();
+            for(int i = 0; i < inventorySize; i++) {
+                ItemStack itemStack = inventory.getItem(i);
+                if(itemStack == null || itemStack.isEmpty()) continue;
+                if(inventorySettings.keepInfiniteSellWands() && skySellWandsHook.isInfiniteSellWand(itemStack)) continue;
+                if(inventorySettings.keepProtectedItems() && protectionOrbManager.isItemStackProtected(itemStack)) continue;
+
+                inventory.setItem(i, emptyStack);
+            }
+        }
+    }
+
+    /**
+     * Reset the player's experience.
+     * @param player The {@link Player} to reset experience for
+     */
+    private void resetExperience(@NonNull Player player) {
+        player.setLevel(0);
+        player.setExp(0);
+    }
+
+    /**
+     * Process the economy settings.
+     * @param player The {@link Player}.
+     * @param isPlayerInitiator Is the player the initiator?
+     * @param resetMoney Should money be reset?
+     * @param startingMoney The starting money.
+     * @param giveAll Whether to give the starting money to all players.
+     */
+    private void processEconomySettings(
+            @NonNull Player player,
+            boolean isPlayerInitiator,
+            boolean resetMoney,
+            double startingMoney,
+            boolean giveAll) {
+        EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
+
+        if(economyHook.isHooked()) {
+            if(resetMoney) {
+                economyHook.removeFromBalance(player, economyHook.getBalance(player));
+            }
+
+            if(startingMoney > 0) {
+                if(giveAll) {
+                    economyHook.addToBalance(player, startingMoney);
+                } else {
+                    if(isPlayerInitiator) {
+                        economyHook.addToBalance(player, startingMoney);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Reset the auction house items for the player id provided.
+     * @param playerId The {@link UUID}.
+     */
+    private void resetAuctionHouse(@NonNull UUID playerId) {
+        PlayerAuctionsHook playerAuctionsHook = hookManager.getHook(PlayerAuctionsHook.class);
+
+        if(playerAuctionsHook.isHooked()) {
+            playerAuctionsHook.clearPlayerAuctions(playerId);
+        }
+    }
+
+    /**
+     * Reset the quest progress for the player id provided.
+     * @param playerId The {@link UUID}.
+     */
+    private void resetQuestProgress(@NonNull UUID playerId) {
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+
+        if(lmbQuestHook.isHooked()) {
+            lmbQuestHook.resetQuestProgress(playerId);
+        }
+    }
+
+    /**
+     * Reset the play time for the player provided.
+     * @param player The {@link Player}
+     * @param playTimeSettings The {@link PlayTimeSettings}.
+     */
+    private void resetPlayTime(@NonNull Player player, @NonNull PlayTimeSettings playTimeSettings) {
+        SkyPlayTimeHook skyPlayTimeHook = hookManager.getHook(SkyPlayTimeHook.class);
+
+        if(skyPlayTimeHook.isHooked()) {
+            skyPlayTimeHook.resetPlayTime(
+                    player,
+                    playTimeSettings.resetSession(),
+                    playTimeSettings.resetDaily(),
+                    playTimeSettings.resetWeekly(),
+                    playTimeSettings.resetMonthly(),
+                    playTimeSettings.resetYearly(),
+                    playTimeSettings.resetTotal());
+        }
+    }
+}

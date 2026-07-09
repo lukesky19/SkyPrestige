@@ -1,0 +1,66 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+version: 1
+prestige-level:
+    no-island-text: "0"
+    opted-out-text: "0"
+legacy-prestige-level:
+    no-island-text: "0"
+    opted-out-text: "0"
+prestige-points:
+    no-island-text: "0.0"
+    opted-out-text: "0.0"
+legacy-prestige-points:
+    no-island-text: "0.0"
+    opted-out-text: "0.0"
+required-prestige-points:
+    no-island-text: "0.0"
+    opted-out-text: "0.0"
+legacy-required-prestige-points:
+    no-island-text: "0.0"
+    opted-out-text: "0.0"
+progress-bar:
+    prestige-points-weight: 1
+    money-weight: 1
+    item-weight: 1
+    quest-weight: 1
+    no-island-text: "<gray>No Island Found"
+    opted-out-text: "<gray>Island Opted Out"
+    max-level: "<gray>Max Level"
+    filled-bar-text: "<green>|"
+    empty-bar-text: "<red>|"
+legacy-progress-bar:
+    prestige-points-weight: 1
+    money-weight: 1
+    item-weight: 1
+    quest-weight: 1
+    no-island-text: "&7No Island Found"
+    opted-out-text: "&7Island Opted Out"
+    max-level: "&7Max Level"
+    filled-bar-text: "&a|"
+    empty-bar-text: "&c|"
+multiplier:
+    no-island-text: "<gray>No Island Found"
+    opted-out-text: "<gray>Island Opted Out"
+    time-format:
+        prefix: ""
+        years: "<years> year(s)"
+        months: "<months> month(s)"
+        weeks: "<weeks> week(s)"
+        days: "<days> day(s)"
+        hours: "<hours> hour(s)"
+        minutes: "<minutes> minute(s)"
+        seconds: "<seconds> second(s)"
+        suffix: ""
+legacy-multiplier:
+    no-island-text: "&7No Island Found"
+    opted-out-text: "&7Island Opted Out"
+    time-format:
+        prefix: ""
+        years: "<years> year(s)"
+        months: "<months> month(s)"
+        weeks: "<weeks> week(s)"
+        days: "<days> day(s)"
+        hours: "<hours> hour(s)"
+        minutes: "<minutes> minute(s)"
+        seconds: "<seconds> second(s)"
+        suffix: ""

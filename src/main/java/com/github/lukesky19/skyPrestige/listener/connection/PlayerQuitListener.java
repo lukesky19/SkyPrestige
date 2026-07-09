@@ -1,0 +1,104 @@
+/*
+    SkyPrestige allows players to prestige or reset their Island to unlock rewards after obtaining the required prestige points.
+    Copyright (C) 2025 lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package com.github.lukesky19.skyPrestige.listener.connection;
+
+import com.github.lukesky19.skyPrestige.data.manager.IslandDataManager;
+import com.github.lukesky19.skyPrestige.database.DatabaseManager;
+import com.github.lukesky19.skyPrestige.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.skyPrestige.integration.hooks.LMBQuestHook;
+import com.github.lukesky19.skyPrestige.integration.manager.HookManager;
+import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
+import world.bentobox.bentobox.database.objects.Island;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Listens for when a player leaves and then saves and unloads any data necessary for their islands.
+ */
+public class PlayerQuitListener implements Listener {
+    private final @NonNull SkyPlugin plugin;
+    private final @NonNull DatabaseManager databaseManager;
+    private final @NonNull IslandDataManager islandDataManager;
+    private final @NonNull HookManager hookManager;
+
+    /**
+     * Constructor
+     * @param plugin A {@link JavaPlugin} instance.
+     * @param databaseManager A {@link DatabaseManager} instance.
+     * @param islandDataManager An {@link IslandDataManager}.
+     * @param hookManager A {@link HookManager} instance.
+     */
+    public PlayerQuitListener(
+            @NonNull SkyPlugin plugin,
+            @NonNull DatabaseManager databaseManager,
+            @NonNull IslandDataManager islandDataManager,
+            @NonNull HookManager hookManager) {
+        this.plugin = plugin;
+        this.databaseManager = databaseManager;
+        this.islandDataManager = islandDataManager;
+        this.hookManager = hookManager;
+    }
+
+    /**
+     * Listens for when a player leaves and then saves and unloads any data necessary for their islands.
+     * @param playerQuitEvent A {@link PlayerQuitEvent}.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onLeave(PlayerQuitEvent playerQuitEvent) {
+        Player player = playerQuitEvent.getPlayer();
+        UUID uuid = player.getUniqueId();
+        Location playerLocation = player.getLocation();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LMBQuestHook lmbQuestHook = hookManager.getHook(LMBQuestHook.class);
+        List<Island> islandList = bentoBoxHook.getIslands(uuid);
+
+        islandList.stream()
+                .filter(island -> !isIslandMemberOnline(island))
+                .forEach(island -> {
+                    String islandId = island.getUniqueId();
+                    islandDataManager.saveData(islandId)
+                            .whenComplete((_, _) -> islandDataManager.removeDataByIdentifier(islandId));
+
+                    if(lmbQuestHook.isHooked()) {
+                        lmbQuestHook.unloadPlayerData(island.getMemberSet());
+                    }
+                });
+
+        databaseManager.getPlayerLogoutLocationsTables().setPlayerLogoutLocation(uuid, playerLocation);
+    }
+
+    /**
+     * Checks if the island has any member online.
+     * @param island The {@link Island} to check.
+     * @return true if any island member is online, otherwise false.
+     */
+    private boolean isIslandMemberOnline(@NonNull Island island) {
+        return island.getMemberSet().stream()
+                .map(plugin.getServer()::getPlayer)
+                .anyMatch(memberPlayer -> memberPlayer != null && memberPlayer.isOnline() && memberPlayer.isConnected());
+    }
+}
